@@ -1,0 +1,15 @@
+[
+    {
+        "name": "Pico SDK 1.5.1 (installed)",
+        "compilers": {
+            "C": "C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\gcc-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe",
+            "CXX": "C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\gcc-arm-none-eabi\\bin\\arm-none-eabi-g++.exe"
+        },
+        "environmentVariables": {
+            "PATH": "C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\gcc-arm-none-eabi\\bin;C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\ninja;${env:PATH}"
+        },
+        "cmakeSettings": {
+            "Python3_EXECUTABLE": "C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\python\\python.exe"
+        }
+    }
+]

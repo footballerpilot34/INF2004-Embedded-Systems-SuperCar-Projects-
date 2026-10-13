@@ -14,6 +14,9 @@
  *   Left motor  (M1): GP8 = M1A, GP9  = M1B
  *   Right motor (M2): GP10 = M2A, GP11 = M2B
  *   Servo port  1   : GP12
+ *
+ * Ultrasonic sensor (3.3 V HC-SR04, powered from 3V3):
+ *   TRIG: GP16, ECHO: GP17 (ECHO is 3.3 V, so no voltage divider needed)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +24,7 @@
 
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
+#include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
 #include "lwip/tcp.h"
@@ -30,14 +34,18 @@
 #define WIFI_NAME       "RoboCar"
 #define WIFI_PASSWORD   "robocar123"   /* must be at least 8 characters */
 
-#define DRIVE_SPEED     60             /* % power for forward/back (0-100) */
-#define TURN_SPEED      45             /* % power when spinning left/right */
+#define DRIVE_SPEED     15             /* % power for forward/back (0-100) */
+#define TURN_SPEED      15             /* % power when spinning left/right */
 
-#define LEFT_REVERSED   false          /* set true if left wheel spins backwards on "forward" */
-#define RIGHT_REVERSED  false          /* set true if right wheel spins backwards on "forward" */
+#define LEFT_REVERSED   true           /* set true if left wheel spins backwards on "forward" */
+#define RIGHT_REVERSED  true           /* set true if right wheel spins backwards on "forward" */
 
 #define SERVO_MIN_US    500            /* pulse width at 0 degrees   */
 #define SERVO_MAX_US    2500           /* pulse width at 180 degrees */
+#define SERVO_CENTER    90             /* starting angle */
+#define SERVO_RANGE     30             /* max degrees either side of centre */
+#define ULTRASONIC_STOP_DISTANCE_CM 25
+#define ULTRASONIC_CLEAR_READINGS   3  /* clear pings in a row needed before driving again */
 /* ---------------------------------------------------------- */
 
 #define M1A 8
@@ -45,9 +53,18 @@
 #define M2A 10
 #define M2B 11
 #define SERVO_PIN 12
+#define ULTRASONIC_TRIG_PIN 16
+#define ULTRASONIC_ECHO_PIN 17
+#define OBSTACLE_FLASH_EVERY_MS 3000     /* on-board LED flash rate while stopped for an obstacle */
+#define OBSTACLE_FLASH_ON_MS    200
 #define MOTOR_PWM_HZ 20000             /* 20 kHz = silent, and the Robo Pico's max */
 
 static uint16_t motor_top;             /* PWM counter value that means "100%" */
+static bool ultrasonic_obstacle;
+static uint64_t obstacle_since_us;     /* when the current obstacle stop began */
+static int drive_left, drive_right;    /* last speeds asked for, resumed after an obstacle clears */
+static volatile uint64_t echo_rise_us; /* set by the ECHO pin interrupt, 0 = not seen yet */
+static volatile uint64_t echo_fall_us;
 
 /* ===================== Motors ===================== */
 
@@ -79,16 +96,106 @@ static void motor_set(uint pin_a, uint pin_b, int speed, bool reversed) {
     }
 }
 
-static void drive(int left, int right) {
+/* Sends the last requested speeds to the motors, or stops them while an obstacle is close */
+static void motors_apply(void) {
+    int left  = ultrasonic_obstacle ? 0 : drive_left;
+    int right = ultrasonic_obstacle ? 0 : drive_right;
     motor_set(M1A, M1B, left,  LEFT_REVERSED);
     motor_set(M2A, M2B, right, RIGHT_REVERSED);
+}
+
+static void drive(int left, int right) {
+    drive_left = left;
+    drive_right = right;
+    motors_apply();
+}
+
+/* ===================== Ultrasonic obstacle stop ===================== */
+
+/* Timestamp the ECHO edges in an interrupt so the measurement doesn't depend
+ * on how often the main loop runs (it only spins about once per millisecond). */
+static void echo_edge_irq(uint gpio, uint32_t events) {
+    if (gpio != ULTRASONIC_ECHO_PIN) return;
+    uint64_t now = time_us_64();
+    if (events & GPIO_IRQ_EDGE_RISE) echo_rise_us = now;
+    if ((events & GPIO_IRQ_EDGE_FALL) && echo_rise_us) echo_fall_us = now;
+}
+
+static void ultrasonic_init(void) {
+    gpio_init(ULTRASONIC_TRIG_PIN);
+    gpio_set_dir(ULTRASONIC_TRIG_PIN, GPIO_OUT);
+    gpio_put(ULTRASONIC_TRIG_PIN, 0);
+
+    gpio_init(ULTRASONIC_ECHO_PIN);
+    gpio_set_dir(ULTRASONIC_ECHO_PIN, GPIO_IN);
+    gpio_pull_down(ULTRASONIC_ECHO_PIN);
+    gpio_set_irq_enabled_with_callback(ULTRASONIC_ECHO_PIN,
+                                       GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL,
+                                       true, echo_edge_irq);
+}
+
+static void ultrasonic_update_obstacle(bool detected) {
+    if (detected != ultrasonic_obstacle) {
+        if (detected) {
+            printf("Obstacle detected within %d cm; motors stopped.\n",
+                   ULTRASONIC_STOP_DISTANCE_CM);
+            obstacle_since_us = time_us_64();
+        } else {
+            printf("Obstacle cleared; resuming.\n");
+        }
+    }
+    ultrasonic_obstacle = detected;
+    motors_apply();
+}
+
+/* Stop on the first close reading, but only resume after several clear ones in a
+ * row, so a single bad ping (e.g. motor noise on battery power) can't restart the car. */
+static void ultrasonic_reading(bool close) {
+    static int clear_count;
+    if (close) {
+        clear_count = 0;
+        ultrasonic_update_obstacle(true);
+    } else if (++clear_count >= ULTRASONIC_CLEAR_READINGS) {
+        clear_count = ULTRASONIC_CLEAR_READINGS;
+        ultrasonic_update_obstacle(false);
+    }
+}
+
+static void ultrasonic_poll(void) {
+    static bool waiting_for_echo;
+    static uint64_t next_ping_us;
+    static uint64_t echo_deadline_us;
+    uint64_t now = time_us_64();
+
+    if (!waiting_for_echo) {
+        if (now < next_ping_us) return;
+
+        echo_rise_us = 0;
+        echo_fall_us = 0;
+        gpio_put(ULTRASONIC_TRIG_PIN, 1);
+        sleep_us(10);
+        gpio_put(ULTRASONIC_TRIG_PIN, 0);
+        echo_deadline_us = time_us_64() + 30000;
+        next_ping_us = time_us_64() + 60000;
+        waiting_for_echo = true;
+    } else if (echo_fall_us) {
+        uint64_t echo_duration_us = echo_fall_us - echo_rise_us;
+        printf("Ultrasonic: %.1f cm\n", echo_duration_us / 58.0f);
+        ultrasonic_reading(echo_duration_us < ULTRASONIC_STOP_DISTANCE_CM * 58);
+        waiting_for_echo = false;
+    } else if (now >= echo_deadline_us) {
+        printf(echo_rise_us ? "Ultrasonic: out of range\n"
+                            : "Ultrasonic: no echo\n");
+        ultrasonic_reading(false);
+        waiting_for_echo = false;
+    }
 }
 
 /* ===================== Servo ===================== */
 
 static void servo_set_angle(int deg) {
-    if (deg < 0)   deg = 0;
-    if (deg > 180) deg = 180;
+    if (deg < SERVO_CENTER - SERVO_RANGE) deg = SERVO_CENTER - SERVO_RANGE;
+    if (deg > SERVO_CENTER + SERVO_RANGE) deg = SERVO_CENTER + SERVO_RANGE;
     pwm_set_gpio_level(SERVO_PIN, SERVO_MIN_US + deg * (SERVO_MAX_US - SERVO_MIN_US) / 180);
 }
 
@@ -98,7 +205,7 @@ static void servo_init(void) {
     pwm_set_clkdiv(slice, clock_get_hz(clk_sys) / 1000000.0f);  /* 1 tick = 1 microsecond */
     pwm_set_wrap(slice, 19999);                                  /* 20 ms period = 50 Hz   */
     pwm_set_enabled(slice, true);
-    servo_set_angle(90);                                         /* start centred */
+    servo_set_angle(SERVO_CENTER);                               /* start centred */
 }
 
 /* ===================== Web page ===================== */
@@ -118,7 +225,7 @@ static const char PAGE[] =
     "<button onclick=\"c('right')\">&#9654;</button>"
     "<span></span><button onclick=\"c('back')\">&#9660;</button><span></span>"
     "</div><p>Servo: <b id=v>90</b>&deg;</p>"
-    "<input type=range min=0 max=180 value=90 "
+    "<input type=range min=60 max=120 value=90 "
     "oninput=\"document.getElementById('v').textContent=this.value\" "
     "onchange=\"c('servo?a='+this.value)\">"
     "<script>function c(x){fetch('/'+x).catch(function(){})}</script>"
@@ -207,6 +314,7 @@ int main(void) {
     stdio_init_all();
     motors_init();
     drive(0, 0);
+    ultrasonic_init();
     servo_init();
 
     if (cyw43_arch_init()) {
@@ -230,10 +338,12 @@ int main(void) {
     }
     printf("Join Wi-Fi \"%s\" and open http://192.168.4.1\n", WIFI_NAME);
 
-    bool led = false;
+    bool led = false;                                      /* Wi-Fi status: blink = waiting, solid = connected */
+    bool led_shown = false;                                /* what the LED is actually showing right now */
     absolute_time_t next_check = get_absolute_time();
     while (true) {
         cyw43_arch_poll();                                 /* let Wi-Fi + web server do their work */
+        ultrasonic_poll();
 
         if (time_reached(next_check)) {
             uint8_t macs[8 * 6];
@@ -246,10 +356,19 @@ int main(void) {
             } else {
                 led = true;                                /* solid when connected */
             }
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, led);
             next_check = make_timeout_time_ms(500);
         }
 
-        cyw43_arch_wait_for_work_until(next_check);        /* nap until there's work */
+        /* While stopped for an obstacle, the LED flashes briefly every few seconds instead */
+        bool led_now = led;
+        if (ultrasonic_obstacle) {
+            uint64_t ms = (time_us_64() - obstacle_since_us) / 1000;
+            led_now = ms % OBSTACLE_FLASH_EVERY_MS < OBSTACLE_FLASH_ON_MS;
+        }
+        if (led_now != led_shown) {                        /* only talk to the Wi-Fi chip on a change */
+            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, led_now);
+            led_shown = led_now;
+        }
+        cyw43_arch_wait_for_work_until(make_timeout_time_ms(1));
     }
 }
