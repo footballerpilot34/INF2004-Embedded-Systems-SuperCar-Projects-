@@ -1,23 +1,39 @@
-/*
- * robocar.c - Wi-Fi remote-control car
- * Board: Cytron Robo Pico + Raspberry Pi Pico W (or Pico 2 W)
+/** @file robocar.c
  *
- * How it works:
- *   1. The Pico W makes its own Wi-Fi network called "RoboCar".
- *   2. Your phone joins that network and opens http://192.168.4.1
- *   3. Tapping the buttons on that page drives the car.
+ * @brief Wi-Fi remote-control car for the Cytron Robo Pico with a
+ *        Raspberry Pi Pico W (or Pico 2 W).
  *
- * Safety: if no phone is connected to the car's Wi-Fi, the motors stop.
- * On-board LED: blinking = waiting for a phone, solid = phone connected.
+ * @par How it works
+ * 1. The Pico W makes its own Wi-Fi network called "RoboCar".
+ * 2. A phone joins that network and opens http://192.168.4.1.
+ * 3. Tapping the buttons on that page drives the car.
  *
- * Robo Pico pins (fixed by the board, no wiring needed):
- *   Left motor  (M1): GP8 = M1A, GP9  = M1B
- *   Right motor (M2): GP10 = M2A, GP11 = M2B
- *   Servo port  1   : GP12
+ * @par Safety
+ * If no phone is connected to the car's Wi-Fi, the motors stop. The on-board
+ * LED blinks while waiting for a phone and stays on once one is connected.
+ * While the car is stopped for an obstacle, the LED flashes every 3 seconds.
  *
- * Ultrasonic sensor (3.3 V HC-SR04, powered from 3V3):
- *   TRIG: GP16, ECHO: GP17 (ECHO is 3.3 V, so no voltage divider needed)
+ * @par Wiring
+ * The Robo Pico fixes these pins: left motor (M1) on GP8 and GP9, right
+ * motor (M2) on GP10 and GP11, and servo port 1 on GP12. The 3.3 V HC-SR04
+ * ultrasonic sensor is powered from 3V3, with TRIG on GP16 and ECHO on GP17.
+ * ECHO is a 3.3 V signal, so no voltage divider is needed.
+ *
+ * @par Coding standard
+ * This module follows BARR-C:2018, with these module-level deviations:
+ * - Rules 4.1.d, 4.2.a and 4.3.a: the whole program is one source file
+ *   without a header file, to keep this single-board project simple.
+ * - Rule 6.5.a: echo_edge_isr() is a GPIO callback that the Pico SDK calls
+ *   from its own interrupt handler, so it needs no compiler ISR keyword.
+ * - Rule 5.2.a: Pico SDK and lwIP functions use their own types (uint,
+ *   u16_t, int, err_t); those types are kept where an API requires them.
+ *
+ * TODO: Record the name of the person who approved these deviations.
  */
+
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,200 +46,132 @@
 #include "lwip/tcp.h"
 #include "dhcpserver.h"
 
-/* ---------------- Settings you can change ---------------- */
-#define WIFI_NAME       "RoboCar"
-#define WIFI_PASSWORD   "robocar123"   /* must be at least 8 characters */
 
-#define DRIVE_SPEED     15             /* % power for forward/back (0-100) */
-#define TURN_SPEED      15             /* % power when spinning left/right */
+// Settings you can change.
+//
+#define WIFI_NAME                   "RoboCar"
+#define WIFI_PASSWORD               "robocar123"  // At least 8 characters.
 
-#define LEFT_REVERSED   true           /* set true if left wheel spins backwards on "forward" */
-#define RIGHT_REVERSED  true           /* set true if right wheel spins backwards on "forward" */
+#define DRIVE_SPEED                 15    // Percent power for forward/back.
+#define TURN_SPEED                  15    // Percent power for spinning.
 
-#define SERVO_MIN_US    500            /* pulse width at 0 degrees   */
-#define SERVO_MAX_US    2500           /* pulse width at 180 degrees */
-#define SERVO_CENTER    90             /* starting angle */
-#define SERVO_RANGE     30             /* max degrees either side of centre */
-#define ULTRASONIC_STOP_DISTANCE_CM 25
-#define ULTRASONIC_CLEAR_READINGS   3  /* clear pings in a row needed before driving again */
-/* ---------------------------------------------------------- */
+// Set a flag to true if that wheel spins backwards on "forward".
+//
+#define LEFT_REVERSED               true
+#define RIGHT_REVERSED              true
 
-#define M1A 8
-#define M1B 9
-#define M2A 10
-#define M2B 11
-#define SERVO_PIN 12
-#define ULTRASONIC_TRIG_PIN 16
-#define ULTRASONIC_ECHO_PIN 17
-#define OBSTACLE_FLASH_EVERY_MS 3000     /* on-board LED flash rate while stopped for an obstacle */
-#define OBSTACLE_FLASH_ON_MS    200
-#define MOTOR_PWM_HZ 20000             /* 20 kHz = silent, and the Robo Pico's max */
+#define SERVO_MIN_USEC              500   // Pulse width at 0 degrees.
+#define SERVO_MAX_USEC              2500  // Pulse width at 180 degrees.
+#define SERVO_CENTER                90    // Starting angle in degrees.
+#define SERVO_RANGE                 30    // Maximum degrees either side.
 
-static uint16_t motor_top;             /* PWM counter value that means "100%" */
-static bool ultrasonic_obstacle;
-static uint64_t obstacle_since_us;     /* when the current obstacle stop began */
-static int drive_left, drive_right;    /* last speeds asked for, resumed after an obstacle clears */
-static volatile uint64_t echo_rise_us; /* set by the ECHO pin interrupt, 0 = not seen yet */
-static volatile uint64_t echo_fall_us;
+#define ULTRASONIC_STOP_DISTANCE_CM 25u   // Stop when closer than this.
+#define ULTRASONIC_CLEAR_READINGS   3u    // Clear pings needed to resume.
 
-/* ===================== Motors ===================== */
+#define OBSTACLE_FLASH_PERIOD_MSEC  3000u // LED flash rate while stopped.
+#define OBSTACLE_FLASH_ON_MSEC      200u  // Length of each flash.
 
-static void motors_init(void) {
-    motor_top = clock_get_hz(clk_sys) / MOTOR_PWM_HZ - 1;
-    const uint pins[] = {M1A, M1B, M2A, M2B};
-    for (int i = 0; i < 4; i++) {
-        gpio_set_function(pins[i], GPIO_FUNC_PWM);
-        uint slice = pwm_gpio_to_slice_num(pins[i]);
-        pwm_set_wrap(slice, motor_top);
-        pwm_set_gpio_level(pins[i], 0);
-        pwm_set_enabled(slice, true);
-    }
-}
+// Robo Pico pin assignments, fixed by the board.
+//
+#define M1A_PIN                     8u
+#define M1B_PIN                     9u
+#define M2A_PIN                     10u
+#define M2B_PIN                     11u
+#define NUM_MOTOR_PINS              4u
+#define SERVO_PIN                   12u
+#define ULTRASONIC_TRIG_PIN         16u
+#define ULTRASONIC_ECHO_PIN         17u
 
-/* speed: -100 (full reverse) ... 0 (stop) ... +100 (full forward) */
-static void motor_set(uint pin_a, uint pin_b, int speed, bool reversed) {
-    if (reversed) speed = -speed;
-    if (speed > 100)  speed = 100;
-    if (speed < -100) speed = -100;
+// Motor PWM settings. 20 kHz is silent and is the Robo Pico's maximum.
+//
+#define MOTOR_PWM_HZ                20000u
+#define MAX_SPEED                   100
 
-    uint16_t level = (uint32_t)abs(speed) * motor_top / 100;
-    if (speed >= 0) {                       /* A pulses, B low  -> one direction   */
-        pwm_set_gpio_level(pin_a, level);
-        pwm_set_gpio_level(pin_b, 0);
-    } else {                                /* A low,  B pulses -> other direction */
-        pwm_set_gpio_level(pin_a, 0);
-        pwm_set_gpio_level(pin_b, level);
-    }
-}
+// Servo PWM settings: 1 tick per microsecond, 20 ms period (50 Hz).
+//
+#define HZ_PER_MHZ                  1000000u
+#define SERVO_PERIOD_TICKS          19999u
+#define SERVO_FULL_SCALE_DEGREES    180
 
-/* Sends the last requested speeds to the motors, or stops them while an obstacle is close */
-static void motors_apply(void) {
-    int left  = ultrasonic_obstacle ? 0 : drive_left;
-    int right = ultrasonic_obstacle ? 0 : drive_right;
-    motor_set(M1A, M1B, left,  LEFT_REVERSED);
-    motor_set(M2A, M2B, right, RIGHT_REVERSED);
-}
+// Ultrasonic timing. Sound takes about 58 us to travel 1 cm and back.
+//
+#define ULTRASONIC_TRIGGER_USEC     10u
+#define ULTRASONIC_TIMEOUT_USEC     30000u
+#define ULTRASONIC_PING_PERIOD_USEC 60000u
+#define USEC_PER_CM                 58u
+#define TENTHS_PER_UNIT             10u
 
-static void drive(int left, int right) {
-    drive_left = left;
-    drive_right = right;
-    motors_apply();
-}
+// GPIO interrupt edges for the ECHO pin.
+// NOTE: The SDK's edge flags are small positive enum values, so they can be
+// cast to an unsigned mask safely.
+//
+#define ECHO_EDGE_RISE              ((uint32_t) GPIO_IRQ_EDGE_RISE)
+#define ECHO_EDGE_FALL              ((uint32_t) GPIO_IRQ_EDGE_FALL)
 
-/* ===================== Ultrasonic obstacle stop ===================== */
+// Main loop timing.
+//
+#define USEC_PER_MSEC               1000u
+#define STATUS_CHECK_MSEC           500u
+#define LOOP_WAIT_MSEC              1u
 
-/* Timestamp the ECHO edges in an interrupt so the measurement doesn't depend
- * on how often the main loop runs (it only spins about once per millisecond). */
-static void echo_edge_irq(uint gpio, uint32_t events) {
-    if (gpio != ULTRASONIC_ECHO_PIN) return;
-    uint64_t now = time_us_64();
-    if (events & GPIO_IRQ_EDGE_RISE) echo_rise_us = now;
-    if ((events & GPIO_IRQ_EDGE_FALL) && echo_rise_us) echo_fall_us = now;
-}
+// Wi-Fi station query limits.
+//
+#define MAX_STATIONS                8
+#define MAC_ADDRESS_BYTES           6
 
-static void ultrasonic_init(void) {
-    gpio_init(ULTRASONIC_TRIG_PIN);
-    gpio_set_dir(ULTRASONIC_TRIG_PIN, GPIO_OUT);
-    gpio_put(ULTRASONIC_TRIG_PIN, 0);
+// Web server settings.
+//
+#define HTTP_PORT                   80u
+#define LISTEN_BACKLOG              4u
+#define REQUEST_BUFFER_BYTES        128u
+#define HEADER_BUFFER_BYTES         160u
+#define HTTP_GET_PREFIX             "GET "
+#define HTTP_GET_PREFIX_LEN         (sizeof(HTTP_GET_PREFIX) - 1u)
+#define SERVO_COMMAND_PREFIX        "/servo?a="
+#define SERVO_COMMAND_PREFIX_LEN    (sizeof(SERVO_COMMAND_PREFIX) - 1u)
 
-    gpio_init(ULTRASONIC_ECHO_PIN);
-    gpio_set_dir(ULTRASONIC_ECHO_PIN, GPIO_IN);
-    gpio_pull_down(ULTRASONIC_ECHO_PIN);
-    gpio_set_irq_enabled_with_callback(ULTRASONIC_ECHO_PIN,
-                                       GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL,
-                                       true, echo_edge_irq);
-}
 
-static void ultrasonic_update_obstacle(bool detected) {
-    if (detected != ultrasonic_obstacle) {
-        if (detected) {
-            printf("Obstacle detected within %d cm; motors stopped.\n",
-                   ULTRASONIC_STOP_DISTANCE_CM);
-            obstacle_since_us = time_us_64();
-        } else {
-            printf("Obstacle cleared; resuming.\n");
-        }
-    }
-    ultrasonic_obstacle = detected;
-    motors_apply();
-}
+// PWM counter value that means 100% motor power.
+//
+static uint16_t g_motor_top = 0u;
 
-/* Stop on the first close reading, but only resume after several clear ones in a
- * row, so a single bad ping (e.g. motor noise on battery power) can't restart the car. */
-static void ultrasonic_reading(bool close) {
-    static int clear_count;
-    if (close) {
-        clear_count = 0;
-        ultrasonic_update_obstacle(true);
-    } else if (++clear_count >= ULTRASONIC_CLEAR_READINGS) {
-        clear_count = ULTRASONIC_CLEAR_READINGS;
-        ultrasonic_update_obstacle(false);
-    }
-}
+// Obstacle state, shared by the ultrasonic, motor and LED code.
+//
+static bool     gb_is_obstacle_close = false;
+static uint64_t g_obstacle_since_usec = 0u;
 
-static void ultrasonic_poll(void) {
-    static bool waiting_for_echo;
-    static uint64_t next_ping_us;
-    static uint64_t echo_deadline_us;
-    uint64_t now = time_us_64();
+// Last speeds asked for, so driving resumes after an obstacle clears.
+//
+static int32_t  g_drive_left  = 0;
+static int32_t  g_drive_right = 0;
 
-    if (!waiting_for_echo) {
-        if (now < next_ping_us) return;
+// ECHO edge times, written by echo_edge_isr(). Zero means "not seen yet".
+// NOTE: These are 32-bit so that each read and write is atomic.
+//
+static volatile uint32_t g_echo_rise_usec = 0u;
+static volatile uint32_t g_echo_fall_usec = 0u;
 
-        echo_rise_us = 0;
-        echo_fall_us = 0;
-        gpio_put(ULTRASONIC_TRIG_PIN, 1);
-        sleep_us(10);
-        gpio_put(ULTRASONIC_TRIG_PIN, 0);
-        echo_deadline_us = time_us_64() + 30000;
-        next_ping_us = time_us_64() + 60000;
-        waiting_for_echo = true;
-    } else if (echo_fall_us) {
-        uint64_t echo_duration_us = echo_fall_us - echo_rise_us;
-        printf("Ultrasonic: %.1f cm\n", echo_duration_us / 58.0f);
-        ultrasonic_reading(echo_duration_us < ULTRASONIC_STOP_DISTANCE_CM * 58);
-        waiting_for_echo = false;
-    } else if (now >= echo_deadline_us) {
-        printf(echo_rise_us ? "Ultrasonic: out of range\n"
-                            : "Ultrasonic: no echo\n");
-        ultrasonic_reading(false);
-        waiting_for_echo = false;
-    }
-}
-
-/* ===================== Servo ===================== */
-
-static void servo_set_angle(int deg) {
-    if (deg < SERVO_CENTER - SERVO_RANGE) deg = SERVO_CENTER - SERVO_RANGE;
-    if (deg > SERVO_CENTER + SERVO_RANGE) deg = SERVO_CENTER + SERVO_RANGE;
-    pwm_set_gpio_level(SERVO_PIN, SERVO_MIN_US + deg * (SERVO_MAX_US - SERVO_MIN_US) / 180);
-}
-
-static void servo_init(void) {
-    gpio_set_function(SERVO_PIN, GPIO_FUNC_PWM);
-    uint slice = pwm_gpio_to_slice_num(SERVO_PIN);
-    pwm_set_clkdiv(slice, clock_get_hz(clk_sys) / 1000000.0f);  /* 1 tick = 1 microsecond */
-    pwm_set_wrap(slice, 19999);                                  /* 20 ms period = 50 Hz   */
-    pwm_set_enabled(slice, true);
-    servo_set_angle(SERVO_CENTER);                               /* start centred */
-}
-
-/* ===================== Web page ===================== */
-
-static const char PAGE[] =
+// The control page served to the phone.
+//
+static char const g_page_html[] =
     "<!DOCTYPE html><html><head>"
     "<meta name=viewport content=\"width=device-width,initial-scale=1\">"
     "<title>RoboCar</title><style>"
-    "body{font-family:sans-serif;text-align:center;background:#111;color:#eee;margin:0;padding:16px}"
-    ".g{display:grid;grid-template-columns:repeat(3,90px);gap:10px;justify-content:center;margin:20px 0}"
-    "button{height:90px;font-size:30px;border:0;border-radius:14px;background:#2a7;color:#fff}"
+    "body{font-family:sans-serif;text-align:center;background:#111;"
+    "color:#eee;margin:0;padding:16px}"
+    ".g{display:grid;grid-template-columns:repeat(3,90px);gap:10px;"
+    "justify-content:center;margin:20px 0}"
+    "button{height:90px;font-size:30px;border:0;border-radius:14px;"
+    "background:#2a7;color:#fff}"
     "#s{background:#c33}input{width:260px}"
     "</style></head><body><h2>RoboCar</h2><div class=g>"
-    "<span></span><button onclick=\"c('fwd')\">&#9650;</button><span></span>"
+    "<span></span><button onclick=\"c('fwd')\">&#9650;</button>"
+    "<span></span>"
     "<button onclick=\"c('left')\">&#9664;</button>"
     "<button id=s onclick=\"c('stop')\">&#9632;</button>"
     "<button onclick=\"c('right')\">&#9654;</button>"
-    "<span></span><button onclick=\"c('back')\">&#9660;</button><span></span>"
+    "<span></span><button onclick=\"c('back')\">&#9660;</button>"
+    "<span></span>"
     "</div><p>Servo: <b id=v>90</b>&deg;</p>"
     "<input type=range min=60 max=120 value=90 "
     "oninput=\"document.getElementById('v').textContent=this.value\" "
@@ -231,144 +179,749 @@ static const char PAGE[] =
     "<script>function c(x){fetch('/'+x).catch(function(){})}</script>"
     "</body></html>";
 
-/* Runs the command in the URL. Returns false if the URL isn't a known command. */
-static bool handle_command(const char *path) {
-    if      (strcmp(path, "/fwd") == 0)   drive(DRIVE_SPEED, DRIVE_SPEED);
-    else if (strcmp(path, "/back") == 0)  drive(-DRIVE_SPEED, -DRIVE_SPEED);
-    else if (strcmp(path, "/left") == 0)  drive(-TURN_SPEED, TURN_SPEED);
-    else if (strcmp(path, "/right") == 0) drive(TURN_SPEED, -TURN_SPEED);
-    else if (strcmp(path, "/stop") == 0)  drive(0, 0);
-    else if (strncmp(path, "/servo?a=", 9) == 0) servo_set_angle(atoi(path + 9));
-    else return false;
-    return true;
-}
 
-/* ===================== Tiny web server ===================== */
+static void  motors_init(void);
+static void  motor_set(uint32_t pin_a, uint32_t pin_b, int32_t speed,
+                       bool b_reversed);
+static void  motors_apply(void);
+static void  drive(int32_t left, int32_t right);
+static void  echo_edge_isr(uint gpio, uint32_t events);
+static void  ultrasonic_init(void);
+static void  ultrasonic_update_obstacle(bool b_detected);
+static void  ultrasonic_reading(bool b_is_close);
+static void  ultrasonic_poll(void);
+static void  servo_set_angle(int32_t degrees);
+static void  servo_init(void);
+static bool  handle_command(char const * p_path);
+static void  send_reply(struct tcp_pcb * p_pcb, char const * p_status,
+                        char const * p_type, char const * p_body,
+                        size_t body_len);
+static void  request_handle(struct tcp_pcb * p_pcb, struct pbuf * p_buf);
+static err_t web_receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
+                                  struct pbuf * p_buf, err_t err);
+static err_t web_accept_callback(void * p_arg, struct tcp_pcb * p_client,
+                                 err_t err);
+static bool  web_server_start(void);
+static bool  network_start(void);
+static bool  wifi_status_update(bool b_led_on);
+static void  led_update(bool b_status_on);
+static void  car_control_task(void);
 
-static void send_reply(struct tcp_pcb *pcb, const char *status, const char *type,
-                       const char *body, size_t body_len) {
-    char header[160];
-    int n = snprintf(header, sizeof header,
-                     "HTTP/1.1 %s\r\nContent-Type: %s\r\nContent-Length: %u\r\n"
-                     "Cache-Control: no-store\r\nConnection: close\r\n\r\n",
-                     status, type, (unsigned)body_len);
-    tcp_write(pcb, header, n, TCP_WRITE_FLAG_COPY);
-    if (body_len) tcp_write(pcb, body, body_len, 0);   /* body is static, no copy needed */
-    tcp_output(pcb);
-}
 
-static err_t on_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
-    (void)arg; (void)err;
-    if (p == NULL) {                       /* the phone hung up */
-        tcp_close(pcb);
-        return ERR_OK;
-    }
+/*!
+ * @brief Start the hardware and network, then run the car forever.
+ *
+ * @return 1 if the Wi-Fi chip or web server failed to start. Otherwise
+ *         this function never returns.
+ */
+int
+main (void)
+{
+    int result = 0;
 
-    char req[128];
-    u16_t n = pbuf_copy_partial(p, req, sizeof req - 1, 0);
-    req[n] = '\0';
-    tcp_recved(pcb, p->tot_len);
-    pbuf_free(p);
-
-    /* First line looks like: "GET /fwd HTTP/1.1" -> cut out "/fwd" */
-    if (strncmp(req, "GET ", 4) == 0) {
-        char *path = req + 4;
-        char *space = strchr(path, ' ');
-        if (space) *space = '\0';
-
-        if (strcmp(path, "/") == 0)
-            send_reply(pcb, "200 OK", "text/html", PAGE, sizeof PAGE - 1);
-        else if (handle_command(path))
-            send_reply(pcb, "200 OK", "text/plain", "OK", 2);
-        else
-            send_reply(pcb, "404 Not Found", "text/plain", "", 0);
-    }
-
-    tcp_recv(pcb, NULL);                   /* one request per connection */
-    if (tcp_close(pcb) != ERR_OK) {        /* sends the reply, then closes */
-        tcp_abort(pcb);
-        return ERR_ABRT;
-    }
-    return ERR_OK;
-}
-
-static err_t on_accept(void *arg, struct tcp_pcb *client, err_t err) {
-    (void)arg;
-    if (err != ERR_OK || client == NULL) return ERR_VAL;
-    tcp_recv(client, on_recv);
-    return ERR_OK;
-}
-
-static bool web_server_start(void) {
-    struct tcp_pcb *pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
-    if (!pcb || tcp_bind(pcb, IP_ANY_TYPE, 80) != ERR_OK) return false;
-    struct tcp_pcb *listener = tcp_listen_with_backlog(pcb, 4);
-    if (!listener) return false;
-    tcp_accept(listener, on_accept);
-    return true;
-}
-
-/* ===================== Main ===================== */
-
-int main(void) {
     stdio_init_all();
     motors_init();
     drive(0, 0);
     ultrasonic_init();
     servo_init();
 
-    if (cyw43_arch_init()) {
+    if (!network_start())
+    {
+        result = 1;
+    }
+    else
+    {
+        car_control_task();
+    }
+
+    return (result);
+}   /* main() */
+
+
+/*!
+ * @brief Set up PWM on all four motor pins, with every motor stopped.
+ */
+static void
+motors_init (void)
+{
+    static uint32_t const motor_pins[NUM_MOTOR_PINS] =
+    {
+        M1A_PIN, M1B_PIN, M2A_PIN, M2B_PIN
+    };
+
+    // NOTE: clk_sys / 20 kHz - 1 is 6249 at 125 MHz and 7499 at 150 MHz,
+    // so the result always fits in 16 bits.
+    g_motor_top = (uint16_t) ((clock_get_hz(clk_sys) / MOTOR_PWM_HZ) - 1u);
+
+    for (uint32_t pin_idx = 0u; pin_idx < NUM_MOTOR_PINS; pin_idx++)
+    {
+        uint32_t slice = pwm_gpio_to_slice_num(motor_pins[pin_idx]);
+
+        gpio_set_function(motor_pins[pin_idx], GPIO_FUNC_PWM);
+        pwm_set_wrap(slice, g_motor_top);
+        pwm_set_gpio_level(motor_pins[pin_idx], 0u);
+        pwm_set_enabled(slice, true);
+    }
+}   /* motors_init() */
+
+
+/*!
+ * @brief Drive one motor at a given speed and direction.
+ *
+ * @param[in] pin_a      The motor's A pin.
+ * @param[in] pin_b      The motor's B pin.
+ * @param[in] speed      -100 (full reverse) to +100 (full forward).
+ * @param[in] b_reversed True if this motor is wired backwards.
+ */
+static void
+motor_set (uint32_t pin_a, uint32_t pin_b, int32_t speed, bool b_reversed)
+{
+    int32_t  limited   = (b_reversed ? -speed : speed);
+    uint32_t magnitude = 0u;
+    uint16_t level     = 0u;
+
+    if (limited > MAX_SPEED)
+    {
+        limited = MAX_SPEED;
+    }
+    else if (limited < -MAX_SPEED)
+    {
+        limited = -MAX_SPEED;
+    }
+    else
+    {
+        // The speed is already within range.
+    }
+
+    // NOTE: limited is within +/-100 here, so its magnitude fits unsigned,
+    // and magnitude * g_motor_top / 100 is at most g_motor_top (16 bits).
+    magnitude = (uint32_t) ((limited < 0) ? -limited : limited);
+    level     = (uint16_t) ((magnitude * g_motor_top) / (uint32_t) MAX_SPEED);
+
+    if (limited >= 0)
+    {
+        // A pulses and B stays low: one direction.
+        pwm_set_gpio_level(pin_a, level);
+        pwm_set_gpio_level(pin_b, 0u);
+    }
+    else
+    {
+        // A stays low and B pulses: the other direction.
+        pwm_set_gpio_level(pin_a, 0u);
+        pwm_set_gpio_level(pin_b, level);
+    }
+}   /* motor_set() */
+
+
+/*!
+ * @brief Send the last requested speeds to the motors, or stop them while
+ *        an obstacle is close.
+ */
+static void
+motors_apply (void)
+{
+    int32_t left  = (gb_is_obstacle_close ? 0 : g_drive_left);
+    int32_t right = (gb_is_obstacle_close ? 0 : g_drive_right);
+
+    motor_set(M1A_PIN, M1B_PIN, left, LEFT_REVERSED);
+    motor_set(M2A_PIN, M2B_PIN, right, RIGHT_REVERSED);
+}   /* motors_apply() */
+
+
+/*!
+ * @brief Remember and apply new speeds for both wheels.
+ *
+ * @param[in] left  Left wheel speed, -100 to +100.
+ * @param[in] right Right wheel speed, -100 to +100.
+ */
+static void
+drive (int32_t left, int32_t right)
+{
+    g_drive_left  = left;
+    g_drive_right = right;
+    motors_apply();
+}   /* drive() */
+
+
+/*!
+ * @brief Timestamp the ECHO pin's edges.
+ *
+ * @par
+ * Timing the echo in an interrupt keeps the measurement independent of how
+ * often the main loop runs (only about once per millisecond).
+ *
+ * @param[in] gpio   The GPIO pin that caused the interrupt.
+ * @param[in] events The edge events that occurred.
+ */
+static void
+echo_edge_isr (uint gpio, uint32_t events)
+{
+    uint32_t now_usec = time_us_32();
+
+    if (ULTRASONIC_ECHO_PIN == gpio)
+    {
+        if (0u != (events & ECHO_EDGE_RISE))
+        {
+            g_echo_rise_usec = now_usec;
+        }
+
+        if ((0u != (events & ECHO_EDGE_FALL)) && (0u != g_echo_rise_usec))
+        {
+            g_echo_fall_usec = now_usec;
+        }
+    }
+}   /* echo_edge_isr() */
+
+
+/*!
+ * @brief Set up the TRIG and ECHO pins and the ECHO edge interrupt.
+ */
+static void
+ultrasonic_init (void)
+{
+    gpio_init(ULTRASONIC_TRIG_PIN);
+    gpio_set_dir(ULTRASONIC_TRIG_PIN, GPIO_OUT);
+    gpio_put(ULTRASONIC_TRIG_PIN, false);
+
+    gpio_init(ULTRASONIC_ECHO_PIN);
+    gpio_set_dir(ULTRASONIC_ECHO_PIN, GPIO_IN);
+    gpio_pull_down(ULTRASONIC_ECHO_PIN);
+    gpio_set_irq_enabled_with_callback(ULTRASONIC_ECHO_PIN,
+                                       (ECHO_EDGE_RISE | ECHO_EDGE_FALL),
+                                       true, echo_edge_isr);
+}   /* ultrasonic_init() */
+
+
+/*!
+ * @brief Record whether an obstacle is close, and stop or resume driving.
+ *
+ * @param[in] b_detected True if an obstacle is within the stop distance.
+ */
+static void
+ultrasonic_update_obstacle (bool b_detected)
+{
+    if (b_detected != gb_is_obstacle_close)
+    {
+        if (b_detected)
+        {
+            printf("Obstacle detected within %u cm; motors stopped.\n",
+                   ULTRASONIC_STOP_DISTANCE_CM);
+            g_obstacle_since_usec = time_us_64();
+        }
+        else
+        {
+            printf("Obstacle cleared; resuming.\n");
+        }
+    }
+
+    gb_is_obstacle_close = b_detected;
+    motors_apply();
+}   /* ultrasonic_update_obstacle() */
+
+
+/*!
+ * @brief Filter one ultrasonic reading before acting on it.
+ *
+ * @par
+ * The car stops on the first close reading but resumes only after several
+ * clear readings in a row, so a single bad ping (for example, motor noise
+ * on battery power) cannot restart it.
+ *
+ * @param[in] b_is_close True if this reading was within the stop distance.
+ */
+static void
+ultrasonic_reading (bool b_is_close)
+{
+    static uint32_t clear_count = 0u;
+
+    if (b_is_close)
+    {
+        clear_count = 0u;
+        ultrasonic_update_obstacle(true);
+    }
+    else if (clear_count < (ULTRASONIC_CLEAR_READINGS - 1u))
+    {
+        clear_count++;
+    }
+    else
+    {
+        clear_count = ULTRASONIC_CLEAR_READINGS;
+        ultrasonic_update_obstacle(false);
+    }
+}   /* ultrasonic_reading() */
+
+
+/*!
+ * @brief Send a ping when one is due, and handle the echo once it ends.
+ *
+ * @par
+ * Call this from the main loop. It never waits for an echo, so Wi-Fi and
+ * the web server keep running.
+ */
+static void
+ultrasonic_poll (void)
+{
+    static bool     b_waiting_for_echo = false;
+    static uint64_t next_ping_usec     = 0u;
+    static uint64_t echo_deadline_usec = 0u;
+    uint64_t        now_usec           = time_us_64();
+
+    if (!b_waiting_for_echo)
+    {
+        if (now_usec >= next_ping_usec)
+        {
+            g_echo_rise_usec = 0u;
+            g_echo_fall_usec = 0u;
+
+            gpio_put(ULTRASONIC_TRIG_PIN, true);
+            sleep_us(ULTRASONIC_TRIGGER_USEC);
+            gpio_put(ULTRASONIC_TRIG_PIN, false);
+
+            echo_deadline_usec = time_us_64() + ULTRASONIC_TIMEOUT_USEC;
+            next_ping_usec     = time_us_64() + ULTRASONIC_PING_PERIOD_USEC;
+            b_waiting_for_echo = true;
+        }
+    }
+    else if (0u != g_echo_fall_usec)
+    {
+        // NOTE: Unsigned subtraction gives the right pulse width even if
+        // the 32-bit timer wrapped between the two edges.
+        uint32_t echo_usec = g_echo_fall_usec - g_echo_rise_usec;
+        uint32_t tenths_cm = (echo_usec * TENTHS_PER_UNIT) / USEC_PER_CM;
+
+        printf("Ultrasonic: %" PRIu32 ".%" PRIu32 " cm\n",
+               tenths_cm / TENTHS_PER_UNIT, tenths_cm % TENTHS_PER_UNIT);
+        ultrasonic_reading(echo_usec <
+                           (ULTRASONIC_STOP_DISTANCE_CM * USEC_PER_CM));
+        b_waiting_for_echo = false;
+    }
+    else if (now_usec >= echo_deadline_usec)
+    {
+        // An echo that started but never ended is out of range. No echo at
+        // all usually means the sensor has no power or is not wired.
+        printf((0u != g_echo_rise_usec) ? "Ultrasonic: out of range\n"
+                                        : "Ultrasonic: no echo\n");
+        ultrasonic_reading(false);
+        b_waiting_for_echo = false;
+    }
+    else
+    {
+        // The echo has not finished yet; check again next time.
+    }
+}   /* ultrasonic_poll() */
+
+
+/*!
+ * @brief Turn the servo, limited to its allowed range around the centre.
+ *
+ * @param[in] degrees The requested angle in degrees.
+ */
+static void
+servo_set_angle (int32_t degrees)
+{
+    int32_t limited = degrees;
+
+    if (limited < (SERVO_CENTER - SERVO_RANGE))
+    {
+        limited = SERVO_CENTER - SERVO_RANGE;
+    }
+    else if (limited > (SERVO_CENTER + SERVO_RANGE))
+    {
+        limited = SERVO_CENTER + SERVO_RANGE;
+    }
+    else
+    {
+        // The angle is already within range.
+    }
+
+    // NOTE: limited is 60 to 120 degrees here, so the pulse width is
+    // positive and well under 16 bits.
+    pwm_set_gpio_level(SERVO_PIN,
+                       (uint16_t) (SERVO_MIN_USEC +
+                                   ((limited * (SERVO_MAX_USEC -
+                                                SERVO_MIN_USEC)) /
+                                    SERVO_FULL_SCALE_DEGREES)));
+}   /* servo_set_angle() */
+
+
+/*!
+ * @brief Set up a 50 Hz servo PWM signal and centre the servo.
+ */
+static void
+servo_init (void)
+{
+    uint32_t slice = pwm_gpio_to_slice_num(SERVO_PIN);
+
+    gpio_set_function(SERVO_PIN, GPIO_FUNC_PWM);
+
+    // Divide the system clock so that 1 tick is 1 microsecond.
+    // NOTE: clk_sys is 125 or 150 MHz, so the divider fits in 8 bits.
+    pwm_set_clkdiv_int_frac(slice,
+                            (uint8_t) (clock_get_hz(clk_sys) / HZ_PER_MHZ),
+                            0u);
+    pwm_set_wrap(slice, SERVO_PERIOD_TICKS);
+    pwm_set_enabled(slice, true);
+    servo_set_angle(SERVO_CENTER);
+}   /* servo_init() */
+
+
+/*!
+ * @brief Run the drive or servo command named in a URL path.
+ *
+ * @param[in] p_path The URL path, such as "/fwd" or "/servo?a=90".
+ *
+ * @return True if the path was a known command.
+ */
+static bool
+handle_command (char const * p_path)
+{
+    bool b_handled = true;
+
+    if (0 == strcmp(p_path, "/fwd"))
+    {
+        drive(DRIVE_SPEED, DRIVE_SPEED);
+    }
+    else if (0 == strcmp(p_path, "/back"))
+    {
+        drive(-DRIVE_SPEED, -DRIVE_SPEED);
+    }
+    else if (0 == strcmp(p_path, "/left"))
+    {
+        drive(-TURN_SPEED, TURN_SPEED);
+    }
+    else if (0 == strcmp(p_path, "/right"))
+    {
+        drive(TURN_SPEED, -TURN_SPEED);
+    }
+    else if (0 == strcmp(p_path, "/stop"))
+    {
+        drive(0, 0);
+    }
+    else if (0 == strncmp(p_path, SERVO_COMMAND_PREFIX,
+                          SERVO_COMMAND_PREFIX_LEN))
+    {
+        servo_set_angle(atoi(p_path + SERVO_COMMAND_PREFIX_LEN));
+    }
+    else
+    {
+        b_handled = false;
+    }
+
+    return (b_handled);
+}   /* handle_command() */
+
+
+/*!
+ * @brief Send an HTTP reply on a connection.
+ *
+ * @param[in] p_pcb    The connection to reply on.
+ * @param[in] p_status The HTTP status, such as "200 OK".
+ * @param[in] p_type   The content type, such as "text/html".
+ * @param[in] p_body   The reply body, which must be static.
+ * @param[in] body_len The number of bytes in the body.
+ */
+static void
+send_reply (struct tcp_pcb * p_pcb, char const * p_status,
+            char const * p_type, char const * p_body, size_t body_len)
+{
+    char header[HEADER_BUFFER_BYTES] = { 0 };
+
+    // NOTE: The largest body is the web page (about 1 KB), so body_len
+    // fits in both uint32_t and lwIP's 16-bit length.
+    int  header_len = snprintf(header, sizeof(header),
+                               "HTTP/1.1 %s\r\n"
+                               "Content-Type: %s\r\n"
+                               "Content-Length: %" PRIu32 "\r\n"
+                               "Cache-Control: no-store\r\n"
+                               "Connection: close\r\n\r\n",
+                               p_status, p_type, (uint32_t) body_len);
+
+    // NOTE: The header always fits its buffer, so header_len is positive
+    // and under 160.
+    tcp_write(p_pcb, header, (u16_t) header_len, TCP_WRITE_FLAG_COPY);
+
+    if (body_len > 0u)
+    {
+        // The body is static, so lwIP can send it without copying.
+        tcp_write(p_pcb, p_body, (u16_t) body_len, 0u);
+    }
+
+    tcp_output(p_pcb);
+}   /* send_reply() */
+
+
+/*!
+ * @brief Read one HTTP request and send the matching reply.
+ *
+ * @param[in] p_pcb The connection the request arrived on.
+ * @param[in] p_buf The received data, which this function frees.
+ */
+static void
+request_handle (struct tcp_pcb * p_pcb, struct pbuf * p_buf)
+{
+    char  request[REQUEST_BUFFER_BYTES] = { 0 };
+    u16_t length = pbuf_copy_partial(p_buf, request, sizeof(request) - 1u,
+                                     0u);
+
+    request[length] = '\0';
+    tcp_recved(p_pcb, p_buf->tot_len);
+    pbuf_free(p_buf);
+
+    // The first line looks like "GET /fwd HTTP/1.1"; cut out "/fwd".
+    if (0 == strncmp(request, HTTP_GET_PREFIX, HTTP_GET_PREFIX_LEN))
+    {
+        char * p_path  = request + HTTP_GET_PREFIX_LEN;
+        char * p_space = strchr(p_path, ' ');
+
+        if (NULL != p_space)
+        {
+            *p_space = '\0';
+        }
+
+        if (0 == strcmp(p_path, "/"))
+        {
+            send_reply(p_pcb, "200 OK", "text/html", g_page_html,
+                       sizeof(g_page_html) - 1u);
+        }
+        else if (handle_command(p_path))
+        {
+            send_reply(p_pcb, "200 OK", "text/plain", "OK", 2u);
+        }
+        else
+        {
+            send_reply(p_pcb, "404 Not Found", "text/plain", "", 0u);
+        }
+    }
+}   /* request_handle() */
+
+
+/*!
+ * @brief lwIP callback for data received on a web connection.
+ *
+ * @param[in] p_arg Unused.
+ * @param[in] p_pcb The connection.
+ * @param[in] p_buf The received data, or NULL if the phone hung up.
+ * @param[in] err   Unused.
+ *
+ * @return ERR_ABRT if the connection had to be aborted, otherwise ERR_OK.
+ */
+static err_t
+web_receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
+                      struct pbuf * p_buf, err_t err)
+{
+    err_t result = ERR_OK;
+
+    // Both parameters are required by lwIP's callback signature only.
+    (void) p_arg;
+    (void) err;
+
+    if (NULL == p_buf)
+    {
+        // The phone hung up.
+        tcp_close(p_pcb);
+    }
+    else
+    {
+        request_handle(p_pcb, p_buf);
+
+        // Handle one request per connection; closing sends the reply.
+        tcp_recv(p_pcb, NULL);
+        if (ERR_OK != tcp_close(p_pcb))
+        {
+            tcp_abort(p_pcb);
+            result = ERR_ABRT;
+        }
+    }
+
+    return (result);
+}   /* web_receive_callback() */
+
+
+/*!
+ * @brief lwIP callback for a new web connection.
+ *
+ * @param[in] p_arg    Unused.
+ * @param[in] p_client The new connection.
+ * @param[in] err      The accept status from lwIP.
+ *
+ * @return ERR_VAL if the connection is unusable, otherwise ERR_OK.
+ */
+static err_t
+web_accept_callback (void * p_arg, struct tcp_pcb * p_client, err_t err)
+{
+    err_t result = ERR_OK;
+
+    // This parameter is required by lwIP's callback signature only.
+    (void) p_arg;
+
+    if ((ERR_OK != err) || (NULL == p_client))
+    {
+        result = ERR_VAL;
+    }
+    else
+    {
+        tcp_recv(p_client, web_receive_callback);
+    }
+
+    return (result);
+}   /* web_accept_callback() */
+
+
+/*!
+ * @brief Start listening for web connections on port 80.
+ *
+ * @return True if the web server started.
+ */
+static bool
+web_server_start (void)
+{
+    struct tcp_pcb * p_pcb      = tcp_new_ip_type(IPADDR_TYPE_ANY);
+    struct tcp_pcb * p_listener = NULL;
+    bool             b_started  = false;
+
+    if ((NULL != p_pcb) && (ERR_OK == tcp_bind(p_pcb, IP_ANY_TYPE, HTTP_PORT)))
+    {
+        p_listener = tcp_listen_with_backlog(p_pcb, LISTEN_BACKLOG);
+    }
+
+    if (NULL != p_listener)
+    {
+        tcp_accept(p_listener, web_accept_callback);
+        b_started = true;
+    }
+
+    return (b_started);
+}   /* web_server_start() */
+
+
+/*!
+ * @brief Start the Wi-Fi hotspot, DHCP server and web server.
+ *
+ * @return True if everything started.
+ */
+static bool
+network_start (void)
+{
+    static dhcp_server_t dhcp_server;
+    ip_addr_t            gateway;
+    ip_addr_t            netmask;
+    bool                 b_started = false;
+
+    if (0 != cyw43_arch_init())
+    {
         printf("Wi-Fi chip failed to start\n");
-        return 1;
+    }
+    else
+    {
+        // Turn the Pico W into a Wi-Fi hotspot.
+        cyw43_arch_enable_ap_mode(WIFI_NAME, WIFI_PASSWORD,
+                                  CYW43_AUTH_WPA2_AES_PSK);
+
+        // Hand out IP addresses to phones that join, like a home router.
+        // The gateway is 192.168.4.1 and the netmask is 255.255.255.0.
+        ip_addr_set_ip4_u32(&gateway, PP_HTONL(CYW43_DEFAULT_IP_AP_ADDRESS));
+        ip_addr_set_ip4_u32(&netmask, PP_HTONL(CYW43_DEFAULT_IP_MASK));
+        dhcp_server_init(&dhcp_server, &cyw43_state.netif[CYW43_ITF_AP],
+                         &gateway, &netmask);
+
+        if (!web_server_start())
+        {
+            printf("Web server failed to start\n");
+        }
+        else
+        {
+            printf("Join Wi-Fi \"%s\" and open http://192.168.4.1\n",
+                   WIFI_NAME);
+            b_started = true;
+        }
     }
 
-    /* Turn the Pico W into a Wi-Fi hotspot */
-    cyw43_arch_enable_ap_mode(WIFI_NAME, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK);
+    return (b_started);
+}   /* network_start() */
 
-    /* Hand out IP addresses to phones that join (like a home router does) */
-    ip_addr_t gw, mask;
-    ip_addr_set_ip4_u32(&gw,   PP_HTONL(CYW43_DEFAULT_IP_AP_ADDRESS));   /* 192.168.4.1   */
-    ip_addr_set_ip4_u32(&mask, PP_HTONL(CYW43_DEFAULT_IP_MASK));         /* 255.255.255.0 */
-    static dhcp_server_t dhcp;
-    dhcp_server_init(&dhcp, &cyw43_state.netif[CYW43_ITF_AP], &gw, &mask);
 
-    if (!web_server_start()) {
-        printf("Web server failed to start\n");
-        return 1;
+/*!
+ * @brief Check whether a phone is connected, and stop the car if not.
+ *
+ * @param[in] b_led_on The current Wi-Fi status LED state.
+ *
+ * @return The new status LED state: blinking while waiting for a phone,
+ *         on while one is connected.
+ */
+static bool
+wifi_status_update (bool b_led_on)
+{
+    uint8_t macs[MAX_STATIONS * MAC_ADDRESS_BYTES] = { 0 };
+    int     num_phones = MAX_STATIONS;  // The SDK takes an int count.
+    bool    b_new_led  = true;
+
+    cyw43_wifi_ap_get_stas(&cyw43_state, &num_phones, macs);
+
+    if (0 == num_phones)
+    {
+        // Failsafe: nobody is connected, so stop and blink while waiting.
+        drive(0, 0);
+        b_new_led = !b_led_on;
     }
-    printf("Join Wi-Fi \"%s\" and open http://192.168.4.1\n", WIFI_NAME);
 
-    bool led = false;                                      /* Wi-Fi status: blink = waiting, solid = connected */
-    bool led_shown = false;                                /* what the LED is actually showing right now */
+    return (b_new_led);
+}   /* wifi_status_update() */
+
+
+/*!
+ * @brief Show the Wi-Fi status on the on-board LED, or flash it while the
+ *        car is stopped for an obstacle.
+ *
+ * @param[in] b_status_on The Wi-Fi status LED state.
+ */
+static void
+led_update (bool b_status_on)
+{
+    static bool b_led_shown = false;
+    bool        b_led_now   = b_status_on;
+
+    if (gb_is_obstacle_close)
+    {
+        uint64_t elapsed_msec = (time_us_64() - g_obstacle_since_usec) /
+                                USEC_PER_MSEC;
+
+        b_led_now = ((elapsed_msec % OBSTACLE_FLASH_PERIOD_MSEC) <
+                     OBSTACLE_FLASH_ON_MSEC);
+    }
+
+    // Only talk to the Wi-Fi chip when the LED needs to change.
+    if (b_led_now != b_led_shown)
+    {
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, b_led_now);
+        b_led_shown = b_led_now;
+    }
+}   /* led_update() */
+
+
+/*!
+ * @brief Run the car's main loop forever.
+ */
+static void
+car_control_task (void)
+{
+    bool            b_led_on   = false;
     absolute_time_t next_check = get_absolute_time();
-    while (true) {
-        cyw43_arch_poll();                                 /* let Wi-Fi + web server do their work */
+
+    for (;;)
+    {
+        // Let the Wi-Fi chip and web server do their work.
+        cyw43_arch_poll();
         ultrasonic_poll();
 
-        if (time_reached(next_check)) {
-            uint8_t macs[8 * 6];
-            int phones = 8;
-            cyw43_wifi_ap_get_stas(&cyw43_state, &phones, macs);
-
-            if (phones == 0) {
-                drive(0, 0);                               /* failsafe: nobody connected -> stop */
-                led = !led;                                /* blink while waiting */
-            } else {
-                led = true;                                /* solid when connected */
-            }
-            next_check = make_timeout_time_ms(500);
+        if (time_reached(next_check))
+        {
+            b_led_on   = wifi_status_update(b_led_on);
+            next_check = make_timeout_time_ms(STATUS_CHECK_MSEC);
         }
 
-        /* While stopped for an obstacle, the LED flashes briefly every few seconds instead */
-        bool led_now = led;
-        if (ultrasonic_obstacle) {
-            uint64_t ms = (time_us_64() - obstacle_since_us) / 1000;
-            led_now = ms % OBSTACLE_FLASH_EVERY_MS < OBSTACLE_FLASH_ON_MS;
-        }
-        if (led_now != led_shown) {                        /* only talk to the Wi-Fi chip on a change */
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, led_now);
-            led_shown = led_now;
-        }
-        cyw43_arch_wait_for_work_until(make_timeout_time_ms(1));
+        led_update(b_led_on);
+        cyw43_arch_wait_for_work_until(make_timeout_time_ms(LOOP_WAIT_MSEC));
     }
-}
+}   /* car_control_task() */
+
+/*** end of file ***/

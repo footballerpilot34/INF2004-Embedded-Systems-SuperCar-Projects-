@@ -43,3 +43,48 @@ pico_enable_stdio_usb(robocar 1)          # printf() over USB cable (handy for d
 pico_enable_stdio_uart(robocar 0)
 
 pico_add_extra_outputs(robocar)           # makes robocar.uf2
+
+# Bench test: line IR sensors + IMU gyroscope connection check.
+add_executable(sensor_test
+    tests/sensor_test.c
+)
+
+target_link_libraries(sensor_test
+    pico_stdlib
+    hardware_i2c
+)
+
+pico_enable_stdio_usb(sensor_test 1)
+pico_enable_stdio_uart(sensor_test 0)
+
+pico_add_extra_outputs(sensor_test)       # makes sensor_test.uf2
+
+# Bench test: gyroscope I2C bus check, scan and WHO_AM_I read.
+add_executable(i2cscanner
+    tests/i2cscanner.c
+)
+
+target_link_libraries(i2cscanner
+    pico_stdlib
+    hardware_i2c
+)
+
+pico_enable_stdio_usb(i2cscanner 1)
+pico_enable_stdio_uart(i2cscanner 0)
+
+pico_add_extra_outputs(i2cscanner)        # makes i2cscanner.uf2
+
+# Bench test: MPU-6050 gyroscope X/Y/Z rates, angles and acceleration.
+add_executable(gyro_test
+    tests/gyro_test.c
+)
+
+target_link_libraries(gyro_test
+    pico_stdlib
+    hardware_i2c
+)
+
+pico_enable_stdio_usb(gyro_test 1)
+pico_enable_stdio_uart(gyro_test 0)
+
+pico_add_extra_outputs(gyro_test)         # makes gyro_test.uf2
