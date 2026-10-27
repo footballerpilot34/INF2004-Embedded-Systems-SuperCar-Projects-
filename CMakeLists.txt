@@ -88,3 +88,40 @@ pico_enable_stdio_usb(gyro_test 1)
 pico_enable_stdio_uart(gyro_test 0)
 
 pico_add_extra_outputs(gyro_test)         # makes gyro_test.uf2
+
+# Final firmware: line following, Code 39 barcode, hump vs wall,
+# Teleplot telemetry and a wireless web UI.
+add_executable(supercar
+    src/supercar_main.c
+    src/barcode.c
+    src/buzzer.c
+    src/gpio_isr.c
+    src/imu.c
+    src/line_diag.c
+    src/line_sensor.c
+    src/log.c
+    src/motor.c
+    src/telemetry.c
+    src/ultrasonic.c
+    src/vehicle.c
+    src/web.c
+    dhcpserver/dhcpserver.c
+)
+
+target_include_directories(supercar PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/src
+    ${CMAKE_CURRENT_LIST_DIR}             # lwipopts.h
+    ${CMAKE_CURRENT_LIST_DIR}/dhcpserver
+)
+
+target_link_libraries(supercar
+    pico_stdlib
+    hardware_i2c
+    hardware_pwm
+    pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI
+)
+
+pico_enable_stdio_usb(supercar 1)
+pico_enable_stdio_uart(supercar 0)
+
+pico_add_extra_outputs(supercar)          # makes supercar.uf2

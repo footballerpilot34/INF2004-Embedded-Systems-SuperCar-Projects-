@@ -7,10 +7,16 @@
  * 1. Finds the MPU-6050 on I2C1 (SDA GP2, SCL GP3) at 0x68 or 0x69.
  * 2. Sets +/-250 dps gyro, +/-2 g accelerometer, 44 Hz filter, 100 Hz rate.
  * 3. Averages 1 s of gyro readings while the car is still, to remove bias.
- * 4. Samples every 10 ms (the IMU Task period) and prints every 100 ms.
+ * 4. Samples every 10 ms (the IMU Task period).
+ *
+ * @par Output modes
+ * - Teleplot (default): sends ">name:value" lines every 20 ms, which the
+ *   Teleplot VS Code extension draws as live graphs.
+ * - Text: prints one readable line every 100 ms.
  *
  * @par Serial commands
- * Type 'z' to zero the angles, or 'c' to recalibrate (keep the car still).
+ * Type 'z' to zero the angles, 'c' to recalibrate (keep the car still), or
+ * 't' to switch between Teleplot and text output.
  *
  * @par Coding standard
  * BARR-C:2018. Deviations: Rule 4.1.d (main() lives in a file without
@@ -36,6 +42,8 @@
 #define SCL_PIN                 3u
 #define I2C_HZ                  100000u
 #define I2C_TIMEOUT_USEC        5000u
+#define I2C_FIRST_ADDRESS       0x08u   // 0x00-0x07 are reserved.
+#define I2C_LAST_ADDRESS        0x77u   // 0x78-0x7F are reserved.
 
 // MPU-6050 addresses and registers.
 //
@@ -82,15 +90,18 @@
 // Timing.
 //
 #define SAMPLE_PERIOD_USEC      10000u
-#define PRINT_EVERY_SAMPLES     10u
+#define TEXT_EVERY_SAMPLES      10u     // 100 ms between text lines.
+#define PLOT_EVERY_SAMPLES      2u      // 20 ms (50 Hz) between plot points.
 #define USB_WAIT_MSEC           10000u
 #define USB_POLL_MSEC           100u
 #define RETRY_MSEC              2000u
+#define LINE_SETTLE_USEC        50u
 
 // Serial commands.
 //
 #define CMD_ZERO_ANGLES         'z'
 #define CMD_RECALIBRATE         'c'
+#define CMD_TOGGLE_OUTPUT       't'
 
 
 static void usb_wait(void);
@@ -99,10 +110,22 @@ static bool reg_write(uint8_t address, uint8_t reg, uint8_t value);
 static bool reg_read(uint8_t address, uint8_t reg, uint8_t * p_data,
                      size_t length);
 static bool mpu_find(uint8_t * p_address);
+static void bus_diagnose(void);
 static bool mpu_configure(uint8_t address);
 static bool mpu_read(uint8_t address, int32_t * p_accel, int32_t * p_gyro);
 static bool gyro_calibrate(uint8_t address, int32_t * p_bias_q4);
 static void fixed_print(char const * p_label, int32_t value, int32_t scale);
+static void plot_print(char const * p_name, int32_t value, int32_t scale);
+static void values_scale(int32_t const * p_rate_q4,
+                         int64_t const * p_angle_sum,
+                         int32_t const * p_accel, int32_t * p_rate_x10,
+                         int32_t * p_angle_x10, int32_t * p_accel_x100);
+static void report_text(int32_t const * p_rate_x10,
+                        int32_t const * p_angle_x10,
+                        int32_t const * p_accel_x100);
+static void report_plot(int32_t const * p_rate_x10,
+                        int32_t const * p_angle_x10,
+                        int32_t const * p_accel_x100);
 static void test_task(uint8_t address);
 
 
@@ -126,8 +149,9 @@ main (void)
     {
         if (!mpu_find(&address))
         {
-            printf("MPU-6050 not found at 0x68 or 0x69. Check wiring; "
-                   "retrying in 2 s.\n");
+            printf("MPU-6050 not found at 0x68 or 0x69.\n");
+            bus_diagnose();
+            printf("Retrying in 2 s.\n\n");
             sleep_ms(RETRY_MSEC);
         }
         else if (!mpu_configure(address))
@@ -161,7 +185,11 @@ test_task (uint8_t address)
     int32_t  accel[NUM_AXES]      = { 0 };
     int32_t  gyro[NUM_AXES]       = { 0 };
     int32_t  rate_q4[NUM_AXES]    = { 0 };
+    int32_t  rate_x10[NUM_AXES]   = { 0 };
+    int32_t  angle_x10[NUM_AXES]  = { 0 };
+    int32_t  accel_x100[NUM_AXES] = { 0 };
     uint32_t sample_count         = 0u;
+    bool     b_plot_mode          = true;
     bool     b_ok                 = gyro_calibrate(address, bias_q4);
     uint64_t last_usec            = time_us_64();
     uint64_t next_usec            = last_usec + SAMPLE_PERIOD_USEC;
@@ -181,6 +209,12 @@ test_task (uint8_t address)
         else if (CMD_RECALIBRATE == command)
         {
             b_ok = gyro_calibrate(address, bias_q4);
+        }
+        else if (CMD_TOGGLE_OUTPUT == command)
+        {
+            b_plot_mode = !b_plot_mode;
+            printf("Output: %s\n", (b_plot_mode ? "Teleplot graphs"
+                                                 : "text"));
         }
         else
         {
@@ -218,46 +252,135 @@ test_task (uint8_t address)
             b_ok = false;
         }
 
-        if (b_ok && (0u == (sample_count % PRINT_EVERY_SAMPLES)))
+        if (b_ok)
         {
-            // NOTE: The angle divisor is counts x microseconds per tenth of
-            // a degree, so the quotient always fits int32 for any angle a
-            // test run can reach.
-            int64_t angle_divisor = ((int64_t) GYRO_LSB_PER_DPS *
-                                     BIAS_FRACTION * USEC_PER_SECOND) /
-                                    TENTHS;
+            values_scale(rate_q4, angle_sum, accel, rate_x10, angle_x10,
+                         accel_x100);
 
-            printf("Gyro dps");
-            for (uint32_t axis = 0u; axis < NUM_AXES; axis++)
+            if (b_plot_mode &&
+                (0u == (sample_count % PLOT_EVERY_SAMPLES)))
             {
-                fixed_print((0u == axis) ? " X:" : ((1u == axis) ? " Y:"
-                                                                 : " Z:"),
-                            (rate_q4[axis] * TENTHS) /
-                            (GYRO_LSB_PER_DPS * BIAS_FRACTION), TENTHS);
+                report_plot(rate_x10, angle_x10, accel_x100);
             }
-
-            printf(" | Angle deg");
-            for (uint32_t axis = 0u; axis < NUM_AXES; axis++)
+            else if ((!b_plot_mode) &&
+                     (0u == (sample_count % TEXT_EVERY_SAMPLES)))
             {
-                fixed_print((0u == axis) ? " X:" : ((1u == axis) ? " Y:"
-                                                                 : " Z:"),
-                            (int32_t) (angle_sum[axis] / angle_divisor),
-                            TENTHS);
+                report_text(rate_x10, angle_x10, accel_x100);
             }
-
-            printf(" | Accel g");
-            for (uint32_t axis = 0u; axis < NUM_AXES; axis++)
+            else
             {
-                fixed_print((0u == axis) ? " X:" : ((1u == axis) ? " Y:"
-                                                                 : " Z:"),
-                            (accel[axis] * HUNDREDTHS) / ACCEL_LSB_PER_G,
-                            HUNDREDTHS);
+                // Not time to report yet.
             }
-
-            printf("\n");
         }
     }
 }   /* test_task() */
+
+
+/*!
+ * @brief Convert raw sums into printable fixed-point values.
+ *
+ * @param[in]  p_rate_q4    Bias-corrected gyro rates, in 1/16 counts.
+ * @param[in]  p_angle_sum  Angle sums, in 1/16 counts x microseconds.
+ * @param[in]  p_accel      Raw accelerometer counts.
+ * @param[out] p_rate_x10   Rates in tenths of a degree per second.
+ * @param[out] p_angle_x10  Angles in tenths of a degree.
+ * @param[out] p_accel_x100 Acceleration in hundredths of a g.
+ */
+static void
+values_scale (int32_t const * p_rate_q4, int64_t const * p_angle_sum,
+              int32_t const * p_accel, int32_t * p_rate_x10,
+              int32_t * p_angle_x10, int32_t * p_accel_x100)
+{
+    // NOTE: The angle divisor is counts x microseconds per tenth of a
+    // degree, so the quotient always fits int32 for any angle a test run
+    // can reach.
+    int64_t angle_divisor = ((int64_t) GYRO_LSB_PER_DPS * BIAS_FRACTION *
+                             USEC_PER_SECOND) / TENTHS;
+
+    for (uint32_t axis = 0u; axis < NUM_AXES; axis++)
+    {
+        p_rate_x10[axis]   = (p_rate_q4[axis] * TENTHS) /
+                             (GYRO_LSB_PER_DPS * BIAS_FRACTION);
+        p_angle_x10[axis]  = (int32_t) (p_angle_sum[axis] / angle_divisor);
+        p_accel_x100[axis] = (p_accel[axis] * HUNDREDTHS) / ACCEL_LSB_PER_G;
+    }
+}   /* values_scale() */
+
+
+/*!
+ * @brief Print one readable line of rates, angles and acceleration.
+ *
+ * @param[in] p_rate_x10   Rates in tenths of a degree per second.
+ * @param[in] p_angle_x10  Angles in tenths of a degree.
+ * @param[in] p_accel_x100 Acceleration in hundredths of a g.
+ */
+static void
+report_text (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
+             int32_t const * p_accel_x100)
+{
+    printf("Gyro dps");
+    fixed_print(" X:", p_rate_x10[0], TENTHS);
+    fixed_print(" Y:", p_rate_x10[1], TENTHS);
+    fixed_print(" Z:", p_rate_x10[2], TENTHS);
+
+    printf(" | Angle deg");
+    fixed_print(" X:", p_angle_x10[0], TENTHS);
+    fixed_print(" Y:", p_angle_x10[1], TENTHS);
+    fixed_print(" Z:", p_angle_x10[2], TENTHS);
+
+    printf(" | Accel g");
+    fixed_print(" X:", p_accel_x100[0], HUNDREDTHS);
+    fixed_print(" Y:", p_accel_x100[1], HUNDREDTHS);
+    fixed_print(" Z:", p_accel_x100[2], HUNDREDTHS);
+
+    printf("\n");
+}   /* report_text() */
+
+
+/*!
+ * @brief Send one point to each Teleplot graph.
+ *
+ * @par
+ * Teleplot draws one graph per name; X/Y/Z traces of the same quantity can
+ * be dragged onto one chart in the Teleplot window.
+ *
+ * @param[in] p_rate_x10   Rates in tenths of a degree per second.
+ * @param[in] p_angle_x10  Angles in tenths of a degree.
+ * @param[in] p_accel_x100 Acceleration in hundredths of a g.
+ */
+static void
+report_plot (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
+             int32_t const * p_accel_x100)
+{
+    plot_print("gyroX_dps", p_rate_x10[0], TENTHS);
+    plot_print("gyroY_dps", p_rate_x10[1], TENTHS);
+    plot_print("gyroZ_dps", p_rate_x10[2], TENTHS);
+    plot_print("angleX_deg", p_angle_x10[0], TENTHS);
+    plot_print("angleY_deg", p_angle_x10[1], TENTHS);
+    plot_print("angleZ_deg", p_angle_x10[2], TENTHS);
+    plot_print("accelX_g", p_accel_x100[0], HUNDREDTHS);
+    plot_print("accelY_g", p_accel_x100[1], HUNDREDTHS);
+    plot_print("accelZ_g", p_accel_x100[2], HUNDREDTHS);
+}   /* report_plot() */
+
+
+/*!
+ * @brief Print one Teleplot point, such as ">gyroZ_dps:-12.3".
+ *
+ * @param[in] p_name The trace name.
+ * @param[in] value  The value, scaled by scale.
+ * @param[in] scale  10 for one decimal place, 100 for two.
+ */
+static void
+plot_print (char const * p_name, int32_t value, int32_t scale)
+{
+    int32_t magnitude = ((value < 0) ? -value : value);
+    int     digits    = ((HUNDREDTHS == scale) ? 2 : 1);
+
+    printf(">%s:%s%" PRId32 ".%0*" PRId32 "\n", p_name,
+           ((value < 0) ? "-" : ""), magnitude / scale, digits,
+           magnitude % scale);
+}   /* plot_print() */
 
 
 /*!
@@ -320,7 +443,8 @@ gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
         printf("\n%s", (b_moved ? "WARNING: the car moved during "
                                   "calibration; type 'c' to redo it.\n"
                                 : ""));
-        printf("Type 'z' to zero the angles, 'c' to recalibrate.\n");
+        printf("Type 'z' to zero the angles, 'c' to recalibrate, 't' for "
+               "text/graph output.\n");
     }
 
     return (b_ok);
@@ -386,6 +510,65 @@ mpu_find (uint8_t * p_address)
 
     return (b_found);
 }   /* mpu_find() */
+
+
+/*!
+ * @brief Explain why the MPU-6050 was not found: check the idle bus lines,
+ *        then list every address that answers.
+ */
+static void
+bus_diagnose (void)
+{
+    bool     b_sda_high = false;
+    bool     b_scl_high = false;
+    uint32_t num_found  = 0u;
+
+    // Read the idle lines as plain GPIO inputs (the pull-ups stay on).
+    gpio_set_function(SDA_PIN, GPIO_FUNC_SIO);
+    gpio_set_function(SCL_PIN, GPIO_FUNC_SIO);
+    gpio_set_dir(SDA_PIN, GPIO_IN);
+    gpio_set_dir(SCL_PIN, GPIO_IN);
+    sleep_us(LINE_SETTLE_USEC);
+    b_sda_high = gpio_get(SDA_PIN);
+    b_scl_high = gpio_get(SCL_PIN);
+    gpio_set_function(SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(SCL_PIN, GPIO_FUNC_I2C);
+
+    printf("  Idle lines: SDA(GP2)=%s SCL(GP3)=%s\n",
+           (b_sda_high ? "HIGH" : "LOW"), (b_scl_high ? "HIGH" : "LOW"));
+
+    printf("  Devices found:");
+    for (uint8_t address = I2C_FIRST_ADDRESS; address <= I2C_LAST_ADDRESS;
+         address++)
+    {
+        uint8_t dummy  = 0u;
+        int     result = i2c_read_timeout_us(I2C_PORT, address, &dummy, 1u,
+                                             false, I2C_TIMEOUT_USEC);
+
+        if (1 == result)
+        {
+            printf(" 0x%02X", address);
+            num_found++;
+        }
+    }
+    printf((0u == num_found) ? " none\n" : "\n");
+
+    if ((!b_sda_high) || (!b_scl_high))
+    {
+        printf("  -> A LOW line: the IMU has no power (check VCC/GND), or "
+               "that wire touches GND.\n");
+    }
+    else if (0u == num_found)
+    {
+        printf("  -> Lines OK but nothing answers: SDA and SCL are probably "
+               "swapped, or the wires are on the wrong pins.\n");
+    }
+    else
+    {
+        printf("  -> Something answers, but not at 0x68/0x69: this is not an "
+               "MPU-6050. Tell me the address(es) above.\n");
+    }
+}   /* bus_diagnose() */
 
 
 /*!
