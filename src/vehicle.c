@@ -769,14 +769,6 @@ line_steer (int32_t speed, uint32_t now_msec)
         // Line is between the sensors.
     }
 
-    if ((VEHICLE_HUMP == g_state) && (left == right))
-    {
-        // With the assumed right-wheel hump, steer a little right to offset
-        // the expected left drift. Preserve forward drive on both wheels.
-        left  += HUMP_RIGHT_RISE_STEER_BIAS;
-        right -= HUMP_RIGHT_RISE_STEER_BIAS;
-    }
-
     motor_set(left, right);
 }   /* line_steer() */
 

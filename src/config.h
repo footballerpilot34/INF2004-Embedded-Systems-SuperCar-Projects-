@@ -98,8 +98,6 @@
 #define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
 #define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
 #define SPEED_HUMP                  18      // Climbing a hump (+20%).
-#define HUMP_RIGHT_RISE_STEER_BIAS  2       // Left +2%, right -2% to counter
-                                            // expected left drift on right hump.
 #define TURN_INNER_PERCENT          0       // Inner wheel speed in a turn,
                                             // as a percent of the outer.
                                             // 0 = inner wheel stops, so

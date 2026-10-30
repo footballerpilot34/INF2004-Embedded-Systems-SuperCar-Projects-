@@ -22,11 +22,15 @@
 #define MOTOR_PWM_HZ    20000u  // Silent, and the Robo Pico's maximum.
 #define MAX_SPEED       100
 #define NUM_MOTOR_PINS  4u
+#define START_BOOST_PERCENT 20
+#define START_BOOST_USEC 60000u
 
 
 static uint16_t g_pwm_top   = 0u;
 static int32_t  g_left      = 0;
 static int32_t  g_right     = 0;
+static uint64_t g_left_boost_until_usec  = 0u;
+static uint64_t g_right_boost_until_usec = 0u;
 
 
 static void motor_drive(uint32_t pin_a, uint32_t pin_b, int32_t speed,
@@ -72,11 +76,48 @@ motor_init (void)
 void
 motor_set (int32_t left, int32_t right)
 {
+    uint64_t now_usec = time_us_64();
+    int32_t  left_drive = left;
+    int32_t  right_drive = right;
+
+    if ((0 != left) &&
+        ((0 == g_left) || ((left < 0) != (g_left < 0))))
+    {
+        g_left_boost_until_usec = now_usec + START_BOOST_USEC;
+    }
+    else if (0 == left)
+    {
+        g_left_boost_until_usec = 0u;
+    }
+
+    if ((0 != right) &&
+        ((0 == g_right) || ((right < 0) != (g_right < 0))))
+    {
+        g_right_boost_until_usec = now_usec + START_BOOST_USEC;
+    }
+    else if (0 == right)
+    {
+        g_right_boost_until_usec = 0u;
+    }
+
+    if ((left != 0) && (now_usec < g_left_boost_until_usec) &&
+        ((left < 0 ? -left : left) < START_BOOST_PERCENT))
+    {
+        left_drive = ((left < 0) ? -START_BOOST_PERCENT :
+                                   START_BOOST_PERCENT);
+    }
+    if ((right != 0) && (now_usec < g_right_boost_until_usec) &&
+        ((right < 0 ? -right : right) < START_BOOST_PERCENT))
+    {
+        right_drive = ((right < 0) ? -START_BOOST_PERCENT :
+                                    START_BOOST_PERCENT);
+    }
+
     g_left  = left;
     g_right = right;
-    motor_drive(PIN_LEFT_MOTOR_A, PIN_LEFT_MOTOR_B, left,
+    motor_drive(PIN_LEFT_MOTOR_A, PIN_LEFT_MOTOR_B, left_drive,
                 LEFT_MOTOR_REVERSED);
-    motor_drive(PIN_RIGHT_MOTOR_A, PIN_RIGHT_MOTOR_B, right,
+    motor_drive(PIN_RIGHT_MOTOR_A, PIN_RIGHT_MOTOR_B, right_drive,
                 RIGHT_MOTOR_REVERSED);
 }   /* motor_set() */
 
