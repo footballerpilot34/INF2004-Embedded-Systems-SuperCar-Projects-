@@ -74,8 +74,10 @@ static uint32_t        g_entered_msec = 0u;     // When g_state began.
 static uint32_t        g_level_msec   = 0u;     // Level since (in HUMP).
 static uint32_t        g_clear_msec   = 0u;     // Clear since (BLOCKED).
 static uint32_t        g_ignore_until = 0u;     // Ignore range until.
+static int32_t         g_hump_peak_tilt_x10 = 0;
 static bool            gb_level       = false;
 static bool            gb_clear       = false;
+static bool            gb_hump_tilted = false;
 static bool            gb_last_left   = true;   // Line last seen left.
 
 // Which sensors last saw the line, so the car knows which limit it left by.
@@ -179,7 +181,7 @@ vehicle_task (void)
 {
     uint32_t now_msec  = now_msec_get();
     uint32_t range_mm  = ultrasonic_range_mm();
-    int32_t  pitch_x10 = imu_pitch_x10();
+    int32_t  tilt_x10  = imu_max_tilt_x10();
 
     switch (g_state)
     {
@@ -188,15 +190,15 @@ vehicle_task (void)
     break;
 
     case VEHICLE_FOLLOW_LINE:
-        follow_line_step(now_msec, range_mm, pitch_x10);
+        follow_line_step(now_msec, range_mm, tilt_x10);
     break;
 
     case VEHICLE_PROBE:
-        probe_step(now_msec, range_mm, pitch_x10);
+        probe_step(now_msec, range_mm, tilt_x10);
     break;
 
     case VEHICLE_HUMP:
-        hump_step(now_msec, pitch_x10);
+        hump_step(now_msec, tilt_x10);
     break;
 
     case VEHICLE_BLOCKED:
@@ -276,18 +278,29 @@ vehicle_state_name (vehicle_state_t state)
 
 
 /*!
+ * @brief Report the maximum positive pitch seen during the latest hump.
+ */
+int32_t
+vehicle_hump_peak_tilt_x10 (void)
+{
+    return (g_hump_peak_tilt_x10);
+}   /* vehicle_hump_peak_tilt_x10() */
+
+
+/*!
  * @brief FOLLOW_LINE: steer along the line; react to humps and obstacles.
  *
  * @param[in] now_msec  The current time.
  * @param[in] range_mm  The forward range.
- * @param[in] pitch_x10 The pitch, in tenths of a degree.
+ * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
+follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
     bool b_range_used = ((int32_t) (now_msec - g_ignore_until) >= 0);
 
-    if (pitch_x10 >= HUMP_ENTER_PITCH_X10)
+    if ((tilt_x10 >= HUMP_ENTER_PITCH_X10) ||
+        (tilt_x10 <= -HUMP_ENTER_PITCH_X10))
     {
         state_enter(VEHICLE_HUMP, now_msec);
     }
@@ -311,12 +324,13 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
  *
  * @param[in] now_msec  The current time.
  * @param[in] range_mm  The forward range.
- * @param[in] pitch_x10 The pitch, in tenths of a degree.
+ * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-probe_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
+probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
-    if (pitch_x10 >= HUMP_ENTER_PITCH_X10)
+    if ((tilt_x10 >= HUMP_ENTER_PITCH_X10) ||
+        (tilt_x10 <= -HUMP_ENTER_PITCH_X10))
     {
         log_printf("Probe: nose tipped up -> HUMP, climbing.\n");
         state_enter(VEHICLE_HUMP, now_msec);
@@ -326,8 +340,7 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
         state_enter(VEHICLE_FOLLOW_LINE, now_msec);
     }
     else if ((range_mm <= OBSTACLE_HARD_STOP_MM) ||
-             ((now_msec - g_entered_msec) > OBSTACLE_PROBE_MSEC) ||
-             (!imu_has_gyroscope()))
+             ((now_msec - g_entered_msec) > OBSTACLE_PROBE_MSEC))
     {
         log_printf("Probe: no climb -> WALL, stopped at %" PRIu32 " mm.\n",
                range_mm);
@@ -344,16 +357,26 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
  * @brief HUMP: climb and descend, ignoring the ultrasonic.
  *
  * @param[in] now_msec  The current time.
- * @param[in] pitch_x10 The pitch, in tenths of a degree.
+ * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-hump_step (uint32_t now_msec, int32_t pitch_x10)
+hump_step (uint32_t now_msec, int32_t tilt_x10)
 {
-    int32_t  magnitude = ((pitch_x10 < 0) ? -pitch_x10 : pitch_x10);
+    int32_t  magnitude = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
     uint32_t in_hump   = now_msec - g_entered_msec;
 
-    // Track how long the car has been level.
-    if (magnitude > HUMP_LEVEL_PITCH_X10)
+    // A single raised wheel may produce roll rather than pitch. Track an
+    // excursion on either axis, then finish only after both return near base.
+    if (magnitude >= HUMP_ENTER_PITCH_X10)
+    {
+        gb_hump_tilted = true;
+        if (magnitude > g_hump_peak_tilt_x10)
+        {
+            g_hump_peak_tilt_x10 = magnitude;
+        }
+    }
+
+    if (!gb_hump_tilted || (magnitude > HUMP_LEVEL_PITCH_X10))
     {
         gb_level = false;
     }
@@ -367,7 +390,7 @@ hump_step (uint32_t now_msec, int32_t pitch_x10)
         // Still level.
     }
 
-    if (gb_level && (in_hump > HUMP_MIN_MSEC) &&
+    if (gb_hump_tilted && gb_level && (in_hump > HUMP_MIN_MSEC) &&
         ((now_msec - g_level_msec) > HUMP_LEVEL_MSEC))
     {
         log_printf("Hump cleared after %" PRIu32 " ms.\n", in_hump);
@@ -437,6 +460,11 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     g_entered_msec = now_msec;
     gb_level       = false;
     gb_clear       = false;
+    if (VEHICLE_HUMP == state)
+    {
+        g_hump_peak_tilt_x10 = 0;
+        gb_hump_tilted = false;
+    }
 
     if (VEHICLE_LINE_CAL == state)
     {

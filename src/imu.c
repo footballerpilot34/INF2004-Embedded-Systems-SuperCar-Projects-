@@ -8,6 +8,8 @@
  */
 
 #include <stdbool.h>
+#include <limits.h>
+#include <math.h>
 #include <stdint.h>
 
 #include "pico/stdlib.h"
@@ -47,12 +49,22 @@
 #define MAG_Z_SENSITIVITY_LSB_G         980
 #define MILLI_PER_UNIT                  1000
 #define RAW_AXIS_BYTES                  6u
+#define CALIBRATION_SAMPLES              25u
+#define ACCEL_MIN_MG                     800
+#define ACCEL_MAX_MG                     1200
+#define PITCH_FILTER_DIVISOR             3
+#define RAD_TO_TENTH_DEG                 572.958f
 
 
 static bool         gb_sensor_ok       = false;
 static bool         gb_reading_valid   = false;
 static uint64_t     g_last_sample_usec = 0u;
 static imu_axes_t   g_axes             = { 0, 0, 0, 0, 0, 0 };
+static bool         gb_calibrated       = false;
+static int32_t      g_pitch_zero_x10    = 0;
+static int32_t      g_roll_zero_x10     = 0;
+static int32_t      g_pitch_x10         = 0;
+static int32_t      g_roll_x10          = 0;
 
 
 static bool    reg_write(uint8_t address, uint8_t reg, uint8_t value);
@@ -61,6 +73,8 @@ static bool    reg_read(uint8_t address, uint8_t reg, uint8_t * p_data,
 static bool    sample_read(imu_axes_t * p_axes);
 static int32_t signed_be(uint8_t msb, uint8_t lsb);
 static int32_t accel_mg(uint8_t msb, uint8_t lsb);
+static int32_t raw_pitch_x10(imu_axes_t const * p_axes);
+static int32_t raw_roll_x10(imu_axes_t const * p_axes);
 
 
 /*!
@@ -136,8 +150,8 @@ imu_init (void)
 /*!
  * @brief Refresh all six physical axis values every 200 ms.
  *
- * Call from the main control loop. No orientation or motion calculations
- * are performed.
+ * Call from the main control loop. The filtered pitch is the only derived
+ * value; the other five axes remain direct physical-unit readings.
  */
 void
 imu_task (void)
@@ -150,10 +164,80 @@ imu_task (void)
         {
             g_last_sample_usec = now_usec;
             gb_reading_valid = sample_read(&g_axes);
-
+            if (gb_reading_valid && gb_calibrated)
+            {
+                int32_t pitch = raw_pitch_x10(&g_axes) - g_pitch_zero_x10;
+                int32_t roll = raw_roll_x10(&g_axes) - g_roll_zero_x10;
+                g_pitch_x10 += (pitch - g_pitch_x10) /
+                               PITCH_FILTER_DIVISOR;
+                g_roll_x10 += (roll - g_roll_x10) / PITCH_FILTER_DIVISOR;
+            }
         }
     }
 }   /* imu_task() */
+
+
+/*!
+ * @brief Calibrate the level pitch reference while the stopped car is still.
+ *
+ * Takes a five-second sample window and rejects implausible gravity magnitude
+ * or excessive tilt variation. The vehicle must be stationary during this.
+ */
+bool
+imu_calibrate (void)
+{
+    int64_t pitch_sum = 0;
+    int64_t roll_sum = 0;
+    int32_t pitch_min = INT32_MAX;
+    int32_t pitch_max = INT32_MIN;
+    int32_t roll_min = INT32_MAX;
+    int32_t roll_max = INT32_MIN;
+    bool    b_ok      = gb_sensor_ok;
+
+    gb_calibrated = false;
+    for (uint32_t idx = 0u; (idx < CALIBRATION_SAMPLES) && b_ok; idx++)
+    {
+        int32_t pitch = 0;
+        int32_t roll = 0;
+        float   magnitude = 0.0f;
+
+        sleep_ms(200u);
+        b_ok = sample_read(&g_axes);
+        if (b_ok)
+        {
+            magnitude = sqrtf((float) (g_axes.ax_mg * g_axes.ax_mg) +
+                              (float) (g_axes.ay_mg * g_axes.ay_mg) +
+                              (float) (g_axes.az_mg * g_axes.az_mg));
+            pitch = raw_pitch_x10(&g_axes);
+            roll = raw_roll_x10(&g_axes);
+            b_ok = (magnitude >= ACCEL_MIN_MG) &&
+                   (magnitude <= ACCEL_MAX_MG);
+            if (pitch < pitch_min) pitch_min = pitch;
+            if (pitch > pitch_max) pitch_max = pitch;
+            if (roll < roll_min) roll_min = roll;
+            if (roll > roll_max) roll_max = roll;
+            pitch_sum += pitch;
+            roll_sum += roll;
+        }
+    }
+
+    if (b_ok)
+    {
+        b_ok = ((pitch_max - pitch_min) <= 30) &&
+               ((roll_max - roll_min) <= 30);
+    }
+    if (b_ok)
+    {
+        g_pitch_zero_x10 = (int32_t) (pitch_sum / CALIBRATION_SAMPLES);
+        g_roll_zero_x10 = (int32_t) (roll_sum / CALIBRATION_SAMPLES);
+        g_pitch_x10 = 0;
+        g_roll_x10 = 0;
+        gb_calibrated = true;
+    }
+    gb_reading_valid = b_ok;
+    g_last_sample_usec = time_us_64();
+    return (b_ok);
+}   /* imu_calibrate() */
 
 
 /*!
@@ -177,6 +261,16 @@ imu_reading_is_valid (void)
 
 
 /*!
+ * @brief Report whether a still, level pitch reference has been calibrated.
+ */
+bool
+imu_is_calibrated (void)
+{
+    return (gb_calibrated);
+}   /* imu_is_calibrated() */
+
+
+/*!
  * @brief Copy the most recent axis values in thousandths of their units.
  *
  * Acceleration values are mg; magnetic values are mGauss.
@@ -189,33 +283,37 @@ imu_get_axes (imu_axes_t * p_axes)
 
 
 /*!
- * @brief The LSM303DLHC has no gyroscope, so hump-rate detection is disabled.
- */
-bool
-imu_has_gyroscope (void)
-{
-    return (false);
-}   /* imu_has_gyroscope() */
-
-
-/*!
- * @brief Legacy interface; no pitch estimate is calculated from raw axes.
+ * @brief Return filtered pitch relative to the calibrated level reference.
  */
 int32_t
 imu_pitch_x10 (void)
 {
-    return (0);
+    return (gb_calibrated && gb_reading_valid ? g_pitch_x10 : 0);
 }   /* imu_pitch_x10() */
 
 
 /*!
- * @brief Legacy interface; the LSM303DLHC has no gyro rate output.
+ * @brief Return filtered roll relative to the calibrated level reference.
  */
 int32_t
-imu_pitch_rate_x10 (void)
+imu_roll_x10 (void)
 {
-    return (0);
-}   /* imu_pitch_rate_x10() */
+    return (gb_calibrated && gb_reading_valid ? g_roll_x10 : 0);
+}   /* imu_roll_x10() */
+
+
+/*!
+ * @brief Return the signed pitch or roll with the greater tilt magnitude.
+ */
+int32_t
+imu_max_tilt_x10 (void)
+{
+    int32_t pitch = imu_pitch_x10();
+    int32_t roll = imu_roll_x10();
+
+    return (((pitch < 0 ? -pitch : pitch) >=
+             (roll < 0 ? -roll : roll)) ? pitch : roll);
+}   /* imu_max_tilt_x10() */
 
 
 /*!
@@ -276,6 +374,30 @@ accel_mg (uint8_t msb, uint8_t lsb)
 
     return (raw);       // +/-2 g, 1 mg per count.
 }   /* accel_mg() */
+
+
+/*!
+ * @brief Calculate raw pitch for Y-forward / Z-up sensor mounting.
+ */
+static int32_t
+raw_pitch_x10 (imu_axes_t const * p_axes)
+{
+    float angle = atan2f((float) p_axes->ay_mg, (float) p_axes->az_mg);
+
+    return ((int32_t) (angle * RAD_TO_TENTH_DEG));
+}   /* raw_pitch_x10() */
+
+
+/*!
+ * @brief Calculate raw roll for X-right / Z-up sensor mounting.
+ */
+static int32_t
+raw_roll_x10 (imu_axes_t const * p_axes)
+{
+    float angle = atan2f((float) -p_axes->ax_mg, (float) p_axes->az_mg);
+
+    return ((int32_t) (angle * RAD_TO_TENTH_DEG));
+}   /* raw_roll_x10() */
 
 
 /*!

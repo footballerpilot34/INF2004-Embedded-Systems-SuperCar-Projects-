@@ -13,7 +13,7 @@ typedef enum
     WEB_CMD_NONE,
     WEB_CMD_START,
     WEB_CMD_STOP,
-    WEB_CMD_IMU_CHECK,
+    WEB_CMD_IMU_CALIBRATE,
     WEB_CMD_WHEEL_TEST,
     WEB_CMD_DIAG,           // Toggle IR diagnostic mode (motors off).
     WEB_CMD_LEARN_BLACK,    // Both line sensors are over black now.

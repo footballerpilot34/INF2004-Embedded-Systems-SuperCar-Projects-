@@ -132,10 +132,11 @@
 #define US_STALE_MSEC               200u    // Range older than this is
                                             // treated as unknown.
 
-// Hump detection is disabled: the LSM303DLHC has no gyroscope.
+// LSM303DLHC pitch uses Y-forward / Z-up axes (see IMU mounting diagram).
+// Tilt is low-pass filtered; thresholds provide hysteresis against noise.
 #define HUMP_ENTER_PITCH_X10        80      // 8.0 deg nose up: on a hump.
 #define HUMP_LEVEL_PITCH_X10        30      // Within 3.0 deg: level again.
-#define HUMP_LEVEL_MSEC             300u    // Level this long: hump done.
+#define HUMP_LEVEL_MSEC             700u    // Level after tilt excursion: done.
 #define HUMP_MIN_MSEC               500u    // Shortest possible hump.
 #define HUMP_MAX_MSEC               8000u   // Longer than this: stop.
 #define HUMP_IGNORE_RANGE_MSEC      500u    // Ignore ultrasonic after a

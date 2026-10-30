@@ -16,8 +16,8 @@
  *   on the line first: it sweeps left/right for 4 s to check the line
  *   sensors, shifts until both are on the line, then follows the line.
  * - STOP: press GP21, 'x', or STOP on the page. Works in any state.
- * - IMU CHECK (while stopped): hold GP20 for 2 s, press 'c', or use
- *   IMU CHECK on the page to report whether the LSM303DLHC is online.
+ * - IMU CALIBRATE (while stopped and level): hold GP20 for 2 s, press 'c',
+ *   or use IMU CALIBRATE on the page. Keep the car still for 5 s.
  * - WHEEL TEST (while stopped, car lifted): 'w' or WHEEL TEST on the page.
  * - IR DIAG (while stopped): 'd' or IR DIAG on the page turns the motors
  *   off and logs every line sensor change. Then 'b' / LEARN BLACK with
@@ -67,7 +67,7 @@
 #define KEY_START               's'
 #define KEY_STOP                'x'
 #define KEY_WHEEL_TEST          'w'
-#define KEY_IMU_CHECK           'c'
+#define KEY_IMU_CALIBRATE       'c'
 #define KEY_DIAG                'd'
 #define KEY_LEARN_BLACK         'b'
 #define KEY_LEARN_WHITE         'n'
@@ -79,7 +79,7 @@ static void          buttons_init(void);
 static web_command_t buttons_poll(void);
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
-static void          imu_check_run(void);
+static void          imu_calibrate_run(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
 static void          barcode_report(barcode_result_t result);
@@ -112,16 +112,13 @@ main (void)
     buttons_init();
 
     log_printf("Checking LSM303DLHC...");
-    if (imu_init())
-    {
-        buzzer_beep(CAL_DONE_BEEP_MSEC);
-    }
+    (void) imu_init();
 
     (void) web_init();  // Logs its own result; the car runs either way.
 
     vehicle_init();
     log_printf("READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. "
-               "Hold GP20 2 s for IMU check.");
+               "Hold GP20 2 s for IMU calibration.");
 
     next_tick_usec = time_us_64() + TICK_USEC;
 
@@ -212,14 +209,14 @@ command_run (web_command_t command)
         line_diag_learn(false);
     break;
 
-    case WEB_CMD_IMU_CHECK:
+    case WEB_CMD_IMU_CALIBRATE:
         if (vehicle_is_idle())
         {
-            imu_check_run();
+            imu_calibrate_run();
         }
         else
         {
-            log_printf("Stop the car before checking the IMU.");
+            log_printf("Stop the car before calibrating the IMU.");
         }
     break;
 
@@ -247,21 +244,25 @@ command_run (web_command_t command)
 
 
 /*!
- * @brief Report whether the LSM303DLHC is online.
+ * @brief Calibrate the LSM303DLHC pitch reference while the car is still.
  */
 static void
-imu_check_run (void)
+imu_calibrate_run (void)
 {
-    if (imu_is_ok())
+    if (!imu_is_ok())
     {
-        log_printf("LSM303DLHC is online; live axis graphs are shown in the UI.");
+        log_printf("LSM303DLHC is offline; check I2C wiring and power.");
+    }
+    else if (imu_calibrate())
+    {
+        log_printf("IMU calibrated. Pitch/roll baseline set; hump detection enabled.");
         buzzer_beep(CAL_DONE_BEEP_MSEC);
     }
     else
     {
-        log_printf("LSM303DLHC is offline; check I2C wiring and power.");
+        log_printf("IMU calibration failed. Keep it still, level and try again.");
     }
-}   /* imu_check_run() */
+}   /* imu_calibrate_run() */
 
 
 /*!
@@ -346,7 +347,7 @@ buttons_init (void)
  *
  * @par
  * STOP acts at once. START acts when released after a short press; held
- * for 2 s it requests an IMU status check instead.
+ * for 2 s it requests a still/level IMU calibration instead.
  *
  * @return The command to run, or WEB_CMD_NONE.
  */
@@ -368,7 +369,7 @@ buttons_poll (void)
         held_ticks++;
         if (BUTTON_LONG_PRESS_TICKS == held_ticks)
         {
-            command = WEB_CMD_IMU_CHECK;
+            command = WEB_CMD_IMU_CALIBRATE;
         }
     }
     else
@@ -405,9 +406,9 @@ serial_poll (void)
     {
         command = WEB_CMD_START;
     }
-    else if (KEY_IMU_CHECK == key)
+    else if (KEY_IMU_CALIBRATE == key)
     {
-        command = WEB_CMD_IMU_CHECK;
+        command = WEB_CMD_IMU_CALIBRATE;
     }
     else if (KEY_WHEEL_TEST == key)
     {

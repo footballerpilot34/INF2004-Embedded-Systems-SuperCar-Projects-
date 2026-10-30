@@ -21,12 +21,14 @@ typedef struct
 
 bool    imu_init(void);
 void    imu_task(void);
+bool    imu_calibrate(void);
 bool    imu_is_ok(void);
 bool    imu_reading_is_valid(void);
+bool    imu_is_calibrated(void);
 void    imu_get_axes(imu_axes_t * p_axes);
-bool    imu_has_gyroscope(void);
 int32_t imu_pitch_x10(void);
-int32_t imu_pitch_rate_x10(void);
+int32_t imu_roll_x10(void);
+int32_t imu_max_tilt_x10(void);
 
 #endif /* IMU_H */
 

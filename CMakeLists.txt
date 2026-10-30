@@ -118,6 +118,7 @@ target_link_libraries(supercar
     pico_stdlib
     hardware_i2c
     hardware_pwm
+    m
     pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI
 )
 

@@ -75,7 +75,7 @@ static char const g_page_html[] =
     "</style></head><body><h2>SuperCar AAI14</h2><div class=g>"
     "<button id=a onclick=\"c('start')\">START</button>"
     "<button id=b onclick=\"c('stop')\">STOP</button>"
-    "<button id=k onclick=\"c('check')\">IMU CHECK</button>"
+    "<button id=k onclick=\"c('calibrate')\">CALIBRATE IMU</button>"
     "<button id=w onclick=\"c('wheel')\">WHEEL TEST</button>"
     "<button id=d onclick=\"c('diag')\">IR DIAG on/off</button>"
     "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
@@ -90,7 +90,13 @@ static char const g_page_html[] =
     "<span style=color:#9be564>Z</span></span>"
     "<div class=vals id=av>AX - &nbsp; AY - &nbsp; AZ -</div>"
     "<canvas id=ac></canvas><div class=hint>Fixed scale: -2.0 to +2.0 g. "
-    "Five-sample display average.</div></div>"
+    "Three-sample display average.</div></div>"
+    "<div class=c><b>Calibrated pitch / roll (one-wheel tilt)</b>"
+    "<span class=leg><span style=color:#ff6464>Pitch</span> &nbsp;"
+    "<span style=color:#58d8ff>Roll</span></span>"
+    "<div class=vals id=pv>Pitch - &nbsp; Peak tilt -</div>"
+    "<canvas id=pc></canvas><div class=hint>Fixed scale: -30 to +30 degrees. "
+    "Pitch is low-pass filtered; calibrate while still and level.</div></div>"
     "<div class=c><b>Magnetometer</b> <span class=leg>"
     "<span style=color:#ff6464>X</span> &nbsp;"
     "<span style=color:#58d8ff>Y</span> &nbsp;"
@@ -102,7 +108,7 @@ static char const g_page_html[] =
     "<script>var hist=[];function $(i){return document.getElementById(i)}"
     "function c(x){fetch('/cmd?c='+x).catch(function(){})}"
     "function f(v){return (v<0?'-':'+')+Math.abs(v).toFixed(3)}"
-    "function avg(i,k){var a=0,n=0;for(var j=Math.max(0,i-4);j<=i;j++)"
+    "function avg(i,k){var a=0,n=0;for(var j=Math.max(0,i-2);j<=i;j++)"
     "{a+=hist[j][k];n++}return n?a/n:0}"
     "function draw(id,keys,lim){var e=$(id),w=e.clientWidth,h=180;"
     "if(!w)return;var d=window.devicePixelRatio||1;e.width=w*d;e.height=h*d;"
@@ -114,7 +120,7 @@ static char const g_page_html[] =
     "x.lineTo(w-R,y);x.stroke();x.fillStyle='#aab4bd';"
     "x.fillText((z*lim).toFixed(1),L-5,y+4)}"
     "var col=['#ff6464','#58d8ff','#9be564'];"
-    "for(var a=0;a<3;a++){x.strokeStyle=col[a];x.lineWidth=2;"
+    "for(var a=0;a<keys.length;a++){x.strokeStyle=col[a];x.lineWidth=2;"
     "x.beginPath();for(var i=0;i<hist.length;i++){var v=avg(i,keys[a])/1000;"
     "v=Math.max(-lim,Math.min(lim,v));var px=L+(hist.length<2?0:"
     "i*P/(hist.length-1));var py=T+(1-(v/lim+1)/2)*(h-T-B);"
@@ -127,16 +133,21 @@ static char const g_page_html[] =
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
-    "$('imu').textContent=!d.imu?'NOT FOUND':(d.iv?'OK':'READ ERROR');"
+    "$('imu').textContent=!d.imu?'NOT FOUND':(!d.iv?'READ ERROR':"
+    "(d.ic?'CALIBRATED':'NEEDS CALIBRATION'));"
     "$('bc').textContent=d.bc||'-';"
-    "if(d.iv){hist.push({ax:d.ax,ay:d.ay,az:d.az,mx:d.mx,my:d.my,mz:d.mz});"
+    "if(d.iv){hist.push({ax:d.ax,ay:d.ay,az:d.az,mx:d.mx,my:d.my,mz:d.mz,"
+    "pt:d.pt,rl:d.rl});"
     "if(hist.length>60)hist.shift();"
     "function val(k){return f(avg(hist.length-1,k)/1000)}"
     "$('av').textContent='AX '+val('ax')+' g   AY '+val('ay')+"
     "' g   AZ '+val('az')+' g';"
     "$('mv').textContent='MX '+val('mx')+' G   MY '+val('my')+"
     "' G   MZ '+val('mz')+' G'}"
-    "draw('ac',['ax','ay','az'],2.0);draw('mc',['mx','my','mz'],1.3);"
+    "$('pv').textContent='Pitch '+(d.ic?(d.pt/1000).toFixed(1)+' deg':'-')+"
+    "'   Peak tilt '+(d.pk/10).toFixed(1)+' deg';"
+    "draw('ac',['ax','ay','az'],2.0);draw('pc',['pt','rl'],30.0);"
+    "draw('mc',['mx','my','mz'],1.3);"
     "setTimeout(u,200)})"
     ".catch(function(){setTimeout(u,1000)})}u();</script>"
     "</body></html>";
@@ -380,9 +391,9 @@ command_parse (char const * p_name)
     {
         g_pending = WEB_CMD_START;
     }
-    else if (0 == strcmp(p_name, "check"))
+    else if (0 == strcmp(p_name, "calibrate"))
     {
-        g_pending = WEB_CMD_IMU_CHECK;
+        g_pending = WEB_CMD_IMU_CALIBRATE;
     }
     else if (0 == strcmp(p_name, "wheel"))
     {
@@ -408,7 +419,7 @@ command_parse (char const * p_name)
 
 
 /*!
- * @brief Build the live web status and six raw sensor-axis values.
+ * @brief Build live vehicle, six-axis and calibrated pitch status.
  *
  * @param[out] p_out    The buffer to fill.
  * @param[in]  capacity The buffer size.
@@ -428,7 +439,9 @@ status_build (char * p_out, size_t capacity)
                                 "{\"st\":\"%s\",\"rg\":%" PRId32 ","
                                 "\"l\":%d,\"r\":%d,\"b\":%d,"
                                 "\"ml\":%" PRId32 ",\"mr\":%" PRId32 ","
-                                "\"imu\":%d,\"iv\":%d,"
+                                "\"imu\":%d,\"iv\":%d,\"ic\":%d,"
+                                "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
+                                "\"pk\":%" PRId32 ","
                                 "\"lh\":%d,\"rh\":%d,"
                                 "\"ax\":%" PRId32 ",\"ay\":%" PRId32 ","
                                 "\"az\":%" PRId32 ",\"mx\":%" PRId32 ","
@@ -443,6 +456,10 @@ status_build (char * p_out, size_t capacity)
                                 motor_left_speed(), motor_right_speed(),
                                 (imu_is_ok() ? 1 : 0),
                                 (imu_reading_is_valid() ? 1 : 0),
+                                (imu_is_calibrated() ? 1 : 0),
+                                (imu_pitch_x10() * 10),
+                                (imu_roll_x10() * 10),
+                                vehicle_hump_peak_tilt_x10(),
                                 (raw.b_left_high ? 1 : 0),
                                 (raw.b_right_high ? 1 : 0),
                                 axes.ax_mg, axes.ay_mg, axes.az_mg,
