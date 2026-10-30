@@ -119,6 +119,7 @@ target_link_libraries(supercar
     hardware_adc                          # Barcode IR analog output
     hardware_i2c
     hardware_pwm
+    m
     pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI
 )
 

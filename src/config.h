@@ -78,7 +78,7 @@
 #define LINE_CAL_PIVOT_LEFT         true    // Search pivot: true = left.
 #define LINE_CAL_PIVOT_MAX_MSEC     8000u   // Pivot this long (7-10 s), then
                                             // drive forward instead.
-#define LINE_CAL_DRIVE_SPEED        8       // Forward search speed.
+#define LINE_CAL_DRIVE_SPEED        10      // Nearest whole % to +20% from 8.
 #define LINE_CAL_ALIGN_MAX_MSEC     5000u   // Align must finish in this.
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long.
 #define LINE_CAL_ALIGN_TRIES        3u      // Failed aligns before giving
@@ -88,9 +88,8 @@
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
 // ------------------------------------------------------------------------
-#define SPEED_CRUISE                8       // Line following (halved from
-                                            // 15 to make steering calmer).
-#define SPEED_CREEP                 6       // Near an obstacle (halved).
+#define SPEED_CRUISE                10      // Nearest whole % to +20% from 8.
+#define SPEED_CREEP                 7       // Nearest whole % to +20% from 6.
 // START calibration pivots are PULSED: the motors stall below about
 // 10-15% when turning on the spot, so instead of a weak steady 6%, each
 // pivot is short bursts at a power that really moves the wheels, with
@@ -99,8 +98,7 @@
 #define PIVOT_PULSE_SPEED           20      // Burst power (moves the car).
 #define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
 #define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
-#define SPEED_HUMP                  15      // Climbing a hump (kept higher:
-                                            // the slope needs torque).
+#define SPEED_HUMP                  18      // Climbing a hump (+20%).
 #define TURN_INNER_PERCENT          0       // Inner wheel speed in a turn,
                                             // as a percent of the outer.
                                             // 0 = inner wheel stops, so
@@ -140,20 +138,11 @@
 #define US_STALE_MSEC               200u    // Range older than this is
                                             // treated as unknown.
 
-// ------------------------------------------------------------------------
-// Hump detection (MPU-6050 pitch).
-// ------------------------------------------------------------------------
-// VERIFY with gyro_test: which accelerometer axis points forward, which
-// gyro axis turns when the nose tips up, and the signs that make nose-up
-// read positive on the "pitch_deg" graph.
-#define IMU_FORWARD_ACCEL_AXIS      0u      // 0 = X, 1 = Y, 2 = Z.
-#define IMU_PITCH_GYRO_AXIS         1u      // 0 = X, 1 = Y, 2 = Z.
-#define IMU_ACCEL_PITCH_SIGN        1
-#define IMU_GYRO_PITCH_SIGN         (-1)
-
+// LSM303DLHC pitch uses Y-forward / Z-up axes (see IMU mounting diagram).
+// Tilt is low-pass filtered; thresholds provide hysteresis against noise.
 #define HUMP_ENTER_PITCH_X10        80      // 8.0 deg nose up: on a hump.
 #define HUMP_LEVEL_PITCH_X10        30      // Within 3.0 deg: level again.
-#define HUMP_LEVEL_MSEC             300u    // Level this long: hump done.
+#define HUMP_LEVEL_MSEC             700u    // Level after tilt excursion: done.
 #define HUMP_MIN_MSEC               500u    // Shortest possible hump.
 #define HUMP_MAX_MSEC               8000u   // Longer than this: stop.
 #define HUMP_IGNORE_RANGE_MSEC      500u    // Ignore ultrasonic after a
