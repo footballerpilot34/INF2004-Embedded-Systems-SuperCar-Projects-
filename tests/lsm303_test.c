@@ -6,6 +6,10 @@
  * both LSM303DLHC core identities, configures the accelerometer for +/-2 g
  * high-resolution output and the magnetometer for +/-1.3 gauss, and prints
  * readings in physical units five times per second.
+ *
+ * Each reading is also emitted in Teleplot format (">name:value"), so the
+ * VS Code Teleplot extension can graph all six axes live from the serial
+ * port; the human-readable lines still appear in its console.
  */
 
 #include <stdbool.h>
@@ -74,6 +78,9 @@ static void    print_value(char const * p_axis, int32_t milli,
                            char const * p_units);
 static void    print_mag_value(char const * p_axis, int16_t raw,
                                int32_t sensitivity);
+static void    teleplot_value(char const * p_name, int32_t milli);
+static void    teleplot_mag(char const * p_name, int16_t raw,
+                            int32_t sensitivity);
 
 
 /*!
@@ -138,6 +145,17 @@ main (void)
             print_mag_value("MY", mag.y, MAG_XY_SENSITIVITY_LSB_G);
             print_mag_value("MZ", mag.z, MAG_Z_SENSITIVITY_LSB_G);
             printf("================================\r\n\r\n");
+
+            // Teleplot graph series: accelerometer in g, magnetometer in gauss.
+            teleplot_value("accel_x", accel_counts(accel.x) *
+                                      ACCEL_SENSITIVITY_MG);
+            teleplot_value("accel_y", accel_counts(accel.y) *
+                                      ACCEL_SENSITIVITY_MG);
+            teleplot_value("accel_z", accel_counts(accel.z) *
+                                      ACCEL_SENSITIVITY_MG);
+            teleplot_mag("mag_x", mag.x, MAG_XY_SENSITIVITY_LSB_G);
+            teleplot_mag("mag_y", mag.y, MAG_XY_SENSITIVITY_LSB_G);
+            teleplot_mag("mag_z", mag.z, MAG_Z_SENSITIVITY_LSB_G);
 
             if ((0 == accel.x) && (0 == accel.y) && (0 == accel.z) &&
                 (0 == mag.x) && (0 == mag.y) && (0 == mag.z))
@@ -327,6 +345,34 @@ print_mag_value (char const * p_axis, int16_t raw, int32_t sensitivity)
         print_value(p_axis, milligauss, "gauss");
     }
 }   /* print_mag_value() */
+
+
+/*!
+ * @brief Emit one Teleplot sample (">name:value") from thousandths of a unit.
+ */
+static void
+teleplot_value (char const * p_name, int32_t milli)
+{
+    int32_t magnitude = ((milli < 0) ? -milli : milli);
+
+    printf(">%s:%s%ld.%03ld\r\n", p_name, ((milli < 0) ? "-" : ""),
+           (long) (magnitude / MILLI_PER_UNIT),
+           (long) (magnitude % MILLI_PER_UNIT));
+}   /* teleplot_value() */
+
+
+/*!
+ * @brief Emit a magnetometer Teleplot sample in gauss, skipping overflow.
+ */
+static void
+teleplot_mag (char const * p_name, int16_t raw, int32_t sensitivity)
+{
+    if (((int32_t) raw >= MAG_RAW_MIN) && ((int32_t) raw <= MAG_RAW_MAX))
+    {
+        teleplot_value(p_name, ((int32_t) raw * MILLI_PER_UNIT) /
+                               sensitivity);
+    }
+}   /* teleplot_mag() */
 
 
 /*!
