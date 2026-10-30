@@ -29,6 +29,9 @@
 static volatile uint32_t g_rise_usec = 0u;
 static volatile uint32_t g_fall_usec = 0u;
 
+// False while TRIG is pulsed, so crosstalk from TRIG onto ECHO is ignored.
+static volatile bool     gb_armed    = false;
+
 static bool     gb_waiting       = false;
 static uint64_t g_next_ping_usec = 0u;
 static uint64_t g_deadline_usec  = 0u;
@@ -65,15 +68,30 @@ ultrasonic_echo_isr (uint32_t events)
 {
     uint32_t now_usec = time_us_32();
 
-    if (0u != (events & (uint32_t) GPIO_IRQ_EDGE_RISE))
+    if (!gb_armed)
+    {
+        // Edge during the trigger pulse: crosstalk, not an echo.
+    }
+    else if (0u != (events & (uint32_t) GPIO_IRQ_EDGE_RISE))
     {
         g_rise_usec = now_usec;
     }
-
-    if ((0u != (events & (uint32_t) GPIO_IRQ_EDGE_FALL)) &&
-        (0u != g_rise_usec))
+    else if ((0u != (events & (uint32_t) GPIO_IRQ_EDGE_FALL)) &&
+             (0u != g_rise_usec) && (0u == g_fall_usec))
     {
-        g_fall_usec = now_usec;
+        if ((now_usec - g_rise_usec) < US_ECHO_MIN_USEC)
+        {
+            // Too short to be an echo: a glitch. Wait for the real one.
+            g_rise_usec = 0u;
+        }
+        else
+        {
+            g_fall_usec = now_usec;
+        }
+    }
+    else
+    {
+        // A fall with no rise, or after the echo was already taken.
     }
 }   /* ultrasonic_echo_isr() */
 
@@ -94,12 +112,14 @@ ultrasonic_task (void)
     {
         if (now_usec >= g_next_ping_usec)
         {
+            gb_armed    = false;
             g_rise_usec = 0u;
             g_fall_usec = 0u;
 
             gpio_put(PIN_US_TRIG, true);
             sleep_us(US_TRIGGER_USEC);
             gpio_put(PIN_US_TRIG, false);
+            gb_armed    = true;
 
             g_deadline_usec  = time_us_64() + US_ECHO_TIMEOUT_USEC;
             g_next_ping_usec = time_us_64() + US_PING_PERIOD_USEC;

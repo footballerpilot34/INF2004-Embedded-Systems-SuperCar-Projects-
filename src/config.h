@@ -135,6 +135,8 @@
 #define US_PING_PERIOD_USEC         60000u  // Pings at least 60 ms apart.
 #define US_ECHO_TIMEOUT_USEC        30000u  // About 5 m.
 #define US_TRIGGER_USEC             10u
+#define US_ECHO_MIN_USEC            100u    // Shorter echoes (under about
+                                            // 2 cm) are glitches: ignored.
 #define US_STALE_MSEC               200u    // Range older than this is
                                             // treated as unknown.
 
