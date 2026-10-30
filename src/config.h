@@ -77,7 +77,7 @@
 #define LINE_CAL_PIVOT_LEFT         true    // Search pivot: true = left.
 #define LINE_CAL_PIVOT_MAX_MSEC     8000u   // Pivot this long (7-10 s), then
                                             // drive forward instead.
-#define LINE_CAL_DRIVE_SPEED        8       // Forward search speed.
+#define LINE_CAL_DRIVE_SPEED        10      // Nearest whole % to +20% from 8.
 #define LINE_CAL_ALIGN_MAX_MSEC     5000u   // Align must finish in this.
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long.
 #define LINE_CAL_ALIGN_TRIES        3u      // Failed aligns before giving
@@ -87,9 +87,8 @@
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
 // ------------------------------------------------------------------------
-#define SPEED_CRUISE                8       // Line following (halved from
-                                            // 15 to make steering calmer).
-#define SPEED_CREEP                 6       // Near an obstacle (halved).
+#define SPEED_CRUISE                10      // Nearest whole % to +20% from 8.
+#define SPEED_CREEP                 7       // Nearest whole % to +20% from 6.
 // START calibration pivots are PULSED: the motors stall below about
 // 10-15% when turning on the spot, so instead of a weak steady 6%, each
 // pivot is short bursts at a power that really moves the wheels, with
@@ -98,8 +97,9 @@
 #define PIVOT_PULSE_SPEED           20      // Burst power (moves the car).
 #define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
 #define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
-#define SPEED_HUMP                  15      // Climbing a hump (kept higher:
-                                            // the slope needs torque).
+#define SPEED_HUMP                  18      // Climbing a hump (+20%).
+#define HUMP_RIGHT_RISE_STEER_BIAS  2       // Left +2%, right -2% to counter
+                                            // expected left drift on right hump.
 #define TURN_INNER_PERCENT          0       // Inner wheel speed in a turn,
                                             // as a percent of the outer.
                                             // 0 = inner wheel stops, so

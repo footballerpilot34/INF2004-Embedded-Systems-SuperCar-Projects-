@@ -723,45 +723,61 @@ line_steer (int32_t speed, uint32_t now_msec)
 {
     line_state_t line     = line_filtered(now_msec);
     int32_t      inner    = (speed * TURN_INNER_PERCENT) / PERCENT;
+    int32_t      left     = speed;
+    int32_t      right    = speed;
     bool         b_launch = ((VEHICLE_FOLLOW_LINE == g_state) &&
                              ((now_msec - g_entered_msec) <
                               LINE_START_STRAIGHT_MSEC));
 
     if (b_launch)
     {
-        motor_set(speed, speed);        // Just started: get moving first.
+        // Just started: get moving first.
     }
     else if (line.b_left_black && line.b_right_black)
     {
         g_line_last = LINE_LAST_BOTH;
-        motor_set(speed, speed);        // Centred: straight on.
+        // Centred: straight on.
     }
     else if (line.b_left_black)
     {
         gb_last_left = true;
         g_line_last  = LINE_LAST_LEFT;
-        motor_set(inner, speed);        // Line moved left: arc left.
+        left  = inner;                  // Line moved left: arc left.
+        right = speed;
     }
     else if (line.b_right_black)
     {
         gb_last_left = false;
         g_line_last  = LINE_LAST_RIGHT;
-        motor_set(speed, inner);        // Line moved right: arc right.
+        left  = speed;                  // Line moved right: arc right.
+        right = inner;
     }
     else if (LINE_LAST_LEFT == g_line_last)
     {
         // Neither sensor on the line: keep going towards the limit the
         // line was last seen at. Never stop, never pivot.
-        motor_set(inner, speed);        // Line slid out left: arc left.
+        left  = inner;                  // Line slid out left: arc left.
+        right = speed;
     }
     else if (LINE_LAST_RIGHT == g_line_last)
     {
-        motor_set(speed, inner);        // Line slid out right: arc right.
+        left  = speed;                  // Line slid out right: arc right.
+        right = inner;
     }
     else
     {
-        motor_set(speed, speed);        // Line is between the sensors.
+        // Line is between the sensors.
     }
+
+    if ((VEHICLE_HUMP == g_state) && (left == right))
+    {
+        // With the assumed right-wheel hump, steer a little right to offset
+        // the expected left drift. Preserve forward drive on both wheels.
+        left  += HUMP_RIGHT_RISE_STEER_BIAS;
+        right -= HUMP_RIGHT_RISE_STEER_BIAS;
+    }
+
+    motor_set(left, right);
 }   /* line_steer() */
 
 
