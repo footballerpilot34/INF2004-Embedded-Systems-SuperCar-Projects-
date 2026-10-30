@@ -10,7 +10,7 @@
  * @par Graphs
  * line_L, line_R, barcode_IR (1 = black); line_L_raw, line_R_raw (raw
  * pin level, 1 = HIGH); range_cm (-1 = nothing ahead);
- * pitch_deg (nose up = positive); motor_L, motor_R (percent); state
+ * motor_L, motor_R (percent); state
  * (number). Text fields: state_name and barcode (last message).
  */
 
@@ -20,7 +20,6 @@
 #include <stdio.h>
 
 #include "barcode.h"
-#include "imu.h"
 #include "line_sensor.h"
 #include "motor.h"
 #include "telemetry.h"
@@ -66,7 +65,6 @@ telemetry_task (void)
         tenths_print("range_cm", (int32_t) range_mm);
     }
 
-    tenths_print("pitch_deg", imu_pitch_x10());
     value_print("motor_L", motor_left_speed());
     value_print("motor_R", motor_right_speed());
     value_print("state", (int32_t) state);

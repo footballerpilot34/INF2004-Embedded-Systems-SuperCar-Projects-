@@ -16,8 +16,8 @@
  *   on the line first: it sweeps left/right for 4 s to check the line
  *   sensors, shifts until both are on the line, then follows the line.
  * - STOP: press GP21, 'x', or STOP on the page. Works in any state.
- * - CALIBRATE (while stopped, car still and level): hold GP20 for 2 s,
- *   'c', or CALIBRATE on the page. One beep when it succeeds.
+ * - IMU CHECK (while stopped): hold GP20 for 2 s, press 'c', or use
+ *   IMU CHECK on the page to report whether the LSM303DLHC is online.
  * - WHEEL TEST (while stopped, car lifted): 'w' or WHEEL TEST on the page.
  * - IR DIAG (while stopped): 'd' or IR DIAG on the page turns the motors
  *   off and logs every line sensor change. Then 'b' / LEARN BLACK with
@@ -67,7 +67,7 @@
 #define KEY_START               's'
 #define KEY_STOP                'x'
 #define KEY_WHEEL_TEST          'w'
-#define KEY_CALIBRATE           'c'
+#define KEY_IMU_CHECK           'c'
 #define KEY_DIAG                'd'
 #define KEY_LEARN_BLACK         'b'
 #define KEY_LEARN_WHITE         'n'
@@ -79,7 +79,7 @@ static void          buttons_init(void);
 static web_command_t buttons_poll(void);
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
-static void          calibrate_run(void);
+static void          imu_check_run(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
 static void          barcode_report(barcode_result_t result);
@@ -111,7 +111,7 @@ main (void)
     gpio_isr_init();
     buttons_init();
 
-    log_printf("Keep the car still and level: calibrating the IMU...");
+    log_printf("Checking LSM303DLHC...");
     if (imu_init())
     {
         buzzer_beep(CAL_DONE_BEEP_MSEC);
@@ -121,7 +121,7 @@ main (void)
 
     vehicle_init();
     log_printf("READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. "
-               "Hold GP20 2 s to calibrate.");
+               "Hold GP20 2 s for IMU check.");
 
     next_tick_usec = time_us_64() + TICK_USEC;
 
@@ -152,7 +152,7 @@ main (void)
         }
         next_tick_usec += TICK_USEC;
 
-        // After a long blocking action (calibration, wheel test), skip the
+        // After a long blocking action (wheel test), skip the
         // missed ticks instead of running them all at once.
         if (time_us_64() > next_tick_usec)
         {
@@ -212,14 +212,14 @@ command_run (web_command_t command)
         line_diag_learn(false);
     break;
 
-    case WEB_CMD_CALIBRATE:
+    case WEB_CMD_IMU_CHECK:
         if (vehicle_is_idle())
         {
-            calibrate_run();
+            imu_check_run();
         }
         else
         {
-            log_printf("Stop the car before calibrating.");
+            log_printf("Stop the car before checking the IMU.");
         }
     break;
 
@@ -247,38 +247,21 @@ command_run (web_command_t command)
 
 
 /*!
- * @brief Calibrate the IMU and beep once if it worked.
- *
- * @par
- * If the IMU was not found at power-up, this tries to find it again, so a
- * loose wire can be fixed without a reset.
+ * @brief Report whether the LSM303DLHC is online.
  */
 static void
-calibrate_run (void)
+imu_check_run (void)
 {
-    bool b_ok = false;
-
-    log_printf("Calibrating the IMU: keep the car still and level...");
-
     if (imu_is_ok())
     {
-        b_ok = imu_calibrate();
-    }
-    else
-    {
-        b_ok = imu_init();
-    }
-
-    if (b_ok)
-    {
-        log_printf("IMU calibration done.");
+        log_printf("LSM303DLHC is online; live axis graphs are shown in the UI.");
         buzzer_beep(CAL_DONE_BEEP_MSEC);
     }
     else
     {
-        log_printf("IMU calibration FAILED: check the gyroscope wiring.");
+        log_printf("LSM303DLHC is offline; check I2C wiring and power.");
     }
-}   /* calibrate_run() */
+}   /* imu_check_run() */
 
 
 /*!
@@ -363,7 +346,7 @@ buttons_init (void)
  *
  * @par
  * STOP acts at once. START acts when released after a short press; held
- * for 2 s it calibrates instead (as soon as the 2 s is reached).
+ * for 2 s it requests an IMU status check instead.
  *
  * @return The command to run, or WEB_CMD_NONE.
  */
@@ -385,7 +368,7 @@ buttons_poll (void)
         held_ticks++;
         if (BUTTON_LONG_PRESS_TICKS == held_ticks)
         {
-            command = WEB_CMD_CALIBRATE;
+            command = WEB_CMD_IMU_CHECK;
         }
     }
     else
@@ -422,9 +405,9 @@ serial_poll (void)
     {
         command = WEB_CMD_START;
     }
-    else if (KEY_CALIBRATE == key)
+    else if (KEY_IMU_CHECK == key)
     {
-        command = WEB_CMD_CALIBRATE;
+        command = WEB_CMD_IMU_CHECK;
     }
     else if (KEY_WHEEL_TEST == key)
     {

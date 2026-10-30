@@ -1,14 +1,12 @@
 /** @file web.c
  *
- * @brief Wireless UI: Wi-Fi hotspot plus a small web page with controls,
- *        live readings, the barcode message and the message log.
+ * @brief Wireless UI with vehicle controls, live readings and IMU graphs.
  *
  * @par How it works
  * The Pico W makes its own Wi-Fi network (WIFI_NAME in config.h) and
  * serves a page at http://192.168.4.1. The page:
- * - sends GET /cmd?c=start|stop|cal|wheel when a button is pressed;
- * - polls GET /status?s=N every 0.5 s, which returns the live readings,
- *   the last barcode message and every log message from number N on.
+ * - sends GET /cmd?c=... when a button is pressed;
+ * - polls GET /status every 0.2 s for live vehicle and sensor readings.
  * Commands are only queued here; main() runs them, exactly like a button
  * press, so the web UI never drives the motors directly.
  *
@@ -21,7 +19,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "pico/stdlib.h"
@@ -44,18 +41,15 @@
 #define LISTEN_BACKLOG          4u
 #define REQUEST_BYTES           128u
 #define HEADER_BYTES            160u
-#define STATUS_BYTES            1400u   // Fits lwIP's 4 KB copy heap.
-#define LINE_RESERVE            200u    // Room for one escaped log line.
-#define LOG_KEPT                32u     // Must match LOG_LINES in log.c.
+#define STATUS_BYTES            512u
 #define NO_RANGE_JSON           (-1)
 
 #define GET_PREFIX              "GET "
 #define GET_PREFIX_LEN          (sizeof(GET_PREFIX) - 1u)
 #define CMD_PREFIX              "/cmd?c="
 #define CMD_PREFIX_LEN          (sizeof(CMD_PREFIX) - 1u)
-#define STATUS_PREFIX           "/status?s="
+#define STATUS_PREFIX           "/status"
 #define STATUS_PREFIX_LEN       (sizeof(STATUS_PREFIX) - 1u)
-#define DECIMAL_BASE            10
 
 
 static char const g_page_html[] =
@@ -73,38 +67,77 @@ static char const g_page_html[] =
     ".c{background:#222;border-radius:10px;padding:10px;margin:10px 0;"
     "line-height:1.6}"
     "#bc{font-size:30px;font-weight:bold;color:#fc3;word-break:break-all}"
-    "#log{font-family:monospace;font-size:12px;height:45vh;overflow:auto;"
-    "white-space:pre-wrap;background:#000;padding:8px;border-radius:8px}"
+    "canvas{display:block;width:100%;height:180px;background:#151a22;"
+    "border-radius:8px}"
+    ".vals{font-family:monospace;color:#ddd;font-size:14px}"
+    ".hint{color:#aaa;font-size:12px}"
+    ".leg{font-size:12px;color:#bbb}"
     "</style></head><body><h2>SuperCar AAI14</h2><div class=g>"
     "<button id=a onclick=\"c('start')\">START</button>"
     "<button id=b onclick=\"c('stop')\">STOP</button>"
-    "<button id=k onclick=\"c('cal')\">CALIBRATE</button>"
+    "<button id=k onclick=\"c('check')\">IMU CHECK</button>"
     "<button id=w onclick=\"c('wheel')\">WHEEL TEST</button>"
     "<button id=d onclick=\"c('diag')\">IR DIAG on/off</button>"
     "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
     "<button id=n onclick=\"c('white')\">LEARN WHITE</button></div>"
     "<div class=c>State: <b id=s>-</b><br>"
-    "Range: <b id=r>-</b> cm &nbsp; Pitch: <b id=p>-</b>&deg;<br>"
+    "Range: <b id=r>-</b> cm &nbsp; LSM303DLHC: <b id=imu>-</b><br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
-    "IR raw pins L(GP28)/R(GP0): <b id=x>-</b><br>"
-    "IMU: <b id=u>-</b></div>"
+    "IR raw pins L(GP28)/R(GP0): <b id=x>-</b></div>"
+    "<div class=c><b>Accelerometer</b> <span class=leg>"
+    "<span style=color:#ff6464>X</span> &nbsp;"
+    "<span style=color:#58d8ff>Y</span> &nbsp;"
+    "<span style=color:#9be564>Z</span></span>"
+    "<div class=vals id=av>AX - &nbsp; AY - &nbsp; AZ -</div>"
+    "<canvas id=ac></canvas><div class=hint>Fixed scale: -2.0 to +2.0 g. "
+    "Five-sample display average.</div></div>"
+    "<div class=c><b>Magnetometer</b> <span class=leg>"
+    "<span style=color:#ff6464>X</span> &nbsp;"
+    "<span style=color:#58d8ff>Y</span> &nbsp;"
+    "<span style=color:#9be564>Z</span></span>"
+    "<div class=vals id=mv>MX - &nbsp; MY - &nbsp; MZ -</div>"
+    "<canvas id=mc></canvas><div class=hint>Fixed scale: -1.3 to +1.3 gauss. "
+    "Five-sample display average.</div></div>"
     "<div class=c>Barcode message<div id=bc>-</div></div>"
-    "<div id=log></div>"
-    "<script>var q=0;function $(i){return document.getElementById(i)}"
+    "<script>var hist=[];function $(i){return document.getElementById(i)}"
     "function c(x){fetch('/cmd?c='+x).catch(function(){})}"
-    "function t(v){return (v/10).toFixed(1)}"
-    "function u(){fetch('/status?s='+q).then(function(r){return r.json()})"
-    ".then(function(d){var L=$('log');"
-    "if(d.nx<q){L.textContent=''}"
-    "$('s').textContent=d.st;$('r').textContent=d.rg<0?'none':t(d.rg);"
-    "$('p').textContent=t(d.pt);$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
+    "function f(v){return (v<0?'-':'+')+Math.abs(v).toFixed(3)}"
+    "function avg(i,k){var a=0,n=0;for(var j=Math.max(0,i-4);j<=i;j++)"
+    "{a+=hist[j][k];n++}return n?a/n:0}"
+    "function draw(id,keys,lim){var e=$(id),w=e.clientWidth,h=180;"
+    "if(!w)return;var d=window.devicePixelRatio||1;e.width=w*d;e.height=h*d;"
+    "var x=e.getContext('2d');x.scale(d,d);x.fillStyle='#151a22';"
+    "x.fillRect(0,0,w,h);var L=36,R=8,T=10,B=22,P=w-L-R;"
+    "x.font='11px sans-serif';x.textAlign='right';"
+    "for(var z=-1;z<=1;z++){var y=T+(1-(z+1)/2)*(h-T-B);"
+    "x.strokeStyle='#34404a';x.beginPath();x.moveTo(L,y);"
+    "x.lineTo(w-R,y);x.stroke();x.fillStyle='#aab4bd';"
+    "x.fillText((z*lim).toFixed(1),L-5,y+4)}"
+    "var col=['#ff6464','#58d8ff','#9be564'];"
+    "for(var a=0;a<3;a++){x.strokeStyle=col[a];x.lineWidth=2;"
+    "x.beginPath();for(var i=0;i<hist.length;i++){var v=avg(i,keys[a])/1000;"
+    "v=Math.max(-lim,Math.min(lim,v));var px=L+(hist.length<2?0:"
+    "i*P/(hist.length-1));var py=T+(1-(v/lim+1)/2)*(h-T-B);"
+    "if(i===0)x.moveTo(px,py);else x.lineTo(px,py)}x.stroke()}"
+    "x.fillStyle='#aab4bd';x.textAlign='left';x.fillText('old',L,h-5);"
+    "x.textAlign='right';x.fillText('12 s',w-R,h-5)}"
+    "function u(){fetch('/status').then(function(r){return r.json()})"
+    ".then(function(d){$('s').textContent=d.st;"
+    "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
+    "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
-    "$('u').textContent=d.imu?'OK':'NOT FOUND';"
+    "$('imu').textContent=!d.imu?'NOT FOUND':(d.iv?'OK':'READ ERROR');"
     "$('bc').textContent=d.bc||'-';"
-    "for(var k=0;k<d.log.length;k++){L.textContent+=d.log[k]+'\\n'}"
-    "if(d.log.length){L.scrollTop=L.scrollHeight}q=d.nx;"
-    "setTimeout(u,d.more?50:500)})"
+    "if(d.iv){hist.push({ax:d.ax,ay:d.ay,az:d.az,mx:d.mx,my:d.my,mz:d.mz});"
+    "if(hist.length>60)hist.shift();"
+    "function val(k){return f(avg(hist.length-1,k)/1000)}"
+    "$('av').textContent='AX '+val('ax')+' g   AY '+val('ay')+"
+    "' g   AZ '+val('az')+' g';"
+    "$('mv').textContent='MX '+val('mx')+' G   MY '+val('my')+"
+    "' G   MZ '+val('mz')+' G'}"
+    "draw('ac',['ax','ay','az'],2.0);draw('mc',['mx','my','mz'],1.3);"
+    "setTimeout(u,200)})"
     ".catch(function(){setTimeout(u,1000)})}u();</script>"
     "</body></html>";
 
@@ -118,7 +151,7 @@ static err_t  receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
                                struct pbuf * p_buf, err_t err);
 static void   request_handle(struct tcp_pcb * p_pcb, char * p_path);
 static void   command_parse(char const * p_name);
-static size_t status_build(char * p_out, size_t capacity, uint32_t since);
+static size_t status_build(char * p_out, size_t capacity);
 static size_t json_string(char * p_out, size_t capacity, char const * p_text);
 static void   reply_send(struct tcp_pcb * p_pcb, char const * p_type,
                          char const * p_body, size_t body_len,
@@ -300,7 +333,7 @@ receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
  * @brief Answer one GET request.
  *
  * @param[in] p_pcb  The connection.
- * @param[in] p_path The requested path, such as "/status?s=12".
+ * @param[in] p_path The requested path.
  */
 static void
 request_handle (struct tcp_pcb * p_pcb, char * p_path)
@@ -314,11 +347,7 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
     }
     else if (0 == strncmp(p_path, STATUS_PREFIX, STATUS_PREFIX_LEN))
     {
-        // NOTE: The page only ever sends sequence numbers it was given,
-        // which fit uint32_t.
-        uint32_t since  = (uint32_t) strtoul(p_path + STATUS_PREFIX_LEN, NULL,
-                                             DECIMAL_BASE);
-        size_t   length = status_build(status, sizeof(status), since);
+        size_t length = status_build(status, sizeof(status));
 
         reply_send(p_pcb, "application/json", status, length, false);
     }
@@ -351,9 +380,9 @@ command_parse (char const * p_name)
     {
         g_pending = WEB_CMD_START;
     }
-    else if (0 == strcmp(p_name, "cal"))
+    else if (0 == strcmp(p_name, "check"))
     {
-        g_pending = WEB_CMD_CALIBRATE;
+        g_pending = WEB_CMD_IMU_CHECK;
     }
     else if (0 == strcmp(p_name, "wheel"))
     {
@@ -379,81 +408,49 @@ command_parse (char const * p_name)
 
 
 /*!
- * @brief Build the /status JSON reply.
- *
- * @par
- * Readings are whole numbers (range in mm, pitch in tenths of a degree);
- * the page divides by 10. As many log lines as fit are included; "more"
- * tells the page to ask again at once.
+ * @brief Build the live web status and six raw sensor-axis values.
  *
  * @param[out] p_out    The buffer to fill.
  * @param[in]  capacity The buffer size.
- * @param[in]  since    The first log sequence number the page wants.
- *
  * @return The number of bytes written.
  */
 static size_t
-status_build (char * p_out, size_t capacity, uint32_t since)
+status_build (char * p_out, size_t capacity)
 {
     line_state_t line     = line_sensor_read();
     line_raw_t   raw      = line_sensor_raw();
     uint32_t     range_mm = ultrasonic_range_mm();
-    uint32_t     next_seq = log_next_seq();
-    uint32_t     seq      = since;
+    imu_axes_t   axes;
     size_t       length   = 0u;
-    char const * p_line   = NULL;
-    bool         b_first  = true;
+    imu_get_axes(&axes);
 
-    // A sequence number from before a reboot starts the log again.
-    if (seq > next_seq)
-    {
-        seq = 0u;
-    }
-    if ((next_seq - seq) > LOG_KEPT)
-    {
-        seq = next_seq - LOG_KEPT;
-    }
-
-    // NOTE: The fixed part of the reply is under 300 bytes, far below the
-    // 1400-byte buffer, so these snprintf calls never truncate.
     length += (size_t) snprintf(p_out + length, capacity - length,
                                 "{\"st\":\"%s\",\"rg\":%" PRId32 ","
-                                "\"pt\":%" PRId32 ",\"l\":%d,\"r\":%d,"
-                                "\"b\":%d,\"ml\":%" PRId32 ",\"mr\":%" PRId32
-                                ",\"imu\":%d,\"lh\":%d,\"rh\":%d,"
+                                "\"l\":%d,\"r\":%d,\"b\":%d,"
+                                "\"ml\":%" PRId32 ",\"mr\":%" PRId32 ","
+                                "\"imu\":%d,\"iv\":%d,"
+                                "\"lh\":%d,\"rh\":%d,"
+                                "\"ax\":%" PRId32 ",\"ay\":%" PRId32 ","
+                                "\"az\":%" PRId32 ",\"mx\":%" PRId32 ","
+                                "\"my\":%" PRId32 ",\"mz\":%" PRId32 ","
                                 "\"bc\":",
                                 vehicle_state_name(vehicle_state()),
                                 ((ULTRASONIC_NO_RANGE == range_mm) ?
                                  NO_RANGE_JSON : (int32_t) range_mm),
-                                imu_pitch_x10(),
                                 (line.b_left_black ? 1 : 0),
                                 (line.b_right_black ? 1 : 0),
                                 (barcode_is_black() ? 1 : 0),
                                 motor_left_speed(), motor_right_speed(),
                                 (imu_is_ok() ? 1 : 0),
+                                (imu_reading_is_valid() ? 1 : 0),
                                 (raw.b_left_high ? 1 : 0),
-                                (raw.b_right_high ? 1 : 0));
+                                (raw.b_right_high ? 1 : 0),
+                                axes.ax_mg, axes.ay_mg, axes.az_mg,
+                                axes.mx_mgauss, axes.my_mgauss,
+                                axes.mz_mgauss);
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
-    length += (size_t) snprintf(p_out + length, capacity - length,
-                                ",\"log\":[");
-
-    while ((seq < next_seq) && ((capacity - length) > LINE_RESERVE) &&
-           log_get(seq, &p_line))
-    {
-        if (!b_first)
-        {
-            p_out[length] = ',';
-            length++;
-        }
-        length += json_string(p_out + length, capacity - length, p_line);
-        b_first = false;
-        seq++;
-    }
-
-    length += (size_t) snprintf(p_out + length, capacity - length,
-                                "],\"nx\":%" PRIu32 ",\"more\":%d}", seq,
-                                ((seq < next_seq) ? 1 : 0));
+    length += (size_t) snprintf(p_out + length, capacity - length, "}");
 
     return (length);
 }   /* status_build() */

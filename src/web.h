@@ -1,7 +1,6 @@
 /** @file web.h
  *
- * @brief Wireless UI: Wi-Fi hotspot plus a small web page with controls,
- *        live readings, the barcode message and the message log.
+ * @brief Wireless UI with vehicle controls, live readings and IMU graphs.
  */
 
 #ifndef WEB_H
@@ -14,7 +13,7 @@ typedef enum
     WEB_CMD_NONE,
     WEB_CMD_START,
     WEB_CMD_STOP,
-    WEB_CMD_CALIBRATE,
+    WEB_CMD_IMU_CHECK,
     WEB_CMD_WHEEL_TEST,
     WEB_CMD_DIAG,           // Toggle IR diagnostic mode (motors off).
     WEB_CMD_LEARN_BLACK,    // Both line sensors are over black now.

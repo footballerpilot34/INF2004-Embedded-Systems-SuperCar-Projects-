@@ -19,8 +19,8 @@
 #define PIN_LINE_LEFT               28u     // Left line IR DOUT (Grove 7).
 #define PIN_LINE_RIGHT              0u      // Right line IR DOUT (Grove 1).
 #define PIN_BARCODE                 26u     // Barcode IR DOUT.
-#define PIN_IMU_SDA                 2u      // MPU-6050 SDA (I2C1).
-#define PIN_IMU_SCL                 3u      // MPU-6050 SCL (I2C1).
+#define PIN_IMU_SDA                 2u      // LSM303DLHC SDA (Grove 2).
+#define PIN_IMU_SCL                 3u      // LSM303DLHC SCL (Grove 2).
 #define PIN_US_TRIG                 16u     // Ultrasonic TRIG.
 #define PIN_US_ECHO                 17u     // Ultrasonic ECHO (3.3 V).
 #define PIN_SERVO                   12u     // Ultrasonic pan servo.
@@ -132,17 +132,7 @@
 #define US_STALE_MSEC               200u    // Range older than this is
                                             // treated as unknown.
 
-// ------------------------------------------------------------------------
-// Hump detection (MPU-6050 pitch).
-// ------------------------------------------------------------------------
-// VERIFY with gyro_test: which accelerometer axis points forward, which
-// gyro axis turns when the nose tips up, and the signs that make nose-up
-// read positive on the "pitch_deg" graph.
-#define IMU_FORWARD_ACCEL_AXIS      0u      // 0 = X, 1 = Y, 2 = Z.
-#define IMU_PITCH_GYRO_AXIS         1u      // 0 = X, 1 = Y, 2 = Z.
-#define IMU_ACCEL_PITCH_SIGN        1
-#define IMU_GYRO_PITCH_SIGN         (-1)
-
+// Hump detection is disabled: the LSM303DLHC has no gyroscope.
 #define HUMP_ENTER_PITCH_X10        80      // 8.0 deg nose up: on a hump.
 #define HUMP_LEVEL_PITCH_X10        30      // Within 3.0 deg: level again.
 #define HUMP_LEVEL_MSEC             300u    // Level this long: hump done.

@@ -327,7 +327,7 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
     }
     else if ((range_mm <= OBSTACLE_HARD_STOP_MM) ||
              ((now_msec - g_entered_msec) > OBSTACLE_PROBE_MSEC) ||
-             (!imu_is_ok()))
+             (!imu_has_gyroscope()))
     {
         log_printf("Probe: no climb -> WALL, stopped at %" PRIu32 " mm.\n",
                range_mm);
