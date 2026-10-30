@@ -25,10 +25,13 @@
  * forward; it stops if no sensor sees the line for LINE_LOST_MSEC.
  *
  * @par START calibration (LINE_CAL): closed loop and bounded
- * 1. Sweep: swing left and right, each swing longer than the last, until
- *    EACH sensor has seen both black and white (LINE_CAL_SWEEP_MAX_MSEC
- *    limit). Each pivot starts with a short SPEED_KICK push so the wheels
- *    actually turn, then continues at SPEED_SWEEP.
+ * 1. Sweep: swing left and right at a steady speed, each swing longer
+ *    (wider) than the last. The sweep is judged only when a swing ends,
+ *    and only after at least one full left and one full right swing; it
+ *    passes once EACH sensor has seen both black and white, otherwise the
+ *    next, wider swing runs (LINE_CAL_SWEEP_MAX_MSEC limit). Each pivot
+ *    starts with a short SPEED_KICK push so the wheels actually turn,
+ *    then continues at SPEED_SWEEP.
  * 2. Align: pivot towards the line until both sensors are on black for
  *    LINE_CAL_ALIGN_TICKS (LINE_CAL_ALIGN_MAX_MSEC limit).
  * Any failure stops the car with the reason; nothing retries by itself.
@@ -103,7 +106,7 @@ static void     state_enter(vehicle_state_t state, uint32_t now_msec);
 static void     line_steer(int32_t speed, uint32_t now_msec);
 static void     line_cal_step(uint32_t now_msec);
 static void     line_align_step(uint32_t now_msec, line_state_t line);
-static void     line_swing_step(uint32_t now_msec);
+static bool     line_swing_step(uint32_t now_msec);
 static void     pivot(bool b_left, uint32_t now_msec);
 static char const * seen_text(bool b_saw_black, bool b_saw_white);
 static line_state_t line_filtered(void);
@@ -481,16 +484,6 @@ line_cal_step (uint32_t now_msec)
     {
         line_align_step(now_msec, line);
     }
-    else if (b_left_ok && b_right_ok)
-    {
-        log_printf("LINE_CAL sweep OK: both sensors saw black and white. "
-                   "Aligning...");
-        gb_aligning     = true;
-        g_align_msec    = now_msec;
-        g_swing_count   = 0u;
-        g_swing_start   = now_msec;
-        gb_swing_left   = gb_last_left;
-    }
     else if (elapsed > LINE_CAL_SWEEP_MAX_MSEC)
     {
         motor_set(0, 0);
@@ -501,9 +494,30 @@ line_cal_step (uint32_t now_msec)
                    "SPEED_KICK / SPEED_SWEEP.");
         state_enter(VEHICLE_STOPPED, now_msec);
     }
+    else if (line_swing_step(now_msec))
+    {
+        // A swing has just ended: judge the sweep only now, and only
+        // after at least one full swing each way.
+        log_printf("LINE_CAL swing %" PRIu32 " (%s) done: LEFT %s, RIGHT %s.",
+                   g_swing_count, (gb_swing_left ? "right" : "left"),
+                   seen_text(gb_left_on, gb_left_off),
+                   seen_text(gb_right_on, gb_right_off));
+
+        if (b_left_ok && b_right_ok &&
+            (g_swing_count >= LINE_CAL_MIN_SWINGS))
+        {
+            log_printf("LINE_CAL sweep OK: both sensors saw black and "
+                       "white. Aligning...");
+            gb_aligning   = true;
+            g_align_msec  = now_msec;
+            g_swing_count = 0u;
+            g_swing_start = now_msec;
+            gb_swing_left = gb_last_left;
+        }
+    }
     else
     {
-        line_swing_step(now_msec);
+        // Mid-swing: keep sweeping.
     }
 }   /* line_cal_step() */
 
@@ -512,14 +526,21 @@ line_cal_step (uint32_t now_msec)
  * @brief Swing left and right, each swing LINE_CAL_SWING_MSEC longer than
  *        the last, so the sweep widens until the sensors cross the line.
  *
+ * @par
+ * Swings alternate around the start: 1 s left, 2 s right (ending 1 s
+ * right of the start), 3 s left (ending 2 s left), and so on.
+ *
  * @param[in] now_msec The current time.
+ *
+ * @return True on the tick a swing ends (and the next one begins).
  */
-static void
+static bool
 line_swing_step (uint32_t now_msec)
 {
-    uint32_t swing_msec = (g_swing_count + 1u) * LINE_CAL_SWING_MSEC;
+    uint32_t swing_msec  = (g_swing_count + 1u) * LINE_CAL_SWING_MSEC;
+    bool     b_swing_end = ((now_msec - g_swing_start) > swing_msec);
 
-    if ((now_msec - g_swing_start) > swing_msec)
+    if (b_swing_end)
     {
         gb_swing_left = !gb_swing_left;
         g_swing_start = now_msec;
@@ -527,6 +548,8 @@ line_swing_step (uint32_t now_msec)
     }
 
     pivot(gb_swing_left, now_msec);
+
+    return (b_swing_end);
 }   /* line_swing_step() */
 
 
@@ -575,7 +598,7 @@ line_align_step (uint32_t now_msec, line_state_t line)
     else
     {
         g_centred_ticks = 0u;
-        line_swing_step(now_msec);          // Lost it: widening swings.
+        (void) line_swing_step(now_msec);   // Lost it: widening swings.
     }
 }   /* line_align_step() */
 

@@ -68,6 +68,10 @@
 // 2. Align: pivot until both sensors are on black for 30 ms.
 // Any timeout stops the car with a reason; only a manual START retries.
 #define LINE_CAL_SWING_MSEC         1000u   // First swing; then 2000, 3000..
+#define LINE_CAL_MIN_SWINGS         2u      // At least one full left and one
+                                            // full right swing; the sweep
+                                            // is only judged when a swing
+                                            // ends.
 #define LINE_CAL_SWEEP_MAX_MSEC     16000u  // Sweep must finish in this.
 #define LINE_CAL_ALIGN_MAX_MSEC     5000u   // Align must finish in this.
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long.
