@@ -99,17 +99,74 @@
 #define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
 #define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
 #define SPEED_HUMP                  18      // Climbing a hump (+20%).
-#define TURN_INNER_PERCENT          0       // Inner wheel speed in a turn,
-                                            // as a percent of the outer.
-                                            // 0 = inner wheel stops, so
-                                            // the car keeps moving forward
-                                            // (negative values spin it on
-                                            // the spot and it oscillates).
+// Line-following turns keep BOTH wheels rolling forward, so the car never
+// pauses to turn: the outer wheel speeds up and the inner wheel slows
+// (never 0, which would brake it and pivot the car on that wheel). The
+// turning rate is about the same as braking the inner wheel at the base
+// speed, but the car keeps moving forward at about the base speed.
+// Too gentle for sharp curves: raise OUTER or lower INNER.
+#define TURN_OUTER_PERCENT          150     // Outer wheel, % of base speed.
+#define TURN_INNER_PERCENT          60      // Inner wheel, % of base speed.
+// Hard turn, once BOTH sensors have slid off the line: pulls the car back
+// onto it quickly instead of drifting alongside it. Inner wheel is kept
+// just above 0 (rolls freely, never brakes). Still drifts off on curves:
+// raise HARD_OUTER; overshoots the line: lower it.
+#define TURN_HARD_OUTER_PERCENT     180
+#define TURN_HARD_INNER_PERCENT     20
 
-// Turn delay: a sensor that goes WHITE must stay white this long before
-// the car turns; if it goes back to black first, the movement does not
-// change. A sensor that sees BLACK again counts at once.
-#define LINE_TURN_DELAY_MSEC        200u
+// Dirty-track filter. Each line sensor keeps a score: +1 tick for every
+// tick it reads black, -1 for every tick it reads white, held between 0
+// and LINE_TURN_DELAY_MSEC. So short flickers cancel out instead of
+// steering the car:
+// - grey footprints on white blip "black" now and then; a sensor only
+//   counts as black once black has beaten white by LINE_BLACK_CONFIRM_MSEC;
+// - scratches on the tape blip "white"; a sensor on the line only counts
+//   as white once the score has drained to 0 (about LINE_TURN_DELAY_MSEC
+//   of mostly-white).
+// Still jittery: raise both. Too slow on curves: lower them.
+#define LINE_TURN_DELAY_MSEC        120u
+#define LINE_BLACK_CONFIRM_MSEC     60u
+
+// Grey patches. Real tape reads SOLID black; a grey patch sits near the
+// sensor's switching level and flickers. While a sensor is white, each
+// white reading cancels this many black readings, so only nearly solid
+// black is taken as the line (3: anything under about 75% black is
+// rejected). Patches still caught: raise it. Real line missed: lower it.
+#define LINE_GREY_WHITE_WEIGHT      3u
+
+// Dark patches that read SOLID black. The line is continuous: it cannot
+// suddenly jump to the side AWAY from where the car has been tracking it.
+// So new black on that side is suspect until it has lasted this long:
+// the car does not turn towards it, it just goes straight (or keeps
+// turning back to the line if it had already lost it). This also covers a
+// patch that joins while the other sensor is on the line and is left
+// behind when the line curves away.
+// Still swayed by patches: raise it a little. Loses the real line or
+// keeps turning: lower it (0 turns the rule off).
+#define LINE_NEW_BLACK_TRUST_MSEC   200u
+
+// Backtrack: when BOTH sensors lose the line, the car reverses along the
+// path it just drove (its recorded wheel speeds, played backwards) to the
+// point where BOTH sensors were last on the line, then follows on from
+// there. Once per loss: if the line still is not found, it turns hard
+// towards the side the line was last seen. Paths longer than MAX are not
+// kept.
+#define LINE_BACKTRACK_ENABLE       true
+#define LINE_BACKTRACK_MAX_MSEC     5000u
+#define LINE_BACKTRACK_BRAKE_MSEC   80u     // Stop rolling before reversing.
+// Reverse at this % of the recorded power, over a correspondingly shorter
+// time, so it covers the same path but more firmly. Lands short or long
+// of the line: adjust it.
+#define LINE_BACKTRACK_SPEED_PERCENT 150u
+// Recorded ticks averaged together while reversing (odd), so the small
+// corrections in the recording do not make the reverse wobble.
+#define LINE_BACKTRACK_SMOOTH_TICKS 5u
+
+// Turning towards the line always happens at once. Straightening up or
+// reversing the turn waits until the last steering change is this old, so
+// the car cannot flip back and forth. Raise to calm it further; lower if
+// it overshoots the line after a turn.
+#define LINE_STEER_HOLD_MSEC        150u
 
 // After calibration, drive straight this long before steering, so the car
 // gets moving instead of correcting from a standstill.

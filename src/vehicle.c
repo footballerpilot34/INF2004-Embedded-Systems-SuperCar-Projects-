@@ -19,15 +19,23 @@
  * @par Line following
  * Both line sensors sit over the line when the car is centred:
  * - both on the line: go straight;
- * - only the left on the line: the line has moved left, so turn left
- *   (left wheel slower or backwards); only the right: turn right;
+ * - only the left on the line: the line has moved left, so arc left
+ *   (left wheel slower, right wheel faster, both still forward); only the
+ *   right: arc right;
  * - neither, when both had been on the line together: the line is
  *   between the sensors, so keep going straight;
- * - neither, when one sensor was last on the line: the line slid out past
- *   that side, so keep arcing that way until a sensor finds it.
- * The car keeps its current movement until a change is confirmed: a
- * sensor going white must stay white for LINE_TURN_DELAY_MSEC before the
- * car turns (back to black sooner: no change at all). It never pivots on
+ * - once turning, keep turning that way until both sensors are on the
+ *   line, so turns are completed;
+ * - neither: reverse along the recorded path back to where both sensors
+ *   were last on the line (LINE_BACKTRACK_ENABLE, once per loss), then
+ *   follow on;
+ *   if that does not find it, arc hard towards the side the line slid out
+ *   past until a sensor finds it.
+ * The car keeps its current movement until a change is confirmed, so a
+ * dirty track (grey footprints, scratched tape) does not make it jitter:
+ * each sensor follows the majority of its recent readings (see
+ * line_filtered()), and each steering change is held for at least
+ * LINE_STEER_HOLD_MSEC. It never pivots on
  * the spot and never stops for white; only an obstacle (PROBE/BLOCKED)
  * or STOP stops it.
  *
@@ -91,6 +99,12 @@
 #define USEC_PER_MSEC   1000u
 #define PERCENT         100
 
+// Line filter score limits, in control ticks.
+#define MSEC_TO_TICKS(msec)  (((msec) * USEC_PER_MSEC) / TICK_USEC)
+#define LINE_SCORE_FULL      MSEC_TO_TICKS(LINE_TURN_DELAY_MSEC)
+#define LINE_SCORE_CONFIRM   MSEC_TO_TICKS(LINE_BLACK_CONFIRM_MSEC)
+#define PATH_MAX_TICKS       MSEC_TO_TICKS(LINE_BACKTRACK_MAX_MSEC)
+
 
 static vehicle_state_t g_state        = VEHICLE_READY;
 static uint32_t        g_entered_msec = 0u;     // When g_state began.
@@ -115,10 +129,38 @@ static line_last_t     g_line_last    = LINE_LAST_BOTH;
 
 // Debounced line state used for steering.
 static line_state_t    g_line          = { true, true };
-static bool            gb_left_going   = false; // Left white, unconfirmed.
-static bool            gb_right_going  = false; // Right white, unconfirmed.
-static uint32_t        g_left_white    = 0u;    // Left turned white at.
-static uint32_t        g_right_white   = 0u;    // Right turned white at.
+static uint32_t        g_left_score    = LINE_SCORE_FULL;  // Net black,
+static uint32_t        g_right_score   = LINE_SCORE_FULL;  // in ticks.
+static uint32_t        g_left_black_msec  = 0u; // Left turned black at.
+static uint32_t        g_right_black_msec = 0u; // Right turned black at.
+
+// Steering: a gentle arc while one sensor is still on the line, a hard
+// arc once both are off it. Going straight or reversing the turn is held
+// back for LINE_STEER_HOLD_MSEC after each change (see steer_allowed()).
+typedef enum
+{
+    STEER_STRAIGHT,
+    STEER_LEFT,
+    STEER_RIGHT,
+    STEER_HARD_LEFT,
+    STEER_HARD_RIGHT
+} steer_t;
+
+static steer_t         g_steer         = STEER_STRAIGHT;
+static uint32_t        g_steer_msec    = 0u;    // Steering last changed at.
+
+// Backtrack: the wheel speeds driven since both sensors were last on the
+// line, so a car that has lost it can reverse along the same path back.
+static int8_t          g_path_left[PATH_MAX_TICKS];
+static int8_t          g_path_right[PATH_MAX_TICKS];
+static uint32_t        g_path_len      = 0u;
+static bool            gb_path_ok      = false; // Path leads back to black.
+static bool            gb_backtracking = false;
+static bool            gb_backtracked  = false; // Used up for this loss.
+static uint32_t        g_back_msec     = 0u;    // Reverse began at.
+static uint32_t        g_back_pos_x100 = 0u;    // Replay position, ticks
+                                                // x 100 (counts down).
+static line_state_t    g_raw_line      = { false, false };
 
 // START calibration: search phases.
 typedef enum
@@ -171,6 +213,16 @@ static void     cal_phase_enter(cal_phase_t phase, uint32_t now_msec);
 static void     line_align_step(uint32_t now_msec, line_state_t line);
 static void     pivot(bool b_left, uint32_t now_msec);
 static line_state_t line_filtered(uint32_t now_msec);
+static bool     line_score_step(uint32_t * p_score, bool b_raw_black,
+                                bool b_black);
+static bool     line_trusted(bool b_black, uint32_t black_msec,
+                             uint32_t now_msec);
+static void     line_filter_reset(line_state_t line, uint32_t now_msec);
+static int32_t  steer_side(steer_t steer);
+static bool     backtrack_step(line_state_t line, uint32_t now_msec);
+static void     path_record(int32_t left, int32_t right, line_state_t line);
+static void     path_reset(bool b_ok);
+static bool     steer_allowed(steer_t want, uint32_t now_msec);
 static uint32_t now_msec_get(void);
 static void     follow_line_step(uint32_t now_msec, uint32_t range_mm,
                                  int32_t pitch_x10);
@@ -442,6 +494,7 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     else if (scan_is_on(now_msec))
     {
         motor_set(SPEED_SCAN, SPEED_SCAN);  // Reading a barcode: steady.
+        path_reset(false);                  // Not steering: no way back.
     }
     else if (b_range_used && (range_mm <= OBSTACLE_SLOW_MM))
     {
@@ -586,9 +639,7 @@ turn_finish (uint32_t now_msec, line_state_t line, line_last_t last,
                barcode_command_name(g_turn_cmd), p_how,
                (now_msec - g_entered_msec));
 
-    g_line         = line;
-    gb_left_going  = false;
-    gb_right_going = false;
+    line_filter_reset(line, now_msec);
     g_line_last    = last;
     gb_last_left   = (LINE_LAST_LEFT == last);
     state_enter(g_turn_after, now_msec);
@@ -758,6 +809,7 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     gb_launch      = (VEHICLE_TURN != g_state);
     g_state        = state;
     g_entered_msec = now_msec;
+    path_reset(false);                  // Valid again once on the line.
     gb_level       = false;
     gb_clear       = false;
     if (VEHICLE_HUMP == state)
@@ -937,10 +989,7 @@ line_align_step (uint32_t now_msec, line_state_t line)
         {
             log_printf("LINE_CAL OK: both sensors detected black and are on "
                        "the line -> following.");
-            g_line.b_left_black  = true;
-            g_line.b_right_black = true;
-            gb_left_going        = false;
-            gb_right_going       = false;
+            line_filter_reset(line, now_msec);
             g_line_last          = LINE_LAST_BOTH;
             state_enter(VEHICLE_FOLLOW_LINE, now_msec);
         }
@@ -1017,72 +1066,377 @@ pivot (bool b_left, uint32_t now_msec)
 /*!
  * @brief Steer along the line at a given speed, never stopping.
  *
- * @param[in] speed    The outer-wheel speed, in percent.
+ * @par
+ * Turns keep both wheels rolling forward, so the car never pauses or
+ * pivots to turn. While one sensor is still on the line the car arcs
+ * gently (TURN_OUTER/INNER_PERCENT); once both are off it, it arcs hard
+ * (TURN_HARD_OUTER/INNER_PERCENT) to get back on the line quickly.
+ *
+ * @param[in] speed    The base (straight-line) speed, in percent.
  * @param[in] now_msec The current time.
  */
 static void
 line_steer (int32_t speed, uint32_t now_msec)
 {
     line_state_t line     = line_filtered(now_msec);
+    bool         b_left_ok  = line_trusted(line.b_left_black,
+                                           g_left_black_msec, now_msec);
+    bool         b_right_ok = line_trusted(line.b_right_black,
+                                           g_right_black_msec, now_msec);
+    int32_t      outer    = (speed * TURN_OUTER_PERCENT) / PERCENT;
     int32_t      inner    = (speed * TURN_INNER_PERCENT) / PERCENT;
-    int32_t      left     = speed;
-    int32_t      right    = speed;
+    int32_t      hard_out = (speed * TURN_HARD_OUTER_PERCENT) / PERCENT;
+    int32_t      hard_in  = (speed * TURN_HARD_INNER_PERCENT) / PERCENT;
+    steer_t      want     = STEER_STRAIGHT;
     bool         b_launch = ((VEHICLE_FOLLOW_LINE == g_state) &&
                              ((now_msec - g_entered_msec) <
                               LINE_START_STRAIGHT_MSEC));
+    int32_t      left     = speed;
+    int32_t      right    = speed;
+
+    // Both sensors lost the line: reverse along the recorded path to where
+    // both were last on it (once per loss), then follow on from there.
+    if (LINE_BACKTRACK_ENABLE && !gb_backtracking && !gb_backtracked &&
+        gb_path_ok && (g_path_len > 0u) && !b_launch &&
+        (VEHICLE_FOLLOW_LINE == g_state) &&
+        !line.b_left_black && !line.b_right_black)
+    {
+        log_printf("Line lost: reversing %" PRIu32 " ms of path to where "
+                   "both sensors were on it.",
+                   (g_path_len * TICK_USEC) / USEC_PER_MSEC);
+        gb_backtracking = true;
+        gb_backtracked  = true;
+        g_back_msec     = now_msec;
+        g_back_pos_x100 = g_path_len * (uint32_t) PERCENT;
+    }
+
+    if (gb_backtracking && backtrack_step(line, now_msec))
+    {
+        return;
+    }
+
+    // Dark patches: the line is continuous, so new black on the side AWAY
+    // from where it has been tracked is suspect until it has lasted
+    // LINE_NEW_BLACK_TRUST_MSEC. A suspect sensor is neither followed nor
+    // fled from: the car goes straight (or keeps hunting, if it had
+    // already lost the line), so a real line there is still reached.
+    bool b_suspect = ((line.b_right_black && !line.b_left_black &&
+                       !b_right_ok && (LINE_LAST_LEFT == g_line_last)) ||
+                      (line.b_left_black && !line.b_right_black &&
+                       !b_left_ok && (LINE_LAST_RIGHT == g_line_last)));
+    bool b_hunting = ((STEER_HARD_LEFT == g_steer) ||
+                      (STEER_HARD_RIGHT == g_steer));
 
     if (b_launch)
     {
         // Just started: get moving first.
     }
+    else if (b_suspect && b_hunting)
+    {
+        want = g_steer;                 // Keep turning back to the line.
+    }
+    else if (b_suspect)
+    {
+        // Straight on until the new black proves itself or goes away.
+    }
     else if (line.b_left_black && line.b_right_black)
     {
-        g_line_last = LINE_LAST_BOTH;
-        // Centred: straight on.
+        // Centred: straight on. Until BOTH blacks are trusted, keep
+        // remembering the side the line was tracked on, in case the new
+        // one is a patch.
+        if (b_left_ok && b_right_ok)
+        {
+            g_line_last = LINE_LAST_BOTH;
+        }
     }
     else if (line.b_left_black)
     {
         gb_last_left = true;
         g_line_last  = LINE_LAST_LEFT;
-        left  = inner;                  // Line moved left: arc left.
-        right = speed;
+        want = STEER_LEFT;              // Line moved left: arc left.
     }
     else if (line.b_right_black)
     {
         gb_last_left = false;
         g_line_last  = LINE_LAST_RIGHT;
-        left  = speed;                  // Line moved right: arc right.
-        right = inner;
+        want = STEER_RIGHT;             // Line moved right: arc right.
     }
     else if (LINE_LAST_LEFT == g_line_last)
     {
-        // Neither sensor on the line: keep going towards the limit the
+        // Neither sensor on the line: turn hard towards the limit the
         // line was last seen at. Never stop, never pivot.
-        left  = inner;                  // Line slid out left: arc left.
-        right = speed;
+        want = STEER_HARD_LEFT;         // Line slid out left.
     }
     else if (LINE_LAST_RIGHT == g_line_last)
     {
-        left  = speed;                  // Line slid out right: arc right.
-        right = inner;
+        want = STEER_HARD_RIGHT;        // Line slid out right.
     }
     else
     {
         // Line is between the sensors.
     }
 
+    // Finish turns: once turning, keep turning that way until BOTH
+    // sensors are on the line (a lost line is handled by the reverse).
+    if (!b_launch && (0 != steer_side(g_steer)) &&
+        (steer_side(want) != steer_side(g_steer)) &&
+        !(line.b_left_black && line.b_right_black))
+    {
+        want = g_steer;
+    }
+
+    if ((want != g_steer) && (b_launch || steer_allowed(want, now_msec)))
+    {
+        g_steer      = want;
+        g_steer_msec = now_msec;
+    }
+
+    // Speed 0 brakes a wheel, so an inner wheel never drops to 0.
+    if (speed > 0)
+    {
+        inner   = ((inner < 1) ? 1 : inner);
+        hard_in = ((hard_in < 1) ? 1 : hard_in);
+    }
+
+    if (STEER_LEFT == g_steer)
+    {
+        left  = inner;
+        right = outer;
+    }
+    else if (STEER_RIGHT == g_steer)
+    {
+        left  = outer;
+        right = inner;
+    }
+    else if (STEER_HARD_LEFT == g_steer)
+    {
+        left  = hard_in;
+        right = hard_out;
+    }
+    else if (STEER_HARD_RIGHT == g_steer)
+    {
+        left  = hard_out;
+        right = hard_in;
+    }
+    else
+    {
+        // Straight: both at the base speed.
+    }
+
     motor_set(left, right);
+    path_record(left, right, line);
 }   /* line_steer() */
 
 
 /*!
- * @brief Read the line sensors with the turn delay applied.
+ * @brief Reverse one tick along the recorded path.
  *
  * @par
- * Black counts at once. White only counts once it has lasted
- * LINE_TURN_DELAY_MSEC; if the sensor sees black again before that, the
- * white is ignored and the car's movement does not change. Call once per
- * control tick (line_steer() does).
+ * First brakes for LINE_BACKTRACK_BRAKE_MSEC so the car is not still
+ * rolling forward. Then plays the recorded wheel speeds back newest
+ * first, negated, so the car retraces its path backwards:
+ * - at LINE_BACKTRACK_SPEED_PERCENT of the recorded power, using up the
+ *   path that much faster, so the distance stays the same but the wheels
+ *   are driven firmly (low power is where these motors are least exact);
+ * - averaged over LINE_BACKTRACK_SMOOTH_TICKS recorded ticks, so the
+ *   small steering corrections in the recording do not make it wobble.
+ * Stops once both sensors are on black again, or the path is used up
+ * (the car is back where both were last on the line); the car then
+ * follows the line from there.
+ *
+ * @param[in] line     The filtered line state.
+ * @param[in] now_msec The current time.
+ *
+ * @return True if the car reversed (or braked) this tick; false once
+ *         it is done.
+ */
+static bool
+backtrack_step (line_state_t line, uint32_t now_msec)
+{
+    bool     b_reversed = true;
+    uint32_t centre     = 0u;
+    uint32_t first      = 0u;
+    uint32_t last       = 0u;
+    int32_t  sum_left   = 0;
+    int32_t  sum_right  = 0;
+    int32_t  count      = 0;
+    int32_t  pct        = (int32_t) LINE_BACKTRACK_SPEED_PERCENT;
+
+    if ((line.b_left_black && line.b_right_black) || (0u == g_back_pos_x100))
+    {
+        log_printf("Reverse done (%s).",
+                   ((0u == g_back_pos_x100) ? "back where both were on it" :
+                                              "both on the line"));
+        gb_backtracking = false;
+        g_path_len      = 0u;
+        g_steer         = STEER_STRAIGHT;   // Steer afresh from here.
+        g_steer_msec    = now_msec;
+        b_reversed      = false;
+    }
+    else if ((now_msec - g_back_msec) < LINE_BACKTRACK_BRAKE_MSEC)
+    {
+        motor_set(0, 0);                    // Stop rolling forward first.
+    }
+    else
+    {
+        g_back_pos_x100 = ((g_back_pos_x100 > LINE_BACKTRACK_SPEED_PERCENT) ?
+                           (g_back_pos_x100 - LINE_BACKTRACK_SPEED_PERCENT) :
+                           0u);
+
+        // Average the recorded ticks around the current position.
+        centre = g_back_pos_x100 / (uint32_t) PERCENT;
+        first  = ((centre > (LINE_BACKTRACK_SMOOTH_TICKS / 2u)) ?
+                  (centre - (LINE_BACKTRACK_SMOOTH_TICKS / 2u)) : 0u);
+        last   = centre + (LINE_BACKTRACK_SMOOTH_TICKS / 2u);
+        last   = ((last < g_path_len) ? last : (g_path_len - 1u));
+
+        for (uint32_t idx = first; idx <= last; idx++)
+        {
+            sum_left  += g_path_left[idx];
+            sum_right += g_path_right[idx];
+            count++;
+        }
+
+        motor_set(-(sum_left * pct) / (count * PERCENT),
+                  -(sum_right * pct) / (count * PERCENT));
+    }
+
+    return (b_reversed);
+}   /* backtrack_step() */
+
+
+/*!
+ * @brief Record one tick of wheel speeds for a later backtrack.
+ *
+ * @par
+ * While BOTH sensors really are on the line (raw AND filtered black, so a
+ * dark patch does not count), the path restarts from here. Otherwise each
+ * tick's speeds are added; a path longer than LINE_BACKTRACK_MAX_MSEC is
+ * dropped, as it can no longer lead all the way back.
+ *
+ * @param[in] left  Left wheel speed driven this tick.
+ * @param[in] right Right wheel speed driven this tick.
+ * @param[in] line  The filtered line state.
+ */
+static void
+path_record (int32_t left, int32_t right, line_state_t line)
+{
+    bool const b_on_line = (line.b_left_black && g_raw_line.b_left_black &&
+                            line.b_right_black && g_raw_line.b_right_black);
+
+    if (VEHICLE_FOLLOW_LINE != g_state)
+    {
+        path_reset(false);
+    }
+    else if (b_on_line)
+    {
+        path_reset(true);
+    }
+    else if (g_path_len < PATH_MAX_TICKS)
+    {
+        // NOTE: Wheel speeds are within +/-100, so they fit in int8_t.
+        g_path_left[g_path_len]  = (int8_t) left;
+        g_path_right[g_path_len] = (int8_t) right;
+        g_path_len++;
+    }
+    else
+    {
+        gb_path_ok = false;             // Too long: no way back.
+    }
+}   /* path_record() */
+
+
+/*!
+ * @brief Start a new, empty backtrack path.
+ *
+ * @param[in] b_ok True if the car is on the line now, so a path recorded
+ *                 from here leads back to it.
+ */
+static void
+path_reset (bool b_ok)
+{
+    g_path_len      = 0u;
+    gb_path_ok      = b_ok;
+    gb_backtracking = false;
+
+    if (b_ok)
+    {
+        gb_backtracked = false;         // Line found: next loss may reverse.
+    }
+}   /* path_reset() */
+
+
+/*!
+ * @brief Report which way a steering command turns.
+ *
+ * @param[in] steer The steering command.
+ *
+ * @return -1 for left, +1 for right, 0 for straight.
+ */
+static int32_t
+steer_side (steer_t steer)
+{
+    int32_t side = 0;
+
+    if ((STEER_LEFT == steer) || (STEER_HARD_LEFT == steer))
+    {
+        side = -1;
+    }
+    else if ((STEER_RIGHT == steer) || (STEER_HARD_RIGHT == steer))
+    {
+        side = 1;
+    }
+    else
+    {
+        // Straight.
+    }
+
+    return (side);
+}   /* steer_side() */
+
+
+/*!
+ * @brief Decide whether the steering may change now.
+ *
+ * @par
+ * Turning towards the line is never delayed: from straight into a turn,
+ * or harder/softer on the same side, happens at once, so the car stays
+ * close to the line. Straightening up or reversing the turn waits until
+ * the last change has been held for LINE_STEER_HOLD_MSEC, so dirt cannot
+ * make the car flip back and forth.
+ *
+ * @param[in] want     The steering the sensors ask for.
+ * @param[in] now_msec The current time.
+ *
+ * @return True if the steering may change to want.
+ */
+static bool
+steer_allowed (steer_t want, uint32_t now_msec)
+{
+    int32_t const now_side  = steer_side(g_steer);
+    int32_t const want_side = steer_side(want);
+
+    return ((0 == now_side) || (want_side == now_side) ||
+            ((now_msec - g_steer_msec) >= LINE_STEER_HOLD_MSEC));
+}   /* steer_allowed() */
+
+
+/*!
+ * @brief Read the line sensors through the dirty-track filter.
+ *
+ * @par
+ * Each sensor's score rises one tick for every black reading and falls
+ * for every white reading, so the filter follows the majority, not
+ * single readings. A sensor becomes black once its score reaches
+ * LINE_BLACK_CONFIRM_MSEC and white again only once it has drained to 0;
+ * between the two it keeps its last state.
+ *
+ * @par Grey patches
+ * Real tape reads solid black; grey sits near the sensor's switching
+ * level and flickers. So while a sensor is white, each white reading
+ * takes away LINE_GREY_WHITE_WEIGHT black readings, and only nearly solid
+ * black can confirm. Also records when each sensor turned black, for
+ * line_trusted(). Call once per control tick (line_steer() does).
  *
  * @param[in] now_msec The current time.
  *
@@ -1091,48 +1445,116 @@ line_steer (int32_t speed, uint32_t now_msec)
 static line_state_t
 line_filtered (uint32_t now_msec)
 {
-    line_state_t raw = line_sensor_read();
+    line_state_t raw          = line_sensor_read();
+    bool const   b_left_was   = g_line.b_left_black;
 
-    if (raw.b_left_black)
-    {
-        g_line.b_left_black = true;
-        gb_left_going       = false;
-    }
-    else if (!gb_left_going)
-    {
-        gb_left_going = true;           // Just went white: start the delay.
-        g_left_white  = now_msec;
-    }
-    else if ((now_msec - g_left_white) >= LINE_TURN_DELAY_MSEC)
-    {
-        g_line.b_left_black = false;    // Still white after the delay.
-    }
-    else
-    {
-        // White, but not for long enough yet: no change.
-    }
+    g_raw_line = raw;
+    bool const   b_right_was  = g_line.b_right_black;
 
-    if (raw.b_right_black)
+    g_line.b_left_black  = line_score_step(&g_left_score, raw.b_left_black,
+                                           b_left_was);
+    g_line.b_right_black = line_score_step(&g_right_score,
+                                           raw.b_right_black, b_right_was);
+
+    if (g_line.b_left_black && !b_left_was)
     {
-        g_line.b_right_black = true;
-        gb_right_going       = false;
+        g_left_black_msec = now_msec;
     }
-    else if (!gb_right_going)
+    if (g_line.b_right_black && !b_right_was)
     {
-        gb_right_going = true;
-        g_right_white  = now_msec;
-    }
-    else if ((now_msec - g_right_white) >= LINE_TURN_DELAY_MSEC)
-    {
-        g_line.b_right_black = false;
-    }
-    else
-    {
-        // White, but not for long enough yet: no change.
+        g_right_black_msec = now_msec;
     }
 
     return (g_line);
 }   /* line_filtered() */
+
+
+/*!
+ * @brief Update one sensor's filter score with one reading.
+ *
+ * @param[in,out] p_score     The sensor's score, in ticks.
+ * @param[in]     b_raw_black This tick's raw reading.
+ * @param[in]     b_black     The sensor's filtered state so far.
+ *
+ * @return The sensor's new filtered state.
+ */
+static bool
+line_score_step (uint32_t * p_score, bool b_raw_black, bool b_black)
+{
+    uint32_t const limit  = (b_black ? LINE_SCORE_FULL : LINE_SCORE_CONFIRM);
+    uint32_t const weight = (b_black ? 1u : LINE_GREY_WHITE_WEIGHT);
+
+    if (b_raw_black)
+    {
+        if (*p_score < limit)
+        {
+            (*p_score)++;
+        }
+    }
+    else if (*p_score > weight)
+    {
+        *p_score -= weight;
+    }
+    else
+    {
+        *p_score = 0u;
+    }
+
+    if (!b_black && (*p_score >= LINE_SCORE_CONFIRM))
+    {
+        b_black = true;
+    }
+    else if (0u == *p_score)
+    {
+        b_black = false;
+    }
+    else
+    {
+        // Between the thresholds: keep the last state.
+    }
+
+    return (b_black);
+}   /* line_score_step() */
+
+
+/*!
+ * @brief Check whether a sensor's black has lasted long enough to be
+ *        trusted as the line rather than a dark patch.
+ *
+ * @param[in] b_black    The sensor's filtered state.
+ * @param[in] black_msec When it turned black.
+ * @param[in] now_msec   The current time.
+ *
+ * @return True if black for at least LINE_NEW_BLACK_TRUST_MSEC.
+ */
+static bool
+line_trusted (bool b_black, uint32_t black_msec, uint32_t now_msec)
+{
+    return (b_black &&
+            ((now_msec - black_msec) >= LINE_NEW_BLACK_TRUST_MSEC));
+}   /* line_trusted() */
+
+
+/*!
+ * @brief Set the filtered line state outright, e.g. after lining up on
+ *        the line, and restart the steering hold.
+ *
+ * @param[in] line     The line state to start from.
+ * @param[in] now_msec The current time.
+ */
+static void
+line_filter_reset (line_state_t line, uint32_t now_msec)
+{
+    g_line        = line;
+    g_left_score  = (line.b_left_black ? LINE_SCORE_FULL : 0u);
+    g_right_score = (line.b_right_black ? LINE_SCORE_FULL : 0u);
+
+    // Lined up on the real line: its black is trusted at once.
+    g_left_black_msec  = now_msec - LINE_NEW_BLACK_TRUST_MSEC;
+    g_right_black_msec = now_msec - LINE_NEW_BLACK_TRUST_MSEC;
+    g_steer       = STEER_STRAIGHT;
+    g_steer_msec  = now_msec;
+}   /* line_filter_reset() */
 
 
 /*!
