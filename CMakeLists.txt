@@ -89,6 +89,25 @@ pico_enable_stdio_uart(gyro_test 0)
 
 pico_add_extra_outputs(gyro_test)         # makes gyro_test.uf2
 
+# Standalone LSM303DLHC accelerometer and magnetometer serial test.
+add_executable(lsm303_test
+    tests/lsm303_test.c
+)
+
+target_include_directories(lsm303_test PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/src
+)
+
+target_link_libraries(lsm303_test
+    pico_stdlib
+    hardware_i2c
+)
+
+pico_enable_stdio_usb(lsm303_test 1)
+pico_enable_stdio_uart(lsm303_test 0)
+
+pico_add_extra_outputs(lsm303_test)
+
 # Final firmware: line following, Code 39 barcode, hump vs wall,
 # Teleplot telemetry and a wireless web UI.
 add_executable(supercar
