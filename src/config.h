@@ -56,25 +56,33 @@
 #define BARCODE_BLACK_IS_HIGH       true
 
 // The two line sensors are the limits of the line. While following, the
-// car always keeps moving forward:
+// car always keeps moving forward and never stops for white (only for an
+// obstacle, or STOP):
 // - both on the line, or both lost together: straight on;
 // - one on the line: arc towards it (inner wheel slowed);
 // - neither, after one was last on the line: keep arcing that way.
-#define LINE_LOST_MSEC              3000u   // No line this long: stop.
 
-// START calibration (closed loop, bounded):
-// 1. Sweep: swing left/right, each swing LINE_CAL_SWING_MSEC longer than
-//    the last, until EACH sensor has seen both black and white.
-// 2. Align: pivot until both sensors are on black for 30 ms.
-// Any timeout stops the car with a reason; only a manual START retries.
-#define LINE_CAL_SWING_MSEC         1000u   // First swing; then 2000, 3000..
-#define LINE_CAL_MIN_SWINGS         2u      // At least one full left and one
-                                            // full right swing; the sweep
-                                            // is only judged when a swing
-                                            // ends.
-#define LINE_CAL_SWEEP_MAX_MSEC     16000u  // Sweep must finish in this.
+// START calibration: find the line from anywhere near it, repeating
+// until it is found (STOP always works):
+// 1. Pivot one way (LINE_CAL_PIVOT_LEFT) until either sensor sees black,
+//    for up to LINE_CAL_PIVOT_MAX_MSEC.
+// 2. Still no line: drive straight ahead until either sensor sees black
+//    (or an obstacle is ahead), then go back to step 1.
+// 3. Align: pivot until both sensors are on black for 30 ms, then follow.
+//    If that fails within LINE_CAL_ALIGN_MAX_MSEC, go back to step 1.
+// Success also needs EACH sensor to have DETECTED black during
+// calibration: switched from white to black, so a dead or stuck sensor
+// cannot pass. Starting on the line, the car turns off and back once to
+// prove it.
+#define LINE_CAL_PIVOT_LEFT         true    // Search pivot: true = left.
+#define LINE_CAL_PIVOT_MAX_MSEC     8000u   // Pivot this long (7-10 s), then
+                                            // drive forward instead.
+#define LINE_CAL_DRIVE_SPEED        8       // Forward search speed.
 #define LINE_CAL_ALIGN_MAX_MSEC     5000u   // Align must finish in this.
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long.
+#define LINE_CAL_ALIGN_TRIES        3u      // Failed aligns before giving
+                                            // up and naming the sensor that
+                                            // never detected black.
 
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
@@ -82,11 +90,14 @@
 #define SPEED_CRUISE                8       // Line following (halved from
                                             // 15 to make steering calmer).
 #define SPEED_CREEP                 6       // Near an obstacle (halved).
-#define SPEED_SWEEP                 6       // START calibration pivot
-                                            // (25% slower than 8).
-#define SPEED_KICK                  12      // Brief push when a pivot
-#define KICK_MSEC                   80u     // starts or reverses, to get
-                                            // the wheels moving.
+// START calibration pivots are PULSED: the motors stall below about
+// 10-15% when turning on the spot, so instead of a weak steady 6%, each
+// pivot is short bursts at a power that really moves the wheels, with
+// braked pauses between them. Average turning speed stays slow:
+// slower turning -> shorter ON or longer OFF; stalls -> raise the speed.
+#define PIVOT_PULSE_SPEED           20      // Burst power (moves the car).
+#define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
+#define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
 #define SPEED_HUMP                  15      // Climbing a hump (kept higher:
                                             // the slope needs torque).
 #define TURN_INNER_PERCENT          0       // Inner wheel speed in a turn,
@@ -96,9 +107,10 @@
                                             // (negative values spin it on
                                             // the spot and it oscillates).
 
-// Steering filter: a sensor must read the same for this many 10 ms ticks
-// before the steering reacts, so flicker at the line edge is ignored.
-#define LINE_DEBOUNCE_TICKS         2u
+// Turn delay: a sensor that goes WHITE must stay white this long before
+// the car turns; if it goes back to black first, the movement does not
+// change. A sensor that sees BLACK again counts at once.
+#define LINE_TURN_DELAY_MSEC        200u
 
 // After calibration, drive straight this long before steering, so the car
 // gets moving instead of correcting from a standstill.
