@@ -18,6 +18,14 @@
  *    (BARCODE_TEXT_...): a match is a command (turn left, turn right,
  *    U-turn) that trumps the line sensors; anything else is a message.
  *
+ * @par Analog reading (BARCODE_USE_ANALOG)
+ * The module's comparator output misses thin bars, so a timer samples the
+ * analog output every BARCODE_AO_SAMPLE_USEC and finds edges by peak and
+ * dip tracking: a rise of BARCODE_AO_DELTA above the last dip is a bar, a
+ * fall of BARCODE_AO_DELTA below the last peak is a space. This needs no
+ * fixed black/white level, so faint thin bars, faded print and room light
+ * changes are all handled. The edges go into the same ring as before.
+ *
  * @par Flicker
  * The IR module can flicker as a bar edge passes under it. A colour that
  * lasts less than BARCODE_GLITCH_USEC is not a bar or space: it is merged
@@ -27,15 +35,18 @@
  * Code 39 symbology: ISO/IEC 16388.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "pico/stdlib.h"
+#include "hardware/adc.h"
 #include "hardware/gpio.h"
 
 #include "barcode.h"
 #include "config.h"
+#include "log.h"
 
 
 #define EDGE_RING_SIZE          256u    // Power of two.
@@ -51,6 +62,13 @@
 #define START_STOP_CHAR         '*'
 #define NUM_CODE39_SYMBOLS      44u
 #define NUM_COMMAND_TEXTS       6u
+#define REPORT_MIN_ELEMENTS     4u      // Shorter scans are not reported.
+#define ADC_FIRST_PIN           26u     // ADC0 is GP26, ADC1 GP27, ...
+#define ADC_FULL_SCALE          4095    // 12-bit ADC.
+#define AO_FILTER_DIV           8       // Smoothing: 1/8 of each change
+                                        // (1.6 ms; a bar lasts 10+ ms).
+#define AO_WHITE_DIV            64      // Paper-white tracking (13 ms).
+#define AO_GUARD_DIV            2       // Guard band: DELTA / 2 above white.
 
 typedef struct
 {
@@ -108,10 +126,21 @@ static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
 static bool     gb_enabled       = true;
 
+// Analog reader state. Written by the sampling timer only.
+static repeating_timer_t g_ao_timer;
+static volatile int32_t  g_ao_level   = 0;      // Smoothed darkness.
+static volatile bool     gb_ao_black  = false;  // Over a bar now.
+static int32_t           g_ao_white   = 0;      // Paper white, tracked.
+static int32_t           g_ao_extreme = 0;      // Last dip (on white) or
+                                                // peak (on black).
+
 static char              g_message[BARCODE_MESSAGE_MAX + 1u];
 static barcode_command_t g_command = BARCODE_CMD_NONE;
 
 
+static void             edge_push(uint32_t edge_usec, bool b_black);
+static bool             ao_sample_isr(repeating_timer_t * p_timer);
+static int32_t          ao_darkness(void);
 static void             edge_add(uint32_t edge_usec, bool b_black);
 static barcode_result_t scan_finish(void);
 static bool             scan_decode(bool b_reverse);
@@ -121,10 +150,10 @@ static barcode_command_t command_match(char const * p_message);
 
 
 /*!
- * @brief Set up the barcode sensor pin.
+ * @brief Set up the barcode sensor: the analog sampler, or the DOUT pin.
  *
  * @par
- * The edge interrupt itself is enabled by gpio_isr_init().
+ * For DOUT, the edge interrupt itself is enabled by gpio_isr_init().
  */
 void
 barcode_init (void)
@@ -133,11 +162,36 @@ barcode_init (void)
     gpio_set_dir(PIN_BARCODE, GPIO_IN);
     gpio_disable_pulls(PIN_BARCODE);
     g_message[0] = '\0';
+
+    if (BARCODE_USE_ANALOG)
+    {
+        adc_init();
+        adc_gpio_init(PIN_BARCODE_AO);
+        adc_select_input(PIN_BARCODE_AO - ADC_FIRST_PIN);
+
+        // Start from the current reading, so power-up is not an edge.
+        g_ao_level   = ao_darkness();
+        g_ao_extreme = g_ao_level;
+        g_ao_white   = g_ao_level;
+
+        // NOTE: A negative period keeps samples evenly spaced.
+        if (add_repeating_timer_us(-((int64_t) BARCODE_AO_SAMPLE_USEC),
+                                   ao_sample_isr, NULL, &g_ao_timer))
+        {
+            log_printf("Barcode: analog reader on GP%u, level %" PRId32
+                       " now.", PIN_BARCODE_AO, g_ao_level);
+        }
+        else
+        {
+            log_printf("Barcode: FAILED to start the analog sampler.");
+        }
+    }
 }   /* barcode_init() */
 
 
 /*!
- * @brief Record one barcode edge. Called from the GPIO interrupt.
+ * @brief Record one barcode edge. Called from the GPIO interrupt (DOUT
+ *        reading only).
  *
  * @param[in] events The edge events (unused; the pin is read directly so a
  *                   glitch that rises and falls together is handled).
@@ -145,15 +199,42 @@ barcode_init (void)
 void
 barcode_edge_isr (uint32_t events)
 {
-    uint32_t head = g_edge_head;
-
     (void) events;  // The level is read from the pin instead.
 
-    g_edge_usec[head & EDGE_RING_MASK]  = time_us_32();
-    g_edge_black[head & EDGE_RING_MASK] = (BARCODE_BLACK_IS_HIGH ==
-                                           gpio_get(PIN_BARCODE));
-    g_edge_head = head + 1u;
+    edge_push(time_us_32(), (BARCODE_BLACK_IS_HIGH == gpio_get(PIN_BARCODE)));
 }   /* barcode_edge_isr() */
+
+
+/*!
+ * @brief Report the barcode sensor's smoothed darkness, for tuning.
+ *
+ * @return 0 (white) to 4095 (black) with the analog reader; with DOUT,
+ *         0 or 4095.
+ */
+int32_t
+barcode_level (void)
+{
+    int32_t level = g_ao_level;
+
+    if (!BARCODE_USE_ANALOG)
+    {
+        level = (barcode_is_black() ? ADC_FULL_SCALE : 0);
+    }
+
+    return (level);
+}   /* barcode_level() */
+
+
+/*!
+ * @brief Report how many bars and spaces the last scan had.
+ *
+ * @return The count; a valid Code 39 scan has 10 per character, less 1.
+ */
+uint32_t
+barcode_scan_size (void)
+{
+    return (g_num_elements);
+}   /* barcode_scan_size() */
 
 
 /*!
@@ -308,8 +389,126 @@ barcode_is_capturing (void)
 bool
 barcode_is_black (void)
 {
-    return (BARCODE_BLACK_IS_HIGH == gpio_get(PIN_BARCODE));
+    bool b_black = gb_ao_black;
+
+    if (!BARCODE_USE_ANALOG)
+    {
+        b_black = (BARCODE_BLACK_IS_HIGH == gpio_get(PIN_BARCODE));
+    }
+
+    return (b_black);
 }   /* barcode_is_black() */
+
+
+/*!
+ * @brief Put one edge into the ring for barcode_task(). Interrupt context.
+ *
+ * @param[in] edge_usec When the edge happened.
+ * @param[in] b_black   True if the sensor sees black after the edge.
+ */
+static void
+edge_push (uint32_t edge_usec, bool b_black)
+{
+    uint32_t head = g_edge_head;
+
+    g_edge_usec[head & EDGE_RING_MASK]  = edge_usec;
+    g_edge_black[head & EDGE_RING_MASK] = b_black;
+    g_edge_head = head + 1u;
+}   /* edge_push() */
+
+
+/*!
+ * @brief Sample the analog output and turn peaks and dips into edges.
+ *        Timer interrupt, every BARCODE_AO_SAMPLE_USEC.
+ *
+ * @param[in] p_timer The timer (unused).
+ *
+ * @return True, to keep sampling.
+ */
+static bool
+ao_sample_isr (repeating_timer_t * p_timer)
+{
+    int32_t level = g_ao_level;
+    int32_t guard = 0;
+
+    (void) p_timer;
+
+    // Smoothing removes ADC noise without blurring a bar.
+    level += (ao_darkness() - level) / AO_FILTER_DIV;
+
+    // Nothing whiter than paper white plus the guard band is ever a bar.
+    guard = g_ao_white + (BARCODE_AO_DELTA / AO_GUARD_DIV);
+
+    if (!gb_ao_black)
+    {
+        // Follow the paper slowly, so one noisy sample cannot move it.
+        g_ao_white += (level - g_ao_white) / AO_WHITE_DIV;
+
+        if (level < g_ao_extreme)
+        {
+            g_ao_extreme = level;           // Whiter still: new dip.
+        }
+        else if ((level >= (g_ao_extreme + BARCODE_AO_DELTA)) &&
+                 (level >= guard))
+        {
+            gb_ao_black  = true;            // Darkened enough: a bar.
+            g_ao_extreme = level;
+            edge_push(time_us_32(), true);
+        }
+        else
+        {
+            // Within DELTA of the dip: no change.
+        }
+    }
+    else
+    {
+        if (level > g_ao_extreme)
+        {
+            g_ao_extreme = level;           // Darker still: new peak.
+        }
+        else if ((level <= (g_ao_extreme - BARCODE_AO_DELTA)) ||
+                 (level < guard))
+        {
+            // Lightened enough, or back at paper white (so noise can never
+            // leave the reader stuck on "black"): a space.
+            gb_ao_black  = false;
+            g_ao_extreme = level;
+            edge_push(time_us_32(), false);
+        }
+        else
+        {
+            // Within DELTA of the peak: no change.
+        }
+    }
+
+    g_ao_level = level;
+
+    return (true);
+}   /* ao_sample_isr() */
+
+
+/*!
+ * @brief Read the analog output as darkness: higher means blacker.
+ *
+ * @return 0 to 4095.
+ */
+static int32_t
+ao_darkness (void)
+{
+    int32_t sum = 0;
+    int32_t raw = 0;
+
+    // Average several conversions (about 2 us each): the ADC noise is
+    // about the size of a thin bar's dip, and averaging N reads cuts it
+    // by roughly the square root of N.
+    for (uint32_t read = 0u; read < BARCODE_AO_OVERSAMPLE; read++)
+    {
+        sum += (int32_t) adc_read();
+    }
+    raw = sum / (int32_t) BARCODE_AO_OVERSAMPLE;
+
+    return (BARCODE_AO_BLACK_IS_HIGH ? raw : (ADC_FULL_SCALE - raw));
+}   /* ao_darkness() */
 
 
 /*!
@@ -392,9 +591,13 @@ scan_finish (void)
     {
         result = BARCODE_INVALID;
     }
+    else if (g_num_elements < REPORT_MIN_ELEMENTS)
+    {
+        // One or two marks (a stray line or smudge): not a barcode.
+    }
     else if (g_num_elements < MIN_ELEMENTS)
     {
-        // Too few edges for even "*X*": not a barcode.
+        result = BARCODE_INVALID;   // Too few for even "*X*": bars missed.
     }
     else if (scan_decode(false) || scan_decode(true))
     {

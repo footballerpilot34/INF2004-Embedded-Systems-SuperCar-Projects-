@@ -21,7 +21,8 @@ typedef enum
     WEB_CMD_LEARN_WHITE,    // Both line sensors are over white now.
     WEB_CMD_TURN_LEFT,      // Test: act as if a barcode said LEFT.
     WEB_CMD_TURN_RIGHT,     // Test: act as if a barcode said RIGHT.
-    WEB_CMD_UTURN           // Test: act as if a barcode said UTURN.
+    WEB_CMD_UTURN,          // Test: act as if a barcode said UTURN.
+    WEB_CMD_BARCODE_TEST    // Drive straight, ignoring the line sensors.
 } web_command_t;
 
 bool          web_init(void);

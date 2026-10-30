@@ -43,7 +43,8 @@ gpio_isr_init (void)
 {
     gpio_set_irq_enabled_with_callback(PIN_US_ECHO, BOTH_EDGES, true,
                                        gpio_dispatch_isr);
-    gpio_set_irq_enabled(PIN_BARCODE, BOTH_EDGES, true);
+    // With the analog barcode reader, edges come from a timer instead.
+    gpio_set_irq_enabled(PIN_BARCODE, BOTH_EDGES, !BARCODE_USE_ANALOG);
 }   /* gpio_isr_init() */
 
 

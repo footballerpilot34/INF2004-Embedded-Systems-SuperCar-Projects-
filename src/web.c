@@ -83,9 +83,7 @@ static char const g_page_html[] =
     "<button id=d onclick=\"c('diag')\">IR DIAG on/off</button>"
     "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
     "<button id=n onclick=\"c('white')\">LEARN WHITE</button>"
-    "<button class=t onclick=\"c('tl')\">TEST LEFT</button>"
-    "<button class=t onclick=\"c('tr')\">TEST RIGHT</button>"
-    "<button class=t onclick=\"c('tu')\">TEST U-TURN</button></div>"
+    "<button class=t onclick=\"c('bt')\">BARCODE TEST</button></div>"
     "<div class=c>State: <b id=s>-</b><br>"
     "Range: <b id=r>-</b> cm &nbsp; Pitch: <b id=p>-</b>&deg;<br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
@@ -106,7 +104,7 @@ static char const g_page_html[] =
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
     "$('u').textContent=d.imu?'OK':'NOT FOUND';"
     "$('bc').textContent=d.bc||'-';$('bk').textContent=d.bc?d.bk:'';"
-    "$('bs').textContent=d.b?'over black':'over white';"
+    "$('bs').textContent=(d.b?'over black':'over white')+', level '+d.ba;"
     "for(var k=0;k<d.log.length;k++){L.textContent+=d.log[k]+'\\n'}"
     "if(d.log.length){L.scrollTop=L.scrollHeight}q=d.nx;"
     "setTimeout(u,d.more?50:500)})"
@@ -343,7 +341,7 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
  * @brief Queue the command named in a /cmd request.
  *
  * @param[in] p_name "start", "stop", "cal", "wheel", "diag", "black",
- *                   "white", or "tl" / "tr" / "tu" (test turns).
+ *                   "white" or "bt" (barcode test).
  */
 static void
 command_parse (char const * p_name)
@@ -376,17 +374,9 @@ command_parse (char const * p_name)
     {
         g_pending = WEB_CMD_LEARN_WHITE;
     }
-    else if (0 == strcmp(p_name, "tl"))
+    else if (0 == strcmp(p_name, "bt"))
     {
-        g_pending = WEB_CMD_TURN_LEFT;
-    }
-    else if (0 == strcmp(p_name, "tr"))
-    {
-        g_pending = WEB_CMD_TURN_RIGHT;
-    }
-    else if (0 == strcmp(p_name, "tu"))
-    {
-        g_pending = WEB_CMD_UTURN;
+        g_pending = WEB_CMD_BARCODE_TEST;
     }
     else
     {
@@ -453,8 +443,10 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
     length += (size_t) snprintf(p_out + length, capacity - length,
-                                ",\"bk\":\"%s\",\"log\":[",
-                                barcode_command_name(barcode_command()));
+                                ",\"bk\":\"%s\",\"ba\":%" PRId32
+                                ",\"log\":[",
+                                barcode_command_name(barcode_command()),
+                                barcode_level());
 
     while ((seq < next_seq) && ((capacity - length) > LINE_RESERVE) &&
            log_get(seq, &p_line))

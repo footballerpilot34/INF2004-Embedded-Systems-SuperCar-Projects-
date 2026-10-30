@@ -2,7 +2,11 @@
  *
  * @brief Mission state machine: line following, obstacle stop, humps.
  *
- * @par Telling a hump from a wall
+ * @par Obstacle stop
+ * With OBSTACLE_STOP_AT_ONCE, an echo from closer than OBSTACLE_STOP_MM
+ * brakes the car at once (BLOCKED, resumes when clear); no PROBE is done.
+ *
+ * @par Telling a hump from a wall (OBSTACLE_STOP_AT_ONCE false)
  * The ultrasonic sensor alone cannot tell them apart: both look like
  * "something close ahead". So a close reading does not stop the car at
  * once; it enters PROBE and creeps forward while watching pitch:
@@ -57,8 +61,14 @@
  *    gives up after TURN_90_MSEC (about 90 degrees) and drives on; a
  *    U-turn finds the same line again behind it;
  * 3. ALIGN: keep pivoting until both sensors are on it, then follow.
- * Pressed with the car stopped (TEST buttons), the car turns and stops
+ * Pressed with the car stopped (test keys), the car turns and stops
  * again, so TURN_90_MSEC can be tuned on the bench.
+ *
+ * @par BARCODE TEST
+ * Drives straight at SPEED_SCAN, ignoring the line sensors, with barcode
+ * reading on: decoded messages and commands are shown, but commands do
+ * not turn the car. It runs until STOP, or stops by itself at an
+ * obstacle closer than OBSTACLE_STOP_MM.
  */
 
 #include <inttypes.h>
@@ -166,6 +176,7 @@ static void     probe_step(uint32_t now_msec, uint32_t range_mm,
                            int32_t pitch_x10);
 static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
 static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
+static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm);
 
 
 /*!
@@ -245,6 +256,28 @@ vehicle_barcode_command (barcode_command_t command)
 
 
 /*!
+ * @brief Start BARCODE TEST: drive straight and read barcodes.
+ *
+ * @par
+ * Works from READY or STOPPED only. STOP ends it.
+ */
+void
+vehicle_barcode_test (void)
+{
+    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    {
+        log_printf("BARCODE TEST: driving straight, line sensors ignored. "
+                   "STOP to end.");
+        state_enter(VEHICLE_BARCODE_TEST, now_msec_get());
+    }
+    else
+    {
+        log_printf("Stop the car before BARCODE TEST.");
+    }
+}   /* vehicle_barcode_test() */
+
+
+/*!
  * @brief Run one step of the state machine. Call every control tick,
  *        after the sensor tasks.
  */
@@ -279,6 +312,10 @@ vehicle_task (void)
 
     case VEHICLE_TURN:
         turn_step(now_msec);
+    break;
+
+    case VEHICLE_BARCODE_TEST:
+        barcode_test_step(now_msec, range_mm);
     break;
 
     case VEHICLE_READY:
@@ -348,6 +385,10 @@ vehicle_state_name (vehicle_state_t state)
         p_name = "TURN";
     break;
 
+    case VEHICLE_BARCODE_TEST:
+        p_name = "BARCODE_TEST";
+    break;
+
     default:
         p_name = "UNKNOWN";
     break;
@@ -375,7 +416,15 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
     }
     else if (b_range_used && (range_mm <= OBSTACLE_STOP_MM))
     {
-        state_enter(VEHICLE_PROBE, now_msec);
+        if (OBSTACLE_STOP_AT_ONCE)
+        {
+            log_printf("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
+            state_enter(VEHICLE_BLOCKED, now_msec);
+        }
+        else
+        {
+            state_enter(VEHICLE_PROBE, now_msec);
+        }
     }
     else if (scan_is_on(now_msec))
     {
@@ -646,6 +695,28 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
 
 
 /*!
+ * @brief BARCODE TEST: drive straight; stop at an obstacle.
+ *
+ * @param[in] now_msec The current time.
+ * @param[in] range_mm The forward range.
+ */
+static void
+barcode_test_step (uint32_t now_msec, uint32_t range_mm)
+{
+    if (range_mm <= OBSTACLE_STOP_MM)
+    {
+        log_printf("BARCODE TEST: obstacle at %" PRIu32 " mm -> stopped.",
+                   range_mm);
+        state_enter(VEHICLE_STOPPED, now_msec);
+    }
+    else
+    {
+        motor_set(SPEED_SCAN, SPEED_SCAN);
+    }
+}   /* barcode_test_step() */
+
+
+/*!
  * @brief Change state, set up the new state's timers and barcode reading.
  *
  * @param[in] state    The new state.
@@ -689,8 +760,10 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
         cal_phase_enter(CAL_PIVOT, now_msec);
     }
 
-    // Barcodes are only read while following the line normally.
-    barcode_set_enabled(VEHICLE_FOLLOW_LINE == state);
+    // Barcodes are only read while following the line normally, or in
+    // BARCODE TEST.
+    barcode_set_enabled((VEHICLE_FOLLOW_LINE == state) ||
+                        (VEHICLE_BARCODE_TEST == state));
 
     if ((VEHICLE_FOLLOW_LINE != state) && (VEHICLE_PROBE != state) &&
         (VEHICLE_HUMP != state) && (VEHICLE_LINE_CAL != state))

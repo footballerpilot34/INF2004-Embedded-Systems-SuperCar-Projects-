@@ -55,6 +55,7 @@ telemetry_task (void)
     value_print("line_L_raw", (raw.b_left_high ? 1 : 0));
     value_print("line_R_raw", (raw.b_right_high ? 1 : 0));
     value_print("barcode_IR", (barcode_is_black() ? 1 : 0));
+    value_print("barcode_AO", barcode_level());
 
     if (ULTRASONIC_NO_RANGE == range_mm)
     {

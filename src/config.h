@@ -18,7 +18,8 @@
 // ------------------------------------------------------------------------
 #define PIN_LINE_LEFT               28u     // Left line IR DOUT (Grove 7).
 #define PIN_LINE_RIGHT              0u      // Right line IR DOUT (Grove 1).
-#define PIN_BARCODE                 26u     // Barcode IR DOUT.
+#define PIN_BARCODE                 26u     // Barcode IR DOUT (Grove 5).
+#define PIN_BARCODE_AO              27u     // Barcode IR AO (Grove 5), ADC1.
 #define PIN_IMU_SDA                 2u      // MPU-6050 SDA (I2C1).
 #define PIN_IMU_SCL                 3u      // MPU-6050 SCL (I2C1).
 #define PIN_US_TRIG                 16u     // Ultrasonic TRIG.
@@ -119,6 +120,11 @@
 // ------------------------------------------------------------------------
 // Obstacle handling (ultrasonic).
 // ------------------------------------------------------------------------
+// Stop at once: an echo from closer than OBSTACLE_STOP_MM brakes the car
+// (BLOCKED) straight away; it resumes once the way is clear. false = the
+// hump/wall PROBE instead (creep closer, climb if the nose tips up). With
+// true the car stops in front of a hump too.
+#define OBSTACLE_STOP_AT_ONCE       true
 #define OBSTACLE_SLOW_MM            400u    // Slow to creep speed.
 #define OBSTACLE_STOP_MM            250u    // Possible obstacle: probe it.
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
@@ -160,6 +166,29 @@
 #define BARCODE_MESSAGE_MAX         16u     // Longest message kept.
 #define BARCODE_GLITCH_USEC         2000u   // A colour shorter than this is
                                             // sensor flicker, not a bar.
+
+// The module's digital output (DOUT) misses thin bars: its comparator
+// only switches at one fixed level, and a thin bar only dims the sensor's
+// spot a little. So the analog output (AO) is sampled instead and edges
+// are found in software: whenever the darkness rises BARCODE_AO_DELTA
+// above the last dip, a bar starts; whenever it falls BARCODE_AO_DELTA
+// below the last peak, a space starts. A thin bar's small dip counts
+// as long as it is bigger than BARCODE_AO_DELTA.
+// MEASURED (Teleplot, car still): white paper ~166, thick barcode bar
+// ~2350, track tape ~3055, flicker about +/-15. A bar must also rise
+// DELTA/2 above the tracked paper-white level, so noise can never start
+// a bar or hold the reader on "black" over white.
+// Tuning: hold the sensor still over a THIN bar; DELTA must be well below
+// (thin bar level - white level).
+#define BARCODE_USE_ANALOG          true    // false = old DOUT reading.
+#define BARCODE_AO_BLACK_IS_HIGH    true    // VERIFY: the web "level"
+                                            // must RISE over black.
+#define BARCODE_AO_SAMPLE_USEC      200u    // 5 kHz sampling.
+#define BARCODE_AO_OVERSAMPLE       8u      // ADC reads averaged per sample
+                                            // (noise / ~2.8; 16 us of CPU).
+#define BARCODE_AO_DELTA            80      // Edge size, in ADC counts
+                                            // (0-4095). Lower: fainter bars
+                                            // seen, but more false edges.
 
 // Bar widths are measured in time, so while a barcode is being read the
 // car ignores the line sensors and drives straight at one steady speed.

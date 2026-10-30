@@ -116,6 +116,7 @@ target_include_directories(supercar PRIVATE
 
 target_link_libraries(supercar
     pico_stdlib
+    hardware_adc                          # Barcode IR analog output
     hardware_i2c
     hardware_pwm
     pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI

@@ -23,8 +23,10 @@
  *   off and logs every line sensor change. Then 'b' / LEARN BLACK with
  *   both sensors over black, and 'n' / LEARN WHITE over white, to measure
  *   each sensor's polarity.
- * - TEST LEFT / U-TURN / RIGHT: 'l', 'u', 'r' or the page buttons act
- *   exactly like a barcode command. While stopped, the car turns and
+ * - BARCODE TEST (while stopped): 't' or BARCODE TEST on the page drives
+ *   straight, ignoring the line sensors, and reads barcodes. STOP ends it.
+ * - Test turns (serial only): 'l', 'u', 'r' act exactly like a barcode
+ *   command. While stopped, the car turns and
  *   stops again (to tune TURN_90_MSEC); while following, it turns and
  *   follows on.
  *
@@ -38,6 +40,7 @@
  * TODO: Record the name of the person who approved this deviation.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -82,6 +85,7 @@
 #define KEY_TURN_LEFT           'l'
 #define KEY_TURN_RIGHT          'r'
 #define KEY_UTURN               'u'
+#define KEY_BARCODE_TEST        't'
 
 
 static void          usb_wait(void);
@@ -262,6 +266,17 @@ command_run (web_command_t command)
         turn_test(BARCODE_CMD_UTURN);
     break;
 
+    case WEB_CMD_BARCODE_TEST:
+        if (line_diag_is_active())
+        {
+            log_printf("IR DIAG is on (motors off): turn it off first.");
+        }
+        else
+        {
+            vehicle_barcode_test();
+        }
+    break;
+
     case WEB_CMD_NONE:
     default:
         // Nothing to do.
@@ -352,7 +367,8 @@ barcode_report (barcode_result_t result)
     }
     else if (BARCODE_INVALID == result)
     {
-        log_printf("Barcode scan could not be decoded.");
+        log_printf("Barcode NOT decoded: %" PRIu32 " bars+spaces seen "
+                   "(valid: 10 per character - 1).", barcode_scan_size());
         telemetry_text("barcode", "(invalid scan)");
     }
     else
@@ -509,6 +525,10 @@ serial_poll (void)
     else if (KEY_UTURN == key)
     {
         command = WEB_CMD_UTURN;
+    }
+    else if (KEY_BARCODE_TEST == key)
+    {
+        command = WEB_CMD_BARCODE_TEST;
     }
     else
     {
