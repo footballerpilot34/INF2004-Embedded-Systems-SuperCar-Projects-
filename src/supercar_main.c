@@ -13,8 +13,8 @@
  *
  * @par Controls (buttons, serial key, or web page)
  * - START: short press GP20, 's', or START on the page. Place the car
- *   on the line first: it sweeps left/right for 4 s to check the line
- *   sensors, shifts until both are on the line, then follows the line.
+ *   on or near the line: it searches for the line, checks both line
+ *   sensors detect black, lines up on it, then follows the line.
  * - STOP: press GP21, 'x', or STOP on the page. Works in any state.
  * - CALIBRATE (while stopped, car still and level): hold GP20 for 2 s,
  *   'c', or CALIBRATE on the page. One beep when it succeeds.
@@ -23,6 +23,14 @@
  *   off and logs every line sensor change. Then 'b' / LEARN BLACK with
  *   both sensors over black, and 'n' / LEARN WHITE over white, to measure
  *   each sensor's polarity.
+ * - TEST LEFT / U-TURN / RIGHT: 'l', 'u', 'r' or the page buttons act
+ *   exactly like a barcode command. While stopped, the car turns and
+ *   stops again (to tune TURN_90_MSEC); while following, it turns and
+ *   follows on.
+ *
+ * @par Barcodes
+ * Every decoded barcode is logged and shown on the web page. A command
+ * (see BARCODE_TEXT_... in config.h) also turns the car at once.
  *
  * @par Coding standard
  * BARR-C:2018. Deviation: Rule 6.5.a, see gpio_isr.c.
@@ -71,6 +79,9 @@
 #define KEY_DIAG                'd'
 #define KEY_LEARN_BLACK         'b'
 #define KEY_LEARN_WHITE         'n'
+#define KEY_TURN_LEFT           'l'
+#define KEY_TURN_RIGHT          'r'
+#define KEY_UTURN               'u'
 
 
 static void          usb_wait(void);
@@ -83,6 +94,7 @@ static void          calibrate_run(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
 static void          barcode_report(barcode_result_t result);
+static void          turn_test(barcode_command_t command);
 
 
 /*!
@@ -238,12 +250,45 @@ command_run (web_command_t command)
         }
     break;
 
+    case WEB_CMD_TURN_LEFT:
+        turn_test(BARCODE_CMD_LEFT);
+    break;
+
+    case WEB_CMD_TURN_RIGHT:
+        turn_test(BARCODE_CMD_RIGHT);
+    break;
+
+    case WEB_CMD_UTURN:
+        turn_test(BARCODE_CMD_UTURN);
+    break;
+
     case WEB_CMD_NONE:
     default:
         // Nothing to do.
     break;
     }
 }   /* command_run() */
+
+
+/*!
+ * @brief Run a barcode command without a barcode, to test the turns.
+ *
+ * @param[in] command The command to act on.
+ */
+static void
+turn_test (barcode_command_t command)
+{
+    if (line_diag_is_active())
+    {
+        log_printf("IR DIAG is on (motors off): turn it off first.");
+    }
+    else
+    {
+        log_printf("TEST: as if a barcode said %s.",
+                   barcode_command_name(command));
+        vehicle_barcode_command(command);
+    }
+}   /* turn_test() */
 
 
 /*!
@@ -291,7 +336,18 @@ barcode_report (barcode_result_t result)
 {
     if (BARCODE_DECODED == result)
     {
-        log_printf("Barcode decoded: \"%s\"", barcode_message());
+        barcode_command_t command = barcode_command();
+
+        if (BARCODE_CMD_NONE == command)
+        {
+            log_printf("Barcode MESSAGE: \"%s\"", barcode_message());
+        }
+        else
+        {
+            log_printf("Barcode COMMAND: \"%s\" = %s", barcode_message(),
+                       barcode_command_name(command));
+            vehicle_barcode_command(command);
+        }
         telemetry_text("barcode", barcode_message());
     }
     else if (BARCODE_INVALID == result)
@@ -441,6 +497,18 @@ serial_poll (void)
     else if (KEY_LEARN_WHITE == key)
     {
         command = WEB_CMD_LEARN_WHITE;
+    }
+    else if (KEY_TURN_LEFT == key)
+    {
+        command = WEB_CMD_TURN_LEFT;
+    }
+    else if (KEY_TURN_RIGHT == key)
+    {
+        command = WEB_CMD_TURN_RIGHT;
+    }
+    else if (KEY_UTURN == key)
+    {
+        command = WEB_CMD_UTURN;
     }
     else
     {

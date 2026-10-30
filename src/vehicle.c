@@ -46,6 +46,19 @@
  * the line turns off it and back once. A sensor that still has not
  * detected black after LINE_CAL_ALIGN_TRIES failed aligns stops the car
  * with its name.
+ *
+ * @par Barcodes
+ * While a barcode is being read (barcode_is_capturing()), FOLLOW_LINE
+ * ignores the line sensors and drives straight at SPEED_SCAN, because bar
+ * widths are measured in time; obstacles and humps are still checked. A
+ * decoded COMMAND trumps the line sensors (TURN state):
+ * 1. LEAVE: pivot until both line sensors are off the current line;
+ * 2. FIND:  keep pivoting until a sensor finds a line. A left/right turn
+ *    gives up after TURN_90_MSEC (about 90 degrees) and drives on; a
+ *    U-turn finds the same line again behind it;
+ * 3. ALIGN: keep pivoting until both sensors are on it, then follow.
+ * Pressed with the car stopped (TEST buttons), the car turns and stops
+ * again, so TURN_90_MSEC can be tuned on the bench.
  */
 
 #include <inttypes.h>
@@ -116,8 +129,30 @@ static bool            gb_pivoting     = false;
 static bool            gb_pivot_left   = true;
 static uint32_t        g_pivot_msec    = 0u;    // Pivot began/reversed.
 
+// Barcode reading and barcode turns.
+typedef enum
+{
+    TURN_LEAVE,     // Pivot until both line sensors are off the line.
+    TURN_FIND,      // Pivot until a line sensor finds a line.
+    TURN_ALIGN      // Pivot until both line sensors are on it.
+} turn_phase_t;
+
+static bool              gb_launch      = true;  // Straight start allowed.
+static bool              gb_scanning    = false; // Driving straight to read.
+static uint32_t          g_scan_msec    = 0u;    // Reading began at.
+static barcode_command_t g_turn_cmd     = BARCODE_CMD_NONE;
+static vehicle_state_t   g_turn_after   = VEHICLE_FOLLOW_LINE;
+static turn_phase_t      g_turn_phase   = TURN_LEAVE;
+static uint32_t          g_turn_msec    = 0u;    // Current phase began.
+static bool              gb_turn_left_on = true; // Left was last on black.
+
 
 static void     state_enter(vehicle_state_t state, uint32_t now_msec);
+static void     turn_step(uint32_t now_msec);
+static void     turn_phase_enter(turn_phase_t phase, uint32_t now_msec);
+static void     turn_finish(uint32_t now_msec, line_state_t line,
+                            line_last_t last, char const * p_how);
+static bool     scan_is_on(uint32_t now_msec);
 static void     line_steer(int32_t speed, uint32_t now_msec);
 static void     line_cal_step(uint32_t now_msec);
 static void     cal_phase_enter(cal_phase_t phase, uint32_t now_msec);
@@ -171,6 +206,45 @@ vehicle_stop (void)
 
 
 /*!
+ * @brief Act on a barcode command; it trumps the line sensors.
+ *
+ * @par
+ * While following, the car turns and then follows the line it finds.
+ * When stopped (a TEST button), it turns and stops again, to tune
+ * TURN_90_MSEC. In any other state the command is ignored and logged.
+ *
+ * @param[in] command The command; BARCODE_CMD_NONE does nothing.
+ */
+void
+vehicle_barcode_command (barcode_command_t command)
+{
+    uint32_t now_msec = now_msec_get();
+
+    if (BARCODE_CMD_NONE == command)
+    {
+        // A plain message: keep following.
+    }
+    else if (VEHICLE_FOLLOW_LINE == g_state)
+    {
+        g_turn_cmd   = command;
+        g_turn_after = VEHICLE_FOLLOW_LINE;
+        state_enter(VEHICLE_TURN, now_msec);
+    }
+    else if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    {
+        g_turn_cmd   = command;
+        g_turn_after = VEHICLE_STOPPED;
+        state_enter(VEHICLE_TURN, now_msec);
+    }
+    else
+    {
+        log_printf("%s ignored in %s.", barcode_command_name(command),
+                   vehicle_state_name(g_state));
+    }
+}   /* vehicle_barcode_command() */
+
+
+/*!
  * @brief Run one step of the state machine. Call every control tick,
  *        after the sensor tasks.
  */
@@ -201,6 +275,10 @@ vehicle_task (void)
 
     case VEHICLE_BLOCKED:
         blocked_step(now_msec, range_mm);
+    break;
+
+    case VEHICLE_TURN:
+        turn_step(now_msec);
     break;
 
     case VEHICLE_READY:
@@ -266,6 +344,10 @@ vehicle_state_name (vehicle_state_t state)
         p_name = "LINE_CAL";
     break;
 
+    case VEHICLE_TURN:
+        p_name = "TURN";
+    break;
+
     default:
         p_name = "UNKNOWN";
     break;
@@ -295,6 +377,10 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
     {
         state_enter(VEHICLE_PROBE, now_msec);
     }
+    else if (scan_is_on(now_msec))
+    {
+        motor_set(SPEED_SCAN, SPEED_SCAN);  // Reading a barcode: steady.
+    }
     else if (b_range_used && (range_mm <= OBSTACLE_SLOW_MM))
     {
         line_steer(SPEED_CREEP, now_msec);
@@ -304,6 +390,147 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10)
         line_steer(SPEED_CRUISE, now_msec);
     }
 }   /* follow_line_step() */
+
+
+/*!
+ * @brief Decide whether to drive straight for a barcode being read.
+ *
+ * @par
+ * True from the first bar until the scan ends, but for no longer than
+ * BARCODE_SCAN_MAX_MSEC, so a stray black patch cannot keep the car off
+ * the line for long.
+ *
+ * @param[in] now_msec The current time.
+ *
+ * @return True to drive straight at SPEED_SCAN this tick.
+ */
+static bool
+scan_is_on (uint32_t now_msec)
+{
+    bool b_on = false;
+
+    if (!barcode_is_capturing())
+    {
+        gb_scanning = false;
+    }
+    else if (!gb_scanning)
+    {
+        gb_scanning = true;
+        g_scan_msec = now_msec;
+        b_on        = true;
+    }
+    else
+    {
+        b_on = ((now_msec - g_scan_msec) < BARCODE_SCAN_MAX_MSEC);
+    }
+
+    return (b_on);
+}   /* scan_is_on() */
+
+
+/*!
+ * @brief TURN: carry out a barcode command, then follow the line found.
+ *
+ * @param[in] now_msec The current time.
+ */
+static void
+turn_step (uint32_t now_msec)
+{
+    line_state_t line     = line_sensor_read();
+    bool         b_black  = (line.b_left_black || line.b_right_black);
+    bool         b_uturn  = (BARCODE_CMD_UTURN == g_turn_cmd);
+    bool         b_left   = (b_uturn ? TURN_UTURN_LEFT
+                                     : (BARCODE_CMD_LEFT == g_turn_cmd));
+    uint32_t     max_msec = (b_uturn ? TURN_UTURN_MAX_MSEC : TURN_90_MSEC);
+    uint32_t     in_turn  = now_msec - g_entered_msec;
+    line_state_t no_line  = { false, false };
+
+    if ((TURN_ALIGN != g_turn_phase) && (in_turn > max_msec))
+    {
+        turn_finish(now_msec, no_line, LINE_LAST_BOTH,
+                    (b_uturn ? "no line found, driving on"
+                             : "about 90 deg, no line, driving on"));
+    }
+    else if (TURN_LEAVE == g_turn_phase)
+    {
+        if (!b_black)
+        {
+            turn_phase_enter(TURN_FIND, now_msec);
+        }
+        pivot(b_left, now_msec);
+    }
+    else if (TURN_FIND == g_turn_phase)
+    {
+        if (b_black)
+        {
+            gb_turn_left_on = line.b_left_black;
+            turn_phase_enter(TURN_ALIGN, now_msec);
+        }
+        pivot(b_left, now_msec);
+    }
+    else if (line.b_left_black && line.b_right_black)
+    {
+        turn_finish(now_msec, line, LINE_LAST_BOTH, "on the line");
+    }
+    else if (!b_black)
+    {
+        // Pivoted past the line: it is on the side last seen.
+        turn_finish(now_msec, line,
+                    (gb_turn_left_on ? LINE_LAST_LEFT : LINE_LAST_RIGHT),
+                    "line found");
+    }
+    else if ((now_msec - g_turn_msec) > TURN_ALIGN_MAX_MSEC)
+    {
+        turn_finish(now_msec, line,
+                    (line.b_left_black ? LINE_LAST_LEFT : LINE_LAST_RIGHT),
+                    "line found");
+    }
+    else
+    {
+        gb_turn_left_on = line.b_left_black;
+        pivot(b_left, now_msec);
+    }
+}   /* turn_step() */
+
+
+/*!
+ * @brief Start a TURN phase.
+ *
+ * @param[in] phase    The new phase.
+ * @param[in] now_msec The current time.
+ */
+static void
+turn_phase_enter (turn_phase_t phase, uint32_t now_msec)
+{
+    g_turn_phase = phase;
+    g_turn_msec  = now_msec;
+}   /* turn_phase_enter() */
+
+
+/*!
+ * @brief End a barcode turn: hand the line state to the steering and
+ *        follow on (or stop again, after a TEST turn).
+ *
+ * @param[in] now_msec The current time.
+ * @param[in] line     The line state to steer from.
+ * @param[in] last     Where the line was last seen.
+ * @param[in] p_how    How the turn ended, for the log.
+ */
+static void
+turn_finish (uint32_t now_msec, line_state_t line, line_last_t last,
+             char const * p_how)
+{
+    log_printf("%s done (%s, %" PRIu32 " ms).",
+               barcode_command_name(g_turn_cmd), p_how,
+               (now_msec - g_entered_msec));
+
+    g_line         = line;
+    gb_left_going  = false;
+    gb_right_going = false;
+    g_line_last    = last;
+    gb_last_left   = (LINE_LAST_LEFT == last);
+    state_enter(g_turn_after, now_msec);
+}   /* turn_finish() */
 
 
 /*!
@@ -433,10 +660,21 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
                    vehicle_state_name(state));
     }
 
+    // After a barcode turn the car is already lined up: no straight start.
+    gb_launch      = (VEHICLE_TURN != g_state);
     g_state        = state;
     g_entered_msec = now_msec;
     gb_level       = false;
     gb_clear       = false;
+    gb_scanning    = false;
+
+    if (VEHICLE_TURN == state)
+    {
+        gb_pivoting = false;    // The pivot starts with a burst.
+        turn_phase_enter(TURN_LEAVE, now_msec);
+        log_printf("Barcode command -> %s (trumps the line sensors).",
+                   barcode_command_name(g_turn_cmd));
+    }
 
     if (VEHICLE_LINE_CAL == state)
     {
@@ -695,7 +933,7 @@ line_steer (int32_t speed, uint32_t now_msec)
 {
     line_state_t line     = line_filtered(now_msec);
     int32_t      inner    = (speed * TURN_INNER_PERCENT) / PERCENT;
-    bool         b_launch = ((VEHICLE_FOLLOW_LINE == g_state) &&
+    bool         b_launch = (gb_launch && (VEHICLE_FOLLOW_LINE == g_state) &&
                              ((now_msec - g_entered_msec) <
                               LINE_START_STRAIGHT_MSEC));
 

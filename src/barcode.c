@@ -14,6 +14,14 @@
  *    character only, so a steady speed is needed but its value is not.
  * 4. If a forward decode fails, the scan is decoded in reverse, so the
  *    car can cross the barcode in either direction.
+ * 5. The message is checked against the command texts in config.h
+ *    (BARCODE_TEXT_...): a match is a command (turn left, turn right,
+ *    U-turn) that trumps the line sensors; anything else is a message.
+ *
+ * @par Flicker
+ * The IR module can flicker as a bar edge passes under it. A colour that
+ * lasts less than BARCODE_GLITCH_USEC is not a bar or space: it is merged
+ * back into the element it interrupted.
  *
  * @par Reference
  * Code 39 symbology: ISO/IEC 16388.
@@ -42,6 +50,7 @@
 #define WIDE_RATIO_DEN          4u      // 1.25x the widest narrow.
 #define START_STOP_CHAR         '*'
 #define NUM_CODE39_SYMBOLS      44u
+#define NUM_COMMAND_TEXTS       6u
 
 typedef struct
 {
@@ -65,6 +74,23 @@ static code39_t const g_code39[NUM_CODE39_SYMBOLS] =
     { 0x0A8u, '$' }, { 0x0A2u, '/' }, { 0x08Au, '+' }, { 0x02Au, '%' }
 };
 
+typedef struct
+{
+    char const *      p_text;
+    barcode_command_t command;
+} command_text_t;
+
+// Messages that are commands (exact match); see config.h.
+static command_text_t const g_command_texts[NUM_COMMAND_TEXTS] =
+{
+    { BARCODE_TEXT_LEFT,        BARCODE_CMD_LEFT  },
+    { BARCODE_TEXT_LEFT_SHORT,  BARCODE_CMD_LEFT  },
+    { BARCODE_TEXT_RIGHT,       BARCODE_CMD_RIGHT },
+    { BARCODE_TEXT_RIGHT_SHORT, BARCODE_CMD_RIGHT },
+    { BARCODE_TEXT_UTURN,       BARCODE_CMD_UTURN },
+    { BARCODE_TEXT_UTURN_SHORT, BARCODE_CMD_UTURN }
+};
+
 // Edge ring, filled by the ISR. The head only ever increases (it wraps
 // naturally at 2^32), so head - tail is the number of unread edges.
 static volatile uint32_t g_edge_usec[EDGE_RING_SIZE];
@@ -82,7 +108,8 @@ static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
 static bool     gb_enabled       = true;
 
-static char     g_message[BARCODE_MESSAGE_MAX + 1u];
+static char              g_message[BARCODE_MESSAGE_MAX + 1u];
+static barcode_command_t g_command = BARCODE_CMD_NONE;
 
 
 static void             edge_add(uint32_t edge_usec, bool b_black);
@@ -90,6 +117,7 @@ static barcode_result_t scan_finish(void);
 static bool             scan_decode(bool b_reverse);
 static char             char_decode(uint32_t first, bool b_reverse);
 static uint32_t         element_get(uint32_t index, bool b_reverse);
+static barcode_command_t command_match(char const * p_message);
 
 
 /*!
@@ -209,6 +237,70 @@ barcode_message (void)
 
 
 /*!
+ * @brief Return what the last decoded message asks the car to do.
+ *
+ * @return The command, or BARCODE_CMD_NONE for a plain message.
+ */
+barcode_command_t
+barcode_command (void)
+{
+    return (g_command);
+}   /* barcode_command() */
+
+
+/*!
+ * @brief Name a barcode command for the log and the web page.
+ *
+ * @param[in] command The command.
+ *
+ * @return A constant string.
+ */
+char const *
+barcode_command_name (barcode_command_t command)
+{
+    char const * p_name = "MESSAGE";
+
+    switch (command)
+    {
+    case BARCODE_CMD_LEFT:
+        p_name = "TURN LEFT";
+    break;
+
+    case BARCODE_CMD_RIGHT:
+        p_name = "TURN RIGHT";
+    break;
+
+    case BARCODE_CMD_UTURN:
+        p_name = "U-TURN";
+    break;
+
+    case BARCODE_CMD_NONE:
+    default:
+        p_name = "MESSAGE";
+    break;
+    }
+
+    return (p_name);
+}   /* barcode_command_name() */
+
+
+/*!
+ * @brief Report whether a barcode is being read right now.
+ *
+ * @par
+ * True from the first bar until the quiet gap after the last one. The car
+ * drives straight and steady meanwhile, since widths are measured in time.
+ *
+ * @return True while a scan is in progress.
+ */
+bool
+barcode_is_capturing (void)
+{
+    return (gb_capturing);
+}   /* barcode_is_capturing() */
+
+
+/*!
  * @brief Report whether the barcode sensor sees black right now.
  *
  * @return True over a bar.
@@ -242,7 +334,26 @@ edge_add (uint32_t edge_usec, bool b_black)
             g_last_edge_usec = edge_usec;
         }
     }
-    else if (b_black != gb_last_black)
+    else if (b_black == gb_last_black)
+    {
+        // Same colour twice: a glitch too short to measure. Ignore it.
+    }
+    else if ((edge_usec - g_last_edge_usec) < BARCODE_GLITCH_USEC)
+    {
+        // The last colour flickered for too short a time to be a bar or a
+        // space: undo it, so the element before it simply continues.
+        if (0u == g_num_elements)
+        {
+            gb_capturing = false;   // The "first bar" was only a flicker.
+        }
+        else
+        {
+            g_num_elements--;
+            g_last_edge_usec -= g_elements[g_num_elements];
+            gb_last_black     = b_black;
+        }
+    }
+    else
     {
         uint32_t width = edge_usec - g_last_edge_usec;
 
@@ -260,10 +371,6 @@ edge_add (uint32_t edge_usec, bool b_black)
                                                     : g_widest_usec);
         g_last_edge_usec = edge_usec;
         gb_last_black    = b_black;
-    }
-    else
-    {
-        // Same colour twice: a glitch too short to measure. Ignore it.
     }
 }   /* edge_add() */
 
@@ -348,6 +455,7 @@ scan_decode (bool b_reverse)
     {
         decoded[out_len] = '\0';
         (void) strcpy(g_message, decoded);  // Lengths match; result unused.
+        g_command = command_match(g_message);
     }
 
     return (b_ok);
@@ -439,5 +547,29 @@ element_get (uint32_t index, bool b_reverse)
 
     return (g_elements[actual]);
 }   /* element_get() */
+
+
+/*!
+ * @brief Check whether a message is one of the command texts.
+ *
+ * @param[in] p_message The decoded message.
+ *
+ * @return The command, or BARCODE_CMD_NONE if it is a plain message.
+ */
+static barcode_command_t
+command_match (char const * p_message)
+{
+    barcode_command_t command = BARCODE_CMD_NONE;
+
+    for (uint32_t idx = 0u; idx < NUM_COMMAND_TEXTS; idx++)
+    {
+        if (0 == strcmp(p_message, g_command_texts[idx].p_text))
+        {
+            command = g_command_texts[idx].command;
+        }
+    }
+
+    return (command);
+}   /* command_match() */
 
 /*** end of file ***/

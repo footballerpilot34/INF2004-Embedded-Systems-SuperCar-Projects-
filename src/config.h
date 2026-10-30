@@ -152,11 +152,41 @@
                                             // hump (it may see the floor).
 
 // ------------------------------------------------------------------------
-// Barcode (Code 39).
+// Barcode (Code 39) on the side IR sensor; barcodes are 20 mm beside the
+// line, so the sensor must sit far enough out that it never sees the line.
 // ------------------------------------------------------------------------
 #define BARCODE_END_GAP_MIN_USEC    300000u // No edge this long ends a scan.
 #define BARCODE_END_GAP_FACTOR      3u      // ...or 3x the widest element.
 #define BARCODE_MESSAGE_MAX         16u     // Longest message kept.
+#define BARCODE_GLITCH_USEC         2000u   // A colour shorter than this is
+                                            // sensor flicker, not a bar.
+
+// Bar widths are measured in time, so while a barcode is being read the
+// car ignores the line sensors and drives straight at one steady speed.
+#define SPEED_SCAN                  8       // Steady speed while reading.
+#define BARCODE_SCAN_MAX_MSEC       5000u   // Longest straight drive for
+                                            // one scan, then steer again.
+
+// Messages that are COMMANDS (exact match; Code 39 is upper case). They
+// trump the line sensors. Anything else is shown as a plain message.
+// VERIFY against the real barcodes and change the texts to match.
+#define BARCODE_TEXT_LEFT           "LEFT"
+#define BARCODE_TEXT_LEFT_SHORT     "L"
+#define BARCODE_TEXT_RIGHT          "RIGHT"
+#define BARCODE_TEXT_RIGHT_SHORT    "R"
+#define BARCODE_TEXT_UTURN          "UTURN"
+#define BARCODE_TEXT_UTURN_SHORT    "U"
+
+// Barcode turns: pivot (pulsed, like calibration) off the line, then
+// until a line sensor finds a line, then until both are on it; then
+// follow it. With no line there, a left/right turn stops pivoting after
+// TURN_90_MSEC and drives on, latching onto the next line it meets.
+// VERIFY TURN_90_MSEC with the TEST LEFT/RIGHT buttons with the car
+// stopped: it should turn about 90 degrees and stop.
+#define TURN_90_MSEC                2000u   // Pivot time for about 90 deg.
+#define TURN_UTURN_MAX_MSEC         6000u   // U-turn gives up after this.
+#define TURN_UTURN_LEFT             true    // U-turn pivot: true = left.
+#define TURN_ALIGN_MAX_MSEC         1500u   // Both-on-line must take less.
 
 // ------------------------------------------------------------------------
 // Timing.
