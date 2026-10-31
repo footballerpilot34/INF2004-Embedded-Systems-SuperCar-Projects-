@@ -64,22 +64,29 @@
 // - neither, after one was last on the line: keep arcing that way.
 
 // START calibration: find the line from anywhere near it, repeating
-// until it is found (STOP always works):
-// 1. Pivot one way (LINE_CAL_PIVOT_LEFT) until either sensor sees black,
-//    for up to LINE_CAL_PIVOT_MAX_MSEC.
-// 2. Still no line: drive straight ahead until either sensor sees black
-//    (or an obstacle is ahead), then go back to step 1.
+// until it is found (STOP always works). All movement is at
+// LINE_CAL_SPEED_PERCENT of the line-following speed (SPEED_CRUISE):
+// 1. A sensor already on black: sweep towards that sensor first.
+//    No sensor on black (e.g. on a white mat): pivot (LINE_CAL_PIVOT_LEFT)
+//    until either sensor sees black, for up to LINE_CAL_PIVOT_MAX_MSEC.
+// 2. Still no line: drive straight ahead in the direction now faced until
+//    either sensor sees black, for up to LINE_CAL_DRIVE_MAX_MSEC (or an
+//    obstacle is ahead), then go back to step 1.
 // 3. Align: pivot until both sensors are on black for 30 ms, then follow.
+//    Overshot: pivot back towards the sensor that last saw black.
 //    If that fails within LINE_CAL_ALIGN_MAX_MSEC, go back to step 1.
 // Success also needs EACH sensor to have DETECTED black during
 // calibration: switched from white to black, so a dead or stuck sensor
 // cannot pass. Starting on the line, the car turns off and back once to
 // prove it.
 #define LINE_CAL_PIVOT_LEFT         true    // Search pivot: true = left.
-#define LINE_CAL_PIVOT_MAX_MSEC     8000u   // Pivot this long (7-10 s), then
-                                            // drive forward instead.
-#define LINE_CAL_DRIVE_SPEED        10      // Nearest whole % to +20% from 8.
-#define LINE_CAL_ALIGN_MAX_MSEC     5000u   // Align must finish in this.
+#define LINE_CAL_PIVOT_MAX_MSEC     5000u   // Pivot this long, then drive
+                                            // forward instead.
+#define LINE_CAL_DRIVE_MAX_MSEC     2000u   // Drive this long, then pivot
+                                            // again.
+#define LINE_CAL_SPEED_PERCENT      50      // % of SPEED_CRUISE: 13 -> 6%.
+                                            // Stalls driving: raise it.
+#define LINE_CAL_ALIGN_MAX_MSEC     7000u   // Align must finish in this.
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long.
 #define LINE_CAL_ALIGN_TRIES        3u      // Failed aligns before giving
                                             // up and naming the sensor that
@@ -88,17 +95,18 @@
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
 // ------------------------------------------------------------------------
-#define SPEED_CRUISE                10      // Nearest whole % to +20% from 8.
-#define SPEED_CREEP                 7       // Nearest whole % to +20% from 6.
+#define SPEED_CRUISE                13      // +25% from 10 (12.5, rounded).
+#define SPEED_CREEP                 9       // +25% from 7 (8.75, rounded).
 // START calibration pivots are PULSED: the motors stall below about
 // 10-15% when turning on the spot, so instead of a weak steady 6%, each
 // pivot is short bursts at a power that really moves the wheels, with
 // braked pauses between them. Average turning speed stays slow:
 // slower turning -> shorter ON or longer OFF; stalls -> raise the speed.
-#define PIVOT_PULSE_SPEED           20      // Burst power (moves the car).
+#define PIVOT_PULSE_SPEED           25      // Burst power, +25% from 20.
 #define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
 #define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
-#define SPEED_HUMP                  18      // Climbing a hump (+20%).
+#define SPEED_HUMP                  23      // Climbing a hump, +25% from 18
+                                            // (22.5, rounded).
 // Line-following turns keep BOTH wheels rolling forward, so the car never
 // pauses to turn: the outer wheel speeds up and the inner wheel slows
 // (never 0, which would brake it and pivot the car on that wheel). The
@@ -134,16 +142,11 @@
 // rejected). Patches still caught: raise it. Real line missed: lower it.
 #define LINE_GREY_WHITE_WEIGHT      3u
 
-// Dark patches that read SOLID black. The line is continuous: it cannot
-// suddenly jump to the side AWAY from where the car has been tracking it.
-// So new black on that side is suspect until it has lasted this long:
-// the car does not turn towards it, it just goes straight (or keeps
-// turning back to the line if it had already lost it). This also covers a
-// patch that joins while the other sensor is on the line and is left
-// behind when the line curves away.
-// Still swayed by patches: raise it a little. Loses the real line or
-// keeps turning: lower it (0 turns the rule off).
-#define LINE_NEW_BLACK_TRUST_MSEC   200u
+// Line lost (both sensors white): black on either sensor counts after
+// only this long (instead of LINE_BLACK_CONFIRM_MSEC), so a sensor that
+// sweeps across the line is caught and the car turns towards it rather
+// than turning past it.
+#define LINE_LOST_BLACK_CONFIRM_MSEC 20u
 
 // Backtrack: when BOTH sensors lose the line, the car reverses along the
 // path it just drove (its recorded wheel speeds, played backwards) to the
@@ -162,9 +165,9 @@
 // corrections in the recording do not make the reverse wobble.
 #define LINE_BACKTRACK_SMOOTH_TICKS 5u
 
-// Turning towards the line always happens at once. Straightening up or
-// reversing the turn waits until the last steering change is this old, so
-// the car cannot flip back and forth. Raise to calm it further; lower if
+// Turning towards a sensor on black always happens at once, whichever
+// way the car was turning. Only straightening up waits until the last
+// steering change is this old, so the car cannot flip back and forth. Raise to calm it further; lower if
 // it overshoots the line after a turn.
 #define LINE_STEER_HOLD_MSEC        150u
 
@@ -240,7 +243,8 @@
 
 // Bar widths are measured in time, so while a barcode is being read the
 // car ignores the line sensors and drives straight at one steady speed.
-#define SPEED_SCAN                  8       // Steady speed while reading.
+#define SPEED_SCAN                  10      // Steady speed while reading,
+                                            // +25% from 8.
 #define BARCODE_SCAN_MAX_MSEC       5000u   // Longest straight drive for
                                             // one scan, then steer again.
 

@@ -22,7 +22,7 @@
 #define MOTOR_PWM_HZ    20000u  // Silent, and the Robo Pico's maximum.
 #define MAX_SPEED       100
 #define NUM_MOTOR_PINS  4u
-#define START_BOOST_PERCENT 20
+#define START_BOOST_PERCENT 25    // +25% from 20.
 #define START_BOOST_USEC 60000u
 
 
