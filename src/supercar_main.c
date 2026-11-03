@@ -1,8 +1,8 @@
 /** @file supercar_main.c
  *
  * @brief SuperCar firmware: follows a black line, reads Code 39 barcodes,
- *        climbs humps and stops at walls, with Teleplot telemetry and a
- *        wireless web UI.
+ *        scans and bypasses small obstacles, climbs humps, with Teleplot
+ *        telemetry and a wireless web UI.
  *
  * @par Control loop
  * Every 10 ms (the design's task period) main() runs, in order: Wi-Fi,
@@ -156,6 +156,10 @@ main (void)
         imu_task();
         barcode_report(barcode_task());
         vehicle_task();
+        if (vehicle_servo_take(&servo_deg))
+        {
+            servo_set_angle(servo_deg);
+        }
         line_diag_task();
         buzzer_task();
 

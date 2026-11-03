@@ -36,6 +36,26 @@
 #define SERVO_MIN_USEC              500     // Pulse width at 0 degrees.
 #define SERVO_MAX_USEC              2500    // Pulse width at 180 degrees.
 
+// Autonomous obstacle profile. The scan uses the servo's full configured
+// range in 15-degree steps. If the pan servo is mounted mirrored, swap the
+// signs in obstacle_scan_angle() in vehicle.c.
+#define OBSTACLE_SCAN_STEP_DEG      15u
+#define OBSTACLE_SERVO_ANGLE_SIGN   1       // +1: increasing angle points right.
+#define OBSTACLE_SCAN_SETTLE_MSEC   250u
+#define OBSTACLE_SCAN_SAMPLE_MSEC   75u
+#define OBSTACLE_SCAN_SAMPLES       3u
+#define OBSTACLE_SCAN_MAX_MM        1500u   // No echo is treated as clear.
+#define OBSTACLE_PROFILE_DETECT_MM  500u    // Range considered part of profile.
+#define OBSTACLE_SIDE_CLEAR_MM      400u    // Minimum side clearance to bypass.
+#define OBSTACLE_BYPASS_SPEED       24      // Low, steady forward speed.
+#define OBSTACLE_BYPASS_INNER_PCT   65u     // Inner wheel for the side arcs.
+#define OBSTACLE_BYPASS_ARC_MSEC    700u    // Outward and return arcs; tune on track.
+#define OBSTACLE_BYPASS_MIN_PASS_MM 300u
+#define OBSTACLE_BYPASS_CLEAR_MM    150u    // Margin beyond profiled obstacle.
+#define OBSTACLE_BYPASS_SPEED_MM_S  120u    // Approximate crawl speed; tune on track.
+#define OBSTACLE_REACQUIRE_MAX_MSEC 5000u
+#define OBSTACLE_REACQUIRE_TICKS    5u      // Both line sensors confirmed.
+
 // ------------------------------------------------------------------------
 // Wireless UI: the car makes its own Wi-Fi network; open the page at
 // http://192.168.4.1 on a phone or laptop that has joined it.
@@ -185,10 +205,10 @@
 // ------------------------------------------------------------------------
 // Obstacle handling (ultrasonic).
 // ------------------------------------------------------------------------
-// Stop at once: an echo from closer than OBSTACLE_STOP_MM brakes the car
-// (BLOCKED) straight away; it resumes once the way is clear. false = the
-// hump/wall PROBE instead (creep closer, climb if the nose tips up). With
-// true the car stops in front of a hump too.
+// With STOP_AT_ONCE, an echo closer than OBSTACLE_STOP_MM brakes the car,
+// scans left/centre/right plus intermediate angles, then attempts a timed
+// bypass and line reacquisition. Set false to retain the older hump/wall
+// PROBE behavior instead (creep closer, climb if the nose tips up).
 #define OBSTACLE_STOP_AT_ONCE       true
 #define OBSTACLE_SLOW_MM            400u    // Slow to creep speed.
 #define OBSTACLE_STOP_MM            250u    // Possible obstacle: probe it.

@@ -11,7 +11,9 @@
  * line_L, line_R, barcode_IR (1 = black); line_L_raw, line_R_raw (raw
  * pin level, 1 = HIGH); range_cm (-1 = nothing ahead);
  * motor_L, motor_R (percent); state
- * (number). Text fields: state_name and barcode (last message).
+ * (number), obstacle_width_mm, obstacle_clear_L/R_mm, obstacle_side
+ * (-1 left, +1 right, 0 none), obstacle_scan_angle, obstacle_scan_mm.
+ * Text fields: state_name and barcode (last message).
  */
 
 #include <inttypes.h>
@@ -69,6 +71,15 @@ telemetry_task (void)
     value_print("motor_L", motor_left_speed());
     value_print("motor_R", motor_right_speed());
     value_print("state", (int32_t) state);
+    value_print("obstacle_width_mm", vehicle_obstacle_width_mm());
+    value_print("obstacle_clear_L_mm",
+                vehicle_obstacle_left_clearance_mm());
+    value_print("obstacle_clear_R_mm",
+                vehicle_obstacle_right_clearance_mm());
+    value_print("obstacle_side", vehicle_obstacle_side());
+    value_print("obstacle_scan_angle",
+                vehicle_obstacle_scan_angle_deg());
+    value_print("obstacle_scan_mm", vehicle_obstacle_scan_range_mm());
 
     // Text only needs sending when it changes, plus a refresh each second
     // in case Teleplot was opened late.

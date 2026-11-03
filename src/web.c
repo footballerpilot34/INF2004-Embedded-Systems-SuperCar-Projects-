@@ -99,6 +99,7 @@ static char const g_page_html[] =
     "</div>"
     "<div class=c>State: <b id=s>-</b><br>"
     "Range: <b id=r>-</b> cm &nbsp; LSM303DLHC: <b id=imu>-</b><br>"
+    "Obstacle profile: <b id=op>-</b><br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
     "IR raw pins L(GP28)/R(GP0): <b id=x>-</b></div>"
     "<div class=c><b>Accelerometer</b> <span class=leg>"
@@ -151,6 +152,10 @@ static char const g_page_html[] =
     "if(d.log.length){L.scrollTop=L.scrollHeight}q=d.nx;"
     "$('s').textContent=d.st;"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
+    "var side=d.os<0?'LEFT':(d.os>0?'RIGHT':'-');"
+    "$('op').textContent='width ~'+d.ow+' mm, clear L/R '+d.ol+'/'+d.or+"
+    "' mm, choice '+side+(d.st==='OBSTACLE_SCAN'?' (scan '+d.oa+' deg: '+"
+    "(d.od<0?'none':d.od+' mm')+')':'');"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
@@ -526,6 +531,9 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 "\"imu\":%d,\"iv\":%d,\"ic\":%d,"
                                 "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
                                 "\"pk\":%" PRId32 ","
+                                "\"ow\":%" PRId32 ",\"ol\":%" PRId32 ","
+                                "\"or\":%" PRId32 ",\"os\":%" PRId32 ","
+                                "\"oa\":%" PRId32 ",\"od\":%" PRId32 ","
                                 "\"lh\":%d,\"rh\":%d,"
                                 "\"ax\":%" PRId32 ",\"ay\":%" PRId32 ","
                                 "\"az\":%" PRId32 ",\"mx\":%" PRId32 ","
@@ -544,6 +552,12 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 (imu_pitch_x10() * 10),
                                 (imu_roll_x10() * 10),
                                 vehicle_hump_peak_tilt_x10(),
+                                vehicle_obstacle_width_mm(),
+                                vehicle_obstacle_left_clearance_mm(),
+                                vehicle_obstacle_right_clearance_mm(),
+                                vehicle_obstacle_side(),
+                                vehicle_obstacle_scan_angle_deg(),
+                                vehicle_obstacle_scan_range_mm(),
                                 (raw.b_left_high ? 1 : 0),
                                 (raw.b_right_high ? 1 : 0),
                                 axes.ax_mg, axes.ay_mg, axes.az_mg,

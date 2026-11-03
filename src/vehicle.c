@@ -1,10 +1,15 @@
 /** @file vehicle.c
  *
- * @brief Mission state machine: line following, obstacle stop, humps.
+ * @brief Mission state machine: line following, obstacle bypass, humps.
  *
- * @par Obstacle stop
- * With OBSTACLE_STOP_AT_ONCE, an echo from closer than OBSTACLE_STOP_MM
- * brakes the car at once (BLOCKED, resumes when clear); no PROBE is done.
+ * @par Obstacle scan and bypass
+ * With OBSTACLE_STOP_AT_ONCE, a close forward return brakes the car and
+ * starts a five-angle servo scan. Three ultrasonic samples are median
+ * filtered at each angle. The angular span gives a rough width estimate;
+ * the clearer side is selected, followed by a timed outward arc, pass and
+ * return arc. Line sensors then steer back to the original line. If neither
+ * side has enough measured clearance, or the line is not reacquired, the
+ * car stops. These timed movements need tuning for the actual chassis.
  *
  * @par Telling a hump from a wall (OBSTACLE_STOP_AT_ONCE false)
  * The ultrasonic sensor alone cannot tell them apart: both look like
@@ -129,6 +134,37 @@ static bool            gb_clear       = false;
 static bool            gb_hump_tilted = false;
 static bool            gb_last_left   = true;   // Line last seen left.
 
+// Servo commands are handed to supercar_main.c, which owns the PWM slice.
+static bool            gb_servo_pending = false;
+static int32_t         g_servo_degrees   = SERVO_CENTER_DEG;
+
+#define OBSTACLE_SCAN_POINTS \
+    ((2u * SERVO_RANGE_DEG / OBSTACLE_SCAN_STEP_DEG) + 1u)
+
+typedef enum
+{
+    OBSTACLE_SWERVE_OUT,
+    OBSTACLE_PASS,
+    OBSTACLE_SWERVE_BACK
+} obstacle_bypass_phase_t;
+
+static uint32_t        g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS];
+static uint32_t        g_obstacle_samples[OBSTACLE_SCAN_SAMPLES];
+static uint32_t        g_obstacle_scan_index = 0u;
+static uint32_t        g_obstacle_sample_count = 0u;
+static uint32_t        g_obstacle_phase_msec = 0u;
+static uint32_t        g_obstacle_scan_next_msec = 0u;
+static int32_t         g_obstacle_scan_angle = 0;
+static int32_t         g_obstacle_scan_range = -1;
+static int32_t         g_obstacle_width_mm = 0;
+static int32_t         g_obstacle_left_clearance_mm = 0;
+static int32_t         g_obstacle_right_clearance_mm = 0;
+static int32_t         g_obstacle_side = 0;       // -1 = left, +1 = right.
+static int32_t         g_obstacle_center_mm = 0;
+static uint32_t        g_obstacle_pass_msec = 0u;
+static uint32_t        g_obstacle_reacquire_ticks = 0u;
+static obstacle_bypass_phase_t g_obstacle_bypass_phase = OBSTACLE_SWERVE_OUT;
+
 // Which sensors last saw the line, so the car knows which limit it left by.
 typedef enum
 {
@@ -240,6 +276,17 @@ static void     probe_step(uint32_t now_msec, uint32_t range_mm,
 static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
 static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
 static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm);
+static void     obstacle_scan_step(uint32_t now_msec, uint32_t range_mm);
+static void     obstacle_bypass_step(uint32_t now_msec);
+static void     obstacle_reacquire_step(uint32_t now_msec);
+static void     obstacle_scan_start(uint32_t now_msec, uint32_t range_mm);
+static void     obstacle_scan_select(uint32_t now_msec);
+static int32_t  obstacle_scan_angle(uint32_t index);
+static uint32_t obstacle_median3(uint32_t a, uint32_t b, uint32_t c);
+static void     obstacle_servo_request(int32_t degrees);
+static void     obstacle_bypass_enter(obstacle_bypass_phase_t phase,
+                                      uint32_t now_msec);
+static void     obstacle_bypass_arc(void);
 
 
 /*!
@@ -381,6 +428,18 @@ vehicle_task (void)
         barcode_test_step(now_msec, range_mm);
     break;
 
+    case VEHICLE_OBSTACLE_SCAN:
+        obstacle_scan_step(now_msec, range_mm);
+    break;
+
+    case VEHICLE_OBSTACLE_BYPASS:
+        obstacle_bypass_step(now_msec);
+    break;
+
+    case VEHICLE_OBSTACLE_REACQUIRE:
+        obstacle_reacquire_step(now_msec);
+    break;
+
     case VEHICLE_READY:
     case VEHICLE_STOPPED:
     default:
@@ -452,6 +511,18 @@ vehicle_state_name (vehicle_state_t state)
         p_name = "BARCODE_TEST";
     break;
 
+    case VEHICLE_OBSTACLE_SCAN:
+        p_name = "OBSTACLE_SCAN";
+    break;
+
+    case VEHICLE_OBSTACLE_BYPASS:
+        p_name = "OBSTACLE_BYPASS";
+    break;
+
+    case VEHICLE_OBSTACLE_REACQUIRE:
+        p_name = "OBSTACLE_REACQUIRE";
+    break;
+
     default:
         p_name = "UNKNOWN";
     break;
@@ -469,6 +540,53 @@ vehicle_hump_peak_tilt_x10 (void)
 {
     return (g_hump_peak_tilt_x10);
 }   /* vehicle_hump_peak_tilt_x10() */
+
+
+/*! @brief Take one pending servo angle command for the PWM owner. */
+bool
+vehicle_servo_take (int32_t * p_degrees)
+{
+    bool b_pending = gb_servo_pending;
+
+    if (b_pending && (NULL != p_degrees))
+    {
+        *p_degrees      = g_servo_degrees;
+        gb_servo_pending = false;
+    }
+
+    return (b_pending);
+}   /* vehicle_servo_take() */
+
+
+int32_t vehicle_obstacle_width_mm (void)
+{
+    return (g_obstacle_width_mm);
+}
+
+int32_t vehicle_obstacle_left_clearance_mm (void)
+{
+    return (g_obstacle_left_clearance_mm);
+}
+
+int32_t vehicle_obstacle_right_clearance_mm (void)
+{
+    return (g_obstacle_right_clearance_mm);
+}
+
+int32_t vehicle_obstacle_side (void)
+{
+    return (g_obstacle_side);
+}
+
+int32_t vehicle_obstacle_scan_angle_deg (void)
+{
+    return (g_obstacle_scan_angle);
+}
+
+int32_t vehicle_obstacle_scan_range_mm (void)
+{
+    return (g_obstacle_scan_range);
+}
 
 
 /*!
@@ -492,8 +610,7 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     {
         if (OBSTACLE_STOP_AT_ONCE)
         {
-            log_printf("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
-            state_enter(VEHICLE_BLOCKED, now_msec);
+            obstacle_scan_start(now_msec, range_mm);
         }
         else
         {
@@ -799,6 +916,343 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm)
 }   /* barcode_test_step() */
 
 
+/*! @brief Begin a stationary multi-angle scan after a close forward return. */
+static void
+obstacle_scan_start (uint32_t now_msec, uint32_t range_mm)
+{
+    g_obstacle_center_mm = (int32_t) range_mm;
+    g_obstacle_width_mm = 0;
+    g_obstacle_side = 0;
+    g_obstacle_left_clearance_mm = 0;
+    g_obstacle_right_clearance_mm = 0;
+    log_printf("Obstacle at %" PRIu32 " mm: stopping for a 5-point scan.",
+               range_mm);
+    state_enter(VEHICLE_OBSTACLE_SCAN, now_msec);
+}   /* obstacle_scan_start() */
+
+
+/*! @brief Scan one servo direction, taking three range samples per angle. */
+static void
+obstacle_scan_step (uint32_t now_msec, uint32_t range_mm)
+{
+    if (g_obstacle_scan_index >= OBSTACLE_SCAN_POINTS)
+    {
+        obstacle_scan_select(now_msec);
+    }
+    else if ((int32_t) (now_msec - g_obstacle_scan_next_msec) >= 0)
+    {
+        uint32_t sample = ((ULTRASONIC_NO_RANGE == range_mm) ?
+                           OBSTACLE_SCAN_MAX_MM : range_mm);
+
+        if (sample > OBSTACLE_SCAN_MAX_MM)
+        {
+            sample = OBSTACLE_SCAN_MAX_MM;
+        }
+        g_obstacle_scan_range = (int32_t) sample;
+        g_obstacle_samples[g_obstacle_sample_count] = sample;
+        g_obstacle_sample_count++;
+
+        if (g_obstacle_sample_count >= OBSTACLE_SCAN_SAMPLES)
+        {
+            g_obstacle_scan_mm[g_obstacle_scan_index] =
+                obstacle_median3(g_obstacle_samples[0],
+                                 g_obstacle_samples[1],
+                                 g_obstacle_samples[2]);
+            log_printf("Scan %s%" PRId32 " deg: %" PRIu32 " mm.",
+                       ((g_obstacle_scan_angle < 0) ? "" : "+"),
+                       g_obstacle_scan_angle,
+                       g_obstacle_scan_mm[g_obstacle_scan_index]);
+            g_obstacle_scan_index++;
+            g_obstacle_sample_count = 0u;
+
+            if (g_obstacle_scan_index < OBSTACLE_SCAN_POINTS)
+            {
+                obstacle_servo_request(
+                    obstacle_scan_angle(g_obstacle_scan_index));
+                g_obstacle_scan_next_msec =
+                    now_msec + OBSTACLE_SCAN_SETTLE_MSEC;
+            }
+            else
+            {
+                obstacle_scan_select(now_msec);
+            }
+        }
+        else
+        {
+            g_obstacle_scan_next_msec =
+                now_msec + OBSTACLE_SCAN_SAMPLE_MSEC;
+        }
+    }
+    else
+    {
+        // Let the servo settle and the next ultrasonic echo arrive.
+    }
+}   /* obstacle_scan_step() */
+
+
+/*! @brief Use the scan profile to select a clear side and size the pass. */
+static void
+obstacle_scan_select (uint32_t now_msec)
+{
+    uint32_t left_outer  = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
+                            g_obstacle_scan_mm[0] :
+                            g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 1u]);
+    uint32_t left_inner  = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
+                            g_obstacle_scan_mm[1] :
+                            g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 2u]);
+    uint32_t right_inner = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
+                            g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 2u] :
+                            g_obstacle_scan_mm[1]);
+    uint32_t right_outer = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
+                            g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 1u] :
+                            g_obstacle_scan_mm[0]);
+    uint32_t left_clear  = 0u;
+    uint32_t right_clear = 0u;
+    uint32_t first_hit   = OBSTACLE_SCAN_POINTS;
+    uint32_t last_hit    = 0u;
+    uint32_t nearest     = OBSTACLE_SCAN_MAX_MM;
+    uint32_t center      = OBSTACLE_SCAN_POINTS / 2u;
+    bool     b_hit       = false;
+    uint32_t span_index  = 0u;
+    uint32_t tangent_x1000[OBSTACLE_SCAN_POINTS] =
+        { 131u, 268u, 414u, 577u, 767u };
+
+    if (OBSTACLE_SCAN_POINTS != 5u)
+    {
+        // The fixed tangent table is for the configured 5-point, 15-degree
+        // scan. Keep it safe if someone changes those tuning values.
+        log_printf("Obstacle scan config must provide five angles.");
+        state_enter(VEHICLE_BLOCKED, now_msec);
+    }
+    else
+    {
+        for (uint32_t idx = 0u; idx < OBSTACLE_SCAN_POINTS; idx++)
+        {
+            if (g_obstacle_scan_mm[idx] <= OBSTACLE_PROFILE_DETECT_MM)
+            {
+                if (!b_hit)
+                {
+                    first_hit = idx;
+                    nearest = g_obstacle_scan_mm[idx];
+                }
+                else if (g_obstacle_scan_mm[idx] < nearest)
+                {
+                    nearest = g_obstacle_scan_mm[idx];
+                }
+                last_hit = idx;
+                b_hit = true;
+            }
+        }
+
+        if (!b_hit)
+        {
+            log_printf("Scan found no close return; resuming line following.");
+            state_enter(VEHICLE_FOLLOW_LINE, now_msec);
+        }
+        else
+        {
+            // Clearance on each side is the nearer of its two scan rays.
+            left_clear = ((left_outer < left_inner) ? left_outer : left_inner);
+            right_clear = ((right_outer < right_inner) ?
+                           right_outer : right_inner);
+            g_obstacle_left_clearance_mm = (int32_t) left_clear;
+            g_obstacle_right_clearance_mm = (int32_t) right_clear;
+
+            if ((left_clear < OBSTACLE_SIDE_CLEAR_MM) &&
+                (right_clear < OBSTACLE_SIDE_CLEAR_MM))
+            {
+                g_obstacle_width_mm = 0;
+                g_obstacle_side = 0;
+                log_printf("No side has %u mm clearance (L=%" PRIu32
+                           ", R=%" PRIu32 "); stopping.",
+                           OBSTACLE_SIDE_CLEAR_MM, left_clear, right_clear);
+                state_enter(VEHICLE_BLOCKED, now_msec);
+            }
+            else
+            {
+                g_obstacle_side =
+                    ((left_clear >= OBSTACLE_SIDE_CLEAR_MM) &&
+                     ((right_clear < OBSTACLE_SIDE_CLEAR_MM) ||
+                      (left_clear > right_clear))) ? -1 : 1;
+
+                // Approximate obstacle width from the angular span of scan
+                // rays that saw it. The result is deliberately labelled as
+                // an estimate because a five-ray sonar scan is coarse.
+                span_index = last_hit - first_hit;
+                g_obstacle_center_mm =
+                    (int32_t) ((g_obstacle_scan_mm[center] <=
+                                OBSTACLE_PROFILE_DETECT_MM) ?
+                               g_obstacle_scan_mm[center] : nearest);
+                g_obstacle_width_mm =
+                    (int32_t) ((2u * (uint32_t) g_obstacle_center_mm *
+                                tangent_x1000[span_index]) / 1000u);
+                uint32_t pass_mm =
+                    (uint32_t) g_obstacle_center_mm +
+                    ((uint32_t) g_obstacle_width_mm / 2u) +
+                    OBSTACLE_BYPASS_CLEAR_MM;
+                if (pass_mm < OBSTACLE_BYPASS_MIN_PASS_MM)
+                {
+                    pass_mm = OBSTACLE_BYPASS_MIN_PASS_MM;
+                }
+                g_obstacle_pass_msec =
+                    (pass_mm * 1000u) / OBSTACLE_BYPASS_SPEED_MM_S;
+
+                log_printf("Profile: estimated width %" PRId32
+                           " mm, clearance L/R %" PRIu32 "/%" PRIu32
+                           " mm. Bypassing %s; pass %" PRIu32 " ms.",
+                           g_obstacle_width_mm, left_clear, right_clear,
+                           ((g_obstacle_side < 0) ? "LEFT" : "RIGHT"),
+                           g_obstacle_pass_msec);
+                state_enter(VEHICLE_OBSTACLE_BYPASS, now_msec);
+            }
+        }
+    }
+}   /* obstacle_scan_select() */
+
+
+/*! @brief Run the timed three-part bypass path. */
+static void
+obstacle_bypass_step (uint32_t now_msec)
+{
+    uint32_t phase_time = now_msec - g_obstacle_phase_msec;
+
+    if (OBSTACLE_SWERVE_OUT == g_obstacle_bypass_phase)
+    {
+        obstacle_bypass_arc();
+        if (phase_time >= OBSTACLE_BYPASS_ARC_MSEC)
+        {
+            obstacle_bypass_enter(OBSTACLE_PASS, now_msec);
+        }
+    }
+    else if (OBSTACLE_PASS == g_obstacle_bypass_phase)
+    {
+        motor_set(OBSTACLE_BYPASS_SPEED, OBSTACLE_BYPASS_SPEED);
+        if (phase_time >= g_obstacle_pass_msec)
+        {
+            obstacle_bypass_enter(OBSTACLE_SWERVE_BACK, now_msec);
+        }
+    }
+    else
+    {
+        obstacle_bypass_arc();
+        if (phase_time >= OBSTACLE_BYPASS_ARC_MSEC)
+        {
+            log_printf("Bypass path complete; searching for the line.");
+            line_filter_reset((line_state_t) { false, false }, now_msec);
+            g_line_last = ((g_obstacle_side < 0) ? LINE_LAST_RIGHT :
+                                                    LINE_LAST_LEFT);
+            gb_last_left = (LINE_LAST_LEFT == g_line_last);
+            g_steer = STEER_STRAIGHT;
+            g_obstacle_reacquire_ticks = 0u;
+            state_enter(VEHICLE_OBSTACLE_REACQUIRE, now_msec);
+        }
+    }
+}   /* obstacle_bypass_step() */
+
+
+/*! @brief Follow line sensor feedback after bypass, or stop if not found. */
+static void
+obstacle_reacquire_step (uint32_t now_msec)
+{
+    line_state_t line = line_filtered();
+
+    if (line.b_left_black && line.b_right_black)
+    {
+        g_obstacle_reacquire_ticks++;
+    }
+    else
+    {
+        g_obstacle_reacquire_ticks = 0u;
+    }
+
+    if (g_obstacle_reacquire_ticks >= OBSTACLE_REACQUIRE_TICKS)
+    {
+        log_printf("Line reacquired after bypass; resuming line following.");
+        line_filter_reset(line, now_msec);
+        g_line_last = LINE_LAST_BOTH;
+        g_steer = STEER_STRAIGHT;
+        state_enter(VEHICLE_FOLLOW_LINE, now_msec);
+    }
+    else if ((now_msec - g_entered_msec) > OBSTACLE_REACQUIRE_MAX_MSEC)
+    {
+        log_printf("Line not found after bypass; stopped. Reposition and START.");
+        state_enter(VEHICLE_STOPPED, now_msec);
+    }
+    else
+    {
+        line_steer(SPEED_CREEP, now_msec);
+    }
+}   /* obstacle_reacquire_step() */
+
+
+static int32_t
+obstacle_scan_angle (uint32_t index)
+{
+    int32_t offset = (int32_t) (index * OBSTACLE_SCAN_STEP_DEG) -
+                     SERVO_RANGE_DEG;
+
+    // Positive logical scan angles are right; this sign compensates a
+    // mirrored servo mount without changing the scan/profile coordinates.
+    g_obstacle_scan_angle = offset;
+    return (SERVO_CENTER_DEG + (offset * OBSTACLE_SERVO_ANGLE_SIGN));
+}   /* obstacle_scan_angle() */
+
+
+static uint32_t
+obstacle_median3 (uint32_t a, uint32_t b, uint32_t c)
+{
+    uint32_t swap = 0u;
+
+    if (a > b)
+    {
+        swap = a; a = b; b = swap;
+    }
+    if (b > c)
+    {
+        swap = b; b = c; c = swap;
+    }
+    if (a > b)
+    {
+        swap = a; a = b; b = swap;
+    }
+    return (b);
+}   /* obstacle_median3() */
+
+
+static void
+obstacle_servo_request (int32_t degrees)
+{
+    g_servo_degrees = degrees;
+    gb_servo_pending = true;
+}   /* obstacle_servo_request() */
+
+
+static void
+obstacle_bypass_enter (obstacle_bypass_phase_t phase, uint32_t now_msec)
+{
+    g_obstacle_bypass_phase = phase;
+    g_obstacle_phase_msec = now_msec;
+    motor_set(0, 0);
+}   /* obstacle_bypass_enter() */
+
+
+static void
+obstacle_bypass_arc (void)
+{
+    int32_t inner = (OBSTACLE_BYPASS_SPEED * OBSTACLE_BYPASS_INNER_PCT) /
+                    PERCENT;
+    bool b_left = ((OBSTACLE_SWERVE_BACK == g_obstacle_bypass_phase) ?
+                   (g_obstacle_side > 0) : (g_obstacle_side < 0));
+
+    if (inner < 1)
+    {
+        inner = 1;
+    }
+    motor_set((b_left ? inner : OBSTACLE_BYPASS_SPEED),
+              (b_left ? OBSTACLE_BYPASS_SPEED : inner));
+}   /* obstacle_bypass_arc() */
+
+
 /*!
  * @brief Change state, set up the new state's timers and barcode reading.
  *
@@ -825,6 +1279,23 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     {
         g_hump_peak_tilt_x10 = 0;
         gb_hump_tilted = false;
+    }
+
+    if (VEHICLE_OBSTACLE_SCAN == state)
+    {
+        g_obstacle_scan_index = 0u;
+        g_obstacle_sample_count = 0u;
+        obstacle_servo_request(obstacle_scan_angle(0u));
+        g_obstacle_scan_next_msec =
+            now_msec + OBSTACLE_SCAN_SETTLE_MSEC;
+    }
+    else
+    {
+        obstacle_servo_request(SERVO_CENTER_DEG);
+    }
+    if (VEHICLE_OBSTACLE_BYPASS == state)
+    {
+        obstacle_bypass_enter(OBSTACLE_SWERVE_OUT, now_msec);
     }
 
     if (VEHICLE_LINE_CAL == state)
