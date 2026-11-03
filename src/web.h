@@ -27,6 +27,7 @@ typedef enum
 bool          web_init(void);
 void          web_task(void);
 web_command_t web_command_take(void);
+bool          web_servo_take(int32_t * p_degrees);
 
 #endif /* WEB_H */
 

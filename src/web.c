@@ -6,6 +6,7 @@
  * The Pico W makes its own Wi-Fi network (WIFI_NAME in config.h) and
  * serves a page at http://192.168.4.1. The page:
  * - sends GET /cmd?c=... when a button is pressed;
+ * - sends GET /servo?a=<degrees> when the servo slider is released;
  * - polls GET /status every 0.2 s for live vehicle and sensor readings.
  * Commands are only queued here; main() runs them, exactly like a button
  * press, so the web UI never drives the motors directly.
@@ -19,6 +20,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "pico/stdlib.h"
@@ -50,6 +52,8 @@
 #define CMD_PREFIX_LEN          (sizeof(CMD_PREFIX) - 1u)
 #define STATUS_PREFIX           "/status"
 #define STATUS_PREFIX_LEN       (sizeof(STATUS_PREFIX) - 1u)
+#define SERVO_PREFIX            "/servo?a="
+#define SERVO_PREFIX_LEN        (sizeof(SERVO_PREFIX) - 1u)
 
 
 static char const g_page_html[] =
@@ -81,6 +85,11 @@ static char const g_page_html[] =
     "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
     "<button id=n onclick=\"c('white')\">LEARN WHITE</button>"
     "<button class=t onclick=\"c('bt')\">BARCODE TEST</button></div>"
+    "<div class=c>Servo: <b id=sv>90</b>&deg;<br>"
+    "<input type=range min=60 max=120 value=90 style=width:100% "
+    "oninput=\"$('sv').textContent=this.value\" "
+    "onchange=\"fetch('/servo?a='+this.value).catch(function(){})\">"
+    "</div>"
     "<div class=c>State: <b id=s>-</b><br>"
     "Range: <b id=r>-</b> cm &nbsp; LSM303DLHC: <b id=imu>-</b><br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
@@ -155,6 +164,8 @@ static char const g_page_html[] =
 
 static web_command_t g_pending = WEB_CMD_NONE;
 static bool          gb_ready  = false;
+static bool          gb_servo_pending = false;
+static int32_t       g_servo_deg      = 0;
 
 
 static err_t  accept_callback(void * p_arg, struct tcp_pcb * p_client,
@@ -252,6 +263,28 @@ web_command_take (void)
 
     return (command);
 }   /* web_command_take() */
+
+
+/*!
+ * @brief Take the angle from the last servo slider change, if any.
+ *
+ * @param[out] p_degrees The requested angle in degrees (not yet limited).
+ *
+ * @return True if a new angle was requested since the last call.
+ */
+bool
+web_servo_take (int32_t * p_degrees)
+{
+    bool b_new = gb_servo_pending;
+
+    if (b_new)
+    {
+        *p_degrees       = g_servo_deg;
+        gb_servo_pending = false;
+    }
+
+    return (b_new);
+}   /* web_servo_take() */
 
 
 /*!
@@ -366,6 +399,13 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
     else if (0 == strncmp(p_path, CMD_PREFIX, CMD_PREFIX_LEN))
     {
         command_parse(p_path + CMD_PREFIX_LEN);
+        reply_send(p_pcb, "text/plain", "OK", 2u, true);
+    }
+    else if (0 == strncmp(p_path, SERVO_PREFIX, SERVO_PREFIX_LEN))
+    {
+        // main() limits the angle when it turns the servo.
+        g_servo_deg      = (int32_t) atoi(p_path + SERVO_PREFIX_LEN);
+        gb_servo_pending = true;
         reply_send(p_pcb, "text/plain", "OK", 2u, true);
     }
     else

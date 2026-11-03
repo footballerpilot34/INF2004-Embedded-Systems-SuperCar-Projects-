@@ -71,8 +71,8 @@
 #define WHEEL_TEST_PAUSE_MSEC   500u
 #define WHEEL_TEST_SPEED        20
 
-#define SERVO_CENTER_USEC       1500u   // 90 degrees: facing forward.
 #define SERVO_PERIOD_TICKS      19999u  // 20 ms at 1 tick per us.
+#define SERVO_FULL_SCALE_DEG    180
 #define HZ_PER_MHZ              1000000u
 
 #define KEY_START               's'
@@ -89,7 +89,8 @@
 
 
 static void          usb_wait(void);
-static void          servo_center(void);
+static void          servo_init(void);
+static void          servo_set_angle(int32_t degrees);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
 static web_command_t serial_poll(void);
@@ -120,7 +121,7 @@ main (void)
     log_printf("=== SuperCar AAI14: line + barcode + hump/wall ===");
 
     buzzer_init();
-    servo_center();
+    servo_init();
     line_sensor_init();
     barcode_init();
     ultrasonic_init();
@@ -140,10 +141,16 @@ main (void)
 
     for (;;)
     {
+        int32_t servo_deg = 0;
+
         web_task();
         command_run(buttons_poll());
         command_run(serial_poll());
         command_run(web_command_take());
+        if (web_servo_take(&servo_deg))
+        {
+            servo_set_angle(servo_deg);
+        }
 
         ultrasonic_task();
         imu_task();
@@ -384,10 +391,10 @@ usb_wait (void)
 
 
 /*!
- * @brief Point the ultrasonic servo straight ahead (90 degrees).
+ * @brief Set up a 50 Hz servo PWM signal and centre the ultrasonic servo.
  */
 static void
-servo_center (void)
+servo_init (void)
 {
     uint32_t slice = pwm_gpio_to_slice_num(PIN_SERVO);
 
@@ -398,9 +405,44 @@ servo_center (void)
                             (uint8_t) (clock_get_hz(clk_sys) / HZ_PER_MHZ),
                             0u);
     pwm_set_wrap(slice, SERVO_PERIOD_TICKS);
-    pwm_set_gpio_level(PIN_SERVO, SERVO_CENTER_USEC);
     pwm_set_enabled(slice, true);
-}   /* servo_center() */
+    servo_set_angle(SERVO_CENTER_DEG);
+}   /* servo_init() */
+
+
+/*!
+ * @brief Turn the ultrasonic servo, limited to SERVO_RANGE_DEG either side
+ *        of the centre.
+ *
+ * @param[in] degrees The requested angle in degrees.
+ */
+static void
+servo_set_angle (int32_t degrees)
+{
+    int32_t limited = degrees;
+
+    if (limited < (SERVO_CENTER_DEG - SERVO_RANGE_DEG))
+    {
+        limited = SERVO_CENTER_DEG - SERVO_RANGE_DEG;
+    }
+    else if (limited > (SERVO_CENTER_DEG + SERVO_RANGE_DEG))
+    {
+        limited = SERVO_CENTER_DEG + SERVO_RANGE_DEG;
+    }
+    else
+    {
+        // The angle is already within range.
+    }
+
+    // NOTE: limited is within 0-180 degrees here, so the pulse width is
+    // positive and well under 16 bits.
+    pwm_set_gpio_level(PIN_SERVO,
+                       (uint16_t) (SERVO_MIN_USEC +
+                                   ((limited * (SERVO_MAX_USEC -
+                                                SERVO_MIN_USEC)) /
+                                    SERVO_FULL_SCALE_DEG)));
+    log_printf("Servo: %" PRId32 " degrees.", limited);
+}   /* servo_set_angle() */
 
 
 /*!

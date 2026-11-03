@@ -29,6 +29,13 @@
 #define PIN_BUTTON_STOP             21u     // Robo Pico button, active low.
 #define PIN_BUZZER                  22u     // Robo Pico piezo buzzer.
 
+// Ultrasonic pan servo (as in robocar.c): centred at start, and turned
+// from the web page's slider within SERVO_RANGE_DEG either side.
+#define SERVO_CENTER_DEG            90      // Facing straight ahead.
+#define SERVO_RANGE_DEG             30      // Limit either side (60-120).
+#define SERVO_MIN_USEC              500     // Pulse width at 0 degrees.
+#define SERVO_MAX_USEC              2500    // Pulse width at 180 degrees.
+
 // ------------------------------------------------------------------------
 // Wireless UI: the car makes its own Wi-Fi network; open the page at
 // http://192.168.4.1 on a phone or laptop that has joined it.
