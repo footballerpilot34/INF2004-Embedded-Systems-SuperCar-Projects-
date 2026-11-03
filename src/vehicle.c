@@ -65,8 +65,13 @@
  * @par Barcodes
  * While a barcode is being read (barcode_is_capturing()), FOLLOW_LINE
  * ignores the line sensors and drives straight at SPEED_SCAN, because bar
- * widths are measured in time; obstacles and humps are still checked. A
- * decoded COMMAND trumps the line sensors (TURN state):
+ * widths are measured in time; obstacles and humps are still checked.
+ * A decoded LEFT/RIGHT command ('A'/'Z') is kept as the pending turn and
+ * carried out at the next crossroad, which the side sensor reports
+ * (vehicle_junction()); a newer command replaces it. A U-turn is carried
+ * out at once. A turn (TURN state) runs:
+ * 0. ADVANCE (crossroad turns only): drive straight for
+ *    JUNCTION_ADVANCE_MSEC, so the wheel axle is over the crossing;
  * 1. LEAVE: pivot until both line sensors are off the current line;
  * 2. FIND:  keep pivoting until a sensor finds a line. A left/right turn
  *    gives up after TURN_90_MSEC (about 90 degrees) and drives on; a
@@ -77,9 +82,11 @@
  *
  * @par BARCODE TEST
  * Drives straight at SPEED_SCAN, ignoring the line sensors, with barcode
- * reading on: decoded messages and commands are shown, but commands do
- * not turn the car. It runs until STOP, or stops by itself at an
- * obstacle closer than OBSTACLE_STOP_MM.
+ * reading on: decoded messages and commands are shown. A LEFT/RIGHT
+ * command becomes the pending turn and is carried out at the next
+ * crossroad, exactly as when following; after the turn the car drives
+ * straight again (still BARCODE TEST). A U-turn is ignored. It runs until
+ * STOP, or stops by itself at an obstacle closer than OBSTACLE_STOP_MM.
  */
 
 #include <inttypes.h>
@@ -198,6 +205,7 @@ static uint32_t        g_pivot_msec    = 0u;    // Pivot began/reversed.
 // Barcode reading and barcode turns.
 typedef enum
 {
+    TURN_ADVANCE,   // Crossroad: drive on until the axle is over it.
     TURN_LEAVE,     // Pivot until both line sensors are off the line.
     TURN_FIND,      // Pivot until a line sensor finds a line.
     TURN_ALIGN      // Pivot until both line sensors are on it.
@@ -210,7 +218,11 @@ static barcode_command_t g_turn_cmd     = BARCODE_CMD_NONE;
 static vehicle_state_t   g_turn_after   = VEHICLE_FOLLOW_LINE;
 static turn_phase_t      g_turn_phase   = TURN_LEAVE;
 static uint32_t          g_turn_msec    = 0u;    // Current phase began.
+static uint32_t          g_pivot_start_msec = 0u; // LEAVE began (pivot).
 static bool              gb_turn_left_on = true; // Left was last on black.
+static bool              gb_turn_advance = false; // Next turn: ADVANCE first.
+static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
+                                                            // crossroad.
 
 
 static void     state_enter(vehicle_state_t state, uint32_t now_msec);
@@ -264,6 +276,7 @@ vehicle_start (void)
 {
     if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
     {
+        g_pending_turn = BARCODE_CMD_NONE;  // A new run: no old turn.
         state_enter(VEHICLE_LINE_CAL, now_msec_get());
     }
 }   /* vehicle_start() */
@@ -280,12 +293,14 @@ vehicle_stop (void)
 
 
 /*!
- * @brief Act on a barcode command; it trumps the line sensors.
+ * @brief Act on a barcode command.
  *
  * @par
- * While following, the car turns and then follows the line it finds.
- * When stopped (a TEST button), it turns and stops again, to tune
- * TURN_90_MSEC. In any other state the command is ignored and logged.
+ * While following (or in BARCODE TEST), LEFT/RIGHT become the pending
+ * turn, carried out at the next crossroad (a newer command replaces it);
+ * while following, a U-turn happens at once.
+ * When stopped (a test key), the car turns at once and stops again, to
+ * tune TURN_90_MSEC. In any other state the command is ignored and logged.
  *
  * @param[in] command The command; BARCODE_CMD_NONE does nothing.
  */
@@ -298,16 +313,26 @@ vehicle_barcode_command (barcode_command_t command)
     {
         // A plain message: keep following.
     }
+    else if (((VEHICLE_FOLLOW_LINE == g_state) ||
+              (VEHICLE_BARCODE_TEST == g_state)) &&
+             (BARCODE_CMD_UTURN != command))
+    {
+        g_pending_turn = command;
+        log_printf("Pending: %s at the next crossroad.",
+                   barcode_command_name(command));
+    }
     else if (VEHICLE_FOLLOW_LINE == g_state)
     {
-        g_turn_cmd   = command;
-        g_turn_after = VEHICLE_FOLLOW_LINE;
+        g_turn_cmd      = command;
+        g_turn_after    = VEHICLE_FOLLOW_LINE;
+        gb_turn_advance = false;
         state_enter(VEHICLE_TURN, now_msec);
     }
     else if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
     {
-        g_turn_cmd   = command;
-        g_turn_after = VEHICLE_STOPPED;
+        g_turn_cmd      = command;
+        g_turn_after    = VEHICLE_STOPPED;
+        gb_turn_advance = false;
         state_enter(VEHICLE_TURN, now_msec);
     }
     else
@@ -316,6 +341,47 @@ vehicle_barcode_command (barcode_command_t command)
                    vehicle_state_name(g_state));
     }
 }   /* vehicle_barcode_command() */
+
+
+/*!
+ * @brief A crossroad was just passed: carry out the pending turn, if any.
+ *
+ * @par
+ * Only acted on while following the line or in BARCODE TEST; the car goes
+ * back to that state after the turn. Otherwise it is just logged.
+ */
+void
+vehicle_junction (void)
+{
+    if (((VEHICLE_FOLLOW_LINE == g_state) ||
+         (VEHICLE_BARCODE_TEST == g_state)) &&
+        (BARCODE_CMD_NONE != g_pending_turn))
+    {
+        log_printf("Crossroad: %s now.", barcode_command_name(g_pending_turn));
+        g_turn_cmd      = g_pending_turn;
+        g_pending_turn  = BARCODE_CMD_NONE;
+        g_turn_after    = g_state;
+        gb_turn_advance = true;
+        state_enter(VEHICLE_TURN, now_msec_get());
+    }
+    else
+    {
+        log_printf("Crossroad seen in %s, no turn pending: straight on.",
+                   vehicle_state_name(g_state));
+    }
+}   /* vehicle_junction() */
+
+
+/*!
+ * @brief Report the turn waiting for the next crossroad.
+ *
+ * @return BARCODE_CMD_LEFT, BARCODE_CMD_RIGHT or BARCODE_CMD_NONE.
+ */
+barcode_command_t
+vehicle_pending_turn (void)
+{
+    return (g_pending_turn);
+}   /* vehicle_pending_turn() */
 
 
 /*!
@@ -331,6 +397,7 @@ vehicle_barcode_test (void)
     {
         log_printf("BARCODE TEST: driving straight, line sensors ignored. "
                    "STOP to end.");
+        g_pending_turn = BARCODE_CMD_NONE;  // A new run: no old turn.
         state_enter(VEHICLE_BARCODE_TEST, now_msec_get());
     }
     else
@@ -566,10 +633,19 @@ turn_step (uint32_t now_msec)
     bool         b_left   = (b_uturn ? TURN_UTURN_LEFT
                                      : (BARCODE_CMD_LEFT == g_turn_cmd));
     uint32_t     max_msec = (b_uturn ? TURN_UTURN_MAX_MSEC : TURN_90_MSEC);
-    uint32_t     in_turn  = now_msec - g_entered_msec;
+    uint32_t     in_turn  = now_msec - g_pivot_start_msec;  // Pivot only.
     line_state_t no_line  = { false, false };
 
-    if ((TURN_ALIGN != g_turn_phase) && (in_turn > max_msec))
+    if (TURN_ADVANCE == g_turn_phase)
+    {
+        // Line sensors ignored: the crossing line would steer the car.
+        if ((now_msec - g_turn_msec) >= JUNCTION_ADVANCE_MSEC)
+        {
+            turn_phase_enter(TURN_LEAVE, now_msec);
+        }
+        motor_set(SPEED_SCAN, SPEED_SCAN);
+    }
+    else if ((TURN_ALIGN != g_turn_phase) && (in_turn > max_msec))
     {
         turn_finish(now_msec, no_line, LINE_LAST_BOTH,
                     (b_uturn ? "no line found, driving on"
@@ -628,6 +704,11 @@ turn_phase_enter (turn_phase_t phase, uint32_t now_msec)
 {
     g_turn_phase = phase;
     g_turn_msec  = now_msec;
+
+    if (TURN_LEAVE == phase)
+    {
+        g_pivot_start_msec = now_msec;  // TURN_90_MSEC counts from here.
+    }
 }   /* turn_phase_enter() */
 
 
@@ -847,6 +928,14 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
                        "towards it.", (gb_cal_left ? "LEFT" : "RIGHT"));
         }
         cal_phase_enter(CAL_PIVOT, now_msec);
+    }
+
+    if (VEHICLE_TURN == state)
+    {
+        // Every turn starts from its first phase, not where the last
+        // one ended (ALIGN would end it at once, without turning).
+        turn_phase_enter((gb_turn_advance ? TURN_ADVANCE : TURN_LEAVE),
+                         now_msec);
     }
 
     // Barcodes are only read while following the line normally, or in

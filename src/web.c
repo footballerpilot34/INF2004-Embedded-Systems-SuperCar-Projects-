@@ -121,7 +121,8 @@ static char const g_page_html[] =
     "<div class=vals id=mv>MX - &nbsp; MY - &nbsp; MZ -</div>"
     "<canvas id=mc></canvas><div class=hint>Fixed scale: -0.8 to +0.8 gauss. "
     "Three-sample display average.</div></div>"
-    "<div class=c>Barcode message<div id=bc>-</div></div>"
+    "<div class=c>Barcode message<div id=bc>-</div>"
+    "Next crossroad: <b id=tn>-</b></div>"
     "<div class=c><b>Serial monitor</b><div id=log></div></div>"
     "<script>var hist=[],q=0;function $(i){return document.getElementById(i)}"
     "function c(x){fetch('/cmd?c='+x).catch(function(){})}"
@@ -156,7 +157,7 @@ static char const g_page_html[] =
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
     "$('imu').textContent=!d.imu?'NOT FOUND':(!d.iv?'READ ERROR':"
     "(d.ic?'CALIBRATED':'NEEDS CALIBRATION'));"
-    "$('bc').textContent=d.bc||'-';"
+    "$('bc').textContent=d.bc||'-';$('tn').textContent=d.tn||'straight on';"
     "if(d.iv){hist.push({ax:d.ax,ay:d.ay,az:d.az,mx:d.mx,my:d.my,mz:d.mz,"
     "pt:d.pt,rl:d.rl});"
     "if(hist.length>60)hist.shift();"
@@ -500,6 +501,7 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     uint32_t     range_mm = ultrasonic_range_mm();
     uint32_t     next_seq = log_next_seq();
     uint32_t     seq      = since;
+    barcode_command_t pending = vehicle_pending_turn();
     imu_axes_t   axes;
     size_t       length   = 0u;
     char const * p_line   = NULL;
@@ -552,7 +554,9 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
     length += (size_t) snprintf(p_out + length, capacity - length,
-                                ",\"log\":[");
+                                ",\"tn\":\"%s\",\"log\":[",
+                                ((BARCODE_CMD_NONE == pending) ? "" :
+                                 barcode_command_name(pending)));
 
     while ((seq < next_seq) && ((capacity - length) > LINE_RESERVE) &&
            log_get(seq, &p_line))

@@ -15,8 +15,14 @@
  * 4. If a forward decode fails, the scan is decoded in reverse, so the
  *    car can cross the barcode in either direction.
  * 5. The message is checked against the command texts in config.h
- *    (BARCODE_TEXT_...): a match is a command (turn left, turn right,
- *    U-turn) that trumps the line sensors; anything else is a message.
+ *    (BARCODE_TEXT_...): a match is a command (turn left or right at the
+ *    next crossroad, U-turn); anything else is a message.
+ *
+ * @par Crossroads
+ * A scan whose first bar lasts at least BARCODE_JUNCTION_MIN_USEC is not
+ * a barcode (they all start with a narrow bar) but a crossroad's side
+ * branch. It is reported as BARCODE_JUNCTION as soon as the sensor has
+ * been on it that long, while still over it (about 11 mm in).
  *
  * @par Analog reading (BARCODE_USE_ANALOG)
  * The module's comparator output misses thin bars, so a timer samples the
@@ -128,6 +134,7 @@ static uint32_t g_last_edge_usec = 0u;
 static bool     gb_last_black    = false;
 static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
+static bool     gb_junction      = false;   // A crossroad mark just ended.
 static bool     gb_enabled       = true;
 
 // Analog reader state. Written by the sampling timer only.
@@ -249,7 +256,8 @@ barcode_scan_size (void)
  * Call every control tick.
  *
  * @return BARCODE_DECODED when a new message is ready, BARCODE_INVALID
- *         when a scan could not be decoded, otherwise BARCODE_NONE.
+ *         when a scan could not be decoded, BARCODE_JUNCTION when a
+ *         crossroad's side branch was just passed, otherwise BARCODE_NONE.
  */
 barcode_result_t
 barcode_task (void)
@@ -280,9 +288,29 @@ barcode_task (void)
     end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ?
                end_gap : BARCODE_END_GAP_MIN_USEC);
 
-    if (gb_capturing && ((time_us_32() - g_last_edge_usec) > end_gap))
+    // Still on the first black mark, and it has already lasted longer
+    // than any first bar of a barcode: a crossroad branch. Decided now,
+    // while still over it, so the end gap (which runs from the last edge)
+    // cannot end the scan as "0 bars" first.
+    if (gb_capturing && gb_last_black && (0u == g_num_elements) &&
+        ((time_us_32() - g_last_edge_usec) >= BARCODE_JUNCTION_MIN_USEC))
+    {
+        gb_capturing = false;
+        gb_junction  = true;
+    }
+
+    if (gb_junction)
+    {
+        gb_junction = false;
+        result      = BARCODE_JUNCTION;
+    }
+    else if (gb_capturing && ((time_us_32() - g_last_edge_usec) > end_gap))
     {
         result = scan_finish();
+    }
+    else
+    {
+        // Nothing finished this tick.
     }
 
     return (result);
@@ -301,6 +329,11 @@ barcode_task (void)
 void
 barcode_set_enabled (bool b_enabled)
 {
+    if (!b_enabled)
+    {
+        gb_junction = false;    // Seen in a state that does not use it.
+    }
+
     if (!b_enabled && gb_capturing)
     {
         // Say so: a scan cut off by STOP or a state change would otherwise
@@ -561,6 +594,15 @@ edge_add (uint32_t edge_usec, bool b_black)
             g_last_edge_usec -= g_elements[g_num_elements];
             gb_last_black     = b_black;
         }
+    }
+    else if ((0u == g_num_elements) &&
+             ((edge_usec - g_last_edge_usec) >= BARCODE_JUNCTION_MIN_USEC))
+    {
+        // The first bar was far wider than any barcode bar can start
+        // with: a crossroad's side branch. End the scan here. (Normally
+        // barcode_task() has already caught it while still on black.)
+        gb_capturing = false;
+        gb_junction  = true;
     }
     else
     {

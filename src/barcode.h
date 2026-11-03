@@ -13,7 +13,8 @@ typedef enum
 {
     BARCODE_NONE,       // Nothing finished this tick.
     BARCODE_DECODED,    // A valid message is ready: see barcode_message().
-    BARCODE_INVALID     // A scan finished but could not be decoded.
+    BARCODE_INVALID,    // A scan finished but could not be decoded.
+    BARCODE_JUNCTION    // A long black mark: a crossroad's side branch.
 } barcode_result_t;
 
 // What a decoded barcode asks the car to do. Commands trump the line
@@ -21,8 +22,8 @@ typedef enum
 typedef enum
 {
     BARCODE_CMD_NONE,   // A plain message: show it, keep following.
-    BARCODE_CMD_LEFT,   // Turn left about 90 degrees.
-    BARCODE_CMD_RIGHT,  // Turn right about 90 degrees.
+    BARCODE_CMD_LEFT,   // Turn left at the next crossroad.
+    BARCODE_CMD_RIGHT,  // Turn right at the next crossroad.
     BARCODE_CMD_UTURN   // Turn round and follow the line back.
 } barcode_command_t;
 

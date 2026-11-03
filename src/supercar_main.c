@@ -27,12 +27,13 @@
  *   straight, ignoring the line sensors, and reads barcodes. STOP ends it.
  * - Test turns (serial only): 'l', 'u', 'r' act exactly like a barcode
  *   command. While stopped, the car turns and
- *   stops again (to tune TURN_90_MSEC); while following, it turns and
- *   follows on.
+ *   stops again (to tune TURN_90_MSEC); while following, 'l'/'r' become
+ *   the pending turn for the next crossroad and 'u' turns at once.
  *
  * @par Barcodes
  * Every decoded barcode is logged and shown on the web page. A command
- * (see BARCODE_TEXT_... in config.h) also turns the car at once.
+ * (see BARCODE_TEXT_... in config.h: 'A' left, 'Z' right) is carried out
+ * at the next crossroad, which the side sensor reports.
  *
  * @par Coding standard
  * BARR-C:2018. Deviation: Rule 6.5.a, see gpio_isr.c.
@@ -366,6 +367,10 @@ barcode_report (barcode_result_t result)
         log_printf("Barcode NOT decoded: %" PRIu32 " bars+spaces seen "
                    "(valid: 10 per character - 1).", barcode_scan_size());
         telemetry_text("barcode", "(invalid scan)");
+    }
+    else if (BARCODE_JUNCTION == result)
+    {
+        vehicle_junction();
     }
     else
     {

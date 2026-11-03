@@ -263,12 +263,14 @@
 #define BARCODE_SCAN_MAX_MSEC       5000u   // Longest straight drive for
                                             // one scan, then steer again.
 
-// Messages that are COMMANDS (exact match; Code 39 is upper case). They
-// trump the line sensors. Anything else is shown as a plain message.
-// VERIFY against the real barcodes and change the texts to match.
-#define BARCODE_TEXT_LEFT           "LEFT"
+// Messages that are COMMANDS (exact match; Code 39 is upper case).
+// Anything else is shown as a plain message. LEFT and RIGHT are kept
+// until the next crossroad and carried out there; a U-turn is at once.
+// Track barcodes (user, 2026-11-03): 'A' = turn left at the next
+// crossroad, 'Z' = turn right at the next crossroad.
+#define BARCODE_TEXT_LEFT           "A"
 #define BARCODE_TEXT_LEFT_SHORT     "L"
-#define BARCODE_TEXT_RIGHT          "RIGHT"
+#define BARCODE_TEXT_RIGHT          "Z"
 #define BARCODE_TEXT_RIGHT_SHORT    "R"
 #define BARCODE_TEXT_UTURN          "UTURN"
 #define BARCODE_TEXT_UTURN_SHORT    "U"
@@ -283,6 +285,20 @@
 #define TURN_UTURN_MAX_MSEC         6000u   // U-turn gives up after this.
 #define TURN_UTURN_LEFT             true    // U-turn pivot: true = left.
 #define TURN_ALIGN_MAX_MSEC         1500u   // Both-on-line must take less.
+
+// Crossroads (+). The two line sensors stay black across a crossing line,
+// so the crossroad is seen by the LEFT side barcode sensor instead: the
+// left branch is one long black mark (18 mm wide), while every barcode
+// starts with a narrow bar (6 mm at most). A scan whose first bar lasts
+// longer than BARCODE_JUNCTION_MIN_USEC is a crossroad (decided while
+// still on it, about 11 mm in), and a pending
+// LEFT/RIGHT turn is carried out there. The pivot point is the wheel
+// axle, behind the sensors, so the car first drives on for
+// JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
+#define BARCODE_JUNCTION_MIN_USEC   200000u // ~11 mm at SPEED_SCAN (54 mm/s).
+#define JUNCTION_ADVANCE_MSEC       1000u   // VERIFY: about the line-sensor
+                                            // to axle distance at
+                                            // SPEED_SCAN (54 mm/s).
 
 // ------------------------------------------------------------------------
 // Timing.
