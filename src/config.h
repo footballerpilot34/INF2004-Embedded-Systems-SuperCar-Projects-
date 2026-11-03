@@ -220,7 +220,11 @@
 // line, so the sensor must sit far enough out that it never sees the line.
 // ------------------------------------------------------------------------
 #define BARCODE_END_GAP_MIN_USEC    300000u // No edge this long ends a scan.
-#define BARCODE_END_GAP_FACTOR      3u      // ...or 3x the widest element.
+#define BARCODE_END_GAP_FACTOR      5u      // ...or 5x the widest element.
+                                            // Must exceed the 3:1 wide:narrow
+                                            // ratio, or the first wide space
+                                            // (after a narrow bar) can end
+                                            // the scan.
 #define BARCODE_MESSAGE_MAX         16u     // Longest message kept.
 #define BARCODE_GLITCH_USEC         2000u   // A colour shorter than this is
                                             // sensor flicker, not a bar.
@@ -244,9 +248,13 @@
 #define BARCODE_AO_SAMPLE_USEC      200u    // 5 kHz sampling.
 #define BARCODE_AO_OVERSAMPLE       8u      // ADC reads averaged per sample
                                             // (noise / ~2.8; 16 us of CPU).
-#define BARCODE_AO_DELTA            80      // Edge size, in ADC counts
+#define BARCODE_AO_DELTA            500     // Edge size, in ADC counts
                                             // (0-4095). Lower: fainter bars
                                             // seen, but more false edges.
+                                            // 80 split solid bars into
+                                            // 7-20 ms pieces while driving
+                                            // (2026-11-03); 500 is ~1/4 of
+                                            // the white-to-bar swing.
 
 // Bar widths are measured in time, so while a barcode is being read the
 // car ignores the line sensors and drives straight at one steady speed.

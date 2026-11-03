@@ -1,13 +1,15 @@
 /** @file web.c
  *
- * @brief Wireless UI with vehicle controls, live readings and IMU graphs.
+ * @brief Wireless UI with vehicle controls, live readings, IMU graphs and
+ *        the message log (the same messages as the USB serial monitor).
  *
  * @par How it works
  * The Pico W makes its own Wi-Fi network (WIFI_NAME in config.h) and
  * serves a page at http://192.168.4.1. The page:
  * - sends GET /cmd?c=... when a button is pressed;
  * - sends GET /servo?a=<degrees> when the servo slider is released;
- * - polls GET /status every 0.2 s for live vehicle and sensor readings.
+ * - polls GET /status?s=N every 0.2 s for live vehicle and sensor readings
+ *   and every log message from number N on.
  * Commands are only queued here; main() runs them, exactly like a button
  * press, so the web UI never drives the motors directly.
  *
@@ -43,15 +45,18 @@
 #define LISTEN_BACKLOG          4u
 #define REQUEST_BYTES           128u
 #define HEADER_BYTES            160u
-#define STATUS_BYTES            512u
+#define STATUS_BYTES            1400u   // Fits lwIP's 4 KB copy heap.
+#define LINE_RESERVE            200u    // Room for one escaped log line.
+#define LOG_KEPT                32u     // Must match LOG_LINES in log.c.
 #define NO_RANGE_JSON           (-1)
 
 #define GET_PREFIX              "GET "
 #define GET_PREFIX_LEN          (sizeof(GET_PREFIX) - 1u)
 #define CMD_PREFIX              "/cmd?c="
 #define CMD_PREFIX_LEN          (sizeof(CMD_PREFIX) - 1u)
-#define STATUS_PREFIX           "/status"
+#define STATUS_PREFIX           "/status?s="
 #define STATUS_PREFIX_LEN       (sizeof(STATUS_PREFIX) - 1u)
+#define DECIMAL_BASE            10
 #define SERVO_PREFIX            "/servo?a="
 #define SERVO_PREFIX_LEN        (sizeof(SERVO_PREFIX) - 1u)
 
@@ -76,6 +81,8 @@ static char const g_page_html[] =
     ".vals{font-family:monospace;color:#ddd;font-size:14px}"
     ".hint{color:#aaa;font-size:12px}"
     ".leg{font-size:12px;color:#bbb}"
+    "#log{font-family:monospace;font-size:12px;height:45vh;overflow:auto;"
+    "white-space:pre-wrap;background:#000;padding:8px;border-radius:8px}"
     "</style></head><body><h2>SuperCar AAI14</h2><div class=g>"
     "<button id=a onclick=\"c('start')\">START</button>"
     "<button id=b onclick=\"c('stop')\">STOP</button>"
@@ -115,7 +122,8 @@ static char const g_page_html[] =
     "<canvas id=mc></canvas><div class=hint>Fixed scale: -0.8 to +0.8 gauss. "
     "Three-sample display average.</div></div>"
     "<div class=c>Barcode message<div id=bc>-</div></div>"
-    "<script>var hist=[];function $(i){return document.getElementById(i)}"
+    "<div class=c><b>Serial monitor</b><div id=log></div></div>"
+    "<script>var hist=[],q=0;function $(i){return document.getElementById(i)}"
     "function c(x){fetch('/cmd?c='+x).catch(function(){})}"
     "function f(v){return (v<0?'-':'+')+Math.abs(v).toFixed(3)}"
     "function avg(i,k){var a=0,n=0;for(var j=Math.max(0,i-2);j<=i;j++)"
@@ -137,8 +145,11 @@ static char const g_page_html[] =
     "if(i===0)x.moveTo(px,py);else x.lineTo(px,py)}x.stroke()}"
     "x.fillStyle='#aab4bd';x.textAlign='left';x.fillText('old',L,h-5);"
     "x.textAlign='right';x.fillText('12 s',w-R,h-5)}"
-    "function u(){fetch('/status').then(function(r){return r.json()})"
-    ".then(function(d){$('s').textContent=d.st;"
+    "function u(){fetch('/status?s='+q).then(function(r){return r.json()})"
+    ".then(function(d){var L=$('log');if(d.nx<q){L.textContent=''}"
+    "for(var k=0;k<d.log.length;k++){L.textContent+=d.log[k]+'\\n'}"
+    "if(d.log.length){L.scrollTop=L.scrollHeight}q=d.nx;"
+    "$('s').textContent=d.st;"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
@@ -158,7 +169,7 @@ static char const g_page_html[] =
     "'   Peak tilt '+(d.pk/10).toFixed(1)+' deg';"
     "draw('ac',['ax','ay','az'],1.2);draw('pc',['pt','rl'],30.0);"
     "draw('mc',['mx','my','mz'],0.8);"
-    "setTimeout(u,200)})"
+    "setTimeout(u,d.more?50:200)})"
     ".catch(function(){setTimeout(u,1000)})}u();</script>"
     "</body></html>";
 
@@ -174,7 +185,7 @@ static err_t  receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
                                struct pbuf * p_buf, err_t err);
 static void   request_handle(struct tcp_pcb * p_pcb, char * p_path);
 static void   command_parse(char const * p_name);
-static size_t status_build(char * p_out, size_t capacity);
+static size_t status_build(char * p_out, size_t capacity, uint32_t since);
 static size_t json_string(char * p_out, size_t capacity, char const * p_text);
 static void   reply_send(struct tcp_pcb * p_pcb, char const * p_type,
                          char const * p_body, size_t body_len,
@@ -392,7 +403,11 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
     }
     else if (0 == strncmp(p_path, STATUS_PREFIX, STATUS_PREFIX_LEN))
     {
-        size_t length = status_build(status, sizeof(status));
+        // NOTE: The page only ever sends sequence numbers it was given,
+        // which fit uint32_t.
+        uint32_t since  = (uint32_t) strtoul(p_path + STATUS_PREFIX_LEN, NULL,
+                                             DECIMAL_BASE);
+        size_t   length = status_build(status, sizeof(status), since);
 
         reply_send(p_pcb, "application/json", status, length, false);
     }
@@ -464,22 +479,46 @@ command_parse (char const * p_name)
 
 
 /*!
- * @brief Build live vehicle, six-axis and calibrated pitch status.
+ * @brief Build live vehicle, six-axis and calibrated pitch status, plus
+ *        the log messages the page has not seen yet.
+ *
+ * @par
+ * As many log lines as fit are included; "more" tells the page to ask
+ * again at once.
  *
  * @param[out] p_out    The buffer to fill.
  * @param[in]  capacity The buffer size.
+ * @param[in]  since    The first log sequence number the page wants.
+ *
  * @return The number of bytes written.
  */
 static size_t
-status_build (char * p_out, size_t capacity)
+status_build (char * p_out, size_t capacity, uint32_t since)
 {
     line_state_t line     = line_sensor_read();
     line_raw_t   raw      = line_sensor_raw();
     uint32_t     range_mm = ultrasonic_range_mm();
+    uint32_t     next_seq = log_next_seq();
+    uint32_t     seq      = since;
     imu_axes_t   axes;
     size_t       length   = 0u;
+    char const * p_line   = NULL;
+    bool         b_first  = true;
+
     imu_get_axes(&axes);
 
+    // A sequence number from before a reboot starts the log again.
+    if (seq > next_seq)
+    {
+        seq = 0u;
+    }
+    if ((next_seq - seq) > LOG_KEPT)
+    {
+        seq = next_seq - LOG_KEPT;
+    }
+
+    // NOTE: The fixed part of the reply is under 500 bytes, well below the
+    // 1400-byte buffer, so these snprintf calls never truncate.
     length += (size_t) snprintf(p_out + length, capacity - length,
                                 "{\"st\":\"%s\",\"rg\":%" PRId32 ","
                                 "\"l\":%d,\"r\":%d,\"b\":%d,"
@@ -512,7 +551,25 @@ status_build (char * p_out, size_t capacity)
                                 axes.mz_mgauss);
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
-    length += (size_t) snprintf(p_out + length, capacity - length, "}");
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                ",\"log\":[");
+
+    while ((seq < next_seq) && ((capacity - length) > LINE_RESERVE) &&
+           log_get(seq, &p_line))
+    {
+        if (!b_first)
+        {
+            p_out[length] = ',';
+            length++;
+        }
+        length += json_string(p_out + length, capacity - length, p_line);
+        b_first = false;
+        seq++;
+    }
+
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                "],\"nx\":%" PRIu32 ",\"more\":%d}", seq,
+                                ((seq < next_seq) ? 1 : 0));
 
     return (length);
 }   /* status_build() */

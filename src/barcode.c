@@ -38,6 +38,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "pico/stdlib.h"
@@ -63,6 +64,9 @@
 #define NUM_CODE39_SYMBOLS      44u
 #define NUM_COMMAND_TEXTS       6u
 #define REPORT_MIN_ELEMENTS     4u      // Shorter scans are not reported.
+#define DUMP_PER_LINE           10u     // Widths per log line (fits 96).
+#define DUMP_LINE_BYTES         96u     // Must match LOG_LINE_MAX in log.c.
+#define USEC_PER_MSEC           1000u
 #define ADC_FIRST_PIN           26u     // ADC0 is GP26, ADC1 GP27, ...
 #define ADC_FULL_SCALE          4095    // 12-bit ADC.
 #define AO_FILTER_DIV           8       // Smoothing: 1/8 of each change
@@ -143,6 +147,7 @@ static bool             ao_sample_isr(repeating_timer_t * p_timer);
 static int32_t          ao_darkness(void);
 static void             edge_add(uint32_t edge_usec, bool b_black);
 static barcode_result_t scan_finish(void);
+static void             scan_dump(void);
 static bool             scan_decode(bool b_reverse);
 static char             char_decode(uint32_t first, bool b_reverse);
 static uint32_t         element_get(uint32_t index, bool b_reverse);
@@ -296,8 +301,13 @@ barcode_task (void)
 void
 barcode_set_enabled (bool b_enabled)
 {
-    if (!b_enabled)
+    if (!b_enabled && gb_capturing)
     {
+        // Say so: a scan cut off by STOP or a state change would otherwise
+        // vanish without a trace.
+        log_printf("Barcode: scan discarded (reading switched off after %"
+                   PRIu32 " bars+spaces).", g_num_elements);
+        scan_dump();
         gb_capturing = false;
     }
 
@@ -593,7 +603,10 @@ scan_finish (void)
     }
     else if (g_num_elements < REPORT_MIN_ELEMENTS)
     {
-        // One or two marks (a stray line or smudge): not a barcode.
+        // One or two marks (a stray line or smudge): not a barcode. Not a
+        // result either, but logged so a missed barcode can be diagnosed.
+        log_printf("Barcode: only %" PRIu32 " bars+spaces seen, ignored.",
+                   g_num_elements);
     }
     else if (g_num_elements < MIN_ELEMENTS)
     {
@@ -608,10 +621,53 @@ scan_finish (void)
         result = BARCODE_INVALID;
     }
 
+    if (BARCODE_INVALID == result)
+    {
+        scan_dump();
+    }
+
     g_widest_usec = 0u;
 
     return (result);
 }   /* scan_finish() */
+
+
+/*!
+ * @brief Log every element width of the current scan, to diagnose it.
+ *
+ * @par
+ * Widths are in ms; the first element is always a bar, so odd numbers
+ * (#1, #3, ...) are bars and even numbers are spaces.
+ */
+static void
+scan_dump (void)
+{
+    char   text[DUMP_LINE_BYTES] = { 0 };
+    size_t length = 0u;
+
+    log_printf("Barcode widths in ms (#1 is a bar, then space, bar, ...):");
+
+    // NOTE: A line holds a 6-character prefix plus DUMP_PER_LINE widths of
+    // at most 8 characters each (86 bytes), so snprintf never truncates.
+    for (uint32_t el = 0u; el < g_num_elements; el++)
+    {
+        if (0u == (el % DUMP_PER_LINE))
+        {
+            length = (size_t) snprintf(text, sizeof(text), " #%" PRIu32 ":",
+                                       el + 1u);
+        }
+
+        length += (size_t) snprintf(text + length, sizeof(text) - length,
+                                    " %" PRIu32,
+                                    g_elements[el] / USEC_PER_MSEC);
+
+        if (((DUMP_PER_LINE - 1u) == (el % DUMP_PER_LINE)) ||
+            ((el + 1u) == g_num_elements))
+        {
+            log_printf("%s", text);
+        }
+    }
+}   /* scan_dump() */
 
 
 /*!
