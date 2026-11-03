@@ -873,7 +873,13 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
 {
     motor_set(0, 0);
 
-    if (range_mm <= OBSTACLE_CLEAR_MM)
+    if ((now_msec - g_entered_msec) < OBSTACLE_BLOCKED_SETTLE_MSEC)
+    {
+        // The pan servo has just been returned to centre. Ignore the last
+        // reading from the scan angle while the servo and sonar settle.
+        gb_clear = false;
+    }
+    else if (range_mm <= OBSTACLE_CLEAR_MM)
     {
         gb_clear = false;
     }
@@ -997,12 +1003,6 @@ obstacle_scan_select (uint32_t now_msec)
     uint32_t left_outer  = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
                             g_obstacle_scan_mm[0] :
                             g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 1u]);
-    uint32_t left_inner  = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
-                            g_obstacle_scan_mm[1] :
-                            g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 2u]);
-    uint32_t right_inner = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
-                            g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 2u] :
-                            g_obstacle_scan_mm[1]);
     uint32_t right_outer = ((OBSTACLE_SERVO_ANGLE_SIGN > 0) ?
                             g_obstacle_scan_mm[OBSTACLE_SCAN_POINTS - 1u] :
                             g_obstacle_scan_mm[0]);
@@ -1051,10 +1051,12 @@ obstacle_scan_select (uint32_t now_msec)
         }
         else
         {
-            // Clearance on each side is the nearer of its two scan rays.
-            left_clear = ((left_outer < left_inner) ? left_outer : left_inner);
-            right_clear = ((right_outer < right_inner) ?
-                           right_outer : right_inner);
+            // The outer rays indicate whether a path opens beside the
+            // obstacle. The inner rays may still hit the obstacle itself;
+            // using their minimum here would reject the bypass path the
+            // outward arc is meant to reach.
+            left_clear = left_outer;
+            right_clear = right_outer;
             g_obstacle_left_clearance_mm = (int32_t) left_clear;
             g_obstacle_right_clearance_mm = (int32_t) right_clear;
 
@@ -1063,7 +1065,7 @@ obstacle_scan_select (uint32_t now_msec)
             {
                 g_obstacle_width_mm = 0;
                 g_obstacle_side = 0;
-                log_printf("No side has %u mm clearance (L=%" PRIu32
+                log_printf("No side has %u mm outer-ray clearance (L=%" PRIu32
                            ", R=%" PRIu32 "); stopping.",
                            OBSTACLE_SIDE_CLEAR_MM, left_clear, right_clear);
                 state_enter(VEHICLE_BLOCKED, now_msec);
@@ -1098,7 +1100,7 @@ obstacle_scan_select (uint32_t now_msec)
                     (pass_mm * 1000u) / OBSTACLE_BYPASS_SPEED_MM_S;
 
                 log_printf("Profile: estimated width %" PRId32
-                           " mm, clearance L/R %" PRIu32 "/%" PRIu32
+                           " mm, outer-ray L/R %" PRIu32 "/%" PRIu32
                            " mm. Bypassing %s; pass %" PRIu32 " ms.",
                            g_obstacle_width_mm, left_clear, right_clear,
                            ((g_obstacle_side < 0) ? "LEFT" : "RIGHT"),

@@ -153,7 +153,7 @@ static char const g_page_html[] =
     "$('s').textContent=d.st;"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
     "var side=d.os<0?'LEFT':(d.os>0?'RIGHT':'-');"
-    "$('op').textContent='width ~'+d.ow+' mm, clear L/R '+d.ol+'/'+d.or+"
+    "$('op').textContent='width ~'+d.ow+' mm, outer-ray L/R '+d.ol+'/'+d.or+"
     "' mm, choice '+side+(d.st==='OBSTACLE_SCAN'?' (scan '+d.oa+' deg: '+"
     "(d.od<0?'none':d.od+' mm')+')':'');"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"

@@ -47,12 +47,12 @@
 #define OBSTACLE_SCAN_MAX_MM        1500u   // No echo is treated as clear.
 #define OBSTACLE_PROFILE_DETECT_MM  500u    // Range considered part of profile.
 #define OBSTACLE_SIDE_CLEAR_MM      400u    // Minimum side clearance to bypass.
-#define OBSTACLE_BYPASS_SPEED       24      // Low, steady forward speed.
-#define OBSTACLE_BYPASS_INNER_PCT   65u     // Inner wheel for the side arcs.
-#define OBSTACLE_BYPASS_ARC_MSEC    700u    // Outward and return arcs; tune on track.
+#define OBSTACLE_BYPASS_SPEED       13      // Cap at normal line cruise speed.
+#define OBSTACLE_BYPASS_INNER_PCT   75u     // Inner wheel for the side arcs.
+#define OBSTACLE_BYPASS_ARC_MSEC    1000u   // Outward and return arcs; tune on track.
 #define OBSTACLE_BYPASS_MIN_PASS_MM 300u
 #define OBSTACLE_BYPASS_CLEAR_MM    150u    // Margin beyond profiled obstacle.
-#define OBSTACLE_BYPASS_SPEED_MM_S  120u    // Approximate crawl speed; tune on track.
+#define OBSTACLE_BYPASS_SPEED_MM_S  70u     // Approximate crawl speed; tune on track.
 #define OBSTACLE_REACQUIRE_MAX_MSEC 5000u
 #define OBSTACLE_REACQUIRE_TICKS    5u      // Both line sensors confirmed.
 
@@ -215,7 +215,8 @@
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
 #define OBSTACLE_CLEAR_MM           300u    // Clear again (hysteresis).
 #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
-#define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
+#define OBSTACLE_CLEAR_MSEC         800u    // Clear this long to resume.
+#define OBSTACLE_BLOCKED_SETTLE_MSEC 500u   // Centre servo and sonar settle first.
 
 #define US_PING_PERIOD_USEC         60000u  // Pings at least 60 ms apart.
 #define US_ECHO_TIMEOUT_USEC        30000u  // About 5 m.
