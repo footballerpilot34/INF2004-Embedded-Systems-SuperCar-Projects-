@@ -48,10 +48,11 @@ gpio_isr_init (void)
                                        gpio_dispatch_isr);
     // With the analog barcode reader, edges come from a timer instead.
     gpio_set_irq_enabled(PIN_BARCODE, BOTH_EDGES, !BARCODE_USE_ANALOG);
-    gpio_set_irq_enabled(PIN_ENC_LEFT_A, BOTH_EDGES, true);
-    gpio_set_irq_enabled(PIN_ENC_LEFT_B, BOTH_EDGES, true);
-    gpio_set_irq_enabled(PIN_ENC_RIGHT_A, BOTH_EDGES, true);
-    gpio_set_irq_enabled(PIN_ENC_RIGHT_B, BOTH_EDGES, true);
+    // Encoder pins, plus the free GPIOs while the pin finder is on.
+    for (uint32_t idx = 0u; idx < encoder_watch_count(); idx++)
+    {
+        gpio_set_irq_enabled(encoder_watch_pin(idx), BOTH_EDGES, true);
+    }
 }   /* gpio_isr_init() */
 
 
@@ -72,8 +73,7 @@ gpio_dispatch_isr (uint gpio, uint32_t events)
     {
         barcode_edge_isr(events);
     }
-    else if ((PIN_ENC_LEFT_A == gpio) || (PIN_ENC_LEFT_B == gpio) ||
-             (PIN_ENC_RIGHT_A == gpio) || (PIN_ENC_RIGHT_B == gpio))
+    else if (encoder_is_watched(gpio))
     {
         encoder_edge_isr(gpio);
     }

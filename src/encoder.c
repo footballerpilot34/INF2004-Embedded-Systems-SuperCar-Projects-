@@ -17,9 +17,15 @@
  * tick instead of the whole pause time.
  *
  * @par Calibration
- * The tick counts are shown on the web page ("Encoders L/R"). Push the
- * car 10 cm by hand to see how many ticks that is. Barcode decoding only
- * compares widths with each other, so it needs no calibration.
+ * The tick counts are shown on the web page ("Encoder ticks L/R"). Push
+ * the car 10 cm by hand to see how many ticks that is. Barcode decoding
+ * only compares widths with each other, so it needs no calibration.
+ *
+ * @par Pin finder (ENCODER_PIN_FINDER)
+ * To find which pins the encoders are really wired to, the four encoder
+ * pins and every free GPIO are watched, and each pin's edge count is
+ * shown on the web page ("Encoder pins"). Turn one wheel by hand: the
+ * pins that count up are its encoder.
  */
 
 #include <stdbool.h>
@@ -36,12 +42,22 @@
 #define WHEEL_LEFT          0u
 #define WHEEL_RIGHT         1u
 #define FRACTION_MAX        (ENCODER_POS_SCALE - 1u)   // Just under 1 tick.
+#define NUM_ENCODER_PINS    4u      // The first 4 watched pins.
 
+
+// Pins watched for edges: the 4 encoder pins first, then (pin finder)
+// every GPIO not used by anything else on the car.
+static uint32_t const g_watch_pins[ENCODER_NUM_WATCH] =
+{
+    PIN_ENC_LEFT_A, PIN_ENC_LEFT_B, PIN_ENC_RIGHT_A, PIN_ENC_RIGHT_B,
+    1u, 7u, 13u, 14u, 15u, 18u
+};
 
 // Written by the GPIO interrupt only; read anywhere.
 static volatile uint32_t g_count[NUM_WHEELS]      = { 0u, 0u };
 static volatile uint32_t g_tick_usec[NUM_WHEELS]  = { 0u, 0u };
 static volatile uint32_t g_interval[NUM_WHEELS]   = { 0u, 0u };
+static volatile uint32_t g_pin_count[ENCODER_NUM_WATCH];
 
 
 static void     pin_init(uint32_t pin);
@@ -58,30 +74,105 @@ static uint32_t wheel_position(uint32_t wheel, uint32_t now_usec);
 void
 encoder_init (void)
 {
-    pin_init(PIN_ENC_LEFT_A);
-    pin_init(PIN_ENC_LEFT_B);
-    pin_init(PIN_ENC_RIGHT_A);
-    pin_init(PIN_ENC_RIGHT_B);
+    for (uint32_t idx = 0u; idx < encoder_watch_count(); idx++)
+    {
+        pin_init(g_watch_pins[idx]);
+    }
 }   /* encoder_init() */
 
 
 /*!
- * @brief Count one encoder edge. Interrupt context (gpio_isr.c).
+ * @brief Report how many pins are watched for edges: the 4 encoder pins,
+ *        plus the free GPIOs when ENCODER_PIN_FINDER is on.
  *
- * @param[in] gpio The encoder pin that changed.
+ * @return The number of entries encoder_watch_pin() can return.
+ */
+uint32_t
+encoder_watch_count (void)
+{
+    return (ENCODER_PIN_FINDER ? ENCODER_NUM_WATCH : NUM_ENCODER_PINS);
+}   /* encoder_watch_count() */
+
+
+/*!
+ * @brief Report one watched pin.
+ *
+ * @param[in] idx 0 to encoder_watch_count() - 1.
+ *
+ * @return The GPIO number.
+ */
+uint32_t
+encoder_watch_pin (uint32_t idx)
+{
+    return (g_watch_pins[idx]);
+}   /* encoder_watch_pin() */
+
+
+/*!
+ * @brief Report how many edges one watched pin has had (pin finder).
+ *
+ * @param[in] idx 0 to encoder_watch_count() - 1.
+ *
+ * @return The edges since power-up.
+ */
+uint32_t
+encoder_watch_edges (uint32_t idx)
+{
+    return (g_pin_count[idx]);
+}   /* encoder_watch_edges() */
+
+
+/*!
+ * @brief Count one edge on a watched pin. Interrupt context (gpio_isr.c).
+ *
+ * @param[in] gpio The pin that changed.
  */
 void
 encoder_edge_isr (uint32_t gpio)
 {
     uint32_t now_usec = time_us_32();
-    uint32_t wheel    = (((PIN_ENC_LEFT_A == gpio) ||
-                          (PIN_ENC_LEFT_B == gpio)) ? WHEEL_LEFT
-                                                     : WHEEL_RIGHT);
 
-    g_interval[wheel]  = now_usec - g_tick_usec[wheel];
-    g_tick_usec[wheel] = now_usec;
-    g_count[wheel]++;
+    for (uint32_t idx = 0u; idx < encoder_watch_count(); idx++)
+    {
+        if (g_watch_pins[idx] == gpio)
+        {
+            g_pin_count[idx]++;
+        }
+    }
+
+    if ((PIN_ENC_LEFT_A == gpio) || (PIN_ENC_LEFT_B == gpio) ||
+        (PIN_ENC_RIGHT_A == gpio) || (PIN_ENC_RIGHT_B == gpio))
+    {
+        uint32_t wheel = (((PIN_ENC_LEFT_A == gpio) ||
+                           (PIN_ENC_LEFT_B == gpio)) ? WHEEL_LEFT
+                                                      : WHEEL_RIGHT);
+
+        g_interval[wheel]  = now_usec - g_tick_usec[wheel];
+        g_tick_usec[wheel] = now_usec;
+        g_count[wheel]++;
+    }
 }   /* encoder_edge_isr() */
+
+
+/*!
+ * @brief Report whether a pin is one encoder_edge_isr() should be given.
+ *
+ * @param[in] gpio The pin.
+ *
+ * @return True if it is watched.
+ */
+bool
+encoder_is_watched (uint32_t gpio)
+{
+    bool b_watched = false;
+
+    for (uint32_t idx = 0u; idx < encoder_watch_count(); idx++)
+    {
+        b_watched = (b_watched || (g_watch_pins[idx] == gpio));
+    }
+
+    return (b_watched);
+}   /* encoder_is_watched() */
 
 
 /*!

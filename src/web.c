@@ -102,7 +102,8 @@ static char const g_page_html[] =
     "Range: <b id=r>-</b> cm &nbsp; LSM303DLHC: <b id=imu>-</b><br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
     "IR raw pins L(GP28)/R(GP0): <b id=x>-</b><br>"
-    "Encoder ticks L/R: <b id=en>-</b></div>"
+    "Encoder ticks L/R: <b id=en>-</b><br>"
+    "Encoder pins (edges): <b id=ep>-</b></div>"
     "<div class=c><b>Accelerometer</b> <span class=leg>"
     "<span style=color:#ff6464>X</span> &nbsp;"
     "<span style=color:#58d8ff>Y</span> &nbsp;"
@@ -160,7 +161,7 @@ static char const g_page_html[] =
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
-    "$('en').textContent=d.el+' / '+d.er;"
+    "$('en').textContent=d.el+' / '+d.er;$('ep').textContent=d.ep;"
     "$('imu').textContent=!d.imu?'NOT FOUND':(!d.iv?'READ ERROR':"
     "(d.ic?'CALIBRATED':'NEEDS CALIBRATION'));"
     "$('bc').textContent=d.bc||'-';$('tn').textContent=d.tn||'straight on';"
@@ -578,6 +579,21 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 axes.mz_mgauss);
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
+
+    // Pin finder: edges seen on each watched pin, as "GP4:12 GP5:0 ...".
+    // NOTE: At most 10 pins of under 18 characters each: well within the
+    // buffer's spare room, so snprintf never truncates.
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                ",\"ep\":\"");
+    for (uint32_t idx = 0u; idx < encoder_watch_count(); idx++)
+    {
+        length += (size_t) snprintf(p_out + length, capacity - length,
+                                    "GP%" PRIu32 ":%" PRIu32 " ",
+                                    encoder_watch_pin(idx),
+                                    encoder_watch_edges(idx));
+    }
+    length += (size_t) snprintf(p_out + length, capacity - length, "\"");
+
     length += (size_t) snprintf(p_out + length, capacity - length,
                                 ",\"tn\":\"%s\",\"log\":[",
                                 ((BARCODE_CMD_NONE == pending) ? "" :

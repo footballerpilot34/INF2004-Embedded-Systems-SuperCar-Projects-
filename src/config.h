@@ -28,11 +28,17 @@
 #define PIN_BUTTON_START            20u     // Robo Pico button, active low.
 #define PIN_BUTTON_STOP             21u     // Robo Pico button, active low.
 #define PIN_BUZZER                  22u     // Robo Pico piezo buzzer.
-#define PIN_ENC_LEFT_A              4u      // Left wheel encoder A.
-#define PIN_ENC_LEFT_B              5u      // Left wheel encoder B.
-#define PIN_ENC_RIGHT_A             6u      // Right wheel encoder A.
-#define PIN_ENC_RIGHT_B             19u     // Right wheel encoder B (moved
+// Pin finder (2026-11-06): the LEFT wheel's encoder is on GP6 + GP19
+// (3140 + 3142 edges, healthy quadrature); the RIGHT one on GP4 + GP5,
+// but only GP5 counted (157 edges, GP4 0): VERIFY its wiring.
+#define PIN_ENC_LEFT_A              6u      // Left wheel encoder A.
+#define PIN_ENC_LEFT_B              19u     // Left wheel encoder B (moved
                                             // from GP7).
+#define PIN_ENC_RIGHT_A             4u      // Right wheel encoder A.
+#define PIN_ENC_RIGHT_B             5u      // Right wheel encoder B.
+// The pin finder watches the encoder pins and every free GPIO and shows
+// each pin's edges on the web page. Turn it off once the wiring is right.
+#define ENCODER_PIN_FINDER          true
 
 // Ultrasonic pan servo (as in robocar.c): centred at start, and turned
 // from the web page's slider within SERVO_RANGE_DEG either side.
