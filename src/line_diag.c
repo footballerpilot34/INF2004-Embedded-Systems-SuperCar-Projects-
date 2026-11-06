@@ -74,17 +74,17 @@ line_diag_enter (void)
     g_right_changes = 0u;
     g_ticks         = 0u;
 
-    log_printf("DIAG ON: motors disabled. Move each IR sensor over black "
-               "and white by hand.");
-    log_printf("DIAG wiring: LEFT GP28 %s, RIGHT GP0 %s.",
-               (b_left_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"),
-               (b_right_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"));
-    log_printf("DIAG now: LEFT=%s RIGHT=%s. Digital DOUT only: no analogue "
-               "values are wired.",
-               level_text(g_last_raw.b_left_high),
-               level_text(g_last_raw.b_right_high));
-    log_printf("DIAG: both over black -> 'b' / BLACK; both over white -> "
-               "'n' / WHITE; 'd' / DIAG to exit.");
+    log_line("DIAG ON: motors disabled. Move each IR sensor over black "
+             "and white by hand.");
+    log_line("DIAG wiring: LEFT GP28 %s, RIGHT GP0 %s.",
+             (b_left_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"),
+             (b_right_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"));
+    log_line("DIAG now: LEFT=%s RIGHT=%s. Digital DOUT only: no analogue "
+             "values are wired.",
+             level_text(g_last_raw.b_left_high),
+             level_text(g_last_raw.b_right_high));
+    log_line("DIAG: both over black -> 'b' / BLACK; both over white -> "
+             "'n' / WHITE; 'd' / DIAG to exit.");
 }   /* line_diag_enter() */
 
 
@@ -96,8 +96,8 @@ line_diag_exit (void)
 {
     if (gb_active)
     {
-        log_printf("DIAG OFF. Changes seen: LEFT %" PRIu32 ", RIGHT %"
-                   PRIu32 ".", g_left_changes, g_right_changes);
+        log_line("DIAG OFF. Changes seen: LEFT %" PRIu32 ", RIGHT %"
+                 PRIu32 ".", g_left_changes, g_right_changes);
     }
 
     gb_active = false;
@@ -134,31 +134,31 @@ line_diag_task (void)
         if (raw.b_left_high != g_last_raw.b_left_high)
         {
             g_left_changes++;
-            log_printf("DIAG LEFT  GP28: %s -> %s (%s)",
-                       level_text(g_last_raw.b_left_high),
-                       level_text(raw.b_left_high),
-                       colour_text(true, raw.b_left_high));
+            log_line("DIAG LEFT  GP28: %s -> %s (%s)",
+                     level_text(g_last_raw.b_left_high),
+                     level_text(raw.b_left_high),
+                     colour_text(true, raw.b_left_high));
         }
 
         if (raw.b_right_high != g_last_raw.b_right_high)
         {
             g_right_changes++;
-            log_printf("DIAG RIGHT GP0:  %s -> %s (%s)",
-                       level_text(g_last_raw.b_right_high),
-                       level_text(raw.b_right_high),
-                       colour_text(false, raw.b_right_high));
+            log_line("DIAG RIGHT GP0:  %s -> %s (%s)",
+                     level_text(g_last_raw.b_right_high),
+                     level_text(raw.b_right_high),
+                     colour_text(false, raw.b_right_high));
         }
 
         g_ticks++;
         if (0u == (g_ticks % STATUS_EVERY_TICKS))
         {
-            log_printf("DIAG status: LEFT=%s (%s) changes %" PRIu32
-                       " | RIGHT=%s (%s) changes %" PRIu32,
-                       level_text(raw.b_left_high),
-                       colour_text(true, raw.b_left_high), g_left_changes,
-                       level_text(raw.b_right_high),
-                       colour_text(false, raw.b_right_high),
-                       g_right_changes);
+            log_line("DIAG status: LEFT=%s (%s) changes %" PRIu32
+                     " | RIGHT=%s (%s) changes %" PRIu32,
+                     level_text(raw.b_left_high),
+                     colour_text(true, raw.b_left_high), g_left_changes,
+                     level_text(raw.b_right_high),
+                     colour_text(false, raw.b_right_high),
+                     g_right_changes);
         }
 
         g_last_raw = raw;
@@ -180,24 +180,24 @@ line_diag_learn (bool b_black)
 
     if (!gb_active)
     {
-        log_printf("Enter diagnostic mode ('d' / DIAG) before learning "
-                   "black or white.");
+        log_line("Enter diagnostic mode ('d' / DIAG) before learning "
+                 "black or white.");
     }
     else if (b_black)
     {
         g_black_raw    = raw;
         gb_black_known = true;
-        log_printf("DIAG learnt BLACK: LEFT=%s RIGHT=%s.",
-                   level_text(raw.b_left_high),
-                   level_text(raw.b_right_high));
+        log_line("DIAG learnt BLACK: LEFT=%s RIGHT=%s.",
+                 level_text(raw.b_left_high),
+                 level_text(raw.b_right_high));
     }
     else
     {
         g_white_raw    = raw;
         gb_white_known = true;
-        log_printf("DIAG learnt WHITE: LEFT=%s RIGHT=%s.",
-                   level_text(raw.b_left_high),
-                   level_text(raw.b_right_high));
+        log_line("DIAG learnt WHITE: LEFT=%s RIGHT=%s.",
+                 level_text(raw.b_left_high),
+                 level_text(raw.b_right_high));
     }
 
     if (gb_active && gb_black_known && gb_white_known)
@@ -225,18 +225,18 @@ polarity_apply (bool b_left, char const * p_name, bool b_black_high,
 {
     if (b_black_high == b_white_high)
     {
-        log_printf("DIAG %s: %s on BOTH black and white -> NOT "
-                   "switching. Adjust its pot.",
-                   p_name, level_text(b_black_high));
+        log_line("DIAG %s: %s on BOTH black and white -> NOT "
+                 "switching. Adjust its pot.",
+                 p_name, level_text(b_black_high));
     }
     else
     {
         line_sensor_set_black_level(b_left, b_black_high);
-        log_printf("DIAG %s OK: black=%s white=%s. Set config.h "
-                   "LINE_BLACK_IS_HIGH %s.",
-                   p_name, level_text(b_black_high),
-                   level_text(b_white_high),
-                   (b_black_high ? "true" : "false"));
+        log_line("DIAG %s OK: black=%s white=%s. Set config.h "
+                 "LINE_BLACK_IS_HIGH %s.",
+                 p_name, level_text(b_black_high),
+                 level_text(b_white_high),
+                 (b_black_high ? "true" : "false"));
     }
 }   /* polarity_apply() */
 

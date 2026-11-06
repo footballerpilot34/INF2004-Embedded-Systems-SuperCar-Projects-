@@ -284,6 +284,17 @@ command_run (web_command_t command)
         }
     break;
 
+    case WEB_CMD_BARCODE_STATIC:
+        if (line_diag_is_active())
+        {
+            log_printf("IR DIAG is on (motors off): turn it off first.");
+        }
+        else
+        {
+            vehicle_barcode_static();
+        }
+    break;
+
     case WEB_CMD_NONE:
     default:
         // Nothing to do.
@@ -306,8 +317,8 @@ turn_test (barcode_command_t command)
     }
     else
     {
-        log_printf("TEST: as if a barcode said %s.",
-                   barcode_command_name(command));
+        log_line("TEST: as if a barcode said %s.",
+                 barcode_command_name(command));
         vehicle_barcode_command(command, true);
     }
 }   /* turn_test() */
@@ -330,12 +341,14 @@ imu_calibrate_run (void)
     }
     else if (imu_calibrate())
     {
-        log_printf("IMU calibrated. Pitch/roll baseline set; hump detection enabled.");
+        log_obstacle("IMU calibrated. Pitch/roll baseline set; hump "
+                     "detection enabled.");
         buzzer_beep(CAL_DONE_BEEP_MSEC);
     }
     else
     {
-        log_printf("IMU calibration failed. Keep it still, level and try again.");
+        log_obstacle("IMU calibration failed. Keep it still, level and "
+                     "try again.");
     }
 }   /* imu_calibrate_run() */
 
@@ -353,23 +366,24 @@ barcode_report (barcode_result_t result)
         barcode_command_t command = barcode_command();
 
         buzzer_beep_soft(BARCODE_BEEP_MSEC);   // A barcode was read.
+        web_barcode_record(barcode_message(), command);
 
         if (BARCODE_CMD_NONE == command)
         {
-            log_printf("Barcode MESSAGE: \"%s\"", barcode_message());
+            log_line("Barcode MESSAGE: \"%s\"", barcode_message());
         }
         else
         {
-            log_printf("Barcode COMMAND: \"%s\" = %s", barcode_message(),
-                       barcode_command_name(command));
+            log_line("Barcode COMMAND: \"%s\" = %s", barcode_message(),
+                     barcode_command_name(command));
             vehicle_barcode_command(command, false);
         }
         telemetry_text("barcode", barcode_message());
     }
     else if (BARCODE_INVALID == result)
     {
-        log_printf("Barcode NOT decoded: %" PRIu32 " bars+spaces seen "
-                   "(valid: 10 per character - 1).", barcode_scan_size());
+        log_line("Barcode NOT decoded: %" PRIu32 " bars+spaces seen "
+                 "(valid: 10 per character - 1).", barcode_scan_size());
         telemetry_text("barcode", "(invalid scan)");
     }
     else

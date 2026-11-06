@@ -190,6 +190,7 @@ static bool     gb_last_black    = false;
 static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
 static bool     gb_enabled       = true;
+static bool     gb_hand          = false;   // Slid past by hand.
 
 // Analog reader state. Written by the sampling timer only.
 static repeating_timer_t g_ao_timer;
@@ -264,12 +265,12 @@ barcode_init (void)
         if (add_repeating_timer_us(-((int64_t) BARCODE_AO_SAMPLE_USEC),
                                    ao_sample_isr, NULL, &g_ao_timer))
         {
-            log_printf("Barcode: analog reader on GP%u, level %" PRId32
-                       " now.", PIN_BARCODE_AO, g_ao_level);
+            log_line("Barcode: analog reader on GP%u, level %" PRId32
+                     " now.", PIN_BARCODE_AO, g_ao_level);
         }
         else
         {
-            log_printf("Barcode: FAILED to start the analog sampler.");
+            log_line("Barcode: FAILED to start the analog sampler.");
         }
     }
 }   /* barcode_init() */
@@ -362,6 +363,10 @@ barcode_task (void)
     end_gap = g_widest_usec * end_gap_factor(g_widest_usec, g_narrow_usec);
     end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ?
                end_gap : BARCODE_END_GAP_MIN_USEC);
+    if (gb_hand && (end_gap < BARCODE_HAND_END_GAP_USEC))
+    {
+        end_gap = BARCODE_HAND_END_GAP_USEC;    // A hand pauses mid-code.
+    }
 
     if ((BARCODE_NONE == result) && gb_capturing && scan_has_ended(end_gap))
     {
@@ -393,13 +398,30 @@ barcode_set_enabled (bool b_enabled)
 {
     if (!b_enabled && gb_capturing)
     {
-        log_printf("Barcode: reading switched off after %" PRIu32
-                   " bars+spaces -> decoding what was read.", g_num_elements);
+        log_line("Barcode: reading switched off after %" PRIu32
+                 " bars+spaces -> decoding what was read.", g_num_elements);
         g_pending_result = scan_finish();
     }
 
     gb_enabled = b_enabled;
 }   /* barcode_set_enabled() */
+
+
+/*!
+ * @brief Read barcodes slid past the sensor by hand (car standing still).
+ *
+ * @par
+ * A hand moves unevenly and pauses, so a scan only ends after at least
+ * BARCODE_HAND_END_GAP_USEC on white. The wheels do not turn, so widths
+ * are measured in time.
+ *
+ * @param[in] b_hand True while BARCODE TEST (STATIC) runs.
+ */
+void
+barcode_set_hand_mode (bool b_hand)
+{
+    gb_hand = b_hand;
+}   /* barcode_set_hand_mode() */
 
 
 /*!
@@ -420,8 +442,8 @@ barcode_end_scan (void)
 
     if (b_was)
     {
-        log_printf("Barcode: crossroad reached after %" PRIu32
-                   " bars+spaces -> decoding now.", g_num_elements);
+        log_line("Barcode: crossroad reached after %" PRIu32
+                 " bars+spaces -> decoding now.", g_num_elements);
         g_pending_result = scan_finish();
     }
 
@@ -840,8 +862,8 @@ widths_select (void)
 
     if (BARCODE_USE_ENCODERS && !gb_widths_dist)
     {
-        log_printf("Barcode: encoders moved only %" PRIu32 " ticks over the "
-                   "scan -> widths measured in time.", ticks);
+        log_line("Barcode: encoders moved only %" PRIu32 " ticks over the "
+                 "scan -> widths measured in time.", ticks);
     }
 }   /* widths_select() */
 
@@ -883,8 +905,8 @@ scan_finish (void)
     {
         // One or two marks (a stray line or smudge): not a barcode. Not a
         // result either, but logged so a missed barcode can be diagnosed.
-        log_printf("Barcode: only %" PRIu32 " bars+spaces seen, ignored.",
-                   g_num_elements);
+        log_line("Barcode: only %" PRIu32 " bars+spaces seen, ignored.",
+                 g_num_elements);
     }
     else if ((g_num_elements >= MIN_ELEMENTS) &&
              (scan_decode(false) || scan_decode(true)))
@@ -925,8 +947,8 @@ scan_dump (void)
     char   text[DUMP_LINE_BYTES] = { 0 };
     size_t length = 0u;
 
-    log_printf("Barcode widths in %s (#1 is a bar, then space, bar, ...):",
-               (gb_widths_dist ? "0.1 encoder ticks" : "ms"));
+    log_line("Barcode widths in %s (#1 is a bar, then space, bar, ...):",
+             (gb_widths_dist ? "0.1 encoder ticks" : "ms"));
 
     // NOTE: A line holds a 6-character prefix plus DUMP_PER_LINE widths of
     // at most 8 characters each (86 bytes), so snprintf never truncates.
@@ -948,7 +970,7 @@ scan_dump (void)
         if (((DUMP_PER_LINE - 1u) == (el % DUMP_PER_LINE)) ||
             ((el + 1u) == g_num_elements))
         {
-            log_printf("%s", text);
+            log_line("%s", text);
         }
     }
 }   /* scan_dump() */
@@ -1093,15 +1115,15 @@ scan_decode_lenient (void)
         g_message[0] = found;
         g_message[1] = '\0';
         g_command    = command_match(g_message);
-        log_printf("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
-                   "%" PRIu32 "+%" PRIu32 " missing, %" PRIu32 " stray "
-                   "left out).", found_len, LENIENT_ELEMENTS, found_lead,
-                   (LENIENT_ELEMENTS - found_lead - found_len), found_junk);
+        log_line("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
+                 "%" PRIu32 "+%" PRIu32 " missing, %" PRIu32 " stray "
+                 "left out).", found_len, LENIENT_ELEMENTS, found_lead,
+                 (LENIENT_ELEMENTS - found_lead - found_len), found_junk);
     }
     else if (b_clash)
     {
-        log_printf("Barcode: lenient read ambiguous (two letters fit), "
-                   "rejected.");
+        log_line("Barcode: lenient read ambiguous (two letters fit), "
+                 "rejected.");
     }
     else
     {
@@ -1151,10 +1173,10 @@ lenient_view (bool b_log, uint32_t * p_lead)
 
                 if (('\0' == symbol) && b_log)
                 {
-                    log_printf("Barcode lenient %s, %" PRIu32 "+%" PRIu32
-                               " missing: %s (#%" PRIu32 ").",
-                               ((1u == dir) ? "reversed" : "forward"), lead,
-                               trail, gp_lenient_why, g_lenient_pos);
+                    log_line("Barcode lenient %s, %" PRIu32 "+%" PRIu32
+                             " missing: %s (#%" PRIu32 ").",
+                             ((1u == dir) ? "reversed" : "forward"), lead,
+                             trail, gp_lenient_why, g_lenient_pos);
                 }
             }
 
@@ -1176,9 +1198,9 @@ lenient_view (bool b_log, uint32_t * p_lead)
 
     if (b_log && !b_tried)
     {
-        log_printf("Barcode lenient: %" PRIu32 " bars+spaces cannot be "
-                   "\"*X*\" with at most %u missing.", n,
-                   LENIENT_MAX_ONE_SIDED);
+        log_line("Barcode lenient: %" PRIu32 " bars+spaces cannot be "
+                 "\"*X*\" with at most %u missing.", n,
+                 LENIENT_MAX_ONE_SIDED);
     }
 
     return (b_clash ? '\0' : found);

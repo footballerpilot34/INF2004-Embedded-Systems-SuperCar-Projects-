@@ -122,6 +122,12 @@ target_link_libraries(supercar
     hardware_pwm
     m
     pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI
+    pico_lwip_mdns                        # http://supercar-aai14.local
+)
+
+# Name shown in a phone hotspot's device list (= WIFI_HOST_NAME).
+target_compile_definitions(supercar PRIVATE
+    CYW43_HOST_NAME="supercar-aai14"
 )
 
 pico_enable_stdio_usb(supercar 1)

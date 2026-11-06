@@ -48,11 +48,41 @@
 #define SERVO_MAX_USEC              2500    // Pulse width at 180 degrees.
 
 // ------------------------------------------------------------------------
-// Wireless UI: the car makes its own Wi-Fi network; open the page at
-// http://192.168.4.1 on a phone or laptop that has joined it.
+// Wireless UI.
+// Hotspot mode: src/wifi_secrets.h lists hotspots (e.g. phone hotspots) in
+// HOTSPOT_LIST. The car tries each in turn, or only the one chosen on the
+// page, and the page is at http://WIFI_HOST_NAME.local or the IP it logs.
+// Each is tried for up to WIFI_TRY_MSEC, WIFI_JOIN_ROUNDS times over the
+// list, before it falls back to its own network below. Once joined, it
+// keeps trying to rejoin if the link drops.
+// Own-network mode: join WIFI_NAME and open http://192.168.4.1.
 // ------------------------------------------------------------------------
 #define WIFI_NAME                   "SuperCar-AAI14"
 #define WIFI_PASSWORD               "supercar14"    // At least 8 characters.
+#define WIFI_HOST_NAME              "supercar-aai14"    // Must match
+                                                        // CYW43_HOST_NAME in
+                                                        // CMakeLists.txt.
+#define WIFI_TRY_MSEC               10000u  // Longest try at one hotspot.
+#define WIFI_FAIL_SETTLE_MSEC       1500u   // A failure is only believed
+                                            // this long into a try.
+#define WIFI_JOIN_ROUNDS            2u      // Power-up: times over the list
+                                            // before the own network...
+#define WIFI_JOIN_MIN_MSEC          30000u  // ...and never sooner than this
+                                            // (time to open the hotspot).
+#define WIFI_CHECK_MSEC             250u    // How often the link is checked.
+
+#if __has_include("wifi_secrets.h")
+#include "wifi_secrets.h"           // HOTSPOT_LIST.
+#endif
+
+// The older one-hotspot form still works.
+#if defined(HOTSPOT_SSID) && !defined(HOTSPOT_LIST)
+#define HOTSPOT_LIST                { HOTSPOT_SSID, HOTSPOT_PASSWORD }
+#endif
+
+#ifndef HOTSPOT_AUTH
+#define HOTSPOT_AUTH                CYW43_AUTH_WPA2_AES_PSK
+#endif
 
 // Wheel test (stage 2) showed LEFT and RIGHT were swapped, so the LEFT
 // wheel is on M1 (GP8/GP9) and the RIGHT wheel on M2 (GP10/GP11).
@@ -223,6 +253,9 @@
 #define BARCODE_BLACK_MAX_USEC      2000000u // ...on black, only this long
                                             // (sensor left on a branch or
                                             // the line).
+#define BARCODE_HAND_END_GAP_USEC   1500000u // BARCODE TEST (STATIC): a scan
+                                            // slid by hand ends only after
+                                            // this long on white.
 // Bar widths measured in DISTANCE (wheel encoders, encoder.c) instead of
 // time, so the car slowing or pausing over a barcode no longer stretches
 // its bars (2026-11-06). If the encoders turned less than
@@ -353,7 +386,7 @@
 #define BUZZER_SOFT_DUTY_PERCENT    5u     // Soft beep loudness (PWM duty;
                                             // 50 = normal beep). Lower is
                                             // quieter.
-
+ 
 #endif /* CONFIG_H */
 
 /*** end of file ***/

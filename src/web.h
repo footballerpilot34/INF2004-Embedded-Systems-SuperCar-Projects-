@@ -7,6 +7,9 @@
 #define WEB_H
 
 #include <stdbool.h>
+#include <stdint.h>
+
+#include "barcode.h"
 
 typedef enum
 {
@@ -21,12 +24,16 @@ typedef enum
     WEB_CMD_TURN_LEFT,      // Test: act as if a barcode said LEFT.
     WEB_CMD_TURN_RIGHT,     // Test: act as if a barcode said RIGHT.
     WEB_CMD_UTURN,          // Test: act as if a barcode said UTURN.
-    WEB_CMD_BARCODE_TEST    // Drive straight, ignoring the line sensors.
+    WEB_CMD_BARCODE_TEST,   // Drive straight, ignoring the line sensors.
+    WEB_CMD_BARCODE_STATIC  // Stand still; barcodes are slid past by hand.
 } web_command_t;
 
 bool          web_init(void);
 void          web_task(void);
 web_command_t web_command_take(void);
+char const *  web_wifi_text(void);
+void          web_barcode_record(char const * p_message,
+                                 barcode_command_t command);
 bool          web_servo_take(int32_t * p_degrees);
 
 #endif /* WEB_H */

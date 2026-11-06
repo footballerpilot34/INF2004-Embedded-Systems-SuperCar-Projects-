@@ -23,6 +23,7 @@
 #define LWIP_UDP                    1      /* needed by the DHCP server */
 #define LWIP_DHCP                   1
 #define LWIP_DNS                    1
+#define LWIP_IGMP                   1      /* needed by mDNS */
 
 #define TCP_MSS                     1460
 #define TCP_WND                     (8 * TCP_MSS)
@@ -33,10 +34,17 @@
 #define LWIP_NETIF_STATUS_CALLBACK  1
 #define LWIP_NETIF_LINK_CALLBACK    1
 #define LWIP_NETIF_HOSTNAME         1
+#define LWIP_NETIF_EXT_STATUS_CALLBACK 1   /* mDNS follows IP changes */
 #define LWIP_NETIF_TX_SINGLE_PBUF   1
 #define LWIP_CHKSUM_ALGORITHM       3
 #define DHCP_DOES_ARP_CHECK         0
 #define LWIP_DHCP_DOES_ACD_CHECK    0
+
+/* mDNS: the page is at http://supercar-aai14.local on a hotspot. */
+#define LWIP_MDNS_RESPONDER         1
+#define MDNS_MAX_SERVICES           1
+#define LWIP_NUM_NETIF_CLIENT_DATA  1
+#define MEMP_NUM_SYS_TIMEOUT        (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 3)
 
 #define MEM_STATS                   0
 #define SYS_STATS                   0

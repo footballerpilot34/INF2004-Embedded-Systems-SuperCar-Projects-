@@ -4,10 +4,17 @@
  *        the message log (the same messages as the USB serial monitor).
  *
  * @par How it works
- * The Pico W makes its own Wi-Fi network (WIFI_NAME in config.h) and
- * serves a page at http://192.168.4.1. The page:
+ * If src/wifi_secrets.h lists hotspots, the Pico W tries each in turn
+ * (or only the one chosen on the page) and serves the page at
+ * http://WIFI_HOST_NAME.local (or the IP it logs). If none is joined after
+ * WIFI_JOIN_ROUNDS times over the list, or none is listed, it makes its
+ * own network (WIFI_NAME) with the page at http://192.168.4.1. Joining
+ * never holds up the car. The page:
  * - sends GET /cmd?c=... when a button is pressed;
  * - sends GET /servo?a=<degrees> when the servo slider is released;
+ * - gets GET /hotspots once for its hotspot chooser, and sends
+ *   GET /wifi?h=<index, or -1 for each in turn> when USE is pressed;
+ * - gets GET /history when the barcode history has changed;
  * - polls GET /status?s=N every 0.2 s for live vehicle and sensor readings
  *   and every log message from number N on.
  * Commands are only queued here; main() runs them, exactly like a button
@@ -28,6 +35,7 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 #include "lwip/tcp.h"
+#include "lwip/apps/mdns.h"
 #include "dhcpserver.h"
 
 #include "barcode.h"
@@ -47,7 +55,8 @@
 #define REQUEST_BYTES           128u
 #define HEADER_BYTES            160u
 #define STATUS_BYTES            1400u   // Fits lwIP's 4 KB copy heap.
-#define LINE_RESERVE            200u    // Room for one escaped log line.
+#define LINE_RESERVE            240u    // Room for one escaped log line
+                                        // (under 200) and the reply's end.
 #define LOG_KEPT                32u     // Must match LOG_LINES in log.c.
 #define NO_RANGE_JSON           (-1)
 
@@ -60,6 +69,41 @@
 #define DECIMAL_BASE            10
 #define SERVO_PREFIX            "/servo?a="
 #define SERVO_PREFIX_LEN        (sizeof(SERVO_PREFIX) - 1u)
+#define WIFI_TEXT_BYTES         80u     // "Hotspot \"name\" at a.b.c.d".
+#define HISTORY_PATH            "/history"
+#define HISTORY_MAX             20u     // Barcodes kept for the page.
+#define HISTORY_TEXT_BYTES      16u     // Longest message kept, plus '\0'.
+#define MSEC_PER_SEC            1000u
+
+typedef struct
+{
+    char              text[HISTORY_TEXT_BYTES];
+    barcode_command_t command;
+    uint32_t          time_sec;     // When it was read, since power-up.
+} history_entry_t;
+
+typedef enum
+{
+    WIFI_OFF,           // Chip failed to start.
+    WIFI_JOINING,       // Joining the hotspot after power-up.
+    WIFI_JOINED,        // On the hotspot.
+    WIFI_REJOINING,     // Was on the hotspot; link lost, rejoining.
+    WIFI_OWN_NETWORK    // Making our own network (192.168.4.1).
+} wifi_mode_t;
+
+typedef struct
+{
+    char const * p_ssid;
+    char const * p_password;
+} hotspot_t;
+
+#define HOTSPOT_AUTO            (-1)    // Page choice: try each in turn.
+#define HOTSPOT_NO_REQUEST      (-2)    // No new choice from the page.
+#define HOTSPOTS_PATH           "/hotspots"
+#define WIFI_PREFIX             "/wifi?h="
+#define WIFI_PREFIX_LEN         (sizeof(WIFI_PREFIX) - 1u)
+#define NUM_HOTSPOTS            ((uint32_t) (sizeof(g_hotspots) / \
+                                             sizeof(g_hotspots[0])))
 
 
 static char const g_page_html[] =
@@ -71,9 +115,8 @@ static char const g_page_html[] =
     ".g{display:grid;grid-template-columns:1fr 1fr;gap:8px}"
     "button{font-size:20px;padding:16px 0;border:0;border-radius:10px;"
     "color:#fff}"
-    "#a{background:#2a7}#b{background:#c33}#k{background:#36c}"
-    "#w{background:#555}#d{background:#a60}#n{background:#888}"
-    "#v{background:#333}.t{background:#538;font-size:16px}"
+    "#a{background:#2a7}#b{background:#c33}#w{background:#555}"
+    ".t{background:#538;font-size:16px}"
     ".c{background:#222;border-radius:10px;padding:10px;margin:10px 0;"
     "line-height:1.6}"
     "#bc{font-size:30px;font-weight:bold;color:#fc3;word-break:break-all}"
@@ -84,26 +127,40 @@ static char const g_page_html[] =
     ".leg{font-size:12px;color:#bbb}"
     "#log{font-family:monospace;font-size:12px;height:45vh;overflow:auto;"
     "white-space:pre-wrap;background:#000;padding:8px;border-radius:8px}"
+    ".tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}"
+    ".tb{font-size:13px;padding:8px 10px;background:#333;border-radius:8px}"
+    ".tb.on{background:#36c}"
+    "#bh{font-family:monospace;font-size:13px;max-height:150px;"
+    "overflow:auto;white-space:pre;background:#000;padding:6px 8px;"
+    "border-radius:8px;margin-top:4px}"
     "</style></head><body><h2>SuperCar AAI14</h2><div class=g>"
     "<button id=a onclick=\"c('start')\">START</button>"
-    "<button id=b onclick=\"c('stop')\">STOP</button>"
-    "<button id=k onclick=\"c('calibrate')\">CALIBRATE IMU</button>"
+    "<button id=b onclick=\"c('stop')\">STOP/RESET</button>"
     "<button id=w onclick=\"c('wheel')\">WHEEL TEST</button>"
-    "<button id=d onclick=\"c('diag')\">IR DIAG on/off</button>"
-    "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
-    "<button id=n onclick=\"c('white')\">LEARN WHITE</button>"
-    "<button class=t onclick=\"c('bt')\">BARCODE TEST</button></div>"
+    "<button class=t onclick=\"c('bt')\">BARCODE TEST</button>"
+    "<button class=t style=grid-column:1/3;background:#746 "
+    "onclick=\"c('bs')\">BARCODE TEST (STATIC)</button></div>"
     "<div class=c>Servo: <b id=sv>90</b>&deg;<br>"
     "<input type=range min=60 max=120 value=90 style=width:100% "
     "oninput=\"$('sv').textContent=this.value\" "
     "onchange=\"fetch('/servo?a='+this.value).catch(function(){})\">"
     "</div>"
-    "<div class=c>State: <b id=s>-</b><br>"
-    "Range: <b id=r>-</b> cm &nbsp; LSM303DLHC: <b id=imu>-</b><br>"
+    "<div class=c>Car State: <b id=s>-</b><br>"
+    "Wi-Fi: <b id=wf>-</b><br>"
+    "<span id=hw style=display:none>Hotspot: <select id=hs "
+    "style=font-size:14px;max-width:55%></select> "
+    "<button class=tb onclick=hset()>USE</button><br>"
+    "<span class=hint>The car may change network: rejoin your device to "
+    "the same hotspot.</span><br></span>"
+    "Obstacle Detection Range: <b id=r>-</b> cm<br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
     "IR raw pins L(GP28)/R(GP0): <b id=x>-</b><br>"
     "Encoder ticks L/R: <b id=en>-</b><br>"
     "Encoder pins (edges): <b id=ep>-</b></div>"
+    "<div class=c>Barcode message<div id=bc>-</div>"
+    "Next crossroad: <b id=tn>-</b>"
+    "<div class=hint style=margin-top:6px>History (newest first)</div>"
+    "<div id=bh>No barcodes read yet.</div></div>"
     "<div class=c><b>Accelerometer</b> <span class=leg>"
     "<span style=color:#ff6464>X</span> &nbsp;"
     "<span style=color:#58d8ff>Y</span> &nbsp;"
@@ -116,7 +173,8 @@ static char const g_page_html[] =
     "<span style=color:#58d8ff>Roll</span></span>"
     "<div class=vals id=pv>Pitch - &nbsp; Peak tilt -</div>"
     "<canvas id=pc></canvas><div class=hint>Fixed scale: -30 to +30 degrees. "
-    "Pitch is low-pass filtered; calibrate while still and level.</div></div>"
+    "Pitch is low-pass filtered; calibrate (hold GP20 2 s) while still "
+    "and level.</div></div>"
     "<div class=c><b>Magnetometer</b> <span class=leg>"
     "<span style=color:#ff6464>X</span> &nbsp;"
     "<span style=color:#58d8ff>Y</span> &nbsp;"
@@ -124,13 +182,47 @@ static char const g_page_html[] =
     "<div class=vals id=mv>MX - &nbsp; MY - &nbsp; MZ -</div>"
     "<canvas id=mc></canvas><div class=hint>Fixed scale: -0.8 to +0.8 gauss. "
     "Three-sample display average.</div></div>"
-    "<div class=c>Barcode message<div id=bc>-</div>"
-    "Next crossroad: <b id=tn>-</b></div>"
-    "<div class=c><b>Serial monitor</b><div id=log></div>"
+    "<div class=c><b>Serial monitor</b><div class=tabs>"
+    "<button class=\"tb on\" id=t0 onclick=tab(0)>All</button>"
+    "<button class=tb id=t1 onclick=tab(1)>Obstacle / Hump</button>"
+    "<button class=tb id=t2 onclick=tab(2)>Line / Barcode</button>"
+    "<button class=tb id=t3 onclick=tab(3)>Vehicle state</button></div>"
+    "<div id=log></div>"
     "<button class=t style=width:100%;margin-top:8px "
-    "onclick=\"c('clear');$('log').textContent='';$('bc').textContent='-'\">"
-    "CLEAR OUTPUT</button></div>"
+    "onclick=\"c('clear');lg=[];nw=[0,0,0,0];show();"
+    "$('bc').textContent='-'\">CLEAR OUTPUT</button></div>"
     "<script>var hist=[],q=0;function $(i){return document.getElementById(i)}"
+    // Serial monitor: lg holds {c:category,t:text}; tab ft 0 shows all,
+    // 1-3 one category (log_cat_t). nw counts lines unseen in each tab.
+    "var lg=[],ft=0,nw=[0,0,0,0],"
+    "tn=['All','Obstacle / Hump','Line / Barcode','Vehicle state'];"
+    "function show(){var L=$('log'),"
+    "b=L.scrollTop+L.clientHeight>=L.scrollHeight-30,s='';"
+    "for(var i=0;i<lg.length;i++){if(!ft||lg[i].c==ft)s+=lg[i].t+'\\n'}"
+    "L.textContent=s;if(b)L.scrollTop=L.scrollHeight;"
+    "for(var k=0;k<4;k++){var e=$('t'+k);"
+    "e.className=k==ft?'tb on':'tb';"
+    "e.textContent=tn[k]+(nw[k]?' ('+nw[k]+')':'')}}"
+    "function tab(k){ft=k;if(k)nw[k]=0;else nw=[0,0,0,0];show();"
+    "var L=$('log');L.scrollTop=L.scrollHeight}"
+    // Barcode history: refetched whenever its number hq changes.
+    // Hotspot chooser: filled once; hidden when no hotspots are listed.
+    "function hlist(){fetch('/hotspots').then(function(r){return r.json()})"
+    ".then(function(j){if(!j.n.length)return;var h=$('hs'),"
+    "o='<option value=-1>Auto (try each in turn)</option>';"
+    "for(var i=0;i<j.n.length;i++){o+='<option value='+i+'></option>'}"
+    "h.innerHTML=o;for(var i=0;i<j.n.length;i++){"
+    "h.options[i+1].textContent=j.n[i]}h.value=j.sel;"
+    "$('hw').style.display=''}).catch(function(){setTimeout(hlist,2000)})}"
+    "function hset(){fetch('/wifi?h='+$('hs').value).catch(function(){})}"
+    "hlist();"
+    "var hq=-1;function two(n){return (n<10?'0':'')+n}"
+    "function hget(){fetch('/history').then(function(r){return r.json()})"
+    ".then(function(j){var s='';for(var i=0;i<j.h.length;i++){var e=j.h[i];"
+    "s+=two(Math.floor(e[2]/60))+':'+two(e[2]%60)+'  \"'+e[0]+'\"  -> '+"
+    "(e[1]?e[1]+' at next crossroad':'no command')+'\\n'}"
+    "$('bh').textContent=s||'No barcodes read yet.';hq=j.hq})"
+    ".catch(function(){})}"
     "function c(x){fetch('/cmd?c='+x).catch(function(){})}"
     "function f(v){return (v<0?'-':'+')+Math.abs(v).toFixed(3)}"
     "function avg(i,k){var a=0,n=0;for(var j=Math.max(0,i-2);j<=i;j++)"
@@ -153,18 +245,20 @@ static char const g_page_html[] =
     "x.fillStyle='#aab4bd';x.textAlign='left';x.fillText('old',L,h-5);"
     "x.textAlign='right';x.fillText('12 s',w-R,h-5)}"
     "function u(){fetch('/status?s='+q).then(function(r){return r.json()})"
-    ".then(function(d){var L=$('log');if(d.nx<q){L.textContent=''}"
-    "for(var k=0;k<d.log.length;k++){L.textContent+=d.log[k]+'\\n'}"
-    "if(d.log.length){L.scrollTop=L.scrollHeight}q=d.nx;"
-    "$('s').textContent=d.st;"
+    ".then(function(d){if(d.nx<q){lg=[]}"
+    "for(var k=0;k<d.log.length;k++){var m=d.log[k],g=+m.charAt(0);"
+    "lg.push({c:g,t:m.slice(1)});"
+    "if(ft&&g!=ft){nw[0]++;if(g)nw[g]++}}"
+    "if(lg.length>500)lg.splice(0,lg.length-500);"
+    "if(d.log.length||d.nx<q)show();q=d.nx;"
+    "$('s').textContent=d.st;$('wf').textContent=d.wf;"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
     "$('en').textContent=d.el+' / '+d.er;$('ep').textContent=d.ep;"
-    "$('imu').textContent=!d.imu?'NOT FOUND':(!d.iv?'READ ERROR':"
-    "(d.ic?'CALIBRATED':'NEEDS CALIBRATION'));"
     "$('bc').textContent=d.bc||'-';$('tn').textContent=d.tn||'straight on';"
+    "if(d.hq!=hq)hget();"
     "if(d.iv){hist.push({ax:d.ax,ay:d.ay,az:d.az,mx:d.mx,my:d.my,mz:d.mz,"
     "pt:d.pt,rl:d.rl});"
     "if(hist.length>60)hist.shift();"
@@ -187,8 +281,35 @@ static bool          gb_servo_pending = false;
 static uint32_t      g_log_floor      = 0u;     // CLEAR OUTPUT: first log
                                                 // line still sent.
 static int32_t       g_servo_deg      = 0;
+static wifi_mode_t   g_wifi_mode      = WIFI_OFF;
+static dhcp_server_t g_dhcp_server;             // Own network only.
+#ifdef HOTSPOT_LIST
+static hotspot_t const g_hotspots[] = { HOTSPOT_LIST };
+static uint32_t      g_hot_idx        = 0u;     // Hotspot being tried/used.
+static int32_t       g_hot_only       = HOTSPOT_AUTO; // Chosen on the page.
+static int32_t       g_hot_request    = HOTSPOT_NO_REQUEST; // New choice.
+static uint32_t      g_hot_since      = 0u;     // This attempt began (ms).
+static uint32_t      g_hot_tries      = 0u;     // Attempts that failed.
+static uint32_t      g_join_since     = 0u;     // Joining began (ms).
+static bool          gb_mdns_started  = false;
+#endif
+static uint32_t      g_wifi_check     = 0u;     // Next link check (ms).
+static char          g_wifi_text[WIFI_TEXT_BYTES] = "Starting";
+static history_entry_t g_history[HISTORY_MAX];  // Ring, oldest overwritten.
+static uint32_t      g_history_count  = 0u;     // Ever recorded (since CLEAR).
+static uint32_t      g_history_seq    = 0u;     // Changes on every record or
+                                                // clear: the page refetches.
 
 
+static bool   server_start(void);
+static void   own_network_start(void);
+#ifdef HOTSPOT_LIST
+static void   hotspot_start(uint32_t now_msec);
+static void   hotspot_try(uint32_t now_msec);
+static void   hotspot_next(uint32_t now_msec, int status);
+#endif
+static size_t hotspots_build(char * p_out, size_t capacity);
+static void   hotspot_check(uint32_t now_msec);
 static err_t  accept_callback(void * p_arg, struct tcp_pcb * p_client,
                               err_t err);
 static err_t  receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
@@ -196,6 +317,7 @@ static err_t  receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
 static void   request_handle(struct tcp_pcb * p_pcb, char * p_path);
 static void   command_parse(char const * p_name);
 static size_t status_build(char * p_out, size_t capacity, uint32_t since);
+static size_t history_build(char * p_out, size_t capacity);
 static size_t json_string(char * p_out, size_t capacity, char const * p_text);
 static void   reply_send(struct tcp_pcb * p_pcb, char const * p_type,
                          char const * p_body, size_t body_len,
@@ -203,54 +325,38 @@ static void   reply_send(struct tcp_pcb * p_pcb, char const * p_type,
 
 
 /*!
- * @brief Start the Wi-Fi hotspot, DHCP server and web server.
+ * @brief Start Wi-Fi and the web server.
  *
- * @return True if the wireless UI is running.
+ * @par
+ * With hotspots listed, joining starts here and finishes in web_task(),
+ * so power-up is never held up; otherwise the car's own network starts
+ * now.
+ *
+ * @return True if the wireless UI is running (or joining).
  */
 bool
 web_init (void)
 {
-    static dhcp_server_t dhcp_server;
-    ip_addr_t            gateway;
-    ip_addr_t            netmask;
-    struct tcp_pcb *     p_pcb      = NULL;
-    struct tcp_pcb *     p_listener = NULL;
-
-    gb_ready = false;
+    gb_ready    = false;
+    g_wifi_mode = WIFI_OFF;
 
     if (0 != cyw43_arch_init())
     {
         log_printf("Wi-Fi: chip failed to start; wireless UI is OFF.");
+        (void) snprintf(g_wifi_text, sizeof(g_wifi_text), "Off");
+    }
+    else if (server_start())
+    {
+        gb_ready = true;
+#ifdef HOTSPOT_LIST
+        hotspot_start(to_ms_since_boot(get_absolute_time()));
+#else
+        own_network_start();
+#endif
     }
     else
     {
-        cyw43_arch_enable_ap_mode(WIFI_NAME, WIFI_PASSWORD,
-                                  CYW43_AUTH_WPA2_AES_PSK);
-
-        // Hand out addresses like a home router: 192.168.4.x.
-        ip_addr_set_ip4_u32(&gateway, PP_HTONL(CYW43_DEFAULT_IP_AP_ADDRESS));
-        ip_addr_set_ip4_u32(&netmask, PP_HTONL(CYW43_DEFAULT_IP_MASK));
-        dhcp_server_init(&dhcp_server, &cyw43_state.netif[CYW43_ITF_AP],
-                         &gateway, &netmask);
-
-        p_pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
-        if ((NULL != p_pcb) &&
-            (ERR_OK == tcp_bind(p_pcb, IP_ANY_TYPE, HTTP_PORT)))
-        {
-            p_listener = tcp_listen_with_backlog(p_pcb, LISTEN_BACKLOG);
-        }
-
-        if (NULL != p_listener)
-        {
-            tcp_accept(p_listener, accept_callback);
-            gb_ready = true;
-            log_printf("Wi-Fi: join \"%s\" (password \"%s\"), then open "
-                       "http://192.168.4.1", WIFI_NAME, WIFI_PASSWORD);
-        }
-        else
-        {
-            log_printf("Wi-Fi: web server failed to start.");
-        }
+        log_printf("Wi-Fi: web server failed to start.");
     }
 
     return (gb_ready);
@@ -266,8 +372,298 @@ web_task (void)
     if (gb_ready)
     {
         cyw43_arch_poll();
+        hotspot_check(to_ms_since_boot(get_absolute_time()));
     }
 }   /* web_task() */
+
+
+/*!
+ * @brief Report how the wireless UI can be reached, for the page.
+ *
+ * @return Text such as "Hotspot \"name\" at 172.20.10.3".
+ */
+char const *
+web_wifi_text (void)
+{
+    return (g_wifi_text);
+}   /* web_wifi_text() */
+
+
+/*!
+ * @brief Add a decoded barcode to the page's barcode history.
+ *
+ * @param[in] p_message The decoded message.
+ * @param[in] command   The command it gives (BARCODE_CMD_NONE if none).
+ */
+void
+web_barcode_record (char const * p_message, barcode_command_t command)
+{
+    history_entry_t * p_entry = &g_history[g_history_count % HISTORY_MAX];
+
+    (void) snprintf(p_entry->text, sizeof(p_entry->text), "%s", p_message);
+    p_entry->command  = command;
+    p_entry->time_sec = to_ms_since_boot(get_absolute_time()) / MSEC_PER_SEC;
+    g_history_count++;
+    g_history_seq++;
+}   /* web_barcode_record() */
+
+
+/*!
+ * @brief Listen for HTTP on every network (hotspot or own).
+ *
+ * @return True if listening.
+ */
+static bool
+server_start (void)
+{
+    struct tcp_pcb * p_pcb      = tcp_new_ip_type(IPADDR_TYPE_ANY);
+    struct tcp_pcb * p_listener = NULL;
+
+    if ((NULL != p_pcb) &&
+        (ERR_OK == tcp_bind(p_pcb, IP_ANY_TYPE, HTTP_PORT)))
+    {
+        p_listener = tcp_listen_with_backlog(p_pcb, LISTEN_BACKLOG);
+    }
+
+    if (NULL != p_listener)
+    {
+        tcp_accept(p_listener, accept_callback);
+    }
+
+    return (NULL != p_listener);
+}   /* server_start() */
+
+
+/*!
+ * @brief Make the car's own network, handing out 192.168.4.x addresses
+ *        like a home router.
+ */
+static void
+own_network_start (void)
+{
+    ip_addr_t gateway;
+    ip_addr_t netmask;
+
+    cyw43_arch_enable_ap_mode(WIFI_NAME, WIFI_PASSWORD,
+                              CYW43_AUTH_WPA2_AES_PSK);
+
+    ip_addr_set_ip4_u32(&gateway, PP_HTONL(CYW43_DEFAULT_IP_AP_ADDRESS));
+    ip_addr_set_ip4_u32(&netmask, PP_HTONL(CYW43_DEFAULT_IP_MASK));
+    dhcp_server_init(&g_dhcp_server, &cyw43_state.netif[CYW43_ITF_AP],
+                     &gateway, &netmask);
+
+    g_wifi_mode = WIFI_OWN_NETWORK;
+    (void) snprintf(g_wifi_text, sizeof(g_wifi_text),
+                    "Own network \"%s\" at 192.168.4.1", WIFI_NAME);
+    log_printf("Wi-Fi: join \"%s\" (password \"%s\"), then open "
+               "http://192.168.4.1", WIFI_NAME, WIFI_PASSWORD);
+}   /* own_network_start() */
+
+
+#ifdef HOTSPOT_LIST
+/*!
+ * @brief Start joining hotspots: the one chosen on the page, or else each
+ *        in wifi_secrets.h in turn.
+ *
+ * @par
+ * mDNS answers WIFI_HOST_NAME on whichever is joined, so the page is at
+ * http://WIFI_HOST_NAME.local whatever IP address the hotspot gives.
+ *
+ * @param[in] now_msec The time now, in ms since boot.
+ */
+static void
+hotspot_start (uint32_t now_msec)
+{
+    cyw43_arch_enable_sta_mode();
+
+    // No Wi-Fi power saving: the page polls every 0.2 s and must not lag.
+    (void) cyw43_wifi_pm(&cyw43_state, CYW43_NONE_PM);
+
+    if (!gb_mdns_started)
+    {
+        mdns_resp_init();               // Once only; netifs come and go.
+        gb_mdns_started = true;
+    }
+    if (ERR_OK != mdns_resp_add_netif(&cyw43_state.netif[CYW43_ITF_STA],
+                                      WIFI_HOST_NAME))
+    {
+        log_printf("Wi-Fi: mDNS failed; use the IP address instead.");
+    }
+
+    g_wifi_mode  = WIFI_JOINING;
+    g_hot_tries  = 0u;
+    g_join_since = now_msec;
+    g_hot_idx   = ((HOTSPOT_AUTO == g_hot_only) ? 0u : (uint32_t) g_hot_only);
+    hotspot_try(now_msec);
+}   /* hotspot_start() */
+
+
+/*!
+ * @brief Start one attempt at joining hotspot g_hot_idx.
+ *
+ * @param[in] now_msec The time now, in ms since boot.
+ */
+static void
+hotspot_try (uint32_t now_msec)
+{
+    hotspot_t const * p_hot = &g_hotspots[g_hot_idx];
+
+    // End a join still in progress (or a link): a failed one is over.
+    if (cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA) >
+        CYW43_LINK_DOWN)
+    {
+        (void) cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
+    }
+    g_hot_since = now_msec;
+
+    (void) snprintf(g_wifi_text, sizeof(g_wifi_text), "%s \"%s\"",
+                    ((WIFI_REJOINING == g_wifi_mode) ? "Rejoining"
+                                                     : "Joining"),
+                    p_hot->p_ssid);
+    log_printf("Wi-Fi: trying hotspot %" PRIu32 " of %" PRIu32 ": \"%s\"...",
+               (g_hot_idx + 1u), NUM_HOTSPOTS, p_hot->p_ssid);
+
+    if (0 != cyw43_arch_wifi_connect_async(p_hot->p_ssid, p_hot->p_password,
+                                           HOTSPOT_AUTH))
+    {
+        log_printf("Wi-Fi: could not start joining \"%s\".", p_hot->p_ssid);
+    }
+}   /* hotspot_try() */
+
+
+/*!
+ * @brief The current attempt failed: try the next hotspot, or fall back
+ *        to the car's own network if power-up joining has run out of tries.
+ *
+ * @param[in] now_msec The time now, in ms since boot.
+ * @param[in] status   The link status the attempt ended with.
+ */
+static void
+hotspot_next (uint32_t now_msec, int status)
+{
+    uint32_t candidates = ((HOTSPOT_AUTO == g_hot_only) ? NUM_HOTSPOTS : 1u);
+
+    log_printf("Wi-Fi: \"%s\" not joined (%s).",
+               g_hotspots[g_hot_idx].p_ssid,
+               ((CYW43_LINK_BADAUTH == status) ? "wrong password" :
+                ((CYW43_LINK_NONET == status) ? "not found" : "no answer")));
+
+    g_hot_tries++;
+
+    // A hotspot that is not up yet fails fast ("not found"), so the tries
+    // alone could run out in seconds: keep going for the minimum time too.
+    if ((WIFI_JOINING == g_wifi_mode) &&
+        (g_hot_tries >= (candidates * WIFI_JOIN_ROUNDS)) &&
+        ((now_msec - g_join_since) >= WIFI_JOIN_MIN_MSEC))
+    {
+        log_printf("Wi-Fi: no hotspot joined -> own network.");
+        cyw43_arch_disable_sta_mode();
+        own_network_start();
+    }
+    else
+    {
+        if (HOTSPOT_AUTO == g_hot_only)
+        {
+            g_hot_idx = ((g_hot_idx + 1u) % NUM_HOTSPOTS);
+        }
+        hotspot_try(now_msec);
+    }
+}   /* hotspot_next() */
+#endif /* HOTSPOT_LIST */
+
+
+/*!
+ * @brief Follow the hotspot link: act on a hotspot chosen on the page,
+ *        report when one is joined, move on to the next when an attempt
+ *        fails, and rejoin when the link drops.
+ *
+ * @par
+ * At power-up (or after a choice on the page), each hotspot is tried for
+ * up to WIFI_TRY_MSEC, WIFI_JOIN_ROUNDS times over, before falling back
+ * to the car's own network. Once one is joined, the car never falls back:
+ * it keeps trying, so it comes back by itself when a hotspot does.
+ *
+ * @param[in] now_msec The time now, in ms since boot.
+ */
+static void
+hotspot_check (uint32_t now_msec)
+{
+#ifdef HOTSPOT_LIST
+    bool b_hotspot = ((WIFI_JOINING == g_wifi_mode) ||
+                      (WIFI_JOINED == g_wifi_mode) ||
+                      (WIFI_REJOINING == g_wifi_mode));
+
+    if (HOTSPOT_NO_REQUEST != g_hot_request)
+    {
+        // Chosen on the page (done here, not inside the web request,
+        // because it can take down the network that request came on).
+        g_hot_only    = g_hot_request;
+        g_hot_request = HOTSPOT_NO_REQUEST;
+        log_printf("Wi-Fi: hotspot choice: %s.",
+                   ((HOTSPOT_AUTO == g_hot_only) ? "try each in turn" :
+                    g_hotspots[g_hot_only].p_ssid));
+
+        if (WIFI_OWN_NETWORK == g_wifi_mode)
+        {
+            dhcp_server_deinit(&g_dhcp_server);
+            cyw43_arch_disable_ap_mode();
+        }
+        if (WIFI_OFF != g_wifi_mode)
+        {
+            hotspot_start(now_msec);
+        }
+    }
+    else if (b_hotspot && ((int32_t) (now_msec - g_wifi_check) >= 0))
+    {
+        int      status  = cyw43_tcpip_link_status(&cyw43_state,
+                                                   CYW43_ITF_STA);
+        uint32_t elapsed = now_msec - g_hot_since;
+
+        g_wifi_check = now_msec + WIFI_CHECK_MSEC;
+
+        if (CYW43_LINK_UP == status)
+        {
+            if (WIFI_JOINED != g_wifi_mode)
+            {
+                char const * p_ip = ip4addr_ntoa(netif_ip4_addr(
+                                        &cyw43_state.netif[CYW43_ITF_STA]));
+
+                g_wifi_mode = WIFI_JOINED;
+                (void) snprintf(g_wifi_text, sizeof(g_wifi_text),
+                                "Hotspot \"%s\" at %s",
+                                g_hotspots[g_hot_idx].p_ssid, p_ip);
+                log_printf("Wi-Fi: on \"%s\". Open http://%s.local or "
+                           "http://%s", g_hotspots[g_hot_idx].p_ssid,
+                           WIFI_HOST_NAME, p_ip);
+            }
+        }
+        else if (WIFI_JOINED == g_wifi_mode)
+        {
+            log_printf("Wi-Fi: lost \"%s\" (status %d); rejoining.",
+                       g_hotspots[g_hot_idx].p_ssid, status);
+            g_wifi_mode = WIFI_REJOINING;
+            g_hot_tries = 0u;
+            hotspot_try(now_msec);          // The same one first.
+        }
+        else if (((status < CYW43_LINK_DOWN) &&
+                  (elapsed >= WIFI_FAIL_SETTLE_MSEC)) ||
+                 (elapsed >= WIFI_TRY_MSEC))
+        {
+            hotspot_next(now_msec, status); // Failed or too slow.
+        }
+        else
+        {
+            // Still joining: wait.
+        }
+    }
+    else
+    {
+        // Nothing to do this tick.
+    }
+#else
+    (void) now_msec;
+#endif
+}   /* hotspot_check() */
 
 
 /*!
@@ -421,6 +817,31 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
 
         reply_send(p_pcb, "application/json", status, length, false);
     }
+    else if (0 == strcmp(p_path, HISTORY_PATH))
+    {
+        size_t length = history_build(status, sizeof(status));
+
+        reply_send(p_pcb, "application/json", status, length, false);
+    }
+    else if (0 == strcmp(p_path, HOTSPOTS_PATH))
+    {
+        size_t length = hotspots_build(status, sizeof(status));
+
+        reply_send(p_pcb, "application/json", status, length, false);
+    }
+    else if (0 == strncmp(p_path, WIFI_PREFIX, WIFI_PREFIX_LEN))
+    {
+#ifdef HOTSPOT_LIST
+        // -1 is "try each"; acted on by hotspot_check(), after this reply.
+        int32_t choice = (int32_t) atoi(p_path + WIFI_PREFIX_LEN);
+
+        if ((HOTSPOT_AUTO <= choice) && (choice < (int32_t) NUM_HOTSPOTS))
+        {
+            g_hot_request = choice;
+        }
+#endif
+        reply_send(p_pcb, "text/plain", "OK", 2u, true);
+    }
     else if (0 == strncmp(p_path, CMD_PREFIX, CMD_PREFIX_LEN))
     {
         command_parse(p_path + CMD_PREFIX_LEN);
@@ -486,9 +907,15 @@ command_parse (char const * p_name)
     {
         g_pending = WEB_CMD_BARCODE_TEST;
     }
+    else if (0 == strcmp(p_name, "bs"))
+    {
+        g_pending = WEB_CMD_BARCODE_STATIC;
+    }
     else if (0 == strcmp(p_name, "clear"))
     {
         barcode_clear_message();
+        g_history_count = 0u;           // And the barcode history.
+        g_history_seq++;
         g_log_floor = log_next_seq();   // Hide every line logged so far.
     }
     else
@@ -524,6 +951,7 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     imu_axes_t   axes;
     size_t       length   = 0u;
     char const * p_line   = NULL;
+    log_cat_t    cat      = LOG_CAT_SYSTEM;
     bool         b_first  = true;
 
     imu_get_axes(&axes);
@@ -595,19 +1023,33 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     length += (size_t) snprintf(p_out + length, capacity - length, "\"");
 
     length += (size_t) snprintf(p_out + length, capacity - length,
-                                ",\"tn\":\"%s\",\"log\":[",
+                                ",\"wf\":");
+    length += json_string(p_out + length, capacity - length,
+                          web_wifi_text());
+
+    // Each log line goes as its category digit (log_cat_t), then its text,
+    // so the page can sort it into a serial monitor tab.
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                ",\"hq\":%" PRIu32 ",\"tn\":\"%s\",\"log\":[",
+                                g_history_seq,
                                 ((BARCODE_CMD_NONE == pending) ? "" :
                                  barcode_command_name(pending)));
 
     while ((seq < next_seq) && ((capacity - length) > LINE_RESERVE) &&
-           log_get(seq, &p_line))
+           log_get(seq, &p_line, &cat))
     {
+        size_t text_len = 0u;
+
         if (!b_first)
         {
             p_out[length] = ',';
             length++;
         }
-        length += json_string(p_out + length, capacity - length, p_line);
+        text_len = json_string(p_out + length + 1u,
+                               capacity - length - 1u, p_line);
+        p_out[length]      = '"';                     // Opening quote...
+        p_out[length + 1u] = (char) ('0' + (int) cat); // ...then category.
+        length += text_len + 1u;
         b_first = false;
         seq++;
     }
@@ -618,6 +1060,93 @@ status_build (char * p_out, size_t capacity, uint32_t since)
 
     return (length);
 }   /* status_build() */
+
+
+/*!
+ * @brief Build the hotspot list for the page's chooser, as
+ *        {"n":["name",...],"sel":-1} (sel: the choice, -1 = try each).
+ *
+ * @par
+ * Passwords are never sent.
+ *
+ * @param[out] p_out    The buffer to fill.
+ * @param[in]  capacity The buffer size.
+ *
+ * @return The number of bytes written.
+ */
+static size_t
+hotspots_build (char * p_out, size_t capacity)
+{
+    size_t length = 0u;
+
+    // NOTE: A handful of names of under 33 bytes each: well within the
+    // 1400-byte buffer, so these snprintf calls never truncate.
+    length += (size_t) snprintf(p_out + length, capacity - length, "{\"n\":[");
+
+#ifdef HOTSPOT_LIST
+    for (uint32_t idx = 0u; idx < NUM_HOTSPOTS; idx++)
+    {
+        if (idx > 0u)
+        {
+            p_out[length] = ',';
+            length++;
+        }
+        length += json_string(p_out + length, capacity - length,
+                              g_hotspots[idx].p_ssid);
+    }
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                "],\"sel\":%" PRId32 "}", g_hot_only);
+#else
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                "],\"sel\":-1}");
+#endif
+
+    return (length);
+}   /* hotspots_build() */
+
+
+/*!
+ * @brief Build the barcode history, newest first, as
+ *        {"hq":seq,"h":[["A","TURN LEFT",12],...]} (text, command, second).
+ *
+ * @param[out] p_out    The buffer to fill.
+ * @param[in]  capacity The buffer size.
+ *
+ * @return The number of bytes written.
+ */
+static size_t
+history_build (char * p_out, size_t capacity)
+{
+    uint32_t kept   = ((g_history_count < HISTORY_MAX) ? g_history_count
+                                                       : HISTORY_MAX);
+    size_t   length = 0u;
+
+    // NOTE: At most 20 entries of under 60 bytes each: well within the
+    // 1400-byte buffer, so these snprintf calls never truncate.
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                "{\"hq\":%" PRIu32 ",\"h\":[", g_history_seq);
+
+    for (uint32_t idx = 0u; idx < kept; idx++)
+    {
+        history_entry_t const * p_entry =
+            &g_history[(g_history_count - 1u - idx) % HISTORY_MAX];
+
+        length += (size_t) snprintf(p_out + length, capacity - length,
+                                    "%s[", ((0u == idx) ? "" : ","));
+        length += json_string(p_out + length, capacity - length,
+                              p_entry->text);
+        length += (size_t) snprintf(p_out + length, capacity - length,
+                                    ",\"%s\",%" PRIu32 "]",
+                                    ((BARCODE_CMD_NONE == p_entry->command) ?
+                                     "" : barcode_command_name(
+                                              p_entry->command)),
+                                    p_entry->time_sec);
+    }
+
+    length += (size_t) snprintf(p_out + length, capacity - length, "]}");
+
+    return (length);
+}   /* history_build() */
 
 
 /*!
@@ -650,7 +1179,8 @@ json_string (char * p_out, size_t capacity, char const * p_text)
         }
 
         // Control characters would break the JSON, so show them as spaces.
-        p_out[length] = ((symbol < ' ') ? ' ' : symbol);
+        // NOTE: Compared unsigned, so UTF-8 bytes (0x80 up) are kept.
+        p_out[length] = ((((unsigned char) symbol) < ' ') ? ' ' : symbol);
         length++;
     }
 

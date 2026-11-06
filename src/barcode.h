@@ -30,6 +30,7 @@ void              barcode_init(void);
 void              barcode_edge_isr(uint32_t events);
 barcode_result_t  barcode_task(void);
 void              barcode_set_enabled(bool b_enabled);
+void              barcode_set_hand_mode(bool b_hand);
 bool              barcode_end_scan(void);
 char const *      barcode_message(void);
 void              barcode_clear_message(void);

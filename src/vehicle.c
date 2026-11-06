@@ -288,6 +288,7 @@ vehicle_barcode_command (barcode_command_t command, bool b_test)
                           (VEHICLE_STOPPED == g_state));
     bool     b_moving  = ((VEHICLE_FOLLOW_LINE == g_state) ||
                           (VEHICLE_BARCODE_TEST == g_state) ||
+                          (VEHICLE_BARCODE_STATIC == g_state) ||
                           (VEHICLE_BLOCKED == g_state) ||
                           (VEHICLE_PROBE == g_state) ||
                           (VEHICLE_HUMP == g_state));
@@ -316,14 +317,14 @@ vehicle_barcode_command (barcode_command_t command, bool b_test)
     {
         // Also while held up (obstacle, hump): the run carries on after.
         g_pending_turn = command;
-        log_printf("Pending: %s at the next crossroad.",
-                   barcode_command_name(command));
+        log_line("Pending: %s at the next crossroad.",
+                 barcode_command_name(command));
     }
     else
     {
         // A barcode read as the car stopped never moves it.
-        log_printf("%s not acted on in %s.", barcode_command_name(command),
-                   vehicle_state_name(g_state));
+        log_line("%s not acted on in %s.", barcode_command_name(command),
+                 vehicle_state_name(g_state));
     }
 }   /* vehicle_barcode_command() */
 
@@ -342,7 +343,7 @@ junction_act (uint32_t now_msec)
 {
     if (BARCODE_CMD_NONE != g_pending_turn)
     {
-        log_printf("Crossroad: %s now.", barcode_command_name(g_pending_turn));
+        log_line("Crossroad: %s now.", barcode_command_name(g_pending_turn));
         g_turn_cmd      = g_pending_turn;
         g_pending_turn  = BARCODE_CMD_NONE;
         g_turn_after    = g_state;
@@ -351,8 +352,8 @@ junction_act (uint32_t now_msec)
     }
     else
     {
-        log_printf("Crossroad seen in %s, no turn pending: straight on.",
-                   vehicle_state_name(g_state));
+        log_line("Crossroad seen in %s, no turn pending: straight on.",
+                 vehicle_state_name(g_state));
     }
 }   /* junction_act() */
 
@@ -380,8 +381,8 @@ vehicle_barcode_test (void)
 {
     if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
     {
-        log_printf("BARCODE TEST: driving straight, line sensors ignored. "
-                   "STOP to end.");
+        log_state("BARCODE TEST: driving straight, line sensors ignored. "
+                  "STOP to end.");
         g_pending_turn = BARCODE_CMD_NONE;  // A new run: no old turn.
         state_enter(VEHICLE_BARCODE_TEST, now_msec_get());
     }
@@ -390,6 +391,31 @@ vehicle_barcode_test (void)
         log_printf("Stop the car before BARCODE TEST.");
     }
 }   /* vehicle_barcode_test() */
+
+
+/*!
+ * @brief Start BARCODE TEST (STATIC): stand still and read barcodes slid
+ *        slowly past the side sensor by hand.
+ *
+ * @par
+ * Works from READY or STOPPED only. STOP ends it. A read command is kept
+ * as the pending turn, as in a real run, so the page shows it.
+ */
+void
+vehicle_barcode_static (void)
+{
+    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    {
+        log_state("BARCODE TEST (STATIC): motors off. Slide a barcode "
+                  "slowly past the side sensor. STOP to end.");
+        g_pending_turn = BARCODE_CMD_NONE;  // A new test: no old turn.
+        state_enter(VEHICLE_BARCODE_STATIC, now_msec_get());
+    }
+    else
+    {
+        log_printf("Stop the car before BARCODE TEST (STATIC).");
+    }
+}   /* vehicle_barcode_static() */
 
 
 /*!
@@ -422,8 +448,8 @@ vehicle_task (void)
                                     now_msec, &mark_msec);
     if (LINE_JUNCTION_FOUND == junction)
     {
-        log_printf("Side sensor: %" PRIu32 " ms black mark -> crossroad.",
-                   mark_msec);
+        log_line("Side sensor: %" PRIu32 " ms black mark -> crossroad.",
+                 mark_msec);
         if (barcode_end_scan())
         {
             gb_junction_deferred = true;    // Decode first, then turn.
@@ -435,8 +461,8 @@ vehicle_task (void)
     }
     else if (LINE_JUNCTION_TOO_LONG == junction)
     {
-        log_printf("Side sensor: %" PRIu32 " ms black mark, too long for a "
-                   "crossroad branch: ignored.", mark_msec);
+        log_line("Side sensor: %" PRIu32 " ms black mark, too long for a "
+                 "crossroad branch: ignored.", mark_msec);
     }
     else
     {
@@ -473,6 +499,7 @@ vehicle_task (void)
         barcode_test_step(now_msec, range_mm);
     break;
 
+    case VEHICLE_BARCODE_STATIC:    // Barcodes are read by barcode_task().
     case VEHICLE_READY:
     case VEHICLE_STOPPED:
     default:
@@ -544,6 +571,10 @@ vehicle_state_name (vehicle_state_t state)
         p_name = "BARCODE_TEST";
     break;
 
+    case VEHICLE_BARCODE_STATIC:
+        p_name = "BARCODE_STATIC";
+    break;
+
     default:
         p_name = "UNKNOWN";
     break;
@@ -584,7 +615,7 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     {
         if (OBSTACLE_STOP_AT_ONCE)
         {
-            log_printf("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
+            log_obstacle("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
             state_enter(VEHICLE_BLOCKED, now_msec);
         }
         else
@@ -772,9 +803,9 @@ static void
 turn_finish (uint32_t now_msec, line_state_t line, line_last_t last,
              char const * p_how)
 {
-    log_printf("%s done (%s, %" PRIu32 " ms).",
-               barcode_command_name(g_turn_cmd), p_how,
-               (now_msec - g_entered_msec));
+    log_line("%s done (%s, %" PRIu32 " ms).",
+             barcode_command_name(g_turn_cmd), p_how,
+             (now_msec - g_entered_msec));
 
     line_filter_reset(line, now_msec);
     g_line_last    = last;
@@ -796,7 +827,7 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     if ((tilt_x10 >= HUMP_ENTER_PITCH_X10) ||
         (tilt_x10 <= -HUMP_ENTER_PITCH_X10))
     {
-        log_printf("Probe: nose tipped up -> HUMP, climbing.\n");
+        log_obstacle("Probe: nose tipped up -> HUMP, climbing.\n");
         state_enter(VEHICLE_HUMP, now_msec);
     }
     else if (range_mm > OBSTACLE_CLEAR_MM)
@@ -806,8 +837,8 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     else if ((range_mm <= OBSTACLE_HARD_STOP_MM) ||
              ((now_msec - g_entered_msec) > OBSTACLE_PROBE_MSEC))
     {
-        log_printf("Probe: no climb -> WALL, stopped at %" PRIu32 " mm.\n",
-               range_mm);
+        log_obstacle("Probe: no climb -> WALL, stopped at %" PRIu32 " mm.\n",
+                     range_mm);
         state_enter(VEHICLE_BLOCKED, now_msec);
     }
     else
@@ -857,13 +888,13 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
     if (gb_hump_tilted && gb_level && (in_hump > HUMP_MIN_MSEC) &&
         ((now_msec - g_level_msec) > HUMP_LEVEL_MSEC))
     {
-        log_printf("Hump cleared after %" PRIu32 " ms.\n", in_hump);
+        log_obstacle("Hump cleared after %" PRIu32 " ms.\n", in_hump);
         g_ignore_until = now_msec + HUMP_IGNORE_RANGE_MSEC;
         state_enter(VEHICLE_FOLLOW_LINE, now_msec);
     }
     else if (in_hump > HUMP_MAX_MSEC)
     {
-        log_printf("Hump took too long (stalled?) -> BLOCKED.\n");
+        log_obstacle("Hump took too long (stalled?) -> BLOCKED.\n");
         state_enter(VEHICLE_BLOCKED, now_msec);
     }
     else
@@ -895,7 +926,7 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
     }
     else if ((now_msec - g_clear_msec) > OBSTACLE_CLEAR_MSEC)
     {
-        log_printf("Obstacle cleared -> resuming.\n");
+        log_obstacle("Obstacle cleared -> resuming.\n");
         state_enter(VEHICLE_FOLLOW_LINE, now_msec);
     }
     else
@@ -916,8 +947,8 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm)
 {
     if (range_mm <= OBSTACLE_STOP_MM)
     {
-        log_printf("BARCODE TEST: obstacle at %" PRIu32 " mm -> stopped.",
-                   range_mm);
+        log_obstacle("BARCODE TEST: obstacle at %" PRIu32 " mm -> stopped.",
+                     range_mm);
         state_enter(VEHICLE_STOPPED, now_msec);
     }
     else
@@ -938,8 +969,8 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
 {
     if (state != g_state)
     {
-        log_printf("State: %s -> %s", vehicle_state_name(g_state),
-                   vehicle_state_name(state));
+        log_state("State: %s -> %s", vehicle_state_name(g_state),
+                  vehicle_state_name(state));
     }
 
     // After a barcode turn the car is already lined up: no straight start.
@@ -972,9 +1003,11 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     }
 
     // Barcodes are only read while following the line normally, or in
-    // BARCODE TEST.
+    // either BARCODE TEST.
+    barcode_set_hand_mode(VEHICLE_BARCODE_STATIC == state);
     barcode_set_enabled((VEHICLE_FOLLOW_LINE == state) ||
-                        (VEHICLE_BARCODE_TEST == state));
+                        (VEHICLE_BARCODE_TEST == state) ||
+                        (VEHICLE_BARCODE_STATIC == state));
 
     if ((VEHICLE_FOLLOW_LINE != state) && (VEHICLE_PROBE != state) &&
         (VEHICLE_HUMP != state) && (VEHICLE_LINE_CAL != state))
@@ -1015,11 +1048,11 @@ line_cal_step (uint32_t now_msec)
 
         if (!gb_cal_turned || (g_centred_ticks >= LINE_CAL_ALIGN_TICKS))
         {
-            log_printf("%s", (gb_cal_turned ?
-                              "LINE_CAL OK: both sensors on the line -> "
-                              "following." :
-                              "LINE_CAL: both sensors already on the "
-                              "line -> skipping calibration."));
+            log_line("%s", (gb_cal_turned ?
+                            "LINE_CAL OK: both sensors on the line -> "
+                            "following." :
+                            "LINE_CAL: both sensors already on the "
+                            "line -> skipping calibration."));
             line_filter_reset(line, now_msec);
             g_line_last = LINE_LAST_BOTH;
             state_enter(VEHICLE_FOLLOW_LINE, now_msec);
@@ -1048,12 +1081,12 @@ line_cal_step (uint32_t now_msec)
 
         if ((!gb_cal_turned) || (b_left != gb_cal_left))
         {
-            log_printf("LINE_CAL: turning %s (%s).",
-                       (b_left ? "left" : "right"),
-                       (line.b_left_black ? "left sensor on black" :
-                        (line.b_right_black ? "right sensor on black" :
-                         (barcode_is_black() ? "side sensor on black" :
-                          "no sensor on black"))));
+            log_line("LINE_CAL: turning %s (%s).",
+                     (b_left ? "left" : "right"),
+                     (line.b_left_black ? "left sensor on black" :
+                      (line.b_right_black ? "right sensor on black" :
+                       (barcode_is_black() ? "side sensor on black" :
+                        "no sensor on black"))));
         }
 
         g_centred_ticks = 0u;
@@ -1147,9 +1180,9 @@ line_steer (int32_t speed, uint32_t now_msec)
         (VEHICLE_FOLLOW_LINE == g_state) &&
         !line.b_left_black && !line.b_right_black)
     {
-        log_printf("Line lost: reversing %" PRIu32 " ms of path to where "
-                   "both sensors were on it.",
-                   (g_path_len * TICK_USEC) / USEC_PER_MSEC);
+        log_line("Line lost: reversing %" PRIu32 " ms of path to where "
+                 "both sensors were on it.",
+                 (g_path_len * TICK_USEC) / USEC_PER_MSEC);
         gb_backtracking = true;
         gb_backtracked  = true;
         g_back_msec     = now_msec;
@@ -1275,9 +1308,9 @@ backtrack_step (line_state_t line, uint32_t now_msec)
 
     if (line.b_left_black || line.b_right_black || (0u == g_back_pos_x100))
     {
-        log_printf("Reverse done (%s).",
-                   ((0u == g_back_pos_x100) ? "back where both were on it" :
-                                              "a sensor found black"));
+        log_line("Reverse done (%s).",
+                 ((0u == g_back_pos_x100) ? "back where both were on it" :
+                                            "a sensor found black"));
         gb_backtracking = false;
         g_path_len      = 0u;
         g_steer         = STEER_STRAIGHT;   // Steer afresh from here.

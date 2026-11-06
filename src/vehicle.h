@@ -21,8 +21,10 @@ typedef enum
     VEHICLE_STOPPED,            // Stopped by STOP. Braked.
     VEHICLE_LINE_CAL,           // START sweep: learn and check the line.
     VEHICLE_TURN,               // Barcode command: turn, then follow.
-    VEHICLE_BARCODE_TEST        // Drive straight, ignoring the line, and
+    VEHICLE_BARCODE_TEST,       // Drive straight, ignoring the line, and
                                 // read barcodes.
+    VEHICLE_BARCODE_STATIC      // Stand still and read barcodes slid past
+                                // the sensor by hand.
 } vehicle_state_t;
 
 void            vehicle_init(void);
@@ -32,6 +34,7 @@ void            vehicle_barcode_command(barcode_command_t command,
                                         bool b_test);
 barcode_command_t vehicle_pending_turn(void);
 void            vehicle_barcode_test(void);
+void            vehicle_barcode_static(void);
 void            vehicle_task(void);
 vehicle_state_t vehicle_state(void);
 char const *    vehicle_state_name(vehicle_state_t state);
