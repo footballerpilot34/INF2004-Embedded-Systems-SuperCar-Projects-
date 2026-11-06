@@ -16,6 +16,13 @@ typedef struct
     bool b_right_black;     // Right sensor is over the line.
 } line_state_t;
 
+typedef enum
+{
+    LINE_JUNCTION_NONE,         // Nothing ended this tick.
+    LINE_JUNCTION_FOUND,        // A branch-length mark ended.
+    LINE_JUNCTION_TOO_LONG      // A longer black mark ended.
+} line_junction_t;
+
 typedef struct
 {
     bool b_left_high;       // Raw left DOUT level.
@@ -28,8 +35,9 @@ line_raw_t   line_sensor_raw(void);
 bool         line_sensor_is_driven(bool b_left);
 void         line_sensor_set_black_level(bool b_left, bool b_black_is_high);
 bool         line_sensor_black_level(bool b_left);
-bool         line_junction_detect(bool b_side_black, bool b_enabled,
-                                  uint32_t now_msec);
+line_junction_t line_junction_detect(bool b_side_black, bool b_enabled,
+                                     uint32_t now_msec,
+                                     uint32_t * p_mark_msec);
 
 #endif /* LINE_SENSOR_H */
 

@@ -194,6 +194,8 @@ static uint32_t          g_turn_msec    = 0u;    // Current phase began.
 static uint32_t          g_pivot_start_msec = 0u; // LEAVE began (pivot).
 static bool              gb_turn_left_on = true; // Left was last on black.
 static bool              gb_turn_advance = false; // Next turn: ADVANCE first.
+static bool              gb_junction_deferred = false; // Crossroad waiting
+                                                       // for a decode.
 static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
                                                             // crossroad.
 
@@ -268,48 +270,59 @@ vehicle_stop (void)
  * @brief Act on a barcode command.
  *
  * @par
- * While following (or in BARCODE TEST), LEFT/RIGHT become the pending
- * turn, carried out at the next crossroad (a newer command replaces it);
- * while following, a U-turn happens at once.
- * When stopped (a test key), the car turns at once and stops again, to
- * tune TURN_90_MSEC. In any other state the command is ignored and logged.
+ * While on a run (following, BARCODE TEST, or held up by an obstacle or
+ * hump), LEFT/RIGHT become the pending turn, carried out at the next
+ * crossroad (a newer command replaces it); while following, a U-turn
+ * happens at once. A test key with the car stopped turns it at once and
+ * stops again, to tune TURN_90_MSEC. A barcode decoded once the car has
+ * stopped is only logged: it never moves the car.
  *
  * @param[in] command The command; BARCODE_CMD_NONE does nothing.
+ * @param[in] b_test  True for a test key, false for a read barcode.
  */
 void
-vehicle_barcode_command (barcode_command_t command)
+vehicle_barcode_command (barcode_command_t command, bool b_test)
 {
-    uint32_t now_msec = now_msec_get();
+    uint32_t now_msec  = now_msec_get();
+    bool     b_stopped = ((VEHICLE_READY == g_state) ||
+                          (VEHICLE_STOPPED == g_state));
+    bool     b_moving  = ((VEHICLE_FOLLOW_LINE == g_state) ||
+                          (VEHICLE_BARCODE_TEST == g_state) ||
+                          (VEHICLE_BLOCKED == g_state) ||
+                          (VEHICLE_PROBE == g_state) ||
+                          (VEHICLE_HUMP == g_state));
 
     if (BARCODE_CMD_NONE == command)
     {
         // A plain message: keep following.
     }
-    else if (((VEHICLE_FOLLOW_LINE == g_state) ||
-              (VEHICLE_BARCODE_TEST == g_state)) &&
-             (BARCODE_CMD_UTURN != command))
+    else if (b_test && b_stopped)
     {
-        g_pending_turn = command;
-        log_printf("Pending: %s at the next crossroad.",
-                   barcode_command_name(command));
+        // Test key on the bench: turn at once, then stop again.
+        g_turn_cmd      = command;
+        g_turn_after    = VEHICLE_STOPPED;
+        gb_turn_advance = false;
+        state_enter(VEHICLE_TURN, now_msec);
     }
-    else if (VEHICLE_FOLLOW_LINE == g_state)
+    else if ((BARCODE_CMD_UTURN == command) &&
+             (VEHICLE_FOLLOW_LINE == g_state))
     {
         g_turn_cmd      = command;
         g_turn_after    = VEHICLE_FOLLOW_LINE;
         gb_turn_advance = false;
         state_enter(VEHICLE_TURN, now_msec);
     }
-    else if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    else if ((BARCODE_CMD_UTURN != command) && b_moving)
     {
-        g_turn_cmd      = command;
-        g_turn_after    = VEHICLE_STOPPED;
-        gb_turn_advance = false;
-        state_enter(VEHICLE_TURN, now_msec);
+        // Also while held up (obstacle, hump): the run carries on after.
+        g_pending_turn = command;
+        log_printf("Pending: %s at the next crossroad.",
+                   barcode_command_name(command));
     }
     else
     {
-        log_printf("%s ignored in %s.", barcode_command_name(command),
+        // A barcode read as the car stopped never moves it.
+        log_printf("%s not acted on in %s.", barcode_command_name(command),
                    vehicle_state_name(g_state));
     }
 }   /* vehicle_barcode_command() */
@@ -391,15 +404,43 @@ vehicle_task (void)
     int32_t  tilt_x10  = imu_max_tilt_x10();
     bool     b_reading = ((VEHICLE_FOLLOW_LINE == g_state) ||
                           (VEHICLE_BARCODE_TEST == g_state));
-    bool     b_in_code = (barcode_is_capturing() &&
-                          (barcode_scan_size() > 0u));
+    uint32_t mark_msec = 0u;
+    line_junction_t junction = LINE_JUNCTION_NONE;
 
-    // Crossroads: off while reading a barcode's bars, whose wide bars can
-    // be as long as a branch on the double-size print.
-    if (line_junction_detect(barcode_is_black(), (b_reading && !b_in_code),
-                             now_msec))
+    // A crossroad found last tick while a barcode was being read: the
+    // barcode has been decoded and reported since, so act on it now.
+    if (gb_junction_deferred)
     {
-        junction_act(now_msec);
+        gb_junction_deferred = false;
+        if (b_reading)
+        {
+            junction_act(now_msec);
+        }
+    }
+
+    junction = line_junction_detect(barcode_is_black(), b_reading,
+                                    now_msec, &mark_msec);
+    if (LINE_JUNCTION_FOUND == junction)
+    {
+        log_printf("Side sensor: %" PRIu32 " ms black mark -> crossroad.",
+                   mark_msec);
+        if (barcode_end_scan())
+        {
+            gb_junction_deferred = true;    // Decode first, then turn.
+        }
+        else
+        {
+            junction_act(now_msec);
+        }
+    }
+    else if (LINE_JUNCTION_TOO_LONG == junction)
+    {
+        log_printf("Side sensor: %" PRIu32 " ms black mark, too long for a "
+                   "crossroad branch: ignored.", mark_msec);
+    }
+    else
+    {
+        // No mark ended this tick.
     }
 
     switch (g_state)

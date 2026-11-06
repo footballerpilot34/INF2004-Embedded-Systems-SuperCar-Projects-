@@ -10,6 +10,7 @@
 
 void buzzer_init(void);
 void buzzer_beep(uint32_t duration_msec);
+void buzzer_beep_soft(uint32_t duration_msec);
 void buzzer_task(void);
 
 #endif /* BUZZER_H */

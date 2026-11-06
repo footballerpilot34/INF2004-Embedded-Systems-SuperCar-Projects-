@@ -90,6 +90,9 @@
 #define LENIENT_MAX_MISSING_ALL 4u      // ...and both ends together, or
 #define LENIENT_MAX_ONE_SIDED   8u      // one end alone while the other
                                         // '*' is complete (gap kept).
+#define LENIENT_MAX_JUNK        4u      // Stray elements left out at the
+                                        // ends (both together).
+#define LENIENT_MIN_VIEW        (LENIENT_ELEMENTS - LENIENT_MAX_ONE_SIDED)
 #define LENIENT_RATIO_X10       20u     // Wide >= 2.0x narrow (same kind).
 #define LENIENT_BAND_PERCENT    20u     // Within 20% of the narrow/wide
                                         // split: too unclear to trust.
@@ -172,12 +175,17 @@ static uint32_t g_elements[MAX_ELEMENTS];
 static uint32_t g_elem_usec[MAX_ELEMENTS];
 static uint32_t g_elem_dist[MAX_ELEMENTS];
 static uint32_t g_num_elements   = 0u;
+static uint32_t g_view_first     = 0u;  // The decoders see elements
+static uint32_t g_view_len       = 0u;  // [first, first + len).
 static uint32_t g_widest_usec    = 0u;
 static uint32_t g_widest_dist    = 0u;
+static uint32_t g_narrow_usec    = UINT32_MAX; // Narrowest after the
+static uint32_t g_narrow_dist    = UINT32_MAX; // first (maybe cut) one.
 static uint32_t g_last_edge_usec = 0u;
 static uint32_t g_last_edge_pos  = 0u;
 static uint32_t g_scan_start_pos = 0u;
 static bool     gb_widths_dist   = false;   // g_elements is in distance.
+static barcode_result_t g_pending_result = BARCODE_NONE; // Cut-off scan.
 static bool     gb_last_black    = false;
 static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
@@ -205,11 +213,13 @@ static int32_t          ao_darkness(void);
 static void             edge_add(uint32_t edge_usec, uint32_t edge_pos,
                                  bool b_black);
 static bool             scan_has_ended(uint32_t end_gap_usec);
+static uint32_t         end_gap_factor(uint32_t widest, uint32_t narrowest);
 static void             widths_select(void);
 static barcode_result_t scan_finish(void);
 static void             scan_dump(void);
 static bool             scan_decode(bool b_reverse);
 static bool             scan_decode_lenient(void);
+static char             lenient_view(bool b_log, uint32_t * p_lead);
 static char             lenient_try(bool b_reverse, uint32_t lead);
 static char             letter_decode(uint32_t first, bool b_reverse,
                                       split_t * p_split);
@@ -325,9 +335,11 @@ barcode_scan_size (void)
 barcode_result_t
 barcode_task (void)
 {
-    barcode_result_t result   = BARCODE_NONE;
+    barcode_result_t result   = g_pending_result;
     uint32_t         head     = g_edge_head;
     uint32_t         end_gap  = 0u;
+
+    g_pending_result = BARCODE_NONE;    // A scan cut off: reported now.
 
     if ((head - g_edge_tail) > EDGE_RING_SIZE)
     {
@@ -347,11 +359,11 @@ barcode_task (void)
         g_edge_tail++;
     }
 
-    end_gap = g_widest_usec * BARCODE_END_GAP_FACTOR;
+    end_gap = g_widest_usec * end_gap_factor(g_widest_usec, g_narrow_usec);
     end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ?
                end_gap : BARCODE_END_GAP_MIN_USEC);
 
-    if (gb_capturing && scan_has_ended(end_gap))
+    if ((BARCODE_NONE == result) && gb_capturing && scan_has_ended(end_gap))
     {
         result = scan_finish();
     }
@@ -369,7 +381,10 @@ barcode_task (void)
  *
  * @par
  * Reading is switched off while climbing a hump or handling an obstacle,
- * where unrelated edges could be mistaken for bars.
+ * where unrelated edges could be mistaken for bars. A scan in progress is
+ * decoded as it stands (the car often stops just after a barcode, before
+ * the quiet gap that normally ends the scan); barcode_task() reports the
+ * result on its next call.
  *
  * @param[in] b_enabled True to read barcodes.
  */
@@ -378,17 +393,40 @@ barcode_set_enabled (bool b_enabled)
 {
     if (!b_enabled && gb_capturing)
     {
-        // Say so: a scan cut off by STOP or a state change would otherwise
-        // vanish without a trace.
-        log_printf("Barcode: scan discarded (reading switched off after %"
-                   PRIu32 " bars+spaces).", g_num_elements);
-        widths_select();
-        scan_dump();
-        gb_capturing = false;
+        log_printf("Barcode: reading switched off after %" PRIu32
+                   " bars+spaces -> decoding what was read.", g_num_elements);
+        g_pending_result = scan_finish();
     }
 
     gb_enabled = b_enabled;
 }   /* barcode_set_enabled() */
+
+
+/*!
+ * @brief End the scan in progress now and decode it (a crossroad was
+ *        reached right after a barcode).
+ *
+ * @par
+ * The result is reported by barcode_task() on its next call, so a
+ * command read from it is known before the crossroad is acted on. The
+ * branch's own mark at the end is left out by the lenient decode.
+ *
+ * @return True if a scan was in progress.
+ */
+bool
+barcode_end_scan (void)
+{
+    bool b_was = gb_capturing;
+
+    if (b_was)
+    {
+        log_printf("Barcode: crossroad reached after %" PRIu32
+                   " bars+spaces -> decoding now.", g_num_elements);
+        g_pending_result = scan_finish();
+    }
+
+    return (b_was);
+}   /* barcode_end_scan() */
 
 
 /*!
@@ -637,6 +675,8 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
             g_num_elements   = 0u;
             g_widest_usec    = 0u;
             g_widest_dist    = 0u;
+            g_narrow_usec    = UINT32_MAX;
+            g_narrow_dist    = UINT32_MAX;
             g_last_edge_usec = edge_usec;
             g_last_edge_pos  = edge_pos;
             g_scan_start_pos = edge_pos;
@@ -689,6 +729,13 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         g_widest_usec    = ((width > g_widest_usec) ? width
                                                     : g_widest_usec);
         g_widest_dist    = ((dist > g_widest_dist) ? dist : g_widest_dist);
+        if (g_num_elements > 1u)
+        {
+            g_narrow_usec = ((width < g_narrow_usec) ? width
+                                                     : g_narrow_usec);
+            g_narrow_dist = ((dist < g_narrow_dist) ? dist
+                                                    : g_narrow_dist);
+        }
         g_last_edge_usec = edge_usec;
         g_last_edge_pos  = edge_pos;
         gb_last_black    = b_black;
@@ -734,7 +781,8 @@ scan_has_ended (uint32_t end_gap_usec)
     else if (b_enc && (g_widest_dist > 0u))
     {
         b_end = ((quiet_usec > BARCODE_END_GAP_MIN_USEC) &&
-                 (moved > (g_widest_dist * BARCODE_END_GAP_FACTOR)));
+                 (moved > (g_widest_dist *
+                           end_gap_factor(g_widest_dist, g_narrow_dist))));
     }
     else
     {
@@ -743,6 +791,33 @@ scan_has_ended (uint32_t end_gap_usec)
 
     return (b_end);
 }   /* scan_has_ended() */
+
+
+/*!
+ * @brief How many times the widest element of white ends a scan.
+ *
+ * @par
+ * Nothing inside a barcode is wider than a wide element (3 narrow
+ * units). Until a wide one has been seen, the widest may still be a
+ * narrow one, so the gap must be long (BARCODE_END_GAP_FACTOR); once
+ * one has (widest at least BARCODE_WIDE_SEEN_X10 / 10 times the
+ * narrowest), BARCODE_END_GAP_FAST is enough, so the scan ends soon
+ * after the last bar.
+ *
+ * @param[in] widest    The widest element so far (time or distance).
+ * @param[in] narrowest The narrowest after the first, same units.
+ *
+ * @return The factor.
+ */
+static uint32_t
+end_gap_factor (uint32_t widest, uint32_t narrowest)
+{
+    bool b_wide_seen = ((UINT32_MAX != narrowest) &&
+                        ((widest * 10u) >=
+                         (narrowest * BARCODE_WIDE_SEEN_X10)));
+
+    return (b_wide_seen ? BARCODE_END_GAP_FAST : BARCODE_END_GAP_FACTOR);
+}   /* end_gap_factor() */
 
 
 /*!
@@ -784,6 +859,8 @@ scan_finish (void)
     barcode_result_t result = BARCODE_NONE;
 
     gb_capturing = false;
+    g_view_first = 0u;              // Decode the whole scan.
+    g_view_len   = g_num_elements;
 
     if (gb_overflow)
     {
@@ -880,17 +957,22 @@ scan_dump (void)
 /*!
  * @brief Decode the scan as Code 39 and store the message if valid.
  *
+ * @par
+ * Every track barcode is one letter, A to Z ("*X*"), so anything else
+ * (digits, symbols, several characters), even if valid Code 39, is
+ * rejected as a misread.
+ *
  * @param[in] b_reverse True to read the elements last-to-first.
  *
- * @return True if the scan was a valid "*...*" Code 39 message.
+ * @return True if the scan was a valid "*X*" with X from A to Z.
  */
 static bool
 scan_decode (bool b_reverse)
 {
     char     decoded[BARCODE_MESSAGE_MAX + 1u] = { 0 };
-    uint32_t num_chars = (g_num_elements + 1u) / ELEMENTS_WITH_GAP;
+    uint32_t num_chars = (g_view_len + 1u) / ELEMENTS_WITH_GAP;
     uint32_t out_len   = 0u;
-    bool     b_ok      = (0u == ((g_num_elements + 1u) % ELEMENTS_WITH_GAP));
+    bool     b_ok      = (0u == ((g_view_len + 1u) % ELEMENTS_WITH_GAP));
 
     for (uint32_t ch = 0u; (ch < num_chars) && b_ok; ch++)
     {
@@ -917,6 +999,10 @@ scan_decode (bool b_reverse)
         }
     }
 
+    // Only a single letter A to Z is a real track barcode.
+    b_ok = (b_ok && (1u == out_len) &&
+            ('A' <= decoded[0]) && (decoded[0] <= 'Z'));
+
     if (b_ok)
     {
         decoded[out_len] = '\0';
@@ -930,15 +1016,18 @@ scan_decode (bool b_reverse)
 
 /*!
  * @brief Lenient decode of a one-letter barcode "*X*" (X = A to Z) whose
- *        outer ends were partly missed.
+ *        ends were partly missed, or that has stray marks beside it.
  *
  * @par
  * The side sensor can slip past the tips of the outermost bars, so a scan
  * may lose elements at its ends (and only half-see the next one): up to
  * LENIENT_MAX_MISSING_ALL in all, or up to LENIENT_MAX_ONE_SIDED at one
- * end when the '*' at the other end is complete. Every way the scan could
- * line up with "*X*" is tried, in both directions; a line-up is accepted
- * only if:
+ * end when the '*' at the other end is complete. A stray mark just before
+ * or after the barcode (the printed letter, the paper edge) can also add
+ * up to LENIENT_MAX_JUNK elements at the ends, so each way of leaving
+ * those out is tried as well. Within that, every way the scan could line
+ * up with "*X*" is tried, in both directions; a line-up is accepted only
+ * if:
  * - the letter is complete and decodes cleanly to A-Z, with bars and
  *   spaces judged separately (2 wide bars, 1 wide space) and every wide
  *   at least LENIENT_RATIO_X10 / 10 times every narrow of its kind;
@@ -948,18 +1037,96 @@ scan_decode (bool b_reverse)
  * - each end's elements add up to 70-140% of their expected width, so no
  *   element is missing or extra inside an end.
  * If two line-ups give different letters, nothing is accepted. If none
- * fits, the reason each line-up failed is logged.
+ * fits, the reason each line-up of the whole scan failed is logged.
  *
  * @return True if a letter was decoded and stored as the message.
  */
 static bool
 scan_decode_lenient (void)
 {
-    char     found     = '\0';
-    bool     b_clash   = false;
-    bool     b_tried   = false;
+    char     found      = '\0';
+    bool     b_clash    = false;
     uint32_t found_lead = 0u;
-    uint32_t n         = g_num_elements;
+    uint32_t found_junk = 0u;
+    uint32_t found_len  = 0u;
+
+    // Junk comes in whole bar+space pairs too, so a view still starts and
+    // ends on a bar.
+    for (uint32_t front = 0u; front <= LENIENT_MAX_JUNK; front += 2u)
+    {
+        for (uint32_t back = 0u; (front + back) <= LENIENT_MAX_JUNK;
+             back += 2u)
+        {
+            uint32_t lead   = 0u;
+            char     symbol = '\0';
+
+            if ((front + back + LENIENT_MIN_VIEW) <= g_num_elements)
+            {
+                g_view_first = front;
+                g_view_len   = g_num_elements - front - back;
+                symbol       = lenient_view(false, &lead);
+            }
+
+            if ('\0' == symbol)
+            {
+                // Nothing fits this view.
+            }
+            else if (('\0' != found) && (symbol != found))
+            {
+                b_clash = true;
+            }
+            else
+            {
+                found      = symbol;
+                found_lead = lead;
+                found_junk = front + back;
+                found_len  = g_view_len;
+            }
+        }
+    }
+
+    g_view_first = 0u;
+    g_view_len   = g_num_elements;
+
+    if (('\0' != found) && !b_clash)
+    {
+        g_message[0] = found;
+        g_message[1] = '\0';
+        g_command    = command_match(g_message);
+        log_printf("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
+                   "%" PRIu32 "+%" PRIu32 " missing, %" PRIu32 " stray "
+                   "left out).", found_len, LENIENT_ELEMENTS, found_lead,
+                   (LENIENT_ELEMENTS - found_lead - found_len), found_junk);
+    }
+    else if (b_clash)
+    {
+        log_printf("Barcode: lenient read ambiguous (two letters fit), "
+                   "rejected.");
+    }
+    else
+    {
+        (void) lenient_view(true, &found_lead);  // Log why, for the scan.
+    }
+
+    return (('\0' != found) && !b_clash);
+}   /* scan_decode_lenient() */
+
+
+/*!
+ * @brief Try every line-up of the current view with "*X*".
+ *
+ * @param[in]  b_log  True to log why each line-up failed.
+ * @param[out] p_lead Elements missing before the view's first, if found.
+ *
+ * @return The letter, or '\0' if none fits or two different ones do.
+ */
+static char
+lenient_view (bool b_log, uint32_t * p_lead)
+{
+    char     found   = '\0';
+    bool     b_clash = false;
+    bool     b_tried = false;
+    uint32_t n       = g_view_len;
 
     // A scan starts and ends on a bar, so it loses elements in pairs.
     for (uint32_t dir = 0u; dir < 2u; dir++)
@@ -982,7 +1149,7 @@ scan_decode_lenient (void)
                 b_tried = true;
                 symbol  = lenient_try((1u == dir), lead);
 
-                if ('\0' == symbol)
+                if (('\0' == symbol) && b_log)
                 {
                     log_printf("Barcode lenient %s, %" PRIu32 "+%" PRIu32
                                " missing: %s (#%" PRIu32 ").",
@@ -1001,40 +1168,21 @@ scan_decode_lenient (void)
             }
             else
             {
-                found      = symbol;
-                found_lead = lead;
+                found   = symbol;
+                *p_lead = lead;
             }
         }
     }
 
-    if (('\0' != found) && !b_clash)
-    {
-        g_message[0] = found;
-        g_message[1] = '\0';
-        g_command    = command_match(g_message);
-        log_printf("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
-                   "%" PRIu32 " missing at one end, %" PRIu32 " at the "
-                   "other).", n, LENIENT_ELEMENTS, found_lead,
-                   (LENIENT_ELEMENTS - found_lead - n));
-    }
-    else if (b_clash)
-    {
-        log_printf("Barcode: lenient read ambiguous (two letters fit), "
-                   "rejected.");
-    }
-    else if (!b_tried)
+    if (b_log && !b_tried)
     {
         log_printf("Barcode lenient: %" PRIu32 " bars+spaces cannot be "
                    "\"*X*\" with at most %u missing.", n,
                    LENIENT_MAX_ONE_SIDED);
     }
-    else
-    {
-        // Nothing fits; each line-up's reason is logged above.
-    }
 
-    return (('\0' != found) && !b_clash);
-}   /* scan_decode_lenient() */
+    return (b_clash ? '\0' : found);
+}   /* lenient_view() */
 
 
 /*!
@@ -1049,7 +1197,7 @@ static char
 lenient_try (bool b_reverse, uint32_t lead)
 {
     split_t  split;
-    uint32_t n      = g_num_elements;
+    uint32_t n      = g_view_len;
     uint32_t last_j = n - 1u;
     uint32_t first  = LENIENT_LETTER_FIRST - lead;
     char     symbol = letter_decode(first, b_reverse, &split);
@@ -1246,7 +1394,7 @@ lenient_check (uint32_t j, uint32_t lead, bool b_reverse,
     bool     b_wide   = expected_wide(idx, p_split->pattern);
     uint32_t split    = (b_bar ? p_split->bar_split : p_split->space_split);
     uint32_t width    = element_get(j, b_reverse);
-    bool     b_outer  = ((0u == j) || ((g_num_elements - 1u) == j));
+    bool     b_outer  = ((0u == j) || ((g_view_len - 1u) == j));
     bool     b_narrow_clear = ((width * PERCENT_100) <=
                                (split * (PERCENT_100 - LENIENT_BAND_PERCENT)));
     bool     b_wide_clear   = ((width * PERCENT_100) >=
@@ -1291,7 +1439,7 @@ lenient_sum_ok (uint32_t first_j, uint32_t last_j, uint32_t lead,
     uint32_t units = 0u;
     bool     b_ok  = true;
 
-    for (uint32_t j = first_j; (j <= last_j) && (j < g_num_elements); j++)
+    for (uint32_t j = first_j; (j <= last_j) && (j < g_view_len); j++)
     {
         width += element_get(j, b_reverse);
         units += (expected_wide(j + lead, p_split->pattern) ? WIDE_UNITS
@@ -1435,7 +1583,8 @@ char_decode (uint32_t first, bool b_reverse)
 static uint32_t
 element_get (uint32_t index, bool b_reverse)
 {
-    uint32_t actual = (b_reverse ? ((g_num_elements - 1u) - index) : index);
+    uint32_t actual = g_view_first +
+                      (b_reverse ? ((g_view_len - 1u) - index) : index);
 
     return (g_elements[actual]);
 }   /* element_get() */

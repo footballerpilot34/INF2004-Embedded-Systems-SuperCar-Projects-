@@ -13,9 +13,10 @@
  * The two line sensors sit side by side on the line, so a line crossing
  * it keeps them both black: they cannot see a crossroad. The LEFT side
  * sensor (the barcode sensor, beside the line) can: a crossroad's left
- * branch is one long black mark under it. line_junction_detect() is given
- * that sensor's black/white reading every tick and reports a crossroad
- * once a black mark has lasted LINE_JUNCTION_MIN_MSEC.
+ * branch is one black mark of bounded length under it.
+ * line_junction_detect() is given that sensor's black/white reading every
+ * tick and reports a crossroad when a mark that lasted
+ * LINE_JUNCTION_MIN_MSEC to LINE_JUNCTION_MAX_MSEC has ended.
  */
 
 #include <stdbool.h>
@@ -37,7 +38,6 @@ static bool gb_right_black_high = LINE_BLACK_IS_HIGH;
 // Crossroad detection, from the side sensor.
 static bool     gb_jn_armed     = false;    // White seen: a mark can start.
 static bool     gb_jn_on_mark   = false;    // Timing a black mark.
-static bool     gb_jn_reported  = false;    // This mark already reported.
 static bool     gb_jn_white     = false;    // On white (in a mark: a gap).
 static uint32_t g_jn_mark_msec  = 0u;       // The mark began at.
 static uint32_t g_jn_white_msec = 0u;       // The white began at.
@@ -169,23 +169,30 @@ line_sensor_black_level (bool b_left)
  * @brief Watch the side sensor for a crossroad's branch. Call every tick.
  *
  * @par
- * A mark only counts if it starts (white to black) while enabled, so a
- * mark the sensor was already on when detection was switched on (after a
- * turn, say) is never mistaken for a new crossroad. White shorter than
- * LINE_JUNCTION_GAP_MSEC inside a mark (glare, a scuff) does not end it.
+ * A branch is 18 mm wide, so it is a black mark of bounded length: it is
+ * judged once it has ended, and is a crossroad only if it lasted
+ * LINE_JUNCTION_MIN_MSEC to LINE_JUNCTION_MAX_MSEC. Longer marks (the
+ * dark mat beyond a paper edge, a long pause on black) are reported as
+ * too long instead, so they can be logged. A mark only counts if it starts
+ * (white to black) while enabled, so a mark the sensor was already on
+ * when detection was switched on (after a turn, say) is never mistaken
+ * for a new crossroad. White shorter than LINE_JUNCTION_GAP_MSEC inside a
+ * mark (glare, a scuff) does not end it.
  *
- * @param[in] b_side_black True if the side sensor sees black now.
- * @param[in] b_enabled    False while crossroads must be ignored (not
- *                         following, or reading a barcode's bars).
- * @param[in] now_msec     The current time.
+ * @param[in]  b_side_black True if the side sensor sees black now.
+ * @param[in]  b_enabled    False while crossroads must be ignored (not
+ *                          following, or reading a barcode's bars).
+ * @param[in]  now_msec     The current time.
+ * @param[out] p_mark_msec  The mark's length, when one is reported.
  *
- * @return True once per crossroad, when its mark reaches
- *         LINE_JUNCTION_MIN_MSEC.
+ * @return LINE_JUNCTION_FOUND or LINE_JUNCTION_TOO_LONG once, when a mark
+ *         has ended; otherwise LINE_JUNCTION_NONE.
  */
-bool
-line_junction_detect (bool b_side_black, bool b_enabled, uint32_t now_msec)
+line_junction_t
+line_junction_detect (bool b_side_black, bool b_enabled, uint32_t now_msec,
+                      uint32_t * p_mark_msec)
 {
-    bool b_junction = false;
+    line_junction_t result = LINE_JUNCTION_NONE;
 
     if (!b_enabled)
     {
@@ -203,7 +210,27 @@ line_junction_detect (bool b_side_black, bool b_enabled, uint32_t now_msec)
 
         if ((now_msec - g_jn_white_msec) >= LINE_JUNCTION_GAP_MSEC)
         {
-            gb_jn_armed   = true;   // Real white: any mark has ended.
+            if (gb_jn_on_mark)
+            {
+                // Real white: the mark ended when this white began.
+                uint32_t length = g_jn_white_msec - g_jn_mark_msec;
+
+                *p_mark_msec = length;
+                if (length > LINE_JUNCTION_MAX_MSEC)
+                {
+                    result = LINE_JUNCTION_TOO_LONG;
+                }
+                else if (length >= LINE_JUNCTION_MIN_MSEC)
+                {
+                    result = LINE_JUNCTION_FOUND;
+                }
+                else
+                {
+                    // Too short: a bar or a smudge.
+                }
+            }
+
+            gb_jn_armed   = true;
             gb_jn_on_mark = false;
         }
     }
@@ -211,28 +238,14 @@ line_junction_detect (bool b_side_black, bool b_enabled, uint32_t now_msec)
     {
         gb_jn_white = false;
 
-        if (!gb_jn_on_mark)
+        if ((!gb_jn_on_mark) && gb_jn_armed)
         {
-            if (gb_jn_armed)
-            {
-                gb_jn_on_mark  = true;
-                gb_jn_reported = false;
-                g_jn_mark_msec = now_msec;
-            }
-        }
-        else if (!gb_jn_reported &&
-                 ((now_msec - g_jn_mark_msec) >= LINE_JUNCTION_MIN_MSEC))
-        {
-            gb_jn_reported = true;
-            b_junction     = true;
-        }
-        else
-        {
-            // Still on the mark: too short yet, or already reported.
+            gb_jn_on_mark  = true;
+            g_jn_mark_msec = now_msec;
         }
     }
 
-    return (b_junction);
+    return (result);
 }   /* line_junction_detect() */
 
 /*** end of file ***/

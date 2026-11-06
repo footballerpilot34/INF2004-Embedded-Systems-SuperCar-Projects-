@@ -308,7 +308,7 @@ turn_test (barcode_command_t command)
     {
         log_printf("TEST: as if a barcode said %s.",
                    barcode_command_name(command));
-        vehicle_barcode_command(command);
+        vehicle_barcode_command(command, true);
     }
 }   /* turn_test() */
 
@@ -352,6 +352,8 @@ barcode_report (barcode_result_t result)
     {
         barcode_command_t command = barcode_command();
 
+        buzzer_beep_soft(BARCODE_BEEP_MSEC);   // A barcode was read.
+
         if (BARCODE_CMD_NONE == command)
         {
             log_printf("Barcode MESSAGE: \"%s\"", barcode_message());
@@ -360,7 +362,7 @@ barcode_report (barcode_result_t result)
         {
             log_printf("Barcode COMMAND: \"%s\" = %s", barcode_message(),
                        barcode_command_name(command));
-            vehicle_barcode_command(command);
+            vehicle_barcode_command(command, false);
         }
         telemetry_text("barcode", barcode_message());
     }

@@ -6,6 +6,7 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "barcode.h"
@@ -27,7 +28,8 @@ typedef enum
 void            vehicle_init(void);
 void            vehicle_start(void);
 void            vehicle_stop(void);
-void            vehicle_barcode_command(barcode_command_t command);
+void            vehicle_barcode_command(barcode_command_t command,
+                                        bool b_test);
 barcode_command_t vehicle_pending_turn(void);
 void            vehicle_barcode_test(void);
 void            vehicle_task(void);

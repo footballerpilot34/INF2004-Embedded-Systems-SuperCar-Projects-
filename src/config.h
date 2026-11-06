@@ -236,8 +236,15 @@
                                             // Must exceed the 3:1 wide:narrow
                                             // ratio, or the first wide space
                                             // (after a narrow bar) can end
-                                            // the scan.
-#define BARCODE_MESSAGE_MAX         16u     // Longest message kept.
+                                            // the scan. Used until a wide
+                                            // element has been seen...
+#define BARCODE_END_GAP_FAST        2u      // ...then 2x is enough (nothing
+                                            // inside is wider than 3 narrow
+                                            // units), so a scan ends soon
+                                            // after the last bar.
+#define BARCODE_WIDE_SEEN_X10       20u     // Wide seen: widest >= 2.0x
+                                            // the narrowest.
+#define BARCODE_MESSAGE_MAX        16u     // Longest message kept.
 #define BARCODE_GLITCH_USEC         2000u   // A colour shorter than this is
                                             // sensor flicker, not a bar.
 
@@ -281,10 +288,10 @@
 // instead (80% of 8 = 6) stalled it and the car crawled over the barcode
 // (2026-11-06). Drifts off the line during a scan: raise SCAN_TRIM_EXTRA;
 // wobbles: lower it.
-#define SPEED_SCAN                  6       // Steady speed while reading,
-                                            // 75% of 8 (2026-11-06),
-                                            // -20% from 10 (too fast to
-                                            // read, 2026-11-06).
+#define SPEED_SCAN                  7       // Steady speed while reading.
+                                            // 6 sat at the stall edge: a
+                                            // steady 6 jerked in BARCODE
+                                            // TEST (2026-11-06).
 #define SCAN_TRIM_EXTRA             2       // Far-side wheel: SPEED_SCAN + 2.
 
 // Messages that are COMMANDS (exact match; Code 39 is upper case).
@@ -314,14 +321,20 @@
 // Crossroads (+), detected in line_sensor.c. The two line sensors stay
 // black across a crossing line, so the crossroad is seen by the LEFT side
 // (barcode) sensor instead: the left branch is one long black mark (18 mm
-// wide). A black mark lasting LINE_JUNCTION_MIN_MSEC is a crossroad
-// (decided while still on it), and a pending LEFT/RIGHT turn is carried
-// out there. The limit sits between a barcode's widest bar (9 mm, about
-// 320 ms measured at SPEED_SCAN 6, so ~28 mm/s) and a branch (18 mm,
-// ~640 ms). Detection is off while a barcode's bars are being read. The
+// wide). A black mark that lasted LINE_JUNCTION_MIN_MSEC to _MAX_MSEC is
+// a crossroad (judged when it ends), and a pending LEFT/RIGHT turn is
+// carried out there. The lower limit sits between a barcode's widest bar
+// (9 mm, ~270 ms at SPEED_SCAN 7, ~33 mm/s; 320 ms was measured at 6) and
+// a branch (18 mm, ~545 ms). Detection stays on while a barcode is read
+// (its bars are far shorter); a crossroad reached mid-scan first ends and
+// decodes the scan, so its command is known before the turn. The
 // pivot point is the wheel axle, behind the sensors, so the car first
 // drives on for JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
-#define LINE_JUNCTION_MIN_MSEC      480u    // ~13 mm at SPEED_SCAN.
+#define LINE_JUNCTION_MIN_MSEC      400u    // ~13 mm at SPEED_SCAN 7.
+#define LINE_JUNCTION_MAX_MSEC      1200u   // ~40 mm: longer black (the
+                                            // mat past a paper edge) is
+                                            // not a branch (2026-11-06:
+                                            // false crossroads).
 #define LINE_JUNCTION_GAP_MSEC      20u     // Shorter white inside a mark
                                             // (glare, scuff) is ignored.
 #define JUNCTION_ADVANCE_MSEC       1350u   // VERIFY: about the line-sensor
@@ -336,6 +349,10 @@
 #define BUTTON_DEBOUNCE_TICKS       3u      // 30 ms START debounce.
 #define BUTTON_LONG_PRESS_TICKS     200u    // Hold START 2 s: calibrate.
 #define CAL_DONE_BEEP_MSEC          150u    // Beep when calibration ends.
+#define BARCODE_BEEP_MSEC           80u     // Soft beep: barcode read.
+#define BUZZER_SOFT_DUTY_PERCENT    5u     // Soft beep loudness (PWM duty;
+                                            // 50 = normal beep). Lower is
+                                            // quieter.
 
 #endif /* CONFIG_H */
 

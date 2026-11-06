@@ -5,7 +5,9 @@
  * @par
  * The buzzer is passive, so it needs a tone: a 2 kHz, 50% duty PWM signal.
  * buzzer_beep() starts the tone and buzzer_task() stops it later, so
- * nothing waits. The Robo Pico's mute switch silences it in hardware.
+ * nothing waits. buzzer_beep_soft() is the same tone at a low duty cycle
+ * (BUZZER_SOFT_DUTY_PERCENT), which a piezo plays more quietly. The Robo
+ * Pico's mute switch silences it in hardware.
  */
 
 #include <stdbool.h>
@@ -23,6 +25,8 @@
 #define BUZZER_HZ       2000u
 #define HZ_PER_MHZ      1000000u    // 1 PWM tick per microsecond.
 #define USEC_PER_MSEC   1000u
+#define PERCENT_100     100u
+#define BUZZER_TOP      (HZ_PER_MHZ / BUZZER_HZ)    // PWM ticks per cycle.
 
 
 static uint64_t g_off_usec = 0u;    // When the beep ends; 0 = silent.
@@ -56,9 +60,23 @@ buzzer_init (void)
 void
 buzzer_beep (uint32_t duration_msec)
 {
-    pwm_set_gpio_level(PIN_BUZZER, (HZ_PER_MHZ / BUZZER_HZ) / 2u);
+    pwm_set_gpio_level(PIN_BUZZER, BUZZER_TOP / 2u);
     g_off_usec = time_us_64() + ((uint64_t) duration_msec * USEC_PER_MSEC);
 }   /* buzzer_beep() */
+
+
+/*!
+ * @brief Start a quiet beep (low duty cycle); buzzer_task() ends it.
+ *
+ * @param[in] duration_msec How long to beep.
+ */
+void
+buzzer_beep_soft (uint32_t duration_msec)
+{
+    pwm_set_gpio_level(PIN_BUZZER,
+                       (BUZZER_TOP * BUZZER_SOFT_DUTY_PERCENT) / PERCENT_100);
+    g_off_usec = time_us_64() + ((uint64_t) duration_msec * USEC_PER_MSEC);
+}   /* buzzer_beep_soft() */
 
 
 /*!
