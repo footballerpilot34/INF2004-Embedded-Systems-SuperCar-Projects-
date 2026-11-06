@@ -38,38 +38,28 @@
  * the spot and never stops for white; only an obstacle (PROBE/BLOCKED)
  * or STOP stops it.
  *
- * @par START calibration (LINE_CAL): search until the line is found
- * The car may start anywhere near the line. Everything moves at
- * LINE_CAL_SPEED_PERCENT of the line-following speed. It repeats, until
- * the line is found or STOP is pressed:
- * 1. PIVOT: a sensor already on black at the start: sweep towards it at
- *    once (straight to ALIGN). Otherwise pivot (LINE_CAL_PIVOT_LEFT) in
- *    short bursts with braked pauses (see pivot()), until either sensor
- *    sees black, for up to LINE_CAL_PIVOT_MAX_MSEC.
- * 2. DRIVE: no line found, so drive straight ahead in the direction now
- *    faced until either sensor sees black, for up to
- *    LINE_CAL_DRIVE_MAX_MSEC, then go back to PIVOT. An obstacle ahead
- *    also ends the drive.
- * 3. ALIGN: pivot towards the sensor on black until both sensors are on
- *    black for LINE_CAL_ALIGN_TICKS, then follow the line. Overshooting
- *    (both on white) pivots back towards the sensor that last saw black;
- *    failing within LINE_CAL_ALIGN_MAX_MSEC
- *    goes back to PIVOT.
- * Success factor: EACH sensor must have DETECTED black during LINE_CAL,
- * that is, switched from white to black. Merely sitting on black at the
- * start does not count, so a stuck sensor cannot pass: a car placed on
- * the line turns off it and back once. A sensor that still has not
- * detected black after LINE_CAL_ALIGN_TRIES failed aligns stops the car
- * with its name.
+ * @par START calibration (LINE_CAL): turn onto the line
+ * Both line sensors already on black: no calibration, follow at once.
+ * Otherwise the car turns on the spot at half its driving speed
+ * (LINE_CAL_SPEED_PERCENT; short bursts with braked pauses, see pivot())
+ * until both line sensors are on black for LINE_CAL_ALIGN_TICKS, then
+ * follows. The direction is chosen every tick: towards the one line
+ * sensor on black; if neither, left when the side (barcode) sensor, which
+ * is on the left, is on black; otherwise the same way as before
+ * (LINE_CAL_PIVOT_LEFT at first). It turns until the line is found or
+ * STOP is pressed.
  *
  * @par Barcodes
- * While a barcode is being read (barcode_is_capturing()), FOLLOW_LINE
- * ignores the line sensors and drives straight at SPEED_SCAN, because bar
- * widths are measured in time; obstacles and humps are still checked.
+ * From the first bar until the scan ends (barcode_is_capturing()),
+ * FOLLOW_LINE drives strictly straight at SPEED_SCAN, holding both line
+ * sensors on the line with only a small speed-neutral trim
+ * (scan_hold_line()), because bar widths are measured in time. Normal
+ * line-following steering is suspended; only an obstacle (or a hump)
+ * interrupts the scan.
  * A decoded LEFT/RIGHT command ('A'/'Z') is kept as the pending turn and
- * carried out at the next crossroad, which the side sensor reports
- * (vehicle_junction()); a newer command replaces it. A U-turn is carried
- * out at once. A turn (TURN state) runs:
+ * carried out at the next crossroad, which line_junction_detect() finds
+ * from the side sensor (junction_act()); a newer command replaces it. A
+ * U-turn is carried out at once. A turn (TURN state) runs:
  * 0. ADVANCE (crossroad turns only): drive straight for
  *    JUNCTION_ADVANCE_MSEC, so the wheel axle is over the crossing;
  * 1. LEAVE: pivot until both line sensors are off the current line;
@@ -179,27 +169,12 @@ static uint32_t        g_back_pos_x100 = 0u;    // Replay position, ticks
                                                 // x 100 (counts down).
 static line_state_t    g_raw_line      = { false, false };
 
-// START calibration: search phases.
-typedef enum
-{
-    CAL_PIVOT,      // Pivot one way looking for the line.
-    CAL_DRIVE,      // Drive straight ahead looking for the line.
-    CAL_ALIGN       // Line found: pivot until both sensors are on black.
-} cal_phase_t;
-
-static cal_phase_t     g_cal_phase     = CAL_PIVOT;
-static uint32_t        g_phase_msec    = 0u;    // Current phase began.
-static uint32_t        g_search_round  = 0u;    // PIVOT phases so far.
-static uint32_t        g_centred_ticks = 0u;
-static uint32_t        g_align_fails   = 0u;
-static bool            gb_left_detect  = false; // Left went white -> black.
-static bool            gb_right_detect = false; // Right went white -> black.
-static bool            gb_left_was     = false; // Left black last tick.
-static bool            gb_right_was    = false; // Right black last tick.
+// START calibration.
+static uint32_t        g_centred_ticks = 0u;    // Both on black this long.
+static bool            gb_cal_left     = true;  // Turning left (calibration).
+static bool            gb_cal_turned   = false; // Has turned at all.
 static bool            gb_pivoting     = false;
 static bool            gb_pivot_left   = true;
-static bool            gb_cal_left     = true;  // Line last seen left
-                                                // (calibration).
 static uint32_t        g_pivot_msec    = 0u;    // Pivot began/reversed.
 
 // Barcode reading and barcode turns.
@@ -212,8 +187,6 @@ typedef enum
 } turn_phase_t;
 
 static bool              gb_launch      = true;  // Straight start allowed.
-static bool              gb_scanning    = false; // Driving straight to read.
-static uint32_t          g_scan_msec    = 0u;    // Reading began at.
 static barcode_command_t g_turn_cmd     = BARCODE_CMD_NONE;
 static vehicle_state_t   g_turn_after   = VEHICLE_FOLLOW_LINE;
 static turn_phase_t      g_turn_phase   = TURN_LEAVE;
@@ -226,15 +199,14 @@ static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
 
 
 static void     state_enter(vehicle_state_t state, uint32_t now_msec);
+static void     junction_act(uint32_t now_msec);
 static void     turn_step(uint32_t now_msec);
 static void     turn_phase_enter(turn_phase_t phase, uint32_t now_msec);
 static void     turn_finish(uint32_t now_msec, line_state_t line,
                             line_last_t last, char const * p_how);
-static bool     scan_is_on(uint32_t now_msec);
+static void     scan_hold_line(void);
 static void     line_steer(int32_t speed, uint32_t now_msec);
 static void     line_cal_step(uint32_t now_msec);
-static void     cal_phase_enter(cal_phase_t phase, uint32_t now_msec);
-static void     line_align_step(uint32_t now_msec, line_state_t line);
 static void     pivot(bool b_left, uint32_t now_msec);
 static line_state_t line_filtered(void);
 static bool     line_score_step(uint32_t * p_score, bool b_raw_black,
@@ -344,32 +316,32 @@ vehicle_barcode_command (barcode_command_t command)
 
 
 /*!
- * @brief A crossroad was just passed: carry out the pending turn, if any.
+ * @brief A crossroad was just reached: carry out the pending turn, if any.
  *
  * @par
- * Only acted on while following the line or in BARCODE TEST; the car goes
- * back to that state after the turn. Otherwise it is just logged.
+ * Only called while following the line or in BARCODE TEST; the car goes
+ * back to that state after the turn.
+ *
+ * @param[in] now_msec The current time.
  */
-void
-vehicle_junction (void)
+static void
+junction_act (uint32_t now_msec)
 {
-    if (((VEHICLE_FOLLOW_LINE == g_state) ||
-         (VEHICLE_BARCODE_TEST == g_state)) &&
-        (BARCODE_CMD_NONE != g_pending_turn))
+    if (BARCODE_CMD_NONE != g_pending_turn)
     {
         log_printf("Crossroad: %s now.", barcode_command_name(g_pending_turn));
         g_turn_cmd      = g_pending_turn;
         g_pending_turn  = BARCODE_CMD_NONE;
         g_turn_after    = g_state;
         gb_turn_advance = true;
-        state_enter(VEHICLE_TURN, now_msec_get());
+        state_enter(VEHICLE_TURN, now_msec);
     }
     else
     {
         log_printf("Crossroad seen in %s, no turn pending: straight on.",
                    vehicle_state_name(g_state));
     }
-}   /* vehicle_junction() */
+}   /* junction_act() */
 
 
 /*!
@@ -417,6 +389,18 @@ vehicle_task (void)
     uint32_t now_msec  = now_msec_get();
     uint32_t range_mm  = ultrasonic_range_mm();
     int32_t  tilt_x10  = imu_max_tilt_x10();
+    bool     b_reading = ((VEHICLE_FOLLOW_LINE == g_state) ||
+                          (VEHICLE_BARCODE_TEST == g_state));
+    bool     b_in_code = (barcode_is_capturing() &&
+                          (barcode_scan_size() > 0u));
+
+    // Crossroads: off while reading a barcode's bars, whose wide bars can
+    // be as long as a branch on the double-size print.
+    if (line_junction_detect(barcode_is_black(), (b_reading && !b_in_code),
+                             now_msec))
+    {
+        junction_act(now_msec);
+    }
 
     switch (g_state)
     {
@@ -567,10 +551,10 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
             state_enter(VEHICLE_PROBE, now_msec);
         }
     }
-    else if (scan_is_on(now_msec))
+    else if (barcode_is_capturing())
     {
-        motor_set(SPEED_SCAN, SPEED_SCAN);  // Reading a barcode: steady.
-        path_reset(false);                  // Not steering: no way back.
+        scan_hold_line();                   // Reading a barcode: straight.
+        path_reset(false);                  // Not following: no way back.
     }
     else if (b_range_used && (range_mm <= OBSTACLE_SLOW_MM))
     {
@@ -584,39 +568,61 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 
 
 /*!
- * @brief Decide whether to drive straight for a barcode being read.
+ * @brief While a barcode is read: drive strictly straight at SPEED_SCAN
+ *        with both line sensors held on the line.
  *
  * @par
- * True from the first bar until the scan ends, but for no longer than
- * BARCODE_SCAN_MAX_MSEC, so a stray black patch cannot keep the car off
- * the line for long.
- *
- * @param[in] now_msec The current time.
- *
- * @return True to drive straight at SPEED_SCAN this tick.
+ * Both sensors on black: both wheels at SPEED_SCAN. One sensor slipped
+ * off: a small trim towards the line: the far-side wheel runs
+ * SCAN_TRIM_EXTRA faster, the other stays at SPEED_SCAN (never slower:
+ * below SPEED_SCAN the motors stall). Both off: keep trimming towards the
+ * side the line was last seen. Never the line-following arcs, hard turns
+ * or reversing.
  */
-static bool
-scan_is_on (uint32_t now_msec)
+static void
+scan_hold_line (void)
 {
-    bool b_on = false;
+    line_state_t line  = line_filtered();   // Keeps the filter up to date.
+    int32_t      fast  = SPEED_SCAN + SCAN_TRIM_EXTRA;
+    int32_t      slow  = SPEED_SCAN;
+    int32_t      left  = SPEED_SCAN;
+    int32_t      right = SPEED_SCAN;
 
-    if (!barcode_is_capturing())
+    if (line.b_left_black && line.b_right_black)
     {
-        gb_scanning = false;
+        g_line_last = LINE_LAST_BOTH;       // Centred: straight.
     }
-    else if (!gb_scanning)
+    else if (line.b_left_black)
     {
-        gb_scanning = true;
-        g_scan_msec = now_msec;
-        b_on        = true;
+        gb_last_left = true;
+        g_line_last  = LINE_LAST_LEFT;
+        left         = slow;                // Line is to the left.
+        right        = fast;
+    }
+    else if (line.b_right_black)
+    {
+        gb_last_left = false;
+        g_line_last  = LINE_LAST_RIGHT;
+        left         = fast;                // Line is to the right.
+        right        = slow;
+    }
+    else if (LINE_LAST_LEFT == g_line_last)
+    {
+        left  = slow;
+        right = fast;
+    }
+    else if (LINE_LAST_RIGHT == g_line_last)
+    {
+        left  = fast;
+        right = slow;
     }
     else
     {
-        b_on = ((now_msec - g_scan_msec) < BARCODE_SCAN_MAX_MSEC);
+        // Line between the sensors: straight.
     }
 
-    return (b_on);
-}   /* scan_is_on() */
+    motor_set(left, right);
+}   /* scan_hold_line() */
 
 
 /*!
@@ -910,24 +916,10 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
 
     if (VEHICLE_LINE_CAL == state)
     {
-        line_state_t start = line_sensor_read();
-
-        g_search_round  = 0u;
-        g_align_fails   = 0u;
-        gb_left_detect  = false;
-        gb_right_detect = false;
-        gb_left_was     = start.b_left_black;   // Black at the start does
-        gb_right_was    = start.b_right_black;  // not count as detected.
-
-        // One sensor already on black: sweep towards it first.
-        gb_cal_left = LINE_CAL_PIVOT_LEFT;
-        if (start.b_left_black != start.b_right_black)
-        {
-            gb_cal_left = start.b_left_black;
-            log_printf("LINE_CAL: %s sensor already on black -> sweeping "
-                       "towards it.", (gb_cal_left ? "LEFT" : "RIGHT"));
-        }
-        cal_phase_enter(CAL_PIVOT, now_msec);
+        gb_cal_left     = LINE_CAL_PIVOT_LEFT;  // Until a sensor says else.
+        gb_cal_turned   = false;
+        gb_pivoting     = false;                // First burst starts fresh.
+        g_centred_ticks = 0u;
     }
 
     if (VEHICLE_TURN == state)
@@ -952,194 +944,83 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
 
 
 /*!
- * @brief LINE_CAL: search for the line until it is found, then align.
+ * @brief LINE_CAL: turn on the spot until both line sensors are on the
+ *        line, then follow it.
+ *
+ * @par
+ * Turns at half the driving speed (pivot(), LINE_CAL_SPEED_PERCENT). The
+ * direction is decided again every tick:
+ * - both line sensors on black: done (at once if the car has not turned:
+ *   no calibration needed);
+ * - one line sensor on black: turn towards it;
+ * - neither, but the side (barcode) sensor on black: turn towards it,
+ *   that is left;
+ * - nothing on black: keep turning the same way (LINE_CAL_PIVOT_LEFT at
+ *   first).
+ * Runs until the line is found or STOP is pressed.
  *
  * @param[in] now_msec The current time.
  */
 static void
 line_cal_step (uint32_t now_msec)
 {
-    line_state_t line     = line_sensor_read();
-    bool         b_black  = (line.b_left_black || line.b_right_black);
-    uint32_t     in_phase = now_msec - g_phase_msec;
+    line_state_t line = line_sensor_read();
 
-    // A detection is a change from white to black, so a stuck sensor (or
-    // one that started on black and never moved) has not detected black.
-    if (line.b_left_black && (!gb_left_was) && (!gb_left_detect))
-    {
-        gb_left_detect = true;
-        log_printf("LINE_CAL: LEFT sensor detected black.");
-    }
-    if (line.b_right_black && (!gb_right_was) && (!gb_right_detect))
-    {
-        gb_right_detect = true;
-        log_printf("LINE_CAL: RIGHT sensor detected black.");
-    }
-    gb_left_was  = line.b_left_black;
-    gb_right_was = line.b_right_black;
-
-    // Remember which side the line was last seen on, so an overshoot turns
-    // back the right way.
-    if (line.b_left_black != line.b_right_black)
-    {
-        gb_cal_left = line.b_left_black;
-    }
-
-    switch (g_cal_phase)
-    {
-    case CAL_PIVOT:
-        if (b_black)
-        {
-            log_printf("LINE_CAL: line found (%s sensor on black) -> "
-                       "aligning.", (line.b_left_black ? "LEFT" : "RIGHT"));
-            cal_phase_enter(CAL_ALIGN, now_msec);
-        }
-        else if (in_phase > LINE_CAL_PIVOT_MAX_MSEC)
-        {
-            log_printf("LINE_CAL: no line after pivoting -> driving forward "
-                       "until a sensor sees black.");
-            cal_phase_enter(CAL_DRIVE, now_msec);
-        }
-        else
-        {
-            pivot(gb_cal_left, now_msec);
-        }
-    break;
-
-    case CAL_DRIVE:
-        if (b_black)
-        {
-            log_printf("LINE_CAL: black seen while driving -> searching "
-                       "again from here.");
-            cal_phase_enter(CAL_PIVOT, now_msec);
-        }
-        else if (ultrasonic_range_mm() <= OBSTACLE_STOP_MM)
-        {
-            log_printf("LINE_CAL: obstacle ahead while driving -> pivoting "
-                       "instead.");
-            cal_phase_enter(CAL_PIVOT, now_msec);
-        }
-        else if (in_phase > LINE_CAL_DRIVE_MAX_MSEC)
-        {
-            log_printf("LINE_CAL: no line after driving -> pivoting again.");
-            cal_phase_enter(CAL_PIVOT, now_msec);
-        }
-        else
-        {
-            motor_set(CAL_SPEED, CAL_SPEED);
-        }
-    break;
-
-    case CAL_ALIGN:
-        line_align_step(now_msec, line);
-    break;
-
-    default:
-        cal_phase_enter(CAL_PIVOT, now_msec);
-    break;
-    }
-}   /* line_cal_step() */
-
-
-/*!
- * @brief Start a LINE_CAL phase: brake, restart the pivot kick, log it.
- *
- * @param[in] phase    The new phase.
- * @param[in] now_msec The current time.
- */
-static void
-cal_phase_enter (cal_phase_t phase, uint32_t now_msec)
-{
-    motor_set(0, 0);
-    gb_pivoting     = false;    // The next pivot starts with a kick.
-    g_cal_phase     = phase;
-    g_phase_msec    = now_msec;
-    g_centred_ticks = 0u;
-
-    if (CAL_PIVOT == phase)
-    {
-        g_search_round++;
-        log_printf("LINE_CAL search %" PRIu32 ": pivoting %s until a sensor "
-                   "sees black...", g_search_round,
-                   (gb_cal_left ? "left" : "right"));
-    }
-}   /* cal_phase_enter() */
-
-
-/*!
- * @brief ALIGN: pivot until both sensors are on black, then follow.
- *
- * @param[in] now_msec The current time.
- * @param[in] line     The current line state.
- */
-static void
-line_align_step (uint32_t now_msec, line_state_t line)
-{
-    bool b_both_detected = (gb_left_detect && gb_right_detect);
-
-    if ((now_msec - g_phase_msec) > LINE_CAL_ALIGN_MAX_MSEC)
-    {
-        g_align_fails++;
-
-        if (g_align_fails >= LINE_CAL_ALIGN_TRIES)
-        {
-            log_printf("LINE_CAL FAILED: LEFT %s, RIGHT %s. Check it in IR "
-                       "DIAG.",
-                       (gb_left_detect ? "detected black"
-                                       : "NEVER detected black"),
-                       (gb_right_detect ? "detected black"
-                                        : "NEVER detected black"));
-            state_enter(VEHICLE_STOPPED, now_msec);
-        }
-        else
-        {
-            log_printf("LINE_CAL: could not align on the line -> searching "
-                       "again.");
-            cal_phase_enter(CAL_PIVOT, now_msec);
-        }
-    }
-    else if (line.b_left_black && line.b_right_black && b_both_detected)
+    if (line.b_left_black && line.b_right_black)
     {
         motor_set(0, 0);
         gb_pivoting = false;
         g_centred_ticks++;
 
-        if (g_centred_ticks >= LINE_CAL_ALIGN_TICKS)
+        if (!gb_cal_turned || (g_centred_ticks >= LINE_CAL_ALIGN_TICKS))
         {
-            log_printf("LINE_CAL OK: both sensors detected black and are on "
-                       "the line -> following.");
+            log_printf("%s", (gb_cal_turned ?
+                              "LINE_CAL OK: both sensors on the line -> "
+                              "following." :
+                              "LINE_CAL: both sensors already on the "
+                              "line -> skipping calibration."));
             line_filter_reset(line, now_msec);
-            g_line_last          = LINE_LAST_BOTH;
+            g_line_last = LINE_LAST_BOTH;
             state_enter(VEHICLE_FOLLOW_LINE, now_msec);
         }
     }
-    else if (line.b_left_black && line.b_right_black)
-    {
-        // On the line, but a sensor has not yet detected black (it started
-        // on it): turn towards that sensor's side, which moves it off the
-        // line; the align then brings it back on, so it detects black.
-        g_centred_ticks = 0u;
-        pivot((gb_left_detect ? false :
-               (gb_right_detect ? true : LINE_CAL_PIVOT_LEFT)), now_msec);
-    }
-    else if (line.b_left_black)
-    {
-        g_centred_ticks = 0u;
-        pivot(true, now_msec);              // Line is left: pivot left.
-    }
-    else if (line.b_right_black)
-    {
-        g_centred_ticks = 0u;
-        pivot(false, now_msec);             // Line is right: pivot right.
-    }
     else
     {
-        // Both on white: the pivot overshot the line, so turn back towards
-        // the side it was last seen on.
+        bool b_left = gb_cal_left;
+
+        if (line.b_left_black)
+        {
+            b_left = true;                  // Line under the left sensor.
+        }
+        else if (line.b_right_black)
+        {
+            b_left = false;                 // Line under the right sensor.
+        }
+        else if (barcode_is_black())
+        {
+            b_left = true;                  // Side sensor (left) on black.
+        }
+        else
+        {
+            // Nothing on black: keep turning the same way.
+        }
+
+        if ((!gb_cal_turned) || (b_left != gb_cal_left))
+        {
+            log_printf("LINE_CAL: turning %s (%s).",
+                       (b_left ? "left" : "right"),
+                       (line.b_left_black ? "left sensor on black" :
+                        (line.b_right_black ? "right sensor on black" :
+                         (barcode_is_black() ? "side sensor on black" :
+                          "no sensor on black"))));
+        }
+
         g_centred_ticks = 0u;
-        pivot(gb_cal_left, now_msec);
+        gb_cal_left     = b_left;
+        gb_cal_turned   = true;
+        pivot(b_left, now_msec);
     }
-}   /* line_align_step() */
+}   /* line_cal_step() */
 
 
 /*!

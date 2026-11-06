@@ -33,7 +33,7 @@
  * @par Barcodes
  * Every decoded barcode is logged and shown on the web page. A command
  * (see BARCODE_TEXT_... in config.h: 'A' left, 'Z' right) is carried out
- * at the next crossroad, which the side sensor reports.
+ * at the next crossroad (detected in line_sensor.c from the side sensor).
  *
  * @par Coding standard
  * BARR-C:2018. Deviation: Rule 6.5.a, see gpio_isr.c.
@@ -52,6 +52,7 @@
 #include "hardware/pwm.h"
 
 #include "barcode.h"
+#include "encoder.h"
 #include "buzzer.h"
 #include "config.h"
 #include "gpio_isr.h"
@@ -126,6 +127,7 @@ main (void)
     line_sensor_init();
     barcode_init();
     ultrasonic_init();
+    encoder_init();
     gpio_isr_init();
     buttons_init();
 
@@ -367,10 +369,6 @@ barcode_report (barcode_result_t result)
         log_printf("Barcode NOT decoded: %" PRIu32 " bars+spaces seen "
                    "(valid: 10 per character - 1).", barcode_scan_size());
         telemetry_text("barcode", "(invalid scan)");
-    }
-    else if (BARCODE_JUNCTION == result)
-    {
-        vehicle_junction();
     }
     else
     {

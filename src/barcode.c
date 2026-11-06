@@ -18,11 +18,14 @@
  *    (BARCODE_TEXT_...): a match is a command (turn left or right at the
  *    next crossroad, U-turn); anything else is a message.
  *
- * @par Crossroads
- * A scan whose first bar lasts at least BARCODE_JUNCTION_MIN_USEC is not
- * a barcode (they all start with a narrow bar) but a crossroad's side
- * branch. It is reported as BARCODE_JUNCTION as soon as the sensor has
- * been on it that long, while still over it (about 11 mm in).
+ * @par Long black marks
+ * A scan is never dropped while still on a long first bar: when the thin
+ * bars at a barcode's start are missed, the first bar seen can be a wide
+ * one. A scan only ends after a quiet gap on white (or
+ * BARCODE_BLACK_MAX_USEC on black). Only once a first mark has ended, and
+ * lasted as long as a crossroad branch (LINE_JUNCTION_MIN_MSEC, which
+ * line_sensor.c reports), is the scan dropped, so a barcode soon after a
+ * crossroad is still read on its own.
  *
  * @par Analog reading (BARCODE_USE_ANALOG)
  * The module's comparator output misses thin bars, so a timer samples the
@@ -53,6 +56,7 @@
 
 #include "barcode.h"
 #include "config.h"
+#include "encoder.h"
 #include "log.h"
 
 
@@ -73,6 +77,32 @@
 #define DUMP_PER_LINE           10u     // Widths per log line (fits 96).
 #define DUMP_LINE_BYTES         96u     // Must match LOG_LINE_MAX in log.c.
 #define USEC_PER_MSEC           1000u
+#define DUMP_TENTHS             10u     // Distance widths in 0.1 ticks.
+#define BRANCH_MIN_USEC        (LINE_JUNCTION_MIN_MSEC * USEC_PER_MSEC)
+
+// Lenient decode of one letter, "*X*" (see scan_decode_lenient()).
+#define LENIENT_ELEMENTS        29u     // '*' gap letter gap '*'.
+#define LENIENT_LETTER_FIRST    10u     // The letter is elements 10..18.
+#define LENIENT_GAP_A           9u      // Gaps between the characters.
+#define LENIENT_GAP_B           19u
+#define LENIENT_STOP_FIRST      20u     // The second '*' is 20..28.
+#define LENIENT_MAX_MISSING     4u      // Elements one end may lose...
+#define LENIENT_MAX_MISSING_ALL 4u      // ...and both ends together, or
+#define LENIENT_MAX_ONE_SIDED   8u      // one end alone while the other
+                                        // '*' is complete (gap kept).
+#define LENIENT_RATIO_X10       20u     // Wide >= 2.0x narrow (same kind).
+#define LENIENT_BAND_PERCENT    20u     // Within 20% of the narrow/wide
+                                        // split: too unclear to trust.
+#define LENIENT_LONG_X          2u      // A cut-off end element may not be
+                                        // longer than 2x the split.
+#define LENIENT_SUM_MIN_PERCENT 70u     // An end's elements must add up to
+#define LENIENT_SUM_MAX_PERCENT 140u    // 70-140% of their expected width.
+#define BARS_PER_CHAR           5u
+#define WIDE_BARS_PER_CHAR      2u      // A-Z and '*': 2 wide bars and
+#define UNITS_PER_CHAR          15u     // 1 wide space = 6x1 + 3x3 units.
+#define WIDE_UNITS              3u
+#define PERCENT_100             100u
+#define STAR_PATTERN            0x094u  // '*' in g_code39.
 #define ADC_FIRST_PIN           26u     // ADC0 is GP26, ADC1 GP27, ...
 #define ADC_FULL_SCALE          4095    // 12-bit ADC.
 #define AO_FILTER_DIV           8       // Smoothing: 1/8 of each change
@@ -108,6 +138,15 @@ typedef struct
     barcode_command_t command;
 } command_text_t;
 
+// Narrow/wide splits learned from a cleanly decoded letter.
+typedef struct
+{
+    uint16_t pattern;       // The letter's pattern.
+    uint32_t bar_split;     // Bars wider than this are wide.
+    uint32_t space_split;   // Spaces wider than this are wide.
+    uint32_t unit;          // One narrow unit (1/15 of the letter).
+} split_t;
+
 // Messages that are commands (exact match); see config.h.
 static command_text_t const g_command_texts[NUM_COMMAND_TEXTS] =
 {
@@ -122,19 +161,26 @@ static command_text_t const g_command_texts[NUM_COMMAND_TEXTS] =
 // Edge ring, filled by the ISR. The head only ever increases (it wraps
 // naturally at 2^32), so head - tail is the number of unread edges.
 static volatile uint32_t g_edge_usec[EDGE_RING_SIZE];
+static volatile uint32_t g_edge_pos[EDGE_RING_SIZE];   // encoder_position().
 static volatile bool     g_edge_black[EDGE_RING_SIZE];
 static volatile uint32_t g_edge_head = 0u;
 static uint32_t          g_edge_tail = 0u;
 
-// Scan in progress.
+// Scan in progress. Widths are kept both in time and in distance; the
+// decoder uses g_elements, which scan_finish() fills from the better one.
 static uint32_t g_elements[MAX_ELEMENTS];
+static uint32_t g_elem_usec[MAX_ELEMENTS];
+static uint32_t g_elem_dist[MAX_ELEMENTS];
 static uint32_t g_num_elements   = 0u;
 static uint32_t g_widest_usec    = 0u;
+static uint32_t g_widest_dist    = 0u;
 static uint32_t g_last_edge_usec = 0u;
+static uint32_t g_last_edge_pos  = 0u;
+static uint32_t g_scan_start_pos = 0u;
+static bool     gb_widths_dist   = false;   // g_elements is in distance.
 static bool     gb_last_black    = false;
 static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
-static bool     gb_junction      = false;   // A crossroad mark just ended.
 static bool     gb_enabled       = true;
 
 // Analog reader state. Written by the sampling timer only.
@@ -148,14 +194,32 @@ static int32_t           g_ao_extreme = 0;      // Last dip (on white) or
 static char              g_message[BARCODE_MESSAGE_MAX + 1u];
 static barcode_command_t g_command = BARCODE_CMD_NONE;
 
+// Why the last lenient line-up failed, for the log.
+static char const *      gp_lenient_why = "";
+static uint32_t          g_lenient_pos  = 0u;   // Scan position (1-based).
+
 
 static void             edge_push(uint32_t edge_usec, bool b_black);
 static bool             ao_sample_isr(repeating_timer_t * p_timer);
 static int32_t          ao_darkness(void);
-static void             edge_add(uint32_t edge_usec, bool b_black);
+static void             edge_add(uint32_t edge_usec, uint32_t edge_pos,
+                                 bool b_black);
+static bool             scan_has_ended(uint32_t end_gap_usec);
+static void             widths_select(void);
 static barcode_result_t scan_finish(void);
 static void             scan_dump(void);
 static bool             scan_decode(bool b_reverse);
+static bool             scan_decode_lenient(void);
+static char             lenient_try(bool b_reverse, uint32_t lead);
+static char             letter_decode(uint32_t first, bool b_reverse,
+                                      split_t * p_split);
+static bool             lenient_check(uint32_t j, uint32_t lead,
+                                      bool b_reverse,
+                                      split_t const * p_split);
+static bool             lenient_sum_ok(uint32_t first_j, uint32_t last_j,
+                                       uint32_t lead, bool b_reverse,
+                                       split_t const * p_split);
+static bool             expected_wide(uint32_t idx, uint16_t letter);
 static char             char_decode(uint32_t first, bool b_reverse);
 static uint32_t         element_get(uint32_t index, bool b_reverse);
 static barcode_command_t command_match(char const * p_message);
@@ -256,8 +320,7 @@ barcode_scan_size (void)
  * Call every control tick.
  *
  * @return BARCODE_DECODED when a new message is ready, BARCODE_INVALID
- *         when a scan could not be decoded, BARCODE_JUNCTION when a
- *         crossroad's side branch was just passed, otherwise BARCODE_NONE.
+ *         when a scan could not be decoded, otherwise BARCODE_NONE.
  */
 barcode_result_t
 barcode_task (void)
@@ -279,7 +342,7 @@ barcode_task (void)
 
         if (gb_enabled)
         {
-            edge_add(g_edge_usec[idx], g_edge_black[idx]);
+            edge_add(g_edge_usec[idx], g_edge_pos[idx], g_edge_black[idx]);
         }
         g_edge_tail++;
     }
@@ -288,23 +351,7 @@ barcode_task (void)
     end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ?
                end_gap : BARCODE_END_GAP_MIN_USEC);
 
-    // Still on the first black mark, and it has already lasted longer
-    // than any first bar of a barcode: a crossroad branch. Decided now,
-    // while still over it, so the end gap (which runs from the last edge)
-    // cannot end the scan as "0 bars" first.
-    if (gb_capturing && gb_last_black && (0u == g_num_elements) &&
-        ((time_us_32() - g_last_edge_usec) >= BARCODE_JUNCTION_MIN_USEC))
-    {
-        gb_capturing = false;
-        gb_junction  = true;
-    }
-
-    if (gb_junction)
-    {
-        gb_junction = false;
-        result      = BARCODE_JUNCTION;
-    }
-    else if (gb_capturing && ((time_us_32() - g_last_edge_usec) > end_gap))
+    if (gb_capturing && scan_has_ended(end_gap))
     {
         result = scan_finish();
     }
@@ -329,17 +376,13 @@ barcode_task (void)
 void
 barcode_set_enabled (bool b_enabled)
 {
-    if (!b_enabled)
-    {
-        gb_junction = false;    // Seen in a state that does not use it.
-    }
-
     if (!b_enabled && gb_capturing)
     {
         // Say so: a scan cut off by STOP or a state change would otherwise
         // vanish without a trace.
         log_printf("Barcode: scan discarded (reading switched off after %"
                    PRIu32 " bars+spaces).", g_num_elements);
+        widths_select();
         scan_dump();
         gb_capturing = false;
     }
@@ -358,6 +401,20 @@ barcode_message (void)
 {
     return (g_message);
 }   /* barcode_message() */
+
+
+/*!
+ * @brief Forget the last decoded message (web CLEAR OUTPUT).
+ *
+ * @par
+ * Only the shown message is cleared; a pending turn is kept.
+ */
+void
+barcode_clear_message (void)
+{
+    g_message[0] = '\0';
+    g_command    = BARCODE_CMD_NONE;
+}   /* barcode_clear_message() */
 
 
 /*!
@@ -446,6 +503,10 @@ barcode_is_black (void)
 /*!
  * @brief Put one edge into the ring for barcode_task(). Interrupt context.
  *
+ * @par
+ * The car's position (encoder_position()) is recorded with it, so bar
+ * widths can be measured in distance as well as time.
+ *
  * @param[in] edge_usec When the edge happened.
  * @param[in] b_black   True if the sensor sees black after the edge.
  */
@@ -455,6 +516,7 @@ edge_push (uint32_t edge_usec, bool b_black)
     uint32_t head = g_edge_head;
 
     g_edge_usec[head & EDGE_RING_MASK]  = edge_usec;
+    g_edge_pos[head & EDGE_RING_MASK]   = encoder_position();
     g_edge_black[head & EDGE_RING_MASK] = b_black;
     g_edge_head = head + 1u;
 }   /* edge_push() */
@@ -558,10 +620,11 @@ ao_darkness (void)
  * @brief Add one edge to the current scan, or start a scan on a bar.
  *
  * @param[in] edge_usec When the edge happened.
+ * @param[in] edge_pos  Where the car was then (encoder_position()).
  * @param[in] b_black   True if the sensor sees black after the edge.
  */
 static void
-edge_add (uint32_t edge_usec, bool b_black)
+edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
 {
     if (!gb_capturing)
     {
@@ -573,7 +636,10 @@ edge_add (uint32_t edge_usec, bool b_black)
             gb_last_black    = true;
             g_num_elements   = 0u;
             g_widest_usec    = 0u;
+            g_widest_dist    = 0u;
             g_last_edge_usec = edge_usec;
+            g_last_edge_pos  = edge_pos;
+            g_scan_start_pos = edge_pos;
         }
     }
     else if (b_black == gb_last_black)
@@ -591,26 +657,28 @@ edge_add (uint32_t edge_usec, bool b_black)
         else
         {
             g_num_elements--;
-            g_last_edge_usec -= g_elements[g_num_elements];
+            g_last_edge_usec -= g_elem_usec[g_num_elements];
+            g_last_edge_pos  -= g_elem_dist[g_num_elements];
             gb_last_black     = b_black;
         }
     }
     else if ((0u == g_num_elements) &&
-             ((edge_usec - g_last_edge_usec) >= BARCODE_JUNCTION_MIN_USEC))
+             ((edge_usec - g_last_edge_usec) >= BRANCH_MIN_USEC))
     {
-        // The first bar was far wider than any barcode bar can start
-        // with: a crossroad's side branch. End the scan here. (Normally
-        // barcode_task() has already caught it while still on black.)
+        // The first mark just ended and was as long as a crossroad branch
+        // (line_sensor.c has reported it): not a barcode. Drop it, so a
+        // barcode soon after it is read on its own.
         gb_capturing = false;
-        gb_junction  = true;
     }
     else
     {
         uint32_t width = edge_usec - g_last_edge_usec;
+        uint32_t dist  = edge_pos - g_last_edge_pos;
 
         if (g_num_elements < MAX_ELEMENTS)
         {
-            g_elements[g_num_elements] = width;
+            g_elem_usec[g_num_elements] = width;
+            g_elem_dist[g_num_elements] = dist;
             g_num_elements++;
         }
         else
@@ -620,14 +688,92 @@ edge_add (uint32_t edge_usec, bool b_black)
 
         g_widest_usec    = ((width > g_widest_usec) ? width
                                                     : g_widest_usec);
+        g_widest_dist    = ((dist > g_widest_dist) ? dist : g_widest_dist);
         g_last_edge_usec = edge_usec;
+        g_last_edge_pos  = edge_pos;
         gb_last_black    = b_black;
     }
 }   /* edge_add() */
 
 
 /*!
- * @brief Decode the finished scan, forwards and then backwards.
+ * @brief Decide whether the scan in progress has ended.
+ *
+ * @par
+ * With the encoders turning (BARCODE_USE_ENCODERS), the quiet gap after
+ * the last bar is measured in distance, so a pause over white does not
+ * end a scan; otherwise in time. On black it never ends sooner than
+ * BARCODE_BLACK_MAX_USEC (a wide or first bar can be long), and then only
+ * once the car has moved, so a pause on a bar does not end it either.
+ * Nothing at all for BARCODE_STALL_USEC ends it regardless.
+ *
+ * @param[in] end_gap_usec The quiet time that ends a scan by time.
+ *
+ * @return True if the scan has ended.
+ */
+static bool
+scan_has_ended (uint32_t end_gap_usec)
+{
+    uint32_t now_pos    = encoder_position();
+    uint32_t quiet_usec = time_us_32() - g_last_edge_usec;
+    uint32_t moved      = now_pos - g_last_edge_pos;
+    bool     b_enc      = (BARCODE_USE_ENCODERS &&
+                           ((now_pos - g_scan_start_pos) >=
+                            ENCODER_POS_SCALE));
+    bool     b_end      = false;
+
+    if (quiet_usec > BARCODE_STALL_USEC)
+    {
+        b_end = true;           // Nothing for a long time: stop waiting.
+    }
+    else if (gb_last_black)
+    {
+        b_end = ((quiet_usec > BARCODE_BLACK_MAX_USEC) &&
+                 ((!b_enc) || (moved >= ENCODER_POS_SCALE)));
+    }
+    else if (b_enc && (g_widest_dist > 0u))
+    {
+        b_end = ((quiet_usec > BARCODE_END_GAP_MIN_USEC) &&
+                 (moved > (g_widest_dist * BARCODE_END_GAP_FACTOR)));
+    }
+    else
+    {
+        b_end = (quiet_usec > end_gap_usec);
+    }
+
+    return (b_end);
+}   /* scan_has_ended() */
+
+
+/*!
+ * @brief Choose the widths to decode: distance if the encoders turned
+ *        enough during the scan, otherwise time.
+ */
+static void
+widths_select (void)
+{
+    uint32_t ticks = (g_last_edge_pos - g_scan_start_pos) /
+                     ENCODER_POS_SCALE;
+
+    gb_widths_dist = (BARCODE_USE_ENCODERS &&
+                      (ticks >= BARCODE_MIN_SCAN_TICKS));
+
+    for (uint32_t el = 0u; el < g_num_elements; el++)
+    {
+        g_elements[el] = (gb_widths_dist ? g_elem_dist[el] : g_elem_usec[el]);
+    }
+
+    if (BARCODE_USE_ENCODERS && !gb_widths_dist)
+    {
+        log_printf("Barcode: encoders moved only %" PRIu32 " ticks over the "
+                   "scan -> widths measured in time.", ticks);
+    }
+}   /* widths_select() */
+
+
+/*!
+ * @brief Decode the finished scan, forwards and then backwards; if that
+ *        fails, try the lenient one-letter decode.
  *
  * @return BARCODE_DECODED, BARCODE_INVALID, or BARCODE_NONE if the scan
  *         was too short to be a barcode (for example, a line crossing).
@@ -643,6 +789,19 @@ scan_finish (void)
     {
         result = BARCODE_INVALID;
     }
+    else if (g_num_elements >= REPORT_MIN_ELEMENTS)
+    {
+        widths_select();    // Distance or time, before decoding.
+    }
+    else
+    {
+        // Too short to decode; reported below.
+    }
+
+    if (gb_overflow)
+    {
+        // Already invalid.
+    }
     else if (g_num_elements < REPORT_MIN_ELEMENTS)
     {
         // One or two marks (a stray line or smudge): not a barcode. Not a
@@ -650,13 +809,14 @@ scan_finish (void)
         log_printf("Barcode: only %" PRIu32 " bars+spaces seen, ignored.",
                    g_num_elements);
     }
-    else if (g_num_elements < MIN_ELEMENTS)
+    else if ((g_num_elements >= MIN_ELEMENTS) &&
+             (scan_decode(false) || scan_decode(true)))
     {
-        result = BARCODE_INVALID;   // Too few for even "*X*": bars missed.
+        result = BARCODE_DECODED;   // Every element read cleanly.
     }
-    else if (scan_decode(false) || scan_decode(true))
+    else if (scan_decode_lenient())
     {
-        result = BARCODE_DECODED;
+        result = BARCODE_DECODED;   // One letter, ends partly missed.
     }
     else
     {
@@ -678,8 +838,9 @@ scan_finish (void)
  * @brief Log every element width of the current scan, to diagnose it.
  *
  * @par
- * Widths are in ms; the first element is always a bar, so odd numbers
- * (#1, #3, ...) are bars and even numbers are spaces.
+ * Widths are in the units decoded: tenths of an encoder tick (both wheels
+ * added) or ms. The first element is always a bar, so odd numbers (#1,
+ * #3, ...) are bars and even numbers are spaces.
  */
 static void
 scan_dump (void)
@@ -687,7 +848,8 @@ scan_dump (void)
     char   text[DUMP_LINE_BYTES] = { 0 };
     size_t length = 0u;
 
-    log_printf("Barcode widths in ms (#1 is a bar, then space, bar, ...):");
+    log_printf("Barcode widths in %s (#1 is a bar, then space, bar, ...):",
+               (gb_widths_dist ? "0.1 encoder ticks" : "ms"));
 
     // NOTE: A line holds a 6-character prefix plus DUMP_PER_LINE widths of
     // at most 8 characters each (86 bytes), so snprintf never truncates.
@@ -701,7 +863,10 @@ scan_dump (void)
 
         length += (size_t) snprintf(text + length, sizeof(text) - length,
                                     " %" PRIu32,
-                                    g_elements[el] / USEC_PER_MSEC);
+                                    (gb_widths_dist ?
+                                     ((g_elements[el] * DUMP_TENTHS) /
+                                      ENCODER_POS_SCALE) :
+                                     (g_elements[el] / USEC_PER_MSEC)));
 
         if (((DUMP_PER_LINE - 1u) == (el % DUMP_PER_LINE)) ||
             ((el + 1u) == g_num_elements))
@@ -761,6 +926,432 @@ scan_decode (bool b_reverse)
 
     return (b_ok);
 }   /* scan_decode() */
+
+
+/*!
+ * @brief Lenient decode of a one-letter barcode "*X*" (X = A to Z) whose
+ *        outer ends were partly missed.
+ *
+ * @par
+ * The side sensor can slip past the tips of the outermost bars, so a scan
+ * may lose elements at its ends (and only half-see the next one): up to
+ * LENIENT_MAX_MISSING_ALL in all, or up to LENIENT_MAX_ONE_SIDED at one
+ * end when the '*' at the other end is complete. Every way the scan could
+ * line up with "*X*" is tried, in both directions; a line-up is accepted
+ * only if:
+ * - the letter is complete and decodes cleanly to A-Z, with bars and
+ *   spaces judged separately (2 wide bars, 1 wide space) and every wide
+ *   at least LENIENT_RATIO_X10 / 10 times every narrow of its kind;
+ * - every other visible element is clearly narrow or wide (not within
+ *   LENIENT_BAND_PERCENT of the split) and matches '*' or the narrow gap,
+ *   except that a cut-off outermost element may read shorter;
+ * - each end's elements add up to 70-140% of their expected width, so no
+ *   element is missing or extra inside an end.
+ * If two line-ups give different letters, nothing is accepted. If none
+ * fits, the reason each line-up failed is logged.
+ *
+ * @return True if a letter was decoded and stored as the message.
+ */
+static bool
+scan_decode_lenient (void)
+{
+    char     found     = '\0';
+    bool     b_clash   = false;
+    bool     b_tried   = false;
+    uint32_t found_lead = 0u;
+    uint32_t n         = g_num_elements;
+
+    // A scan starts and ends on a bar, so it loses elements in pairs.
+    for (uint32_t dir = 0u; dir < 2u; dir++)
+    {
+        for (uint32_t lead = 0u; lead <= LENIENT_MAX_ONE_SIDED; lead += 2u)
+        {
+            char     symbol = '\0';
+            uint32_t trail  = LENIENT_ELEMENTS - lead - n;
+            bool     b_both = ((lead <= LENIENT_MAX_MISSING) &&
+                               (trail <= LENIENT_MAX_MISSING) &&
+                               ((lead + trail) <= LENIENT_MAX_MISSING_ALL));
+            bool     b_one  = (((0u == lead) || (0u == trail)) &&
+                               ((lead + trail) <= LENIENT_MAX_ONE_SIDED));
+
+            // Only whole bar+space pairs can be missing at the other end
+            // too, within the limits above.
+            if (((lead + n) <= LENIENT_ELEMENTS) && (0u == (trail % 2u)) &&
+                (b_both || b_one))
+            {
+                b_tried = true;
+                symbol  = lenient_try((1u == dir), lead);
+
+                if ('\0' == symbol)
+                {
+                    log_printf("Barcode lenient %s, %" PRIu32 "+%" PRIu32
+                               " missing: %s (#%" PRIu32 ").",
+                               ((1u == dir) ? "reversed" : "forward"), lead,
+                               trail, gp_lenient_why, g_lenient_pos);
+                }
+            }
+
+            if ('\0' == symbol)
+            {
+                // This line-up does not fit.
+            }
+            else if (('\0' != found) && (symbol != found))
+            {
+                b_clash = true;
+            }
+            else
+            {
+                found      = symbol;
+                found_lead = lead;
+            }
+        }
+    }
+
+    if (('\0' != found) && !b_clash)
+    {
+        g_message[0] = found;
+        g_message[1] = '\0';
+        g_command    = command_match(g_message);
+        log_printf("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
+                   "%" PRIu32 " missing at one end, %" PRIu32 " at the "
+                   "other).", n, LENIENT_ELEMENTS, found_lead,
+                   (LENIENT_ELEMENTS - found_lead - n));
+    }
+    else if (b_clash)
+    {
+        log_printf("Barcode: lenient read ambiguous (two letters fit), "
+                   "rejected.");
+    }
+    else if (!b_tried)
+    {
+        log_printf("Barcode lenient: %" PRIu32 " bars+spaces cannot be "
+                   "\"*X*\" with at most %u missing.", n,
+                   LENIENT_MAX_ONE_SIDED);
+    }
+    else
+    {
+        // Nothing fits; each line-up's reason is logged above.
+    }
+
+    return (('\0' != found) && !b_clash);
+}   /* scan_decode_lenient() */
+
+
+/*!
+ * @brief Try one line-up for the lenient decode.
+ *
+ * @param[in] b_reverse True to read the elements last-to-first.
+ * @param[in] lead      Elements of "*X*" missing before the scan's first.
+ *
+ * @return The letter (A to Z), or '\0' if this line-up does not fit.
+ */
+static char
+lenient_try (bool b_reverse, uint32_t lead)
+{
+    split_t  split;
+    uint32_t n      = g_num_elements;
+    uint32_t last_j = n - 1u;
+    uint32_t first  = LENIENT_LETTER_FIRST - lead;
+    char     symbol = letter_decode(first, b_reverse, &split);
+    bool     b_ok   = (('A' <= symbol) && (symbol <= 'Z'));
+
+    // Scan positions in the log count from 1, in scan order (as the
+    // width dump does).
+    gp_lenient_why = "letter not a clean A-Z";
+    g_lenient_pos  = (b_reverse ? (n - first) : (first + 1u));
+
+    // Every element outside the letter must match '*' or a narrow gap.
+    for (uint32_t j = 0u; (j < n) && b_ok; j++)
+    {
+        uint32_t idx = j + lead;
+
+        if ((idx < LENIENT_LETTER_FIRST) || (idx > LENIENT_GAP_B - 1u))
+        {
+            b_ok = lenient_check(j, lead, b_reverse, &split);
+
+            if (!b_ok)
+            {
+                gp_lenient_why = (expected_wide(idx, split.pattern) ?
+                                  "should be wide" : "should be narrow");
+                g_lenient_pos  = (b_reverse ? (n - j) : (j + 1u));
+            }
+        }
+    }
+
+    // Each end's complete elements (not the cut-off outermost one) must
+    // add up to about the right width: nothing missing or extra inside.
+    if (b_ok)
+    {
+        b_ok = lenient_sum_ok(1u, (LENIENT_GAP_A - lead), lead, b_reverse,
+                              &split);
+        gp_lenient_why = "first end's width off";
+        g_lenient_pos  = (b_reverse ? n : 1u);
+    }
+    if (b_ok)
+    {
+        b_ok = lenient_sum_ok((LENIENT_GAP_B - lead), (last_j - 1u), lead,
+                              b_reverse, &split);
+        gp_lenient_why = "last end's width off";
+        g_lenient_pos  = (b_reverse ? 1u : n);
+    }
+
+    return (b_ok ? symbol : '\0');
+}   /* lenient_try() */
+
+
+/*!
+ * @brief Decode one complete character, judging bars and spaces apart:
+ *        its 2 widest bars and its widest space are wide.
+ *
+ * @param[in]  first     Index of the character's first element.
+ * @param[in]  b_reverse True to read the elements last-to-first.
+ * @param[out] p_split   The pattern and narrow/wide splits it shows.
+ *
+ * @return The character, or '\0' if the wide and narrow elements are not
+ *         clearly apart (LENIENT_RATIO_X10) or the pattern is unknown.
+ */
+static char
+letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
+{
+    uint32_t bar_wide_min    = UINT32_MAX;
+    uint32_t bar_narrow_max  = 0u;
+    uint32_t bar_narrow_sum  = 0u;
+    uint32_t bar_wide_sum    = 0u;
+    uint32_t space_wide      = 0u;
+    uint32_t space_narrow_max = 0u;
+    uint32_t space_narrow_sum = 0u;
+    uint32_t total           = 0u;
+    uint16_t pattern         = 0u;
+    char     symbol          = '\0';
+
+    // Mark the 2 widest bars (even elements) wide.
+    for (uint32_t pick = 0u; pick < WIDE_BARS_PER_CHAR; pick++)
+    {
+        uint32_t best_el    = 0u;
+        uint32_t best_width = 0u;
+
+        for (uint32_t el = 0u; el < ELEMENTS_PER_CHAR; el += 2u)
+        {
+            uint16_t bit   = (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - el));
+            uint32_t width = element_get(first + el, b_reverse);
+
+            if ((0u == (pattern & bit)) && (width > best_width))
+            {
+                best_width = width;
+                best_el    = el;
+            }
+        }
+        pattern |= (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - best_el));
+    }
+
+    // Mark the widest space (odd elements) wide.
+    {
+        uint32_t best_el    = 1u;
+        uint32_t best_width = 0u;
+
+        for (uint32_t el = 1u; el < ELEMENTS_PER_CHAR; el += 2u)
+        {
+            uint32_t width = element_get(first + el, b_reverse);
+
+            if (width > best_width)
+            {
+                best_width = width;
+                best_el    = el;
+            }
+        }
+        pattern |= (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - best_el));
+    }
+
+    // Measure each group, to check they are clearly apart.
+    for (uint32_t el = 0u; el < ELEMENTS_PER_CHAR; el++)
+    {
+        uint16_t bit    = (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - el));
+        uint32_t width  = element_get(first + el, b_reverse);
+        bool     b_wide = (0u != (pattern & bit));
+
+        total += width;
+
+        if (0u == (el % 2u))
+        {
+            if (b_wide)
+            {
+                bar_wide_sum += width;
+                bar_wide_min  = ((width < bar_wide_min) ? width
+                                                        : bar_wide_min);
+            }
+            else
+            {
+                bar_narrow_sum += width;
+                bar_narrow_max  = ((width > bar_narrow_max) ? width
+                                                            : bar_narrow_max);
+            }
+        }
+        else if (b_wide)
+        {
+            space_wide = width;
+        }
+        else
+        {
+            space_narrow_sum += width;
+            space_narrow_max  = ((width > space_narrow_max) ? width
+                                                            : space_narrow_max);
+        }
+    }
+
+    if (((bar_wide_min * 10u) >= (bar_narrow_max * LENIENT_RATIO_X10)) &&
+        ((space_wide * 10u) >= (space_narrow_max * LENIENT_RATIO_X10)))
+    {
+        for (uint32_t idx = 0u; idx < NUM_CODE39_SYMBOLS; idx++)
+        {
+            if (g_code39[idx].pattern == pattern)
+            {
+                symbol = g_code39[idx].symbol;
+            }
+        }
+    }
+
+    // Splits halfway between the average narrow and wide of each kind.
+    p_split->pattern     = pattern;
+    p_split->bar_split   = ((bar_narrow_sum / (BARS_PER_CHAR -
+                                               WIDE_BARS_PER_CHAR)) +
+                            (bar_wide_sum / WIDE_BARS_PER_CHAR)) / 2u;
+    p_split->space_split = ((space_narrow_sum /
+                             (ELEMENTS_PER_CHAR - BARS_PER_CHAR - 1u)) +
+                            space_wide) / 2u;
+    p_split->unit        = total / UNITS_PER_CHAR;
+
+    return (symbol);
+}   /* letter_decode() */
+
+
+/*!
+ * @brief Check one element outside the letter against "*X*".
+ *
+ * @param[in] j         The element's position in the scan.
+ * @param[in] lead      Elements missing before the scan's first.
+ * @param[in] b_reverse True to read the elements last-to-first.
+ * @param[in] p_split   The splits learned from the letter.
+ *
+ * @return True if it is clearly the width "*X*" needs there. The scan's
+ *         first and last elements may have been cut off by the sensor, so
+ *         there a wide element may also read shorter (but not absurdly
+ *         long).
+ */
+static bool
+lenient_check (uint32_t j, uint32_t lead, bool b_reverse,
+               split_t const * p_split)
+{
+    uint32_t idx      = j + lead;
+    bool     b_bar    = (0u == (idx % 2u));
+    bool     b_wide   = expected_wide(idx, p_split->pattern);
+    uint32_t split    = (b_bar ? p_split->bar_split : p_split->space_split);
+    uint32_t width    = element_get(j, b_reverse);
+    bool     b_outer  = ((0u == j) || ((g_num_elements - 1u) == j));
+    bool     b_narrow_clear = ((width * PERCENT_100) <=
+                               (split * (PERCENT_100 - LENIENT_BAND_PERCENT)));
+    bool     b_wide_clear   = ((width * PERCENT_100) >=
+                               (split * (PERCENT_100 + LENIENT_BAND_PERCENT)));
+    bool     b_ok     = false;
+
+    if (b_outer && b_wide)
+    {
+        b_ok = (width <= (split * LENIENT_LONG_X));  // May be cut short.
+    }
+    else if (b_wide)
+    {
+        b_ok = b_wide_clear;
+    }
+    else
+    {
+        b_ok = b_narrow_clear;
+    }
+
+    return (b_ok);
+}   /* lenient_check() */
+
+
+/*!
+ * @brief Check that a run of elements adds up to about its expected
+ *        width, so none is missing or extra in it.
+ *
+ * @param[in] first_j   First scan position of the run.
+ * @param[in] last_j    Last scan position of the run (inclusive).
+ * @param[in] lead      Elements missing before the scan's first.
+ * @param[in] b_reverse True to read the elements last-to-first.
+ * @param[in] p_split   The splits learned from the letter.
+ *
+ * @return True if the run is within 70-140% of its expected width (or is
+ *         empty).
+ */
+static bool
+lenient_sum_ok (uint32_t first_j, uint32_t last_j, uint32_t lead,
+                bool b_reverse, split_t const * p_split)
+{
+    uint32_t width = 0u;
+    uint32_t units = 0u;
+    bool     b_ok  = true;
+
+    for (uint32_t j = first_j; (j <= last_j) && (j < g_num_elements); j++)
+    {
+        width += element_get(j, b_reverse);
+        units += (expected_wide(j + lead, p_split->pattern) ? WIDE_UNITS
+                                                            : 1u);
+    }
+
+    if (units > 0u)
+    {
+        uint32_t expected = units * p_split->unit;
+
+        b_ok = (((width * PERCENT_100) >=
+                 (expected * LENIENT_SUM_MIN_PERCENT)) &&
+                ((width * PERCENT_100) <=
+                 (expected * LENIENT_SUM_MAX_PERCENT)));
+    }
+
+    return (b_ok);
+}   /* lenient_sum_ok() */
+
+
+/*!
+ * @brief Report whether element idx of "*X*" is wide.
+ *
+ * @param[in] idx    Element 0 to 28 of "*X*".
+ * @param[in] letter The letter's pattern.
+ *
+ * @return True if that element is wide.
+ */
+static bool
+expected_wide (uint32_t idx, uint16_t letter)
+{
+    uint16_t pattern = STAR_PATTERN;
+    uint32_t el      = idx;
+    bool     b_wide  = false;
+
+    if ((LENIENT_GAP_A == idx) || (LENIENT_GAP_B == idx))
+    {
+        b_wide = false;                     // Gaps are narrow.
+    }
+    else
+    {
+        if (idx >= LENIENT_STOP_FIRST)
+        {
+            el = idx - LENIENT_STOP_FIRST;
+        }
+        else if (idx >= LENIENT_LETTER_FIRST)
+        {
+            el      = idx - LENIENT_LETTER_FIRST;
+            pattern = letter;
+        }
+        else
+        {
+            // The first '*'.
+        }
+
+        b_wide = (0u != (pattern & (1u << (ELEMENTS_PER_CHAR - 1u - el))));
+    }
+
+    return (b_wide);
+}   /* expected_wide() */
 
 
 /*!

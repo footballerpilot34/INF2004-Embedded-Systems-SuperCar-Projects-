@@ -4,8 +4,9 @@
  *
  * @par
  * The Pico SDK allows one GPIO callback per core, so this module owns it
- * and routes each pin's edges to its driver: ultrasonic ECHO and barcode.
- * Handlers only timestamp edges; all processing happens in the tasks.
+ * and routes each pin's edges to its driver: ultrasonic ECHO, barcode and
+ * the wheel encoders. Handlers only timestamp or count edges; all
+ * processing happens in the tasks.
  *
  * @par Deviation
  * Rule 6.5.a: the SDK calls gpio_dispatch_isr() from its own interrupt
@@ -19,6 +20,7 @@
 
 #include "barcode.h"
 #include "config.h"
+#include "encoder.h"
 #include "gpio_isr.h"
 #include "ultrasonic.h"
 
@@ -33,10 +35,11 @@ static void gpio_dispatch_isr(uint gpio, uint32_t events);
 
 
 /*!
- * @brief Enable edge interrupts on the ECHO and barcode pins.
+ * @brief Enable edge interrupts on the ECHO, barcode and encoder pins.
  *
  * @par
- * Call after ultrasonic_init() and barcode_init() have set up the pins.
+ * Call after ultrasonic_init(), barcode_init() and encoder_init() have
+ * set up the pins.
  */
 void
 gpio_isr_init (void)
@@ -45,6 +48,10 @@ gpio_isr_init (void)
                                        gpio_dispatch_isr);
     // With the analog barcode reader, edges come from a timer instead.
     gpio_set_irq_enabled(PIN_BARCODE, BOTH_EDGES, !BARCODE_USE_ANALOG);
+    gpio_set_irq_enabled(PIN_ENC_LEFT_A, BOTH_EDGES, true);
+    gpio_set_irq_enabled(PIN_ENC_LEFT_B, BOTH_EDGES, true);
+    gpio_set_irq_enabled(PIN_ENC_RIGHT_A, BOTH_EDGES, true);
+    gpio_set_irq_enabled(PIN_ENC_RIGHT_B, BOTH_EDGES, true);
 }   /* gpio_isr_init() */
 
 
@@ -64,6 +71,11 @@ gpio_dispatch_isr (uint gpio, uint32_t events)
     else if (PIN_BARCODE == gpio)
     {
         barcode_edge_isr(events);
+    }
+    else if ((PIN_ENC_LEFT_A == gpio) || (PIN_ENC_LEFT_B == gpio) ||
+             (PIN_ENC_RIGHT_A == gpio) || (PIN_ENC_RIGHT_B == gpio))
+    {
+        encoder_edge_isr(gpio);
     }
     else
     {

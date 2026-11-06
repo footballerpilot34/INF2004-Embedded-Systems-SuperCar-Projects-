@@ -31,6 +31,7 @@
 #include "dhcpserver.h"
 
 #include "barcode.h"
+#include "encoder.h"
 #include "config.h"
 #include "imu.h"
 #include "line_sensor.h"
@@ -100,7 +101,8 @@ static char const g_page_html[] =
     "<div class=c>State: <b id=s>-</b><br>"
     "Range: <b id=r>-</b> cm &nbsp; LSM303DLHC: <b id=imu>-</b><br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
-    "IR raw pins L(GP28)/R(GP0): <b id=x>-</b></div>"
+    "IR raw pins L(GP28)/R(GP0): <b id=x>-</b><br>"
+    "Encoder ticks L/R: <b id=en>-</b></div>"
     "<div class=c><b>Accelerometer</b> <span class=leg>"
     "<span style=color:#ff6464>X</span> &nbsp;"
     "<span style=color:#58d8ff>Y</span> &nbsp;"
@@ -123,7 +125,10 @@ static char const g_page_html[] =
     "Three-sample display average.</div></div>"
     "<div class=c>Barcode message<div id=bc>-</div>"
     "Next crossroad: <b id=tn>-</b></div>"
-    "<div class=c><b>Serial monitor</b><div id=log></div></div>"
+    "<div class=c><b>Serial monitor</b><div id=log></div>"
+    "<button class=t style=width:100%;margin-top:8px "
+    "onclick=\"c('clear');$('log').textContent='';$('bc').textContent='-'\">"
+    "CLEAR OUTPUT</button></div>"
     "<script>var hist=[],q=0;function $(i){return document.getElementById(i)}"
     "function c(x){fetch('/cmd?c='+x).catch(function(){})}"
     "function f(v){return (v<0?'-':'+')+Math.abs(v).toFixed(3)}"
@@ -155,6 +160,7 @@ static char const g_page_html[] =
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
+    "$('en').textContent=d.el+' / '+d.er;"
     "$('imu').textContent=!d.imu?'NOT FOUND':(!d.iv?'READ ERROR':"
     "(d.ic?'CALIBRATED':'NEEDS CALIBRATION'));"
     "$('bc').textContent=d.bc||'-';$('tn').textContent=d.tn||'straight on';"
@@ -177,6 +183,8 @@ static char const g_page_html[] =
 static web_command_t g_pending = WEB_CMD_NONE;
 static bool          gb_ready  = false;
 static bool          gb_servo_pending = false;
+static uint32_t      g_log_floor      = 0u;     // CLEAR OUTPUT: first log
+                                                // line still sent.
 static int32_t       g_servo_deg      = 0;
 
 
@@ -434,8 +442,13 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
 /*!
  * @brief Queue the command named in a /cmd request.
  *
+ * @par
+ * "clear" (CLEAR OUTPUT) is done here at once: it only clears the shown
+ * barcode message and the log lines sent to the page, so it never needs
+ * main().
+ *
  * @param[in] p_name "start", "stop", "cal", "wheel", "diag", "black",
- *                   "white" or "bt" (barcode test).
+ *                   "white", "bt" (barcode test) or "clear".
  */
 static void
 command_parse (char const * p_name)
@@ -471,6 +484,11 @@ command_parse (char const * p_name)
     else if (0 == strcmp(p_name, "bt"))
     {
         g_pending = WEB_CMD_BARCODE_TEST;
+    }
+    else if (0 == strcmp(p_name, "clear"))
+    {
+        barcode_clear_message();
+        g_log_floor = log_next_seq();   // Hide every line logged so far.
     }
     else
     {
@@ -518,6 +536,10 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     {
         seq = next_seq - LOG_KEPT;
     }
+    if (seq < g_log_floor)
+    {
+        seq = g_log_floor;      // Cleared: never send those lines again.
+    }
 
     // NOTE: The fixed part of the reply is under 500 bytes, well below the
     // 1400-byte buffer, so these snprintf calls never truncate.
@@ -529,6 +551,7 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
                                 "\"pk\":%" PRId32 ","
                                 "\"lh\":%d,\"rh\":%d,"
+                                "\"el\":%" PRIu32 ",\"er\":%" PRIu32 ","
                                 "\"ax\":%" PRId32 ",\"ay\":%" PRId32 ","
                                 "\"az\":%" PRId32 ",\"mx\":%" PRId32 ","
                                 "\"my\":%" PRId32 ",\"mz\":%" PRId32 ","
@@ -548,6 +571,8 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 vehicle_hump_peak_tilt_x10(),
                                 (raw.b_left_high ? 1 : 0),
                                 (raw.b_right_high ? 1 : 0),
+                                encoder_count(PIN_ENC_LEFT_A),
+                                encoder_count(PIN_ENC_RIGHT_A),
                                 axes.ax_mg, axes.ay_mg, axes.az_mg,
                                 axes.mx_mgauss, axes.my_mgauss,
                                 axes.mz_mgauss);

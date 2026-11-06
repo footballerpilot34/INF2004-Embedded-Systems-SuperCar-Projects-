@@ -1,12 +1,14 @@
 /** @file line_sensor.h
  *
- * @brief Left and right line IR sensors (digital DOUT).
+ * @brief Left and right line IR sensors (digital DOUT), and crossroad
+ *        detection.
  */
 
 #ifndef LINE_SENSOR_H
 #define LINE_SENSOR_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct
 {
@@ -26,6 +28,8 @@ line_raw_t   line_sensor_raw(void);
 bool         line_sensor_is_driven(bool b_left);
 void         line_sensor_set_black_level(bool b_left, bool b_black_is_high);
 bool         line_sensor_black_level(bool b_left);
+bool         line_junction_detect(bool b_side_black, bool b_enabled,
+                                  uint32_t now_msec);
 
 #endif /* LINE_SENSOR_H */
 

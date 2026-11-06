@@ -13,8 +13,7 @@ typedef enum
 {
     BARCODE_NONE,       // Nothing finished this tick.
     BARCODE_DECODED,    // A valid message is ready: see barcode_message().
-    BARCODE_INVALID,    // A scan finished but could not be decoded.
-    BARCODE_JUNCTION    // A long black mark: a crossroad's side branch.
+    BARCODE_INVALID     // A scan finished but could not be decoded.
 } barcode_result_t;
 
 // What a decoded barcode asks the car to do. Commands trump the line
@@ -32,6 +31,7 @@ void              barcode_edge_isr(uint32_t events);
 barcode_result_t  barcode_task(void);
 void              barcode_set_enabled(bool b_enabled);
 char const *      barcode_message(void);
+void              barcode_clear_message(void);
 barcode_command_t barcode_command(void);
 char const *      barcode_command_name(barcode_command_t command);
 bool              barcode_is_black(void);

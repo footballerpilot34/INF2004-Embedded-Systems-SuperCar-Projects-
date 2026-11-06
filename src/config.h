@@ -28,6 +28,11 @@
 #define PIN_BUTTON_START            20u     // Robo Pico button, active low.
 #define PIN_BUTTON_STOP             21u     // Robo Pico button, active low.
 #define PIN_BUZZER                  22u     // Robo Pico piezo buzzer.
+#define PIN_ENC_LEFT_A              4u      // Left wheel encoder A.
+#define PIN_ENC_LEFT_B              5u      // Left wheel encoder B.
+#define PIN_ENC_RIGHT_A             6u      // Right wheel encoder A.
+#define PIN_ENC_RIGHT_B             19u     // Right wheel encoder B (moved
+                                            // from GP7).
 
 // Ultrasonic pan servo (as in robocar.c): centred at start, and turned
 // from the web page's slider within SERVO_RANGE_DEG either side.
@@ -70,48 +75,36 @@
 // - one on the line: arc towards it (inner wheel slowed);
 // - neither, after one was last on the line: keep arcing that way.
 
-// START calibration: find the line from anywhere near it, repeating
-// until it is found (STOP always works). All movement is at
-// LINE_CAL_SPEED_PERCENT of the line-following speed (SPEED_CRUISE):
-// 1. A sensor already on black: sweep towards that sensor first.
-//    No sensor on black (e.g. on a white mat): pivot (LINE_CAL_PIVOT_LEFT)
-//    until either sensor sees black, for up to LINE_CAL_PIVOT_MAX_MSEC.
-// 2. Still no line: drive straight ahead in the direction now faced until
-//    either sensor sees black, for up to LINE_CAL_DRIVE_MAX_MSEC (or an
-//    obstacle is ahead), then go back to step 1.
-// 3. Align: pivot until both sensors are on black for 30 ms, then follow.
-//    Overshot: pivot back towards the sensor that last saw black.
-//    If that fails within LINE_CAL_ALIGN_MAX_MSEC, go back to step 1.
-// Success also needs EACH sensor to have DETECTED black during
-// calibration: switched from white to black, so a dead or stuck sensor
-// cannot pass. Starting on the line, the car turns off and back once to
-// prove it.
-#define LINE_CAL_PIVOT_LEFT         true    // Search pivot: true = left.
-#define LINE_CAL_PIVOT_MAX_MSEC     5000u   // Pivot this long, then drive
-                                            // forward instead.
-#define LINE_CAL_DRIVE_MAX_MSEC     2000u   // Drive this long, then pivot
-                                            // again.
-#define LINE_CAL_SPEED_PERCENT      50      // % of SPEED_CRUISE: 13 -> 6%.
-                                            // Stalls driving: raise it.
-#define LINE_CAL_ALIGN_MAX_MSEC     7000u   // Align must finish in this.
-#define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long.
-#define LINE_CAL_ALIGN_TRIES        3u      // Failed aligns before giving
-                                            // up and naming the sensor that
-                                            // never detected black.
+// START calibration (user, 2026-11-06): turn on the spot at half the
+// driving speed (LINE_CAL_SPEED_PERCENT of SPEED_CRUISE, as an average of
+// PIVOT_PULSE_SPEED bursts) until both line sensors are on black, then
+// follow. Direction, chosen every tick:
+// - one line sensor on black: turn towards it;
+// - neither: the side (barcode) sensor on black -> turn left (its side);
+//   otherwise keep turning the same way (LINE_CAL_PIVOT_LEFT at first);
+// - both on black: skip calibration (at the start) or stop turning.
+// It turns until the line is found or STOP is pressed.
+#define LINE_CAL_PIVOT_LEFT         true    // First turn: true = left.
+#define LINE_CAL_SPEED_PERCENT      50      // % of SPEED_CRUISE: 8 -> 4%.
+#define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long (after
+                                            // turning) to finish.
 
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
 // ------------------------------------------------------------------------
-#define SPEED_CRUISE                13      // +25% from 10 (12.5, rounded).
-#define SPEED_CREEP                 9       // +25% from 7 (8.75, rounded).
+#define SPEED_CRUISE                8       // 75% of 10 (7.5, rounded up;
+                                            // half jerked, 2026-11-06).
+#define SPEED_CREEP                 5       // 75% of 7 (5.25, rounded).
 // START calibration pivots are PULSED: the motors stall below about
 // 10-15% when turning on the spot, so instead of a weak steady 6%, each
 // pivot is short bursts at a power that really moves the wheels, with
 // braked pauses between them. Average turning speed stays slow:
 // slower turning -> shorter ON or longer OFF; stalls -> raise the speed.
-#define PIVOT_PULSE_SPEED           25      // Burst power, +25% from 20.
+#define PIVOT_PULSE_SPEED           20      // Burst power, -20% from 25.
 #define PIVOT_PULSE_ON_MSEC         60u     // Burst length.
-#define PIVOT_PULSE_OFF_MSEC        120u    // Braked pause between bursts.
+#define PIVOT_PULSE_OFF_MSEC        180u    // Braked pause between bursts
+                                            // (was 120: turning speed
+                                            // 75%, burst power kept).
 #define SPEED_HUMP                  23      // Climbing a hump, +25% from 18
                                             // (22.5, rounded).
 // Line-following turns keep BOTH wheels rolling forward, so the car never
@@ -219,7 +212,20 @@
 // Barcode (Code 39) on the side IR sensor; barcodes are 20 mm beside the
 // line, so the sensor must sit far enough out that it never sees the line.
 // ------------------------------------------------------------------------
-#define BARCODE_END_GAP_MIN_USEC    300000u // No edge this long ends a scan.
+#define BARCODE_END_GAP_MIN_USEC    300000u // No edge this long ON WHITE
+                                            // ends a scan...
+#define BARCODE_BLACK_MAX_USEC      2000000u // ...on black, only this long
+                                            // (sensor left on a branch or
+                                            // the line).
+// Bar widths measured in DISTANCE (wheel encoders, encoder.c) instead of
+// time, so the car slowing or pausing over a barcode no longer stretches
+// its bars (2026-11-06). If the encoders turned less than
+// BARCODE_MIN_SCAN_TICKS over a scan (not connected, or the car was
+// pushed by something else), it falls back to time and says so in the log.
+#define BARCODE_USE_ENCODERS        true
+#define BARCODE_MIN_SCAN_TICKS      20u     // Both wheels' ticks, per scan.
+#define BARCODE_STALL_USEC          5000000u // No edge and no ending for
+                                            // this long: end the scan.
 #define BARCODE_END_GAP_FACTOR      5u      // ...or 5x the widest element.
                                             // Must exceed the 3:1 wide:narrow
                                             // ratio, or the first wide space
@@ -242,7 +248,11 @@
 // a bar or hold the reader on "black" over white.
 // Tuning: hold the sensor still over a THIN bar; DELTA must be well below
 // (thin bar level - white level).
-#define BARCODE_USE_ANALOG          true    // false = old DOUT reading.
+// 2026-11-06: back to DOUT. The user re-tuned the module's potentiometer
+// so DOUT switches on every bar, thin ones included, and the sensor sits
+// slightly raised, which shrinks and varies the analog swing (fixed DELTA
+// then gave inconsistent reads). true = analog reading as described above.
+#define BARCODE_USE_ANALOG          false   // false = DOUT (GP26) reading.
 #define BARCODE_AO_BLACK_IS_HIGH    true    // VERIFY: the web "level"
                                             // must RISE over black.
 #define BARCODE_AO_SAMPLE_USEC      200u    // 5 kHz sampling.
@@ -256,12 +266,20 @@
                                             // (2026-11-03); 500 is ~1/4 of
                                             // the white-to-bar swing.
 
-// Bar widths are measured in time, so while a barcode is being read the
-// car ignores the line sensors and drives straight at one steady speed.
-#define SPEED_SCAN                  10      // Steady speed while reading,
-                                            // +25% from 8.
-#define BARCODE_SCAN_MAX_MSEC       5000u   // Longest straight drive for
-                                            // one scan, then steer again.
+// Bar widths are measured in time, so from the first bar until the scan
+// ends the car drives strictly straight at one steady speed, holding BOTH
+// line sensors on the line: no line-following turns, reversing or hard
+// arcs, and only an obstacle (or a hump) interrupts it. If one sensor
+// slips off, the wheel on the far side runs SCAN_TRIM_EXTRA faster to
+// bring it back; the other wheel stays at SPEED_SCAN. Slowing a wheel
+// instead (80% of 8 = 6) stalled it and the car crawled over the barcode
+// (2026-11-06). Drifts off the line during a scan: raise SCAN_TRIM_EXTRA;
+// wobbles: lower it.
+#define SPEED_SCAN                  6       // Steady speed while reading,
+                                            // 75% of 8 (2026-11-06),
+                                            // -20% from 10 (too fast to
+                                            // read, 2026-11-06).
+#define SCAN_TRIM_EXTRA             2       // Far-side wheel: SPEED_SCAN + 2.
 
 // Messages that are COMMANDS (exact match; Code 39 is upper case).
 // Anything else is shown as a plain message. LEFT and RIGHT are kept
@@ -281,24 +299,28 @@
 // TURN_90_MSEC and drives on, latching onto the next line it meets.
 // VERIFY TURN_90_MSEC with the TEST LEFT/RIGHT buttons with the car
 // stopped: it should turn about 90 degrees and stop.
-#define TURN_90_MSEC                2000u   // Pivot time for about 90 deg.
-#define TURN_UTURN_MAX_MSEC         6000u   // U-turn gives up after this.
+#define TURN_90_MSEC                2700u   // Pivot time for about 90 deg
+                                            // (x1.33: 75% turn speed).
+#define TURN_UTURN_MAX_MSEC         8000u   // U-turn gives up after this.
 #define TURN_UTURN_LEFT             true    // U-turn pivot: true = left.
-#define TURN_ALIGN_MAX_MSEC         1500u   // Both-on-line must take less.
+#define TURN_ALIGN_MAX_MSEC         2000u   // Both-on-line must take less.
 
-// Crossroads (+). The two line sensors stay black across a crossing line,
-// so the crossroad is seen by the LEFT side barcode sensor instead: the
-// left branch is one long black mark (18 mm wide), while every barcode
-// starts with a narrow bar (6 mm at most). A scan whose first bar lasts
-// longer than BARCODE_JUNCTION_MIN_USEC is a crossroad (decided while
-// still on it, about 11 mm in), and a pending
-// LEFT/RIGHT turn is carried out there. The pivot point is the wheel
-// axle, behind the sensors, so the car first drives on for
-// JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
-#define BARCODE_JUNCTION_MIN_USEC   200000u // ~11 mm at SPEED_SCAN (54 mm/s).
-#define JUNCTION_ADVANCE_MSEC       1000u   // VERIFY: about the line-sensor
+// Crossroads (+), detected in line_sensor.c. The two line sensors stay
+// black across a crossing line, so the crossroad is seen by the LEFT side
+// (barcode) sensor instead: the left branch is one long black mark (18 mm
+// wide). A black mark lasting LINE_JUNCTION_MIN_MSEC is a crossroad
+// (decided while still on it), and a pending LEFT/RIGHT turn is carried
+// out there. The limit sits between a barcode's widest bar (9 mm, about
+// 320 ms measured at SPEED_SCAN 6, so ~28 mm/s) and a branch (18 mm,
+// ~640 ms). Detection is off while a barcode's bars are being read. The
+// pivot point is the wheel axle, behind the sensors, so the car first
+// drives on for JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
+#define LINE_JUNCTION_MIN_MSEC      480u    // ~13 mm at SPEED_SCAN.
+#define LINE_JUNCTION_GAP_MSEC      20u     // Shorter white inside a mark
+                                            // (glare, scuff) is ignored.
+#define JUNCTION_ADVANCE_MSEC       1350u   // VERIFY: about the line-sensor
                                             // to axle distance at
-                                            // SPEED_SCAN (54 mm/s).
+                                            // SPEED_SCAN (~28 mm/s).
 
 // ------------------------------------------------------------------------
 // Timing.

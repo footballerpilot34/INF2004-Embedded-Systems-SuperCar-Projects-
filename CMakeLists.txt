@@ -94,6 +94,7 @@ pico_add_extra_outputs(gyro_test)         # makes gyro_test.uf2
 add_executable(supercar
     src/supercar_main.c
     src/barcode.c
+    src/encoder.c
     src/buzzer.c
     src/gpio_isr.c
     src/imu.c
