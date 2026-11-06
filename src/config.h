@@ -52,23 +52,24 @@
 // Hotspot mode: src/wifi_secrets.h lists hotspots (e.g. phone hotspots) in
 // HOTSPOT_LIST. The car tries each in turn, or only the one chosen on the
 // page, and the page is at http://WIFI_HOST_NAME.local or the IP it logs.
-// Each is tried for up to WIFI_TRY_MSEC, WIFI_JOIN_ROUNDS times over the
-// list, before it falls back to its own network below. Once joined, it
-// keeps trying to rejoin if the link drops.
-// Own-network mode: join WIFI_NAME and open http://192.168.4.1.
+// Each is tried for up to WIFI_TRY_MSEC, round and round until one
+// answers (also when the link drops); the car makes no network of its own.
+// Own-network mode, only if no hotspot is listed: join WIFI_NAME and open
+// http://192.168.4.1.
 // ------------------------------------------------------------------------
 #define WIFI_NAME                   "SuperCar-AAI14"
 #define WIFI_PASSWORD               "supercar14"    // At least 8 characters.
 #define WIFI_HOST_NAME              "supercar-aai14"    // Must match
                                                         // CYW43_HOST_NAME in
                                                         // CMakeLists.txt.
-#define WIFI_TRY_MSEC               10000u  // Longest try at one hotspot.
+#define WIFI_TRY_MSEC               10000u  // Longest try at one hotspot...
+#define WIFI_GET_IP_MSEC            45000u  // ...once on it but still
+                                            // waiting for an IP address.
 #define WIFI_FAIL_SETTLE_MSEC       1500u   // A failure is only believed
                                             // this long into a try.
-#define WIFI_JOIN_ROUNDS            2u      // Power-up: times over the list
-                                            // before the own network...
-#define WIFI_JOIN_MIN_MSEC          30000u  // ...and never sooner than this
-                                            // (time to open the hotspot).
+#define WIFI_STILL_LOG_MSEC         30000u  // After the first time round the
+                                            // list, "still looking" this
+                                            // often instead of every try.
 #define WIFI_CHECK_MSEC             250u    // How often the link is checked.
 
 #if __has_include("wifi_secrets.h")

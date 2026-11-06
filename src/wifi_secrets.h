@@ -6,7 +6,7 @@
  * Add one { "name", "password" } line per hotspot, each ending in a comma
  * and a backslash except the last. The car tries them in this order (or
  * only the one picked on the web page). Without this file, or with
- * HOTSPOT_LIST deleted, the car makes its own network.
+ * HOTSPOT_LIST deleted, the car makes its own network instead.
  *
  * @par
  * Phone hotspots: use 2.4 GHz (the Pico W has no 5 GHz) and WPA2, or

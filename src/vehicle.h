@@ -37,6 +37,7 @@ void            vehicle_barcode_test(void);
 void            vehicle_barcode_static(void);
 void            vehicle_task(void);
 vehicle_state_t vehicle_state(void);
+bool            vehicle_is_moving(void);
 char const *    vehicle_state_name(vehicle_state_t state);
 int32_t         vehicle_hump_peak_tilt_x10(void);
 

@@ -152,7 +152,14 @@ main (void)
         command_run(web_command_take());
         if (web_servo_take(&servo_deg))
         {
-            servo_set_angle(servo_deg);
+            if (vehicle_is_moving())
+            {
+                log_printf("Servo: locked while the car is moving.");
+            }
+            else
+            {
+                servo_set_angle(servo_deg);
+            }
         }
 
         ultrasonic_task();

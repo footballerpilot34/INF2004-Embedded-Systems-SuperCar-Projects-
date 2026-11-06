@@ -6,10 +6,10 @@
  * @par How it works
  * If src/wifi_secrets.h lists hotspots, the Pico W tries each in turn
  * (or only the one chosen on the page) and serves the page at
- * http://WIFI_HOST_NAME.local (or the IP it logs). If none is joined after
- * WIFI_JOIN_ROUNDS times over the list, or none is listed, it makes its
- * own network (WIFI_NAME) with the page at http://192.168.4.1. Joining
- * never holds up the car. The page:
+ * http://WIFI_HOST_NAME.local (or the IP it logs). It keeps trying until
+ * one answers and never makes a network of its own. Only if no hotspot is
+ * listed at all does it make its own network (WIFI_NAME), with the page
+ * at http://192.168.4.1. Joining never holds up the car. The page:
  * - sends GET /cmd?c=... when a button is pressed;
  * - sends GET /servo?a=<degrees> when the servo slider is released;
  * - gets GET /hotspots once for its hotspot chooser, and sends
@@ -116,6 +116,8 @@ static char const g_page_html[] =
     "button{font-size:20px;padding:16px 0;border:0;border-radius:10px;"
     "color:#fff}"
     "#a{background:#2a7}#b{background:#c33}#w{background:#555}"
+    "#k{background:#36c}#d{background:#a60}#n{background:#888}"
+    "#v{background:#333}summary{cursor:pointer;font-weight:bold}"
     ".t{background:#538;font-size:16px}"
     ".c{background:#222;border-radius:10px;padding:10px;margin:10px 0;"
     "line-height:1.6}"
@@ -140,10 +142,22 @@ static char const g_page_html[] =
     "<button class=t onclick=\"c('bt')\">BARCODE TEST</button>"
     "<button class=t style=grid-column:1/3;background:#746 "
     "onclick=\"c('bs')\">BARCODE TEST (STATIC)</button></div>"
-    "<div class=c>Servo: <b id=sv>90</b>&deg;<br>"
-    "<input type=range min=60 max=120 value=90 style=width:100% "
-    "oninput=\"$('sv').textContent=this.value\" "
+    "<details class=c><summary>More controls</summary><div class=g "
+    "style=margin-top:8px>"
+    "<button id=k onclick=\"c('calibrate')\">CALIBRATE IMU</button>"
+    "<button id=d onclick=\"c('diag')\">IR DIAG on/off</button>"
+    "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
+    "<button id=n onclick=\"c('white')\">LEARN WHITE</button>"
+    "</div></details>"
+    // Servo: only while unlocked, and never while the car moves (the car
+    // also ignores it then).
+    "<div class=c>Servo: <b id=sv>90</b>&deg; "
+    "<label style=float:right><input type=checkbox id=lk checked "
+    "onchange=lock()> Locked</label><br>"
+    "<input type=range id=sl min=60 max=120 value=90 disabled "
+    "style=width:100% oninput=\"$('sv').textContent=this.value\" "
     "onchange=\"fetch('/servo?a='+this.value).catch(function(){})\">"
+    "<div class=hint id=lh>Untick Locked to move the servo.</div>"
     "</div>"
     "<div class=c>Car State: <b id=s>-</b><br>"
     "Wi-Fi: <b id=wf>-</b><br>"
@@ -206,6 +220,11 @@ static char const g_page_html[] =
     "function tab(k){ft=k;if(k)nw[k]=0;else nw=[0,0,0,0];show();"
     "var L=$('log');L.scrollTop=L.scrollHeight}"
     // Barcode history: refetched whenever its number hq changes.
+    // Servo lock: moving forces it locked and greys out the checkbox.
+    "var mv=false;function lock(){var k=$('lk');if(mv)k.checked=true;"
+    "k.disabled=mv;$('sl').disabled=k.checked;"
+    "$('lh').textContent=mv?'Locked while the car is moving.':"
+    "(k.checked?'Untick Locked to move the servo.':'')}"
     // Hotspot chooser: filled once; hidden when no hotspots are listed.
     "function hlist(){fetch('/hotspots').then(function(r){return r.json()})"
     ".then(function(j){if(!j.n.length)return;var h=$('hs'),"
@@ -252,6 +271,7 @@ static char const g_page_html[] =
     "if(lg.length>500)lg.splice(0,lg.length-500);"
     "if(d.log.length||d.nx<q)show();q=d.nx;"
     "$('s').textContent=d.st;$('wf').textContent=d.wf;"
+    "mv=['READY','STOPPED','BARCODE_STATIC'].indexOf(d.st)<0;lock();"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
@@ -290,7 +310,7 @@ static int32_t       g_hot_only       = HOTSPOT_AUTO; // Chosen on the page.
 static int32_t       g_hot_request    = HOTSPOT_NO_REQUEST; // New choice.
 static uint32_t      g_hot_since      = 0u;     // This attempt began (ms).
 static uint32_t      g_hot_tries      = 0u;     // Attempts that failed.
-static uint32_t      g_join_since     = 0u;     // Joining began (ms).
+static uint32_t      g_join_since     = 0u;     // Last "still looking" log.
 static bool          gb_mdns_started  = false;
 #endif
 static uint32_t      g_wifi_check     = 0u;     // Next link check (ms).
@@ -307,6 +327,7 @@ static void   own_network_start(void);
 static void   hotspot_start(uint32_t now_msec);
 static void   hotspot_try(uint32_t now_msec);
 static void   hotspot_next(uint32_t now_msec, int status);
+static bool   hotspot_first_round(void);
 #endif
 static size_t hotspots_build(char * p_out, size_t capacity);
 static void   hotspot_check(uint32_t now_msec);
@@ -520,8 +541,12 @@ hotspot_try (uint32_t now_msec)
                     ((WIFI_REJOINING == g_wifi_mode) ? "Rejoining"
                                                      : "Joining"),
                     p_hot->p_ssid);
-    log_printf("Wi-Fi: trying hotspot %" PRIu32 " of %" PRIu32 ": \"%s\"...",
-               (g_hot_idx + 1u), NUM_HOTSPOTS, p_hot->p_ssid);
+    if (hotspot_first_round())
+    {
+        log_printf("Wi-Fi: trying hotspot %" PRIu32 " of %" PRIu32
+                   ": \"%s\"...", (g_hot_idx + 1u), NUM_HOTSPOTS,
+                   p_hot->p_ssid);
+    }
 
     if (0 != cyw43_arch_wifi_connect_async(p_hot->p_ssid, p_hot->p_password,
                                            HOTSPOT_AUTH))
@@ -532,8 +557,13 @@ hotspot_try (uint32_t now_msec)
 
 
 /*!
- * @brief The current attempt failed: try the next hotspot, or fall back
- *        to the car's own network if power-up joining has run out of tries.
+ * @brief The current attempt failed: try the next hotspot. The car never
+ *        gives up, so it joins whichever hotspot turns up, whenever.
+ *
+ * @par
+ * Each failure is logged on the first time round the list only; after
+ * that a "still looking" line every WIFI_STILL_LOG_MSEC, so the log is
+ * not flooded.
  *
  * @param[in] now_msec The time now, in ms since boot.
  * @param[in] status   The link status the attempt ended with.
@@ -541,34 +571,48 @@ hotspot_try (uint32_t now_msec)
 static void
 hotspot_next (uint32_t now_msec, int status)
 {
-    uint32_t candidates = ((HOTSPOT_AUTO == g_hot_only) ? NUM_HOTSPOTS : 1u);
-
-    log_printf("Wi-Fi: \"%s\" not joined (%s).",
-               g_hotspots[g_hot_idx].p_ssid,
-               ((CYW43_LINK_BADAUTH == status) ? "wrong password" :
-                ((CYW43_LINK_NONET == status) ? "not found" : "no answer")));
-
-    g_hot_tries++;
-
-    // A hotspot that is not up yet fails fast ("not found"), so the tries
-    // alone could run out in seconds: keep going for the minimum time too.
-    if ((WIFI_JOINING == g_wifi_mode) &&
-        (g_hot_tries >= (candidates * WIFI_JOIN_ROUNDS)) &&
-        ((now_msec - g_join_since) >= WIFI_JOIN_MIN_MSEC))
+    if (hotspot_first_round())
     {
-        log_printf("Wi-Fi: no hotspot joined -> own network.");
-        cyw43_arch_disable_sta_mode();
-        own_network_start();
+        log_printf("Wi-Fi: \"%s\" not joined (%s).",
+                   g_hotspots[g_hot_idx].p_ssid,
+                   ((CYW43_LINK_BADAUTH == status) ? "wrong password" :
+                    ((CYW43_LINK_NONET == status) ? "not found" :
+                     "no answer")));
+    }
+    else if ((now_msec - g_join_since) >= WIFI_STILL_LOG_MSEC)
+    {
+        g_join_since = now_msec;
+        log_printf("Wi-Fi: still looking for a hotspot (%" PRIu32
+                   " tries so far)...", g_hot_tries);
     }
     else
     {
-        if (HOTSPOT_AUTO == g_hot_only)
-        {
-            g_hot_idx = ((g_hot_idx + 1u) % NUM_HOTSPOTS);
-        }
-        hotspot_try(now_msec);
+        // Quiet: already reported.
     }
+
+    g_hot_tries++;
+
+    if (HOTSPOT_AUTO == g_hot_only)
+    {
+        g_hot_idx = ((g_hot_idx + 1u) % NUM_HOTSPOTS);
+    }
+    hotspot_try(now_msec);
 }   /* hotspot_next() */
+
+
+/*!
+ * @brief Report whether the car is still on its first time round the
+ *        hotspots to try (when every attempt is logged).
+ *
+ * @return True on the first time round.
+ */
+static bool
+hotspot_first_round (void)
+{
+    uint32_t candidates = ((HOTSPOT_AUTO == g_hot_only) ? NUM_HOTSPOTS : 1u);
+
+    return (g_hot_tries < candidates);
+}   /* hotspot_first_round() */
 #endif /* HOTSPOT_LIST */
 
 
@@ -578,10 +622,10 @@ hotspot_next (uint32_t now_msec, int status)
  *        fails, and rejoin when the link drops.
  *
  * @par
- * At power-up (or after a choice on the page), each hotspot is tried for
- * up to WIFI_TRY_MSEC, WIFI_JOIN_ROUNDS times over, before falling back
- * to the car's own network. Once one is joined, the car never falls back:
- * it keeps trying, so it comes back by itself when a hotspot does.
+ * Each hotspot is tried for up to WIFI_TRY_MSEC in turn, round and round,
+ * for as long as it takes: at power-up, after a choice on the page, and
+ * when the link drops. So the car joins by itself whenever a hotspot is
+ * switched on, and never makes a network of its own.
  *
  * @param[in] now_msec The time now, in ms since boot.
  */
@@ -641,15 +685,21 @@ hotspot_check (uint32_t now_msec)
         {
             log_printf("Wi-Fi: lost \"%s\" (status %d); rejoining.",
                        g_hotspots[g_hot_idx].p_ssid, status);
-            g_wifi_mode = WIFI_REJOINING;
-            g_hot_tries = 0u;
+            g_wifi_mode  = WIFI_REJOINING;
+            g_hot_tries  = 0u;              // Log the first round again.
+            g_join_since = now_msec;
             hotspot_try(now_msec);          // The same one first.
         }
         else if (((status < CYW43_LINK_DOWN) &&
                   (elapsed >= WIFI_FAIL_SETTLE_MSEC)) ||
-                 (elapsed >= WIFI_TRY_MSEC))
+                 ((CYW43_LINK_DOWN == status) &&
+                  (elapsed >= WIFI_TRY_MSEC)) ||
+                 (elapsed >= WIFI_GET_IP_MSEC))
         {
-            hotspot_next(now_msec, status); // Failed or too slow.
+            // Failed, or nothing for too long. Once on the hotspot (JOIN
+            // or NOIP: waiting for an address) it gets far longer, since
+            // a phone can be slow to hand out an address.
+            hotspot_next(now_msec, status);
         }
         else
         {

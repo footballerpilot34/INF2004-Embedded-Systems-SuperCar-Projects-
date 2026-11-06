@@ -522,6 +522,20 @@ vehicle_state (void)
 
 
 /*!
+ * @brief Report whether the car may be driving (any state but READY,
+ *        STOPPED and BARCODE TEST (STATIC)). The servo is locked then.
+ *
+ * @return True if the car may be moving.
+ */
+bool
+vehicle_is_moving (void)
+{
+    return ((VEHICLE_READY != g_state) && (VEHICLE_STOPPED != g_state) &&
+            (VEHICLE_BARCODE_STATIC != g_state));
+}   /* vehicle_is_moving() */
+
+
+/*!
  * @brief Name a state for telemetry.
  *
  * @param[in] state The state.
