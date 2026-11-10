@@ -38,7 +38,7 @@
 #define PIN_ENC_RIGHT_B             5u      // Right wheel encoder B.
 // The pin finder watches the encoder pins and every free GPIO and shows
 // each pin's edges on the web page. Turn it off once the wiring is right.
-#define ENCODER_PIN_FINDER          true
+#define ENCODER_PIN_FINDER          false
 
 // Ultrasonic pan servo (as in robocar.c): centred at start, and turned
 // from the web page's slider within SERVO_RANGE_DEG either side.
@@ -49,8 +49,9 @@
 
 // ------------------------------------------------------------------------
 // Wireless UI.
-// Hotspot mode: src/wifi_secrets.h lists hotspots (e.g. phone hotspots) in
-// HOTSPOT_LIST. The car tries each in turn, or only the one chosen on the
+// Hotspot mode: src/wifi_secrets.h (copy src/wifi_secrets_example.h; git
+// ignores it, so passwords stay off GitHub) lists hotspots (e.g. phone
+// hotspots) in HOTSPOT_LIST. The car tries each in turn, or the one on the
 // page, and the page is at http://WIFI_HOST_NAME.local or the IP it logs.
 // Each is tried for up to WIFI_TRY_MSEC, round and round until one
 // answers (also when the link drops); the car makes no network of its own.
@@ -377,6 +378,13 @@
 #define JUNCTION_ADVANCE_MSEC       1180u   // VERIFY: about the line-sensor
                                             // to axle distance at
                                             // SPEED_SCAN (~32 mm/s).
+// A + crossroad or a sharp bend? The side sensor crosses a line at both.
+// After the mark the car follows on for JUNCTION_CONFIRM_MSEC (part of
+// the ADVANCE above, so it must be shorter): a line sensor white for
+// JUNCTION_BEND_WHITE_MSEC means the line ended ahead (a bend: the turn
+// waits for the real crossroad); both still on black means a + crossroad.
+#define JUNCTION_CONFIRM_MSEC       400u    // ~14 mm at cruise speed.
+#define JUNCTION_BEND_WHITE_MSEC    150u    // Shorter white is a wobble.
 
 // ------------------------------------------------------------------------
 // Supply watch (power.c): VSYS, the battery voltage the Pico gets, shown

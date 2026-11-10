@@ -198,12 +198,19 @@ static bool              gb_turn_left_on = true; // Left was last on black.
 static bool              gb_turn_advance = false; // Next turn: ADVANCE first.
 static bool              gb_junction_deferred = false; // Crossroad waiting
                                                        // for a decode.
+static bool              gb_junction_confirming = false; // Side mark seen:
+                                                         // + or bend?
+static uint32_t          g_junction_seen_msec  = 0u;  // When the mark ended.
+static uint32_t          g_junction_white_msec = 0u;  // A line sensor went
+                                                      // white then (0: no).
 static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
                                                             // crossroad.
 
 
 static void     state_enter(vehicle_state_t state, uint32_t now_msec);
-static void     junction_act(uint32_t now_msec);
+static void     junction_seen(uint32_t now_msec);
+static void     junction_confirm_step(uint32_t now_msec);
+static void     junction_act(uint32_t now_msec, uint32_t already_msec);
 static void     turn_step(uint32_t now_msec);
 static void     turn_phase_enter(turn_phase_t phase, uint32_t now_msec);
 static void     turn_finish(uint32_t now_msec, line_state_t line,
@@ -332,16 +339,95 @@ vehicle_barcode_command (barcode_command_t command, bool b_test)
 
 
 /*!
+ * @brief The side sensor's mark looked like a crossroad branch: check it
+ *        is really a + crossroad, not a bend, before acting on it.
+ *
+ * @par
+ * At a + crossroad the main line carries straight on, so both line
+ * sensors stay black past the branch. At a sharp bend the side sensor
+ * crosses the line too, but the line ends ahead, so the line sensors
+ * soon read white. So while following the line, the car follows on for
+ * JUNCTION_CONFIRM_MSEC and junction_confirm_step() decides. In BARCODE
+ * TEST the line sensors are ignored, so the mark is acted on at once.
+ *
+ * @param[in] now_msec The current time.
+ */
+static void
+junction_seen (uint32_t now_msec)
+{
+    if (VEHICLE_FOLLOW_LINE == g_state)
+    {
+        gb_junction_confirming = true;
+        g_junction_seen_msec   = now_msec;
+        g_junction_white_msec  = 0u;
+    }
+    else
+    {
+        junction_act(now_msec, 0u);
+    }
+}   /* junction_seen() */
+
+
+/*!
+ * @brief While a crossroad is being confirmed: a line sensor white for
+ *        JUNCTION_BEND_WHITE_MSEC means the line ended (a bend); both
+ *        still on the line after JUNCTION_CONFIRM_MSEC means a + crossroad.
+ *
+ * @par
+ * A bend leaves the pending turn waiting for the real crossroad. Leaving
+ * FOLLOW_LINE meanwhile (an obstacle, a hump, STOP) drops the check.
+ *
+ * @param[in] now_msec The current time.
+ */
+static void
+junction_confirm_step (uint32_t now_msec)
+{
+    line_state_t line    = line_sensor_read();
+    bool         b_white = !(line.b_left_black && line.b_right_black);
+
+    if (VEHICLE_FOLLOW_LINE != g_state)
+    {
+        gb_junction_confirming = false;
+    }
+    else if (b_white && (0u != g_junction_white_msec) &&
+             ((now_msec - g_junction_white_msec) >= JUNCTION_BEND_WHITE_MSEC))
+    {
+        gb_junction_confirming = false;
+        log_line("Side mark was a bend, not a crossroad (the line ends "
+                 "ahead)%s.", ((BARCODE_CMD_NONE == g_pending_turn) ? "" :
+                               ": turn kept for the crossroad"));
+    }
+    else if ((now_msec - g_junction_seen_msec) >= JUNCTION_CONFIRM_MSEC)
+    {
+        gb_junction_confirming = false;
+        log_line("Line sensors stayed on the line: a + crossroad.");
+        junction_act(now_msec, JUNCTION_CONFIRM_MSEC);
+    }
+    else
+    {
+        // Still checking. Time a white spell from its start (0 = none;
+        // the clock is never 0 this long after power-up).
+        g_junction_white_msec = (b_white ? ((0u == g_junction_white_msec) ?
+                                            now_msec : g_junction_white_msec)
+                                         : 0u);
+    }
+}   /* junction_confirm_step() */
+
+
+/*!
  * @brief A crossroad was just reached: carry out the pending turn, if any.
  *
  * @par
  * Only called while following the line or in BARCODE TEST; the car goes
  * back to that state after the turn.
  *
- * @param[in] now_msec The current time.
+ * @param[in] now_msec     The current time.
+ * @param[in] already_msec How long the car has driven on since the mark
+ *                         (spent confirming it); the turn's ADVANCE
+ *                         phase is that much shorter.
  */
 static void
-junction_act (uint32_t now_msec)
+junction_act (uint32_t now_msec, uint32_t already_msec)
 {
     if (BARCODE_CMD_NONE != g_pending_turn)
     {
@@ -351,6 +437,7 @@ junction_act (uint32_t now_msec)
         g_turn_after    = g_state;
         gb_turn_advance = true;
         state_enter(VEHICLE_TURN, now_msec);
+        g_turn_msec    -= already_msec;     // ADVANCE counts from the mark.
     }
     else
     {
@@ -442,15 +529,24 @@ vehicle_task (void)
         gb_junction_deferred = false;
         if (b_reading)
         {
-            junction_act(now_msec);
+            junction_seen(now_msec);
         }
+    }
+
+    if (gb_junction_confirming)
+    {
+        junction_confirm_step(now_msec);    // A + crossroad, or a bend?
     }
 
     junction = line_junction_detect(barcode_is_black(), b_reading,
                                     now_msec, &mark_msec);
-    if (LINE_JUNCTION_FOUND == junction)
+    if ((LINE_JUNCTION_FOUND == junction) && gb_junction_confirming)
     {
-        log_line("Side sensor: %" PRIu32 " ms black mark -> crossroad.",
+        // Another mark while the last is being checked: same crossing.
+    }
+    else if (LINE_JUNCTION_FOUND == junction)
+    {
+        log_line("Side sensor: %" PRIu32 " ms black mark -> crossroad?",
                  mark_msec);
         if (barcode_end_scan())
         {
@@ -458,7 +554,7 @@ vehicle_task (void)
         }
         else
         {
-            junction_act(now_msec);
+            junction_seen(now_msec);
         }
     }
     else if (LINE_JUNCTION_TOO_LONG == junction)
