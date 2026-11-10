@@ -69,6 +69,40 @@ The width interval expresses angular sampling resolution, not a guarantee
 of physical accuracy. Ultrasonic beam width and surface reflection affect
 edge accuracy; the picture's width-error target requires physical testing.
 
+### Hardware-feedback refinements
+
+The reported near returns (182–196 mm at ±10–20°) place the visible front
+surface at approximately 180 mm. A ±30° sweep at that depth spans only
+`2 * 180 * tan(30°)`, approximately 208 mm. A 300 mm centred obstacle needs
+at least approximately 260 mm sensor distance just to put its edges within
+that sweep, before allowing beam width and measurement margin. Begin the
+approach beyond 400 mm and verify the centre distance in the scan log.
+Do not increase the confirmed mechanical servo limits to compensate.
+
+Fine rays that alternate between near/far reflections previously invalidated
+usable coarse brackets. The estimator now skips unknown rays when looking
+for the next observed boundary, retaining a wider angular interval rather
+than treating a missing echo as clearance. Two agreeing echoes out of three
+also survive a single outlier. Independent left/right results are displayed;
+an edge beyond the sweep remains unknown, with its observed foreground extent
+shown. Unknown full width is logged as UNKNOWN rather than a misleading zero.
+
+The supplied right-edge returns now bracket the edge between +20° and +26°
+even with unknown +22°/+24° rays: at 180 mm depth the midpoint estimate is
+approximately +76 mm. The supplied excerpt does not establish the left edge
+or full obstacle width; both cannot be claimed from those data.
+
+Barcode reading remains enabled in FOLLOW_LINE and is re-enabled after a
+blocked run resumes. Reader enabled/capturing state, GPIO edge count, element
+count and last decode result are now shown in the UI, with capture-start and
+long-initial-mark diagnostics in the log. If a distance decode fails, a full
+strict `*letter*` timing decode is tried; incomplete/ambiguous timing scans
+are not accepted by an extra lenient fallback. Tests reproduce distorted
+encoder widths while retaining complete valid timed barcodes. This is a
+robustness fix, not proof that encoder distortion caused the reported
+FOLLOW_LINE failure. Fresh reader diagnostics are still needed to establish
+its cause. The referenced MOV path was unavailable for inspection.
+
 A stationary frontal scan cannot reliably measure the hidden rear face of
 an obstacle. Its full front-to-back depth needs either a confirmed bound or
 additional observations while passing it.
@@ -135,7 +169,10 @@ several seconds; it does not meet the picture's under-3-second full bypass
 target. Settling and scan speed must be tuned from hardware measurements.
 
 Run checks with `python3 tests/test_ultrasonic_host.py` and
-`python3 tests/test_obstacle_host.py`; build with
+`python3 tests/test_obstacle_host.py`, plus
+`python3 tests/test_barcode_host.py` for real GPIO edge stream decoding
+(forward/reverse, distance/time, malformed and truncated codes, disable and
+re-enable); build with
 `cmake --build build --target supercar -j 4`.
 
 Hardware acceptance sequence:

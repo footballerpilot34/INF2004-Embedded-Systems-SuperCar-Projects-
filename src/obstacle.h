@@ -28,6 +28,8 @@ typedef struct {
     uint32_t front_mm;
     int32_t left_mm;               // Estimated edge at angular bracket midpoint.
     int32_t right_mm;
+    int32_t left_observed_mm;      // Farthest observed foreground, not an edge.
+    int32_t right_observed_mm;
     int32_t left_angle_x10;
     int32_t right_angle_x10;
     uint32_t width_mm;             // Only meaningful with BOTH bounded flags.

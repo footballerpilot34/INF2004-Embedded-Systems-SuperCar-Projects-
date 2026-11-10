@@ -26,13 +26,14 @@ static bool measurement_ready;
 static int mode; // 0 background echo, 1 no echo, 2 wide, 3 noisy centre.
 static int width = 300, offset;
 static int32_t motor_left, motor_right, tilt;
+static bool reader_enabled;
 uint64_t time_us_64(void) { return (uint64_t)now * 1000; }
 void motor_set(int32_t l, int32_t r) { motor_left = l; motor_right = r; }
 void log_state(char const * format, ...) { (void)format; }
 void log_line(char const * format, ...) { (void)format; }
 void log_printf(char const * format, ...) { (void)format; }
 void barcode_set_hand_mode(bool enabled) { (void)enabled; }
-void barcode_set_enabled(bool enabled) { (void)enabled; }
+void barcode_set_enabled(bool enabled) { reader_enabled = enabled; }
 bool barcode_is_black(void) { return false; }
 bool barcode_is_capturing(void) { return false; }
 bool barcode_end_scan(void) { return false; }
@@ -66,7 +67,8 @@ static void sample(void) {
     bool hit = mode == 2 || fabsf(x - offset) <= width / 2.0f;
     range_mm = hit ? (uint32_t)lroundf(400.0f / cosf(a)) :
         (mode == 1 ? ULTRASONIC_NO_RANGE : (uint32_t)lroundf(2000.0f / cosf(a)));
-    if (mode == 3) { range_mm = sequence % 2 ? 200 : 400; }
+    if (mode == 3) { range_mm = 200 + 200 * (sequence % 3); }
+    if (mode == 4 && sequence % 3 == 0) { range_mm = 3000; }
     ++sequence;
     measurement_ready = true;
 }
@@ -114,6 +116,32 @@ int main(void) {
     assert(!obstacle_profile()->left_bounded && !obstacle_profile()->right_bounded);
     mode = 3; run_scan(); // Inconsistent samples are not labelled no-echo/clear.
     assert(!obstacle_profile()->centre_seen);
+    mode = 4; run_scan(); // A single multipath outlier must not destroy two agreeing echoes.
+    assert(obstacle_profile()->left_bounded && obstacle_profile()->right_bounded);
+    assert(obstacle_profile()->edges_confirmed);
+    // Regression: actual reported right-edge returns, with a clipped left side.
+    obstacle_point_t actual[] = {
+        {-30, 210, OBSTACLE_RETURN_RANGE}, {-20, 196, OBSTACLE_RETURN_RANGE},
+        {-10, 182, OBSTACLE_RETURN_RANGE}, {0, 180, OBSTACLE_RETURN_RANGE},
+        {10, 183, OBSTACLE_RETURN_RANGE}, {20, 196, OBSTACLE_RETURN_RANGE},
+        {22, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_UNKNOWN},
+        {24, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_UNKNOWN},
+        {26, 501, OBSTACLE_RETURN_RANGE},
+        {28, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_UNKNOWN},
+        {30, 494, OBSTACLE_RETURN_RANGE}
+    };
+    obstacle_profile_t actual_profile;
+    obstacle_profile_build(actual, sizeof(actual) / sizeof(actual[0]), 180, &actual_profile);
+    assert(!actual_profile.left_bounded && actual_profile.right_bounded);
+    assert(actual_profile.right_angle_x10 == 230);
+    assert(actual_profile.right_mm >= 75 && actual_profile.right_mm <= 77);
+    assert(actual_profile.left_observed_mm <= -100);
+    assert(!actual_profile.edges_confirmed && actual_profile.width_mm == 0);
+    // A valid coarse background bracket survives inconsistent fine readings.
+    actual[0] = (obstacle_point_t){-30, 500, OBSTACLE_RETURN_RANGE};
+    obstacle_profile_build(actual, sizeof(actual) / sizeof(actual[0]), 180, &actual_profile);
+    assert(actual_profile.left_bounded && actual_profile.right_bounded);
+    assert(actual_profile.width_mm > 150 && actual_profile.edges_confirmed);
     obstacle_scan_start(400, now);
     obstacle_scan_cancel();
     assert(!obstacle_scan_active() && !obstacle_profile()->finished);
@@ -135,11 +163,13 @@ int main(void) {
     now = 100; ready_at = 0; mode = 0; range_mm = 401;
     vehicle_init(); vehicle_start(); vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
+    assert(reader_enabled);
     vehicle_task();
     assert(motor_left > 0 && motor_right > 0);
     range_mm = 400; tilt = HUMP_ENTER_PITCH_X10;
     vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Stop outranks tilt.
+    assert(!reader_enabled);
     assert(motor_left == 0 && motor_right == 0);
     tilt = 0;
     uint32_t scan_start = now;
@@ -159,6 +189,7 @@ int main(void) {
     range_mm = OBSTACLE_CLEAR_MM + 1;
     vehicle_task(); now += OBSTACLE_CLEAR_MSEC + 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
+    assert(reader_enabled);
     vehicle_stop(); vehicle_start(); range_mm = 399; vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Calibration protected.
     vehicle_stop();

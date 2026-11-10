@@ -186,6 +186,7 @@ static uint32_t g_last_edge_pos  = 0u;
 static uint32_t g_scan_start_pos = 0u;
 static bool     gb_widths_dist   = false;   // g_elements is in distance.
 static barcode_result_t g_pending_result = BARCODE_NONE; // Cut-off scan.
+static barcode_result_t g_last_result = BARCODE_NONE;
 static bool     gb_last_black    = false;
 static bool     gb_capturing     = false;
 static bool     gb_overflow      = false;
@@ -377,8 +378,13 @@ barcode_task (void)
         // Nothing finished this tick.
     }
 
+    if (BARCODE_NONE != result) { g_last_result = result; }
     return (result);
 }   /* barcode_task() */
+
+bool barcode_is_enabled(void) { return gb_enabled; }
+uint32_t barcode_edge_count(void) { return g_edge_head; }
+barcode_result_t barcode_last_result(void) { return g_last_result; }
 
 
 /*!
@@ -396,6 +402,11 @@ barcode_task (void)
 void
 barcode_set_enabled (bool b_enabled)
 {
+    if (b_enabled != gb_enabled)
+    {
+        log_line("Barcode reader %s; IRQ edges=%lu", b_enabled ? "ON" : "OFF",
+                 (unsigned long)g_edge_head);
+    }
     if (!b_enabled && gb_capturing)
     {
         log_line("Barcode: reading switched off after %" PRIu32
@@ -702,6 +713,7 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
             g_last_edge_usec = edge_usec;
             g_last_edge_pos  = edge_pos;
             g_scan_start_pos = edge_pos;
+            log_line("Barcode capture started; IRQ edges=%lu", (unsigned long)g_edge_head);
         }
     }
     else if (b_black == gb_last_black)
@@ -731,6 +743,8 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         // (line_sensor.c has reported it): not a barcode. Drop it, so a
         // barcode soon after it is read on its own.
         gb_capturing = false;
+        log_line("Barcode initial mark %lu ms: treated as junction, scan dropped.",
+                 (unsigned long)((edge_usec - g_last_edge_usec) / 1000u));
     }
     else
     {
@@ -922,6 +936,31 @@ scan_finish (void)
         result = BARCODE_INVALID;
     }
 
+    if (BARCODE_INVALID == result)
+    {
+        // Working but coarse/uneven encoders can distort individual widths
+        // even when total travel passes the distance-mode threshold. Only
+        // accept a COMPLETE, strict *letter* timing decode as fallback.
+        // Never add a second lenient attempt with another set of widths.
+        if (!gb_overflow && gb_widths_dist && g_num_elements == MIN_ELEMENTS)
+        {
+            for (uint32_t el = 0; el < g_num_elements; ++el) {
+                g_elements[el] = g_elem_usec[el];
+            }
+            if (scan_decode(false) || scan_decode(true))
+            {
+                result = BARCODE_DECODED;
+                gb_widths_dist = false;
+                log_line("Barcode: distance decode failed; complete Code 39 timing decode succeeded.");
+            }
+            else
+            {
+                for (uint32_t el = 0; el < g_num_elements; ++el) {
+                    g_elements[el] = g_elem_dist[el];
+                }
+            }
+        }
+    }
     if (BARCODE_INVALID == result)
     {
         scan_dump();

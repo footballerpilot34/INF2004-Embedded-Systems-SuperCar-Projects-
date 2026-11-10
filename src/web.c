@@ -174,6 +174,7 @@ static char const g_page_html[] =
     "Encoder ticks L/R: <b id=en>-</b><br>"
     "Encoder pins (edges): <b id=ep>-</b></div>"
     "<div class=c>Barcode message<div id=bc>-</div>"
+    "<div class=hint id=bd>Reader status pending.</div>"
     "Next crossroad: <b id=tn>-</b>"
     "<div class=hint style=margin-top:6px>History (newest first)</div>"
     "<div id=bh>No barcodes read yet.</div></div>"
@@ -280,9 +281,10 @@ static char const g_page_html[] =
     "$('s').textContent=d.st;$('wf').textContent=d.wf;"
     "$('os').textContent=d.st==='OBSTACLE_SCAN'?'Scanning; wheels braked.':"
     "(!d.of?'No scan yet.':(d.ot?'Scan timed out.':"
-    "(!d.ob?'Edges unknown or outside sweep.':"
-    "'Width '+d.ow+' mm; left '+d.ol+' mm; right '+d.orr+' mm; '+"
-    "(d.oc?'echo-bracketed estimate.':'tentative: missing echoes.'))));"
+    "'Left '+(d.olb?d.ol+' mm':'unknown (seen to '+d.ols+' mm)')+"
+    "'; right '+(d.orb?d.orr+' mm':'unknown (seen to '+d.ors+' mm)')+"
+    "'; width '+(d.ob?d.ow+' mm ['+d.omin+'..'+d.omax+']':'unknown')+"
+    "(d.ob?(d.oc?'; echo-bracketed estimate.':'; tentative: missing echoes.'):'') ));"
     "mv=['READY','STOPPED','BARCODE_STATIC'].indexOf(d.st)<0;lock();"
     "if(mv||document.activeElement!==$('sl')){"
     "$('sv').textContent=d.sa;$('sl').value=d.sa}"
@@ -292,6 +294,9 @@ static char const g_page_html[] =
     "$('x').textContent=(d.lh?'HIGH':'LOW')+' / '+(d.rh?'HIGH':'LOW');"
     "$('en').textContent=d.el+' / '+d.er;$('ep').textContent=d.ep;"
     "$('bc').textContent=d.bc||'-';$('tn').textContent=d.tn||'straight on';"
+    "$('bd').textContent='Reader '+(d.be?'ON':'OFF')+'; IRQ edges '+d.bec+"
+    "'; '+(d.bcap?'capturing':'idle')+'; elements '+d.bel+'; last result '+"
+    "(['none','decoded','invalid'][d.br]||'unknown');"
     "if(d.hq!=hq)hget();"
     "if(d.iv){hist.push({ax:d.ax,ay:d.ay,az:d.az,mx:d.mx,my:d.my,mz:d.mz,"
     "pt:d.pt,rl:d.rl});"
@@ -1073,12 +1078,20 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
     length += (size_t) snprintf(p_out + length, capacity - length,
+        ",\"be\":%d,\"bec\":%lu,\"bcap\":%d,\"bel\":%lu,\"br\":%d",
+        barcode_is_enabled(), (unsigned long)barcode_edge_count(), barcode_is_capturing(),
+        (unsigned long)barcode_scan_size(), (int)barcode_last_result());
+    length += (size_t) snprintf(p_out + length, capacity - length,
         ",\"sa\":%ld,\"of\":%d,\"ot\":%d,\"ob\":%d,\"oc\":%d,"
-        "\"ow\":%lu,\"ol\":%ld,\"orr\":%ld",
+        "\"ow\":%lu,\"ol\":%ld,\"orr\":%ld,\"olb\":%d,\"orb\":%d,"
+        "\"ols\":%ld,\"ors\":%ld,\"omin\":%lu,\"omax\":%lu",
         (long)servo_angle(), profile->finished, profile->timed_out,
         profile->left_bounded && profile->right_bounded,
         profile->edges_confirmed, (unsigned long)profile->width_mm,
-        (long)profile->left_mm, (long)profile->right_mm);
+        (long)profile->left_mm, (long)profile->right_mm,
+        profile->left_bounded, profile->right_bounded,
+        (long)profile->left_observed_mm, (long)profile->right_observed_mm,
+        (unsigned long)profile->width_min_mm, (unsigned long)profile->width_max_mm);
 
     // Pin finder: edges seen on each watched pin, as "GP4:12 GP5:0 ...".
     // NOTE: At most 10 pins of under 18 characters each: well within the

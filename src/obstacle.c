@@ -36,6 +36,26 @@ static bool foreground(obstacle_point_t const * p, uint32_t front)
             front + OBSTACLE_SCAN_PLANE_MM;
 }
 
+// An inconsistent fine reading cannot erase a previously observed coarse
+// bracket. Walk past unknown rays to the next observation, retaining the
+// full angular interval instead of pretending the missing ray is clear.
+static bool edge_bracket(obstacle_point_t const * points, uint32_t count,
+                         uint32_t centre, uint32_t front, int32_t step,
+                         uint32_t * inner, uint32_t * outer)
+{
+    *inner = centre;
+    for (int32_t i = (int32_t)centre + step;
+         i >= 0 && i < (int32_t)count; i += step) {
+        if (points[i].kind == OBSTACLE_RETURN_UNKNOWN) { continue; }
+        if (!foreground(&points[i], front)) {
+            *outer = (uint32_t)i;
+            return true;
+        }
+        *inner = (uint32_t)i;
+    }
+    return false;
+}
+
 static int32_t lateral(uint32_t front, float angle)
 {
     return (int32_t)lroundf(front * tanf(angle * RAD_PER_DEG));
@@ -64,30 +84,28 @@ obstacle_profile_build(obstacle_point_t const * points, uint32_t count,
     }
     if (centre == count || !foreground(&points[centre], front)) { return; }
     p->centre_seen = true;
-    uint32_t left = centre, right = centre;
-    while (left > 0u && foreground(&points[left - 1u], front)) { --left; }
-    while (right + 1u < count && foreground(&points[right + 1u], front)) { ++right; }
+    uint32_t left, right, left_outer = centre, right_outer = centre;
     // No-echo brackets permit a tentative estimate, never confirmed clearance.
-    p->left_bounded = left > 0u &&
-        points[left - 1u].kind != OBSTACLE_RETURN_UNKNOWN;
-    p->right_bounded = right + 1u < count &&
-        points[right + 1u].kind != OBSTACLE_RETURN_UNKNOWN;
+    p->left_bounded = edge_bracket(points, count, centre, front, -1, &left, &left_outer);
+    p->right_bounded = edge_bracket(points, count, centre, front, 1, &right, &right_outer);
+    p->left_observed_mm = lateral(front, points[left].angle_deg);
+    p->right_observed_mm = lateral(front, points[right].angle_deg);
     if (p->left_bounded) {
-        p->left_angle_x10 = (points[left].angle_deg + points[left - 1u].angle_deg) * 5;
+        p->left_angle_x10 = (points[left].angle_deg + points[left_outer].angle_deg) * 5;
         p->left_mm = lateral(front, p->left_angle_x10 / 10.0f);
     }
     if (p->right_bounded) {
-        p->right_angle_x10 = (points[right].angle_deg + points[right + 1u].angle_deg) * 5;
+        p->right_angle_x10 = (points[right].angle_deg + points[right_outer].angle_deg) * 5;
         p->right_mm = lateral(front, p->right_angle_x10 / 10.0f);
     }
     if (p->left_bounded && p->right_bounded) {
         p->width_mm = (uint32_t)(p->right_mm - p->left_mm);
         p->width_min_mm = (uint32_t)(lateral(front, points[right].angle_deg) -
                                      lateral(front, points[left].angle_deg));
-        p->width_max_mm = (uint32_t)(lateral(front, points[right + 1u].angle_deg) -
-                                     lateral(front, points[left - 1u].angle_deg));
-        p->edges_confirmed = points[left - 1u].kind == OBSTACLE_RETURN_RANGE &&
-                             points[right + 1u].kind == OBSTACLE_RETURN_RANGE;
+        p->width_max_mm = (uint32_t)(lateral(front, points[right_outer].angle_deg) -
+                                     lateral(front, points[left_outer].angle_deg));
+        p->edges_confirmed = points[left_outer].kind == OBSTACLE_RETURN_RANGE &&
+                             points[right_outer].kind == OBSTACLE_RETURN_RANGE;
         p->exceeds_expected_width = p->width_min_mm > OBSTACLE_EXPECTED_WIDTH_MM;
     }
 }
@@ -126,6 +144,8 @@ obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
     for (int32_t a = -SERVO_RANGE_DEG; a <= SERVO_RANGE_DEG;
          a += OBSTACLE_SCAN_COARSE_DEG) { queue_angle(a); }
     log_obstacle("SCAN: wheels braked; coarse sweep 60-120 deg, then fine edges.");
+    log_obstacle("SCAN start: front=%lu mm, sweep span at this depth=%ld mm (expected width <=300).",
+        (unsigned long)forward_mm, (long)(2 * lateral(forward_mm, SERVO_RANGE_DEG)));
     aim();
 }
 
@@ -143,7 +163,12 @@ static void store_point(void)
                 }
             }
         }
-        if (g_values[g_valid - 1u] - g_values[0] <= SCAN_SPREAD_MM) {
+        // Two agreeing echoes out of three survive a single multipath outlier.
+        bool stable = g_values[1] - g_values[0] <= SCAN_SPREAD_MM;
+        if (g_valid == 3u) {
+            stable = stable || g_values[2] - g_values[1] <= SCAN_SPREAD_MM;
+        }
+        if (stable) {
             p.kind = OBSTACLE_RETURN_RANGE;
             p.range_mm = g_valid == 3u ? g_values[1] :
                 (g_values[0] + g_values[1]) / 2u;
@@ -156,6 +181,10 @@ static void store_point(void)
     }
     g_points[pos] = p;
     ++g_count;
+    log_obstacle("SCAN echoes: angle=%ld valid=%lu/3 min=%ld max=%ld mm",
+        (long)p.angle_deg, (unsigned long)g_valid,
+        g_valid ? (long)g_values[0] : -1L,
+        g_valid ? (long)g_values[g_valid - 1u] : -1L);
     log_obstacle("SCAN point: angle=%ld range=%ld mm return=%u (0 unknown, 1 echo, 2 no echo)",
         (long)p.angle_deg, p.kind == OBSTACLE_RETURN_RANGE ? (long)p.range_mm : -1L,
         (unsigned)p.kind);
@@ -169,11 +198,28 @@ static void finish(bool timeout)
     g_profile.timed_out = timeout;
     g_active = false;
     servo_set_angle(SERVO_CENTER_DEG);
-    log_obstacle("SCAN done: L=%ld R=%ld mm width=%lu mm; bounded=%u/%u confirmed=%u timeout=%u",
-        (long)g_profile.left_mm, (long)g_profile.right_mm,
-        (unsigned long)g_profile.width_mm, (unsigned)g_profile.left_bounded,
-        (unsigned)g_profile.right_bounded, (unsigned)g_profile.edges_confirmed,
-        (unsigned)timeout);
+    if (g_profile.left_bounded) {
+        log_obstacle("SCAN left edge: %ld mm, angle=%ld/10 deg", (long)g_profile.left_mm,
+            (long)g_profile.left_angle_x10);
+    } else {
+        log_obstacle("SCAN left edge UNKNOWN; observed foreground reaches %ld mm; scan limit/gap.",
+            (long)g_profile.left_observed_mm);
+    }
+    if (g_profile.right_bounded) {
+        log_obstacle("SCAN right edge: %ld mm, angle=%ld/10 deg", (long)g_profile.right_mm,
+            (long)g_profile.right_angle_x10);
+    } else {
+        log_obstacle("SCAN right edge UNKNOWN; observed foreground reaches %ld mm; scan limit/gap.",
+            (long)g_profile.right_observed_mm);
+    }
+    if (g_profile.left_bounded && g_profile.right_bounded) {
+        log_obstacle("SCAN width=%lu mm; sampling interval=%lu..%lu mm; echo brackets=%u",
+            (unsigned long)g_profile.width_mm, (unsigned long)g_profile.width_min_mm,
+            (unsigned long)g_profile.width_max_mm, (unsigned)g_profile.edges_confirmed);
+    } else {
+        log_obstacle("SCAN width UNKNOWN: one or both edges are outside reliable observations.");
+    }
+    if (timeout) { log_obstacle("SCAN timed out; profile is incomplete."); }
     log_obstacle("SCAN: depth unknown; bypass awaits encoder calibration. Staying braked.");
 }
 
