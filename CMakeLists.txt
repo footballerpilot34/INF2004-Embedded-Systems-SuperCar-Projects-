@@ -102,6 +102,7 @@ add_executable(supercar
     src/line_sensor.c
     src/log.c
     src/motor.c
+    src/power.c
     src/telemetry.c
     src/ultrasonic.c
     src/vehicle.c
@@ -120,6 +121,7 @@ target_link_libraries(supercar
     hardware_adc                          # Barcode IR analog output
     hardware_i2c
     hardware_pwm
+    hardware_watchdog                     # Restart reason
     m
     pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI
     pico_lwip_mdns                        # http://supercar-aai14.local

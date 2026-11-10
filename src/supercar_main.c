@@ -50,6 +50,8 @@
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
+#include "hardware/structs/vreg_and_chip_reset.h"
+#include "hardware/watchdog.h"
 
 #include "barcode.h"
 #include "encoder.h"
@@ -61,6 +63,7 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "power.h"
 #include "telemetry.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
@@ -100,6 +103,7 @@ static void          command_run(web_command_t command);
 static void          imu_calibrate_run(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
+static char const *  restart_reason(void);
 static void          barcode_report(barcode_result_t result);
 static void          turn_test(barcode_command_t command);
 
@@ -121,6 +125,8 @@ main (void)
     stdio_init_all();
     usb_wait();
     log_printf("=== SuperCar AAI14: line + barcode + hump/wall ===");
+    web_set_restart_reason(restart_reason());
+    log_printf("Last restart: %s.", restart_reason());
 
     buzzer_init();
     servo_init();
@@ -135,6 +141,7 @@ main (void)
     (void) imu_init();
 
     (void) web_init();  // Logs its own result; the car runs either way.
+    power_init();       // After Wi-Fi: shares GP29 with the Wi-Fi chip.
 
     vehicle_init();
     log_printf("READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. "
@@ -147,6 +154,7 @@ main (void)
         int32_t servo_deg = 0;
 
         web_task();
+        power_task();
         command_run(buttons_poll());
         command_run(serial_poll());
         command_run(web_command_take());
@@ -192,6 +200,49 @@ main (void)
 
     return (0);
 }   /* main() */
+
+
+/*!
+ * @brief Say why the Pico last started, from the chip's reset flags.
+ *
+ * @par
+ * "Power-on or brown-out" covers both a real power-up and the supply
+ * dipping too low (the chip cannot tell them apart). Seen while the car
+ * stayed switched on, it means the battery sagged: the web page's uptime
+ * going back to zero shows the same.
+ *
+ * @return A short description.
+ */
+static char const *
+restart_reason (void)
+{
+    uint32_t     flags    = vreg_and_chip_reset_hw->chip_reset;
+    char const * p_reason = "unknown";
+
+    if (watchdog_caused_reboot())
+    {
+        p_reason = "software or watchdog reset (e.g. after flashing)";
+    }
+    else if (0u != (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_RUN_BITS))
+    {
+        p_reason = "reset button (RUN pin)";
+    }
+    else if (0u != (flags &
+                    VREG_AND_CHIP_RESET_CHIP_RESET_HAD_PSM_RESTART_BITS))
+    {
+        p_reason = "debugger restart";
+    }
+    else if (0u != (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_POR_BITS))
+    {
+        p_reason = "power-on or brown-out (supply dipped)";
+    }
+    else
+    {
+        // No flag set: leave "unknown".
+    }
+
+    return (p_reason);
+}   /* restart_reason() */
 
 
 /*!
@@ -500,9 +551,20 @@ static web_command_t
 buttons_poll (void)
 {
     static uint32_t held_ticks = 0u;
+    static bool     b_stop_was = false;     // STOP down last tick.
     web_command_t   command    = WEB_CMD_NONE;
+    bool            b_stop     = !gpio_get(PIN_BUTTON_STOP);
 
-    if (!gpio_get(PIN_BUTTON_STOP))
+    // Every press is logged, so a button that does nothing can be told
+    // apart from one the Pico never sees (wiring, or a pin in use).
+    if (b_stop && !b_stop_was)
+    {
+        log_printf("Button: STOP (GP%u) pressed%s.", PIN_BUTTON_STOP,
+                   (vehicle_is_idle() ? " (already stopped)" : ""));
+    }
+    b_stop_was = b_stop;
+
+    if (b_stop)
     {
         if (!vehicle_is_idle())
         {
@@ -512,6 +574,11 @@ buttons_poll (void)
     else if (!gpio_get(PIN_BUTTON_START))
     {
         held_ticks++;
+        if (BUTTON_DEBOUNCE_TICKS == held_ticks)
+        {
+            log_printf("Button: START (GP%u) pressed; starts on release, "
+                       "hold 2 s to calibrate the IMU.", PIN_BUTTON_START);
+        }
         if (BUTTON_LONG_PRESS_TICKS == held_ticks)
         {
             command = WEB_CMD_IMU_CALIBRATE;

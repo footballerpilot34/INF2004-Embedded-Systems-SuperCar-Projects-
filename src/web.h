@@ -32,6 +32,7 @@ bool          web_init(void);
 void          web_task(void);
 web_command_t web_command_take(void);
 char const *  web_wifi_text(void);
+void          web_set_restart_reason(char const * p_reason);
 void          web_barcode_record(char const * p_message,
                                  barcode_command_t command);
 bool          web_servo_take(int32_t * p_degrees);

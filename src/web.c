@@ -35,6 +35,10 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 #include "lwip/tcp.h"
+#include "lwip/raw.h"
+#include "lwip/icmp.h"
+#include "lwip/inet_chksum.h"
+#include "lwip/prot/ip4.h"
 #include "lwip/apps/mdns.h"
 #include "dhcpserver.h"
 
@@ -45,6 +49,7 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "power.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
 #include "web.h"
@@ -52,6 +57,10 @@
 
 #define HTTP_PORT               80u
 #define LISTEN_BACKLOG          4u
+#define HTTP_POLL_INTERVAL      10u     // x 0.5 s: a connection open 5 s is
+                                        // stuck and is freed.
+#define PING_ID                 0xAF14u // Marks our pings' replies.
+#define PING_DATA_BYTES         8u
 #define REQUEST_BYTES           128u
 #define HEADER_BYTES            160u
 #define STATUS_BYTES            1400u   // Fits lwIP's 4 KB copy heap.
@@ -132,10 +141,13 @@ static char const g_page_html[] =
     ".tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}"
     ".tb{font-size:13px;padding:8px 10px;background:#333;border-radius:8px}"
     ".tb.on{background:#36c}"
+    "#cn{padding:8px 10px;border-radius:8px;margin-bottom:8px;"
+    "font-weight:bold;background:#555}"
     "#bh{font-family:monospace;font-size:13px;max-height:150px;"
     "overflow:auto;white-space:pre;background:#000;padding:6px 8px;"
     "border-radius:8px;margin-top:4px}"
-    "</style></head><body><h2>SuperCar AAI14</h2><div class=g>"
+    "</style></head><body><h2>SuperCar AAI14</h2>"
+    "<div id=cn>Connecting to the car...</div><div class=g>"
     "<button id=a onclick=\"c('start')\">START</button>"
     "<button id=b onclick=\"c('stop')\">STOP/RESET</button>"
     "<button id=w onclick=\"c('wheel')\">WHEEL TEST</button>"
@@ -161,6 +173,8 @@ static char const g_page_html[] =
     "</div>"
     "<div class=c>Car State: <b id=s>-</b><br>"
     "Wi-Fi: <b id=wf>-</b><br>"
+    "Uptime: <b id=up>-</b> &nbsp; Last restart: <b id=rr>-</b><br>"
+    "Battery (VSYS): <b id=vb>-</b><br>"
     "<span id=hw style=display:none>Hotspot: <select id=hs "
     "style=font-size:14px;max-width:55%></select> "
     "<button class=tb onclick=hset()>USE</button><br>"
@@ -265,7 +279,19 @@ static char const g_page_html[] =
     "if(i===0)x.moveTo(px,py);else x.lineTo(px,py)}x.stroke()}"
     "x.fillStyle='#aab4bd';x.textAlign='left';x.fillText('old',L,h-5);"
     "x.textAlign='right';x.fillText('12 s',w-R,h-5)}"
-    "function u(){fetch('/status?s='+q).then(function(r){return r.json()})"
+    // Connection banner: green while the car answers, red with the time
+    // since its last answer otherwise. A request gets 4 s at most, so a
+    // stalled one never stops the updates.
+    "var ok=0,up=0,rs=0;setInterval(function(){var e=$('cn'),a=Date.now()-ok;"
+    "if(ok&&a<2500){e.style.background='#2a7';"
+    "e.textContent='Connected to the car'}else{e.style.background='#c33';"
+    "e.textContent=ok?'No answer from the car for '+Math.round(a/1000)+"
+    "' s: retrying...':'Connecting to the car...'}},1000);"
+    "function tget(x){var c=window.AbortController?new AbortController()"
+    ":null,t=c?setTimeout(function(){c.abort()},4000):0;"
+    "return fetch(x,c?{signal:c.signal}:{}).then(function(r){"
+    "clearTimeout(t);return r.json()})}"
+    "function u(){tget('/status?s='+q)"
     ".then(function(d){if(d.nx<q){lg=[]}"
     "for(var k=0;k<d.log.length;k++){var m=d.log[k],g=+m.charAt(0);"
     "lg.push({c:g,t:m.slice(1)});"
@@ -273,6 +299,14 @@ static char const g_page_html[] =
     "if(lg.length>500)lg.splice(0,lg.length-500);"
     "if(d.log.length||d.nx<q)show();q=d.nx;"
     "$('s').textContent=d.st;$('wf').textContent=d.wf;"
+    // Uptime going back to zero while powered = the Pico restarted.
+    "if(up>d.up)rs++;up=d.up;$('rr').textContent=d.rr;"
+    // Battery: red below 3.5 V (low or sagging under load).
+    "var vb=$('vb');vb.textContent=d.vb?(d.vb/1000).toFixed(2)+' V, "
+    "lowest '+(d.vm/1000).toFixed(2)+' V since power-up':'not measured';"
+    "vb.style.color=d.vb&&d.vm<3500?'#f66':'';"
+    "$('up').textContent=Math.floor(d.up/60)+' min '+(d.up%60)+' s'+"
+    "(rs?' (restarted '+rs+'x since this page opened!)':'');"
     "mv=['READY','STOPPED','BARCODE_STATIC'].indexOf(d.st)<0;lock();"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
@@ -293,12 +327,24 @@ static char const g_page_html[] =
     "'   Peak tilt '+(d.pk/10).toFixed(1)+' deg';"
     "draw('ac',['ax','ay','az'],1.2);draw('pc',['pt','rl'],30.0);"
     "draw('mc',['mx','my','mz'],0.8);"
-    "setTimeout(u,d.more?50:200)})"
+    "ok=Date.now();setTimeout(u,d.more?50:200)})"
     ".catch(function(){setTimeout(u,1000)})}u();</script>"
     "</body></html>";
 
 static web_command_t g_pending = WEB_CMD_NONE;
 static bool          gb_ready  = false;
+static char const *  gp_restart_reason = "unknown";  // Why the Pico started.
+static uint8_t       g_answered = 0u;           // Its address marks a
+                                                // connection as answered.
+static struct raw_pcb * gp_ping   = NULL;       // Pings to the hotspot.
+static uint16_t      g_ping_seq   = 0u;
+static uint32_t      g_ping_next  = 0u;         // Next ping due (ms).
+static uint32_t      g_ping_reply = 0u;         // Last reply (ms).
+static uint32_t      g_ping_rtt   = 0u;         // Its round trip (ms).
+static uint32_t      g_ping_sent  = 0u;         // When the last was sent.
+static bool          gb_ping_answers = false;   // Hotspot answers pings.
+static int32_t       g_rssi       = 0;          // Signal (dBm), 0 = unknown.
+static uint32_t      g_drops      = 0u;         // Hotspot links lost.
 static bool          gb_servo_pending = false;
 static uint32_t      g_log_floor      = 0u;     // CLEAR OUTPUT: first log
                                                 // line still sent.
@@ -333,6 +379,12 @@ static bool   hotspot_first_round(void);
 #endif
 static size_t hotspots_build(char * p_out, size_t capacity);
 static void   hotspot_check(uint32_t now_msec);
+static err_t  connection_close(struct tcp_pcb * p_pcb);
+static err_t  sent_callback(void * p_arg, struct tcp_pcb * p_pcb, u16_t len);
+static err_t  poll_callback(void * p_arg, struct tcp_pcb * p_pcb);
+static void   ping_send(uint32_t now_msec);
+static u8_t   ping_recv(void * p_arg, struct raw_pcb * p_pcb,
+                        struct pbuf * p_buf, ip_addr_t const * p_addr);
 static err_t  accept_callback(void * p_arg, struct tcp_pcb * p_client,
                               err_t err);
 static err_t  receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
@@ -401,15 +453,149 @@ web_task (void)
 
 
 /*!
- * @brief Report how the wireless UI can be reached, for the page.
+ * @brief Report how the wireless UI can be reached and how well the link
+ *        is doing, for the page.
  *
- * @return Text such as "Hotspot \"name\" at 172.20.10.3".
+ * @return Text such as "Hotspot \"name\" at 172.20.10.3, signal -58 dBm,
+ *         ping 14 ms, 0 drops".
  */
 char const *
 web_wifi_text (void)
 {
-    return (g_wifi_text);
+    static char text[WIFI_TEXT_BYTES * 2u];
+    uint32_t    now_msec = to_ms_since_boot(get_absolute_time());
+
+    if (WIFI_JOINED != g_wifi_mode)
+    {
+        (void) snprintf(text, sizeof(text), "%s (%" PRIu32 " drops)",
+                        g_wifi_text, g_drops);
+    }
+    else if (!gb_ping_answers)
+    {
+        (void) snprintf(text, sizeof(text), "%s, signal %" PRId32 " dBm, "
+                        "hotspot not answering pings, %" PRIu32 " drops",
+                        g_wifi_text, g_rssi, g_drops);
+    }
+    else
+    {
+        (void) snprintf(text, sizeof(text), "%s, signal %" PRId32 " dBm, "
+                        "ping %" PRIu32 " ms (%" PRIu32 " s ago), %" PRIu32
+                        " drops", g_wifi_text, g_rssi, g_ping_rtt,
+                        (uint32_t) ((now_msec - g_ping_reply) /
+                                    MSEC_PER_SEC), g_drops);
+    }
+
+    return (text);
 }   /* web_wifi_text() */
+
+
+/*!
+ * @brief Record why the Pico last started, for the page.
+ *
+ * @param[in] p_reason A description that stays valid (a string literal).
+ */
+void
+web_set_restart_reason (char const * p_reason)
+{
+    gp_restart_reason = p_reason;
+}   /* web_set_restart_reason() */
+
+
+/*!
+ * @brief Ping the hotspot (the gateway), to check the link really works.
+ *
+ * @param[in] now_msec The time now, in ms since boot.
+ */
+static void
+ping_send (uint32_t now_msec)
+{
+    struct netif * p_netif = &cyw43_state.netif[CYW43_ITF_STA];
+    size_t         size    = sizeof(struct icmp_echo_hdr) + PING_DATA_BYTES;
+    struct pbuf *  p_buf   = NULL;
+
+    if (NULL == gp_ping)
+    {
+        gp_ping = raw_new(IP_PROTO_ICMP);
+        if (NULL != gp_ping)
+        {
+            raw_recv(gp_ping, ping_recv, NULL);
+            (void) raw_bind(gp_ping, IP_ADDR_ANY);
+        }
+    }
+
+    // NOTE: size is 16 bytes, so it fits u16_t.
+    p_buf = pbuf_alloc(PBUF_IP, (u16_t) size, PBUF_RAM);
+
+    if ((NULL != gp_ping) && (NULL != p_buf) && (p_buf->len == p_buf->tot_len))
+    {
+        struct icmp_echo_hdr * p_echo = (struct icmp_echo_hdr *) p_buf->payload;
+        ip_addr_t              gateway;
+
+        ip_addr_copy_from_ip4(gateway, *netif_ip4_gw(p_netif));
+        g_ping_seq++;
+        ICMPH_TYPE_SET(p_echo, ICMP_ECHO);
+        ICMPH_CODE_SET(p_echo, 0u);
+        p_echo->id     = PING_ID;
+        p_echo->seqno  = lwip_htons(g_ping_seq);
+        (void) memset(((uint8_t *) p_echo) + sizeof(*p_echo), 0,
+                      PING_DATA_BYTES);
+        p_echo->chksum = 0u;
+        p_echo->chksum = inet_chksum(p_echo, (u16_t) size);
+
+        g_ping_sent = now_msec;
+        (void) raw_sendto(gp_ping, p_buf, &gateway);
+    }
+
+    if (NULL != p_buf)
+    {
+        (void) pbuf_free(p_buf);
+    }
+}   /* ping_send() */
+
+
+/*!
+ * @brief lwIP callback for ICMP arriving: note replies to our pings.
+ *
+ * @param[in] p_arg  Unused.
+ * @param[in] p_pcb  Unused.
+ * @param[in] p_buf  The packet, IP header first.
+ * @param[in] p_addr Unused.
+ *
+ * @return 1 if it was a reply to our ping (eaten), 0 to pass it on.
+ */
+static u8_t
+ping_recv (void * p_arg, struct raw_pcb * p_pcb, struct pbuf * p_buf,
+           ip_addr_t const * p_addr)
+{
+    u8_t b_eaten = 0u;
+
+    (void) p_arg;   // All required by lwIP's callback signature only.
+    (void) p_pcb;
+    (void) p_addr;
+
+    if ((p_buf->tot_len >= (PBUF_IP_HLEN + sizeof(struct icmp_echo_hdr))) &&
+        (0u == pbuf_remove_header(p_buf, PBUF_IP_HLEN)))
+    {
+        struct icmp_echo_hdr const * p_echo = p_buf->payload;
+
+        if ((ICMP_ER == p_echo->type) && (PING_ID == p_echo->id))
+        {
+            uint32_t now_msec = to_ms_since_boot(get_absolute_time());
+
+            g_ping_reply    = now_msec;
+            g_ping_rtt      = now_msec - g_ping_sent;
+            gb_ping_answers = true;
+            (void) pbuf_free(p_buf);
+            b_eaten = 1u;
+        }
+        else
+        {
+            (void) pbuf_add_header(p_buf, PBUF_IP_HLEN);    // Not ours.
+        }
+    }
+
+    return (b_eaten);
+}   /* ping_recv() */
 
 
 /*!
@@ -667,26 +853,53 @@ hotspot_check (uint32_t now_msec)
 
         g_wifi_check = now_msec + WIFI_CHECK_MSEC;
 
-        if (CYW43_LINK_UP == status)
+        if ((CYW43_LINK_UP == status) && (WIFI_JOINED != g_wifi_mode))
         {
-            if (WIFI_JOINED != g_wifi_mode)
-            {
-                char const * p_ip = ip4addr_ntoa(netif_ip4_addr(
-                                        &cyw43_state.netif[CYW43_ITF_STA]));
+            char const * p_ip = ip4addr_ntoa(netif_ip4_addr(
+                                    &cyw43_state.netif[CYW43_ITF_STA]));
 
-                g_wifi_mode = WIFI_JOINED;
-                (void) snprintf(g_wifi_text, sizeof(g_wifi_text),
-                                "Hotspot \"%s\" at %s",
-                                g_hotspots[g_hot_idx].p_ssid, p_ip);
-                log_printf("Wi-Fi: on \"%s\". Open http://%s.local or "
-                           "http://%s", g_hotspots[g_hot_idx].p_ssid,
-                           WIFI_HOST_NAME, p_ip);
+            g_wifi_mode     = WIFI_JOINED;
+            gb_ping_answers = false;        // Learnt afresh on each link.
+            g_ping_reply    = now_msec;
+            g_ping_next     = now_msec;
+            (void) snprintf(g_wifi_text, sizeof(g_wifi_text),
+                            "Hotspot \"%s\" at %s",
+                            g_hotspots[g_hot_idx].p_ssid, p_ip);
+            log_printf("Wi-Fi: on \"%s\". Open http://%s.local or "
+                       "http://%s", g_hotspots[g_hot_idx].p_ssid,
+                       WIFI_HOST_NAME, p_ip);
+        }
+        else if ((CYW43_LINK_UP == status) && gb_ping_answers &&
+                 ((now_msec - g_ping_reply) >= WIFI_PING_LOST_MSEC))
+        {
+            // The chip still says "up", but the hotspot has stopped
+            // answering: the link is dead in practice, so rejoin.
+            log_printf("Wi-Fi: no answer from \"%s\" for %" PRIu32
+                       " s; rejoining.", g_hotspots[g_hot_idx].p_ssid,
+                       (uint32_t) ((now_msec - g_ping_reply) /
+                                   MSEC_PER_SEC));
+            g_drops++;
+            g_wifi_mode  = WIFI_REJOINING;
+            g_hot_tries  = 0u;
+            g_join_since = now_msec;
+            hotspot_try(now_msec);
+        }
+        else if (CYW43_LINK_UP == status)
+        {
+            // Joined: keep pinging the hotspot, which also keeps the link
+            // busy so a phone does not treat the car as idle.
+            if ((int32_t) (now_msec - g_ping_next) >= 0)
+            {
+                g_ping_next = now_msec + WIFI_PING_MSEC;
+                ping_send(now_msec);
+                (void) cyw43_wifi_get_rssi(&cyw43_state, &g_rssi);
             }
         }
         else if (WIFI_JOINED == g_wifi_mode)
         {
             log_printf("Wi-Fi: lost \"%s\" (status %d); rejoining.",
                        g_hotspots[g_hot_idx].p_ssid, status);
+            g_drops++;
             g_wifi_mode  = WIFI_REJOINING;
             g_hot_tries  = 0u;              // Log the first round again.
             g_join_since = now_msec;
@@ -778,7 +991,10 @@ accept_callback (void * p_arg, struct tcp_pcb * p_client, err_t err)
     }
     else
     {
+        tcp_arg(p_client, NULL);                // Not answered yet.
         tcp_recv(p_client, receive_callback);
+        tcp_sent(p_client, sent_callback);
+        tcp_poll(p_client, poll_callback, HTTP_POLL_INTERVAL);
     }
 
     return (result);
@@ -786,9 +1002,95 @@ accept_callback (void * p_arg, struct tcp_pcb * p_client, err_t err)
 
 
 /*!
- * @brief lwIP callback for received data: one request per connection.
+ * @brief Close a connection, or abort it if it cannot be closed now.
+ *
+ * @param[in] p_pcb The connection.
+ *
+ * @return ERR_ABRT if it was aborted (lwIP must be told), otherwise ERR_OK.
+ */
+static err_t
+connection_close (struct tcp_pcb * p_pcb)
+{
+    err_t result = ERR_OK;
+
+    tcp_arg(p_pcb, NULL);
+    tcp_recv(p_pcb, NULL);
+    tcp_sent(p_pcb, NULL);
+    tcp_poll(p_pcb, NULL, 0u);
+
+    if (ERR_OK != tcp_close(p_pcb))
+    {
+        tcp_abort(p_pcb);
+        result = ERR_ABRT;
+    }
+
+    return (result);
+}   /* connection_close() */
+
+
+/*!
+ * @brief lwIP callback when sent data is acknowledged: once the whole
+ *        reply has arrived, close the connection.
+ *
+ * @par
+ * Closing only now (not straight after queueing the reply) means the rest
+ * of the browser's request can still arrive: lwIP answers data reaching a
+ * closed connection with a reset, which can destroy the reply in flight.
+ * Over a phone hotspot, which relays every packet, that happens often.
+ *
+ * @param[in] p_arg Non-NULL once the reply has been queued.
+ * @param[in] p_pcb The connection.
+ * @param[in] len   Unused.
+ *
+ * @return ERR_ABRT if the connection was aborted, otherwise ERR_OK.
+ */
+static err_t
+sent_callback (void * p_arg, struct tcp_pcb * p_pcb, u16_t len)
+{
+    err_t result = ERR_OK;
+
+    (void) len;     // Required by lwIP's callback signature only.
+
+    if ((NULL != p_arg) && (0u == tcp_sndqueuelen(p_pcb)))
+    {
+        result = connection_close(p_pcb);
+    }
+
+    return (result);
+}   /* sent_callback() */
+
+
+/*!
+ * @brief lwIP callback every HTTP_POLL_INTERVAL: a connection still open
+ *        then is stuck (the browser went away), so free it.
  *
  * @param[in] p_arg Unused.
+ * @param[in] p_pcb The connection.
+ *
+ * @return ERR_ABRT (the connection is always aborted).
+ */
+static err_t
+poll_callback (void * p_arg, struct tcp_pcb * p_pcb)
+{
+    (void) p_arg;   // Required by lwIP's callback signature only.
+
+    tcp_arg(p_pcb, NULL);
+    tcp_abort(p_pcb);
+
+    return (ERR_ABRT);
+}   /* poll_callback() */
+
+
+/*!
+ * @brief lwIP callback for received data: one request per connection.
+ *
+ * @par
+ * The first piece holds the request line and is answered; anything after
+ * it (the rest of the headers) is read and dropped. The connection is
+ * closed by sent_callback() once the reply has been acknowledged, or here
+ * if the browser closes first.
+ *
+ * @param[in] p_arg Non-NULL once this connection has been answered.
  * @param[in] p_pcb The connection.
  * @param[in] p_buf The data, or NULL if the client closed.
  * @param[in] err   Unused.
@@ -801,12 +1103,17 @@ receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
 {
     err_t result = ERR_OK;
 
-    (void) p_arg;   // Both required by lwIP's callback signature only.
-    (void) err;
+    (void) err;     // Required by lwIP's callback signature only.
 
     if (NULL == p_buf)
     {
-        tcp_close(p_pcb);
+        result = connection_close(p_pcb);
+    }
+    else if (NULL != p_arg)
+    {
+        // More of a request already answered: read it and drop it.
+        tcp_recved(p_pcb, p_buf->tot_len);
+        pbuf_free(p_buf);
     }
     else
     {
@@ -831,11 +1138,11 @@ receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
             request_handle(p_pcb, p_path);
         }
 
-        tcp_recv(p_pcb, NULL);
-        if (ERR_OK != tcp_close(p_pcb))
+        // Answered (or not a GET): close once the reply has been taken.
+        tcp_arg(p_pcb, &g_answered);
+        if (0u == tcp_sndqueuelen(p_pcb))
         {
-            tcp_abort(p_pcb);
-            result = ERR_ABRT;
+            result = connection_close(p_pcb);   // Nothing was sent.
         }
     }
 
@@ -1074,6 +1381,14 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     }
     length += (size_t) snprintf(p_out + length, capacity - length, "\"");
 
+    length += (size_t) snprintf(p_out + length, capacity - length,
+                                ",\"vb\":%" PRIu32 ",\"vm\":%" PRIu32
+                                ",\"up\":%" PRIu32 ",\"rr\":",
+                                power_vsys_mv(), power_vsys_min_mv(),
+                                (to_ms_since_boot(get_absolute_time()) /
+                                 MSEC_PER_SEC));
+    length += json_string(p_out + length, capacity - length,
+                          gp_restart_reason);
     length += (size_t) snprintf(p_out + length, capacity - length,
                                 ",\"wf\":");
     length += json_string(p_out + length, capacity - length,

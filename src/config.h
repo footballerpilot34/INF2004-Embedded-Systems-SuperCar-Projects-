@@ -71,6 +71,9 @@
                                             // list, "still looking" this
                                             // often instead of every try.
 #define WIFI_CHECK_MSEC             250u    // How often the link is checked.
+#define WIFI_PING_MSEC              2000u   // Ping the hotspot this often...
+#define WIFI_PING_LOST_MSEC         10000u  // ...no reply this long: rejoin
+                                            // (only if it ever answered).
 
 #if __has_include("wifi_secrets.h")
 #include "wifi_secrets.h"           // HOTSPOT_LIST.
@@ -122,16 +125,17 @@
 // - both on black: skip calibration (at the start) or stop turning.
 // It turns until the line is found or STOP is pressed.
 #define LINE_CAL_PIVOT_LEFT         true    // First turn: true = left.
-#define LINE_CAL_SPEED_PERCENT      50      // % of SPEED_CRUISE: 8 -> 4%.
+#define LINE_CAL_SPEED_PERCENT      50      // % of SPEED_CRUISE: 9 -> 4%.
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long (after
                                             // turning) to finish.
 
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
 // ------------------------------------------------------------------------
-#define SPEED_CRUISE                8       // 75% of 10 (7.5, rounded up;
-                                            // half jerked, 2026-11-06).
-#define SPEED_CREEP                 5       // 75% of 7 (5.25, rounded).
+#define SPEED_CRUISE                9       // 8 + 1: at 8 the car jerked
+                                            // (too little power,
+                                            // 2026-11-10).
+#define SPEED_CREEP                 6       // 5 + 1, same reason.
 // START calibration pivots are PULSED: the motors stall below about
 // 10-15% when turning on the spot, so instead of a weak steady 6%, each
 // pivot is short bursts at a power that really moves the wheels, with
@@ -322,10 +326,9 @@
 // instead (80% of 8 = 6) stalled it and the car crawled over the barcode
 // (2026-11-06). Drifts off the line during a scan: raise SCAN_TRIM_EXTRA;
 // wobbles: lower it.
-#define SPEED_SCAN                  7       // Steady speed while reading.
-                                            // 6 sat at the stall edge: a
-                                            // steady 6 jerked in BARCODE
-                                            // TEST (2026-11-06).
+#define SPEED_SCAN                  8       // Steady speed while reading
+                                            // (7 + 1, ~38 mm/s; 6 jerked,
+                                            // 7 still did, 2026-11-10).
 #define SCAN_TRIM_EXTRA             2       // Far-side wheel: SPEED_SCAN + 2.
 
 // Messages that are COMMANDS (exact match; Code 39 is upper case).
@@ -358,22 +361,33 @@
 // wide). A black mark that lasted LINE_JUNCTION_MIN_MSEC to _MAX_MSEC is
 // a crossroad (judged when it ends), and a pending LEFT/RIGHT turn is
 // carried out there. The lower limit sits between a barcode's widest bar
-// (9 mm, ~270 ms at SPEED_SCAN 7, ~33 mm/s; 320 ms was measured at 6) and
-// a branch (18 mm, ~545 ms). Detection stays on while a barcode is read
+// (9 mm, ~240 ms at SPEED_SCAN 8, ~38 mm/s) and a branch (18 mm,
+// ~470 ms). Detection stays on while a barcode is read
 // (its bars are far shorter); a crossroad reached mid-scan first ends and
 // decodes the scan, so its command is known before the turn. The
 // pivot point is the wheel axle, behind the sensors, so the car first
 // drives on for JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
-#define LINE_JUNCTION_MIN_MSEC      400u    // ~13 mm at SPEED_SCAN 7.
-#define LINE_JUNCTION_MAX_MSEC      1200u   // ~40 mm: longer black (the
+#define LINE_JUNCTION_MIN_MSEC      340u    // ~13 mm at SPEED_SCAN 8.
+#define LINE_JUNCTION_MAX_MSEC      1050u   // ~40 mm: longer black (the
                                             // mat past a paper edge) is
                                             // not a branch (2026-11-06:
                                             // false crossroads).
 #define LINE_JUNCTION_GAP_MSEC      20u     // Shorter white inside a mark
                                             // (glare, scuff) is ignored.
-#define JUNCTION_ADVANCE_MSEC       1350u   // VERIFY: about the line-sensor
+#define JUNCTION_ADVANCE_MSEC       1180u   // VERIFY: about the line-sensor
                                             // to axle distance at
-                                            // SPEED_SCAN (~28 mm/s).
+                                            // SPEED_SCAN (~32 mm/s).
+
+// ------------------------------------------------------------------------
+// Supply watch (power.c): VSYS, the battery voltage the Pico gets, shown
+// on the page with its lowest value since power-up. A 1-cell LiPo is
+// about 4.2 V full and 3.7 V half; below about 3.5 V under load the
+// motors jerk and the Pico can brown out and restart.
+// ------------------------------------------------------------------------
+#define POWER_SAMPLE_MSEC           1000u   // Read the supply this often.
+#define POWER_LOW_MV                3500u   // Below this: "battery low".
+#define POWER_LOW_HYST_MV           200u    // Warn again once it has been
+                                            // this far above, then dips.
 
 // ------------------------------------------------------------------------
 // Timing.

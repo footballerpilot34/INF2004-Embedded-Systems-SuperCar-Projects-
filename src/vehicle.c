@@ -71,8 +71,10 @@
  * again, so TURN_90_MSEC can be tuned on the bench.
  *
  * @par BARCODE TEST
- * Drives straight at SPEED_SCAN, ignoring the line sensors, with barcode
- * reading on: decoded messages and commands are shown. A LEFT/RIGHT
+ * Drives straight, ignoring the line sensors, at the same speeds as START
+ * (SPEED_CRUISE, SPEED_SCAN while a barcode is read, SPEED_CREEP near an
+ * obstacle), with barcode reading on: decoded messages and commands are
+ * shown. A LEFT/RIGHT
  * command becomes the pending turn and is carried out at the next
  * crossroad, exactly as when following; after the turn the car drives
  * straight again (still BARCODE TEST). A U-turn is ignored. It runs until
@@ -951,7 +953,9 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
 
 
 /*!
- * @brief BARCODE TEST: drive straight; stop at an obstacle.
+ * @brief BARCODE TEST: drive straight at the same speeds as START (cruise,
+ *        scan speed while a barcode is read, creep near an obstacle); stop
+ *        at an obstacle. Only the line sensors are ignored.
  *
  * @param[in] now_msec The current time.
  * @param[in] range_mm The forward range.
@@ -965,9 +969,17 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm)
                      range_mm);
         state_enter(VEHICLE_STOPPED, now_msec);
     }
+    else if (barcode_is_capturing())
+    {
+        motor_set(SPEED_SCAN, SPEED_SCAN);      // As START while reading.
+    }
+    else if (range_mm <= OBSTACLE_SLOW_MM)
+    {
+        motor_set(SPEED_CREEP, SPEED_CREEP);
+    }
     else
     {
-        motor_set(SPEED_SCAN, SPEED_SCAN);
+        motor_set(SPEED_CRUISE, SPEED_CRUISE);
     }
 }   /* barcode_test_step() */
 
