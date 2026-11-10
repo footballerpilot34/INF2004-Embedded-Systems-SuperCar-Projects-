@@ -102,6 +102,8 @@ add_executable(supercar
     src/line_sensor.c
     src/log.c
     src/motor.c
+    src/servo.c
+    src/obstacle.c
     src/telemetry.c
     src/ultrasonic.c
     src/vehicle.c

@@ -4,7 +4,8 @@
  *
  * @par Obstacle stop
  * With OBSTACLE_STOP_AT_ONCE, an echo from closer than OBSTACLE_STOP_MM
- * brakes the car at once (BLOCKED, resumes when clear); no PROBE is done.
+ * brakes the car at once, scans while stopped, then waits in BLOCKED until
+ * clear. Bypass and line recovery await movement calibration; no PROBE is done.
  *
  * @par Telling a hump from a wall (OBSTACLE_STOP_AT_ONCE false)
  * The ultrasonic sensor alone cannot tell them apart: both look like
@@ -92,6 +93,7 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "obstacle.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
 
@@ -433,6 +435,22 @@ vehicle_task (void)
     uint32_t mark_msec = 0u;
     line_junction_t junction = LINE_JUNCTION_NONE;
 
+    // Apply the immediate stop before junctions, calibration, turns or
+    // tilt handling can issue another movement command.
+    if (OBSTACLE_STOP_AT_ONCE && vehicle_is_moving() &&
+        (VEHICLE_BLOCKED != g_state) &&
+        (VEHICLE_OBSTACLE_SCAN != g_state) && (range_mm <= OBSTACLE_STOP_MM))
+    {
+        log_obstacle("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
+        state_enter((VEHICLE_BARCODE_TEST == g_state ?
+                     VEHICLE_STOPPED : VEHICLE_OBSTACLE_SCAN), now_msec);
+        if (VEHICLE_OBSTACLE_SCAN == g_state)
+        {
+            obstacle_scan_start(range_mm, now_msec);
+        }
+        return;
+    }
+
     // A crossroad found last tick while a barcode was being read: the
     // barcode has been decoded and reported since, so act on it now.
     if (gb_junction_deferred)
@@ -471,6 +489,15 @@ vehicle_task (void)
 
     switch (g_state)
     {
+    case VEHICLE_OBSTACLE_SCAN:
+        motor_set(0, 0);
+        obstacle_scan_task(now_msec);
+        if (!obstacle_scan_active())
+        {
+            state_enter(VEHICLE_BLOCKED, now_msec);
+        }
+    break;
+
     case VEHICLE_LINE_CAL:
         line_cal_step(now_msec);
     break;
@@ -549,6 +576,10 @@ vehicle_state_name (vehicle_state_t state)
 
     switch (state)
     {
+    case VEHICLE_OBSTACLE_SCAN:
+        p_name = "OBSTACLE_SCAN";
+    break;
+
     case VEHICLE_READY:
         p_name = "READY";
     break;
@@ -929,7 +960,8 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
 {
     motor_set(0, 0);
 
-    if (range_mm <= OBSTACLE_CLEAR_MM)
+    if ((ULTRASONIC_NO_RANGE == range_mm) ||
+        (range_mm <= OBSTACLE_CLEAR_MM))
     {
         gb_clear = false;
     }
@@ -981,6 +1013,15 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm)
 static void
 state_enter (vehicle_state_t state, uint32_t now_msec)
 {
+    if ((VEHICLE_OBSTACLE_SCAN == g_state) &&
+        (VEHICLE_OBSTACLE_SCAN != state) && obstacle_scan_active())
+    {
+        obstacle_scan_cancel();
+    }
+    if ((VEHICLE_LINE_CAL == state) || (VEHICLE_BARCODE_TEST == state))
+    {
+        obstacle_scan_cancel();  // New mission: discard the previous profile.
+    }
     if (state != g_state)
     {
         log_state("State: %s -> %s", vehicle_state_name(g_state),

@@ -45,6 +45,8 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "obstacle.h"
+#include "servo.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
 #include "web.h"
@@ -175,6 +177,9 @@ static char const g_page_html[] =
     "Next crossroad: <b id=tn>-</b>"
     "<div class=hint style=margin-top:6px>History (newest first)</div>"
     "<div id=bh>No barcodes read yet.</div></div>"
+    "<div class=c><b>Obstacle scan</b><br><span id=os>No scan yet.</span>"
+    "<div class=hint>Edges: left negative, right positive, relative to sensor. "
+    "Depth is unknown. Bypass awaits movement calibration.</div></div>"
     "<div class=c><b>Accelerometer</b> <span class=leg>"
     "<span style=color:#ff6464>X</span> &nbsp;"
     "<span style=color:#58d8ff>Y</span> &nbsp;"
@@ -273,7 +278,14 @@ static char const g_page_html[] =
     "if(lg.length>500)lg.splice(0,lg.length-500);"
     "if(d.log.length||d.nx<q)show();q=d.nx;"
     "$('s').textContent=d.st;$('wf').textContent=d.wf;"
+    "$('os').textContent=d.st==='OBSTACLE_SCAN'?'Scanning; wheels braked.':"
+    "(!d.of?'No scan yet.':(d.ot?'Scan timed out.':"
+    "(!d.ob?'Edges unknown or outside sweep.':"
+    "'Width '+d.ow+' mm; left '+d.ol+' mm; right '+d.orr+' mm; '+"
+    "(d.oc?'echo-bracketed estimate.':'tentative: missing echoes.'))));"
     "mv=['READY','STOPPED','BARCODE_STATIC'].indexOf(d.st)<0;lock();"
+    "if(mv||document.activeElement!==$('sl')){"
+    "$('sv').textContent=d.sa;$('sl').value=d.sa}"
     "$('r').textContent=d.rg<0?'none':(d.rg/10).toFixed(1);"
     "$('i').textContent=d.l+' / '+d.r+' / '+d.b;"
     "$('m').textContent=d.ml+' / '+d.mr;"
@@ -1000,6 +1012,7 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     uint32_t     next_seq = log_next_seq();
     uint32_t     seq      = since;
     barcode_command_t pending = vehicle_pending_turn();
+    obstacle_profile_t const * profile = obstacle_profile();
     imu_axes_t   axes;
     size_t       length   = 0u;
     char const * p_line   = NULL;
@@ -1059,6 +1072,13 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 axes.mz_mgauss);
     length += json_string(p_out + length, capacity - length,
                           barcode_message());
+    length += (size_t) snprintf(p_out + length, capacity - length,
+        ",\"sa\":%ld,\"of\":%d,\"ot\":%d,\"ob\":%d,\"oc\":%d,"
+        "\"ow\":%lu,\"ol\":%ld,\"orr\":%ld",
+        (long)servo_angle(), profile->finished, profile->timed_out,
+        profile->left_bounded && profile->right_bounded,
+        profile->edges_confirmed, (unsigned long)profile->width_mm,
+        (long)profile->left_mm, (long)profile->right_mm);
 
     // Pin finder: edges seen on each watched pin, as "GP4:12 GP5:0 ...".
     // NOTE: At most 10 pins of under 18 characters each: well within the

@@ -40,12 +40,14 @@
 // each pin's edges on the web page. Turn it off once the wiring is right.
 #define ENCODER_PIN_FINDER          true
 
-// Ultrasonic pan servo (as in robocar.c): centred at start, and turned
-// from the web page's slider within SERVO_RANGE_DEG either side.
+// Ultrasonic pan servo: 60 = left, 90 = forward, 120 = right (confirmed).
+// Centred while driving; automatic scans own it while braked. Web slider
+// control is available only while parked.
 #define SERVO_CENTER_DEG            90      // Facing straight ahead.
 #define SERVO_RANGE_DEG             30      // Limit either side (60-120).
 #define SERVO_MIN_USEC              500     // Pulse width at 0 degrees.
 #define SERVO_MAX_USEC              2500    // Pulse width at 180 degrees.
+#define SERVO_SETTLE_MSEC           300u    // Verify on the mounted servo.
 
 // ------------------------------------------------------------------------
 // Wireless UI.
@@ -220,12 +222,22 @@
 // hump/wall PROBE instead (creep closer, climb if the nose tips up). With
 // true the car stops in front of a hump too.
 #define OBSTACLE_STOP_AT_ONCE       true
-#define OBSTACLE_SLOW_MM            400u    // Slow to creep speed.
-#define OBSTACLE_STOP_MM            250u    // Possible obstacle: probe it.
+#define OBSTACLE_SLOW_MM            500u    // Slow before the stop threshold.
+#define OBSTACLE_STOP_MM            400u    // Brake at or below 40 cm.
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
-#define OBSTACLE_CLEAR_MM           300u    // Clear again (hysteresis).
+#define OBSTACLE_CLEAR_MM           450u    // Clear again (hysteresis).
 #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
 #define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
+
+// Confirmed test setup; scan settings require tuning on the real sensor.
+#define CAR_LENGTH_MM              160u
+#define CAR_WIDTH_MM               130u
+#define OBSTACLE_EXPECTED_WIDTH_MM  300u    // Width only; depth is UNKNOWN.
+#define OBSTACLE_SCAN_COARSE_DEG    10
+#define OBSTACLE_SCAN_FINE_DEG      2
+#define OBSTACLE_SCAN_SAMPLES       3u
+#define OBSTACLE_SCAN_PLANE_MM      80u    // Foreground depth tolerance.
+#define OBSTACLE_SCAN_TIMEOUT_MSEC  20000u
 
 #define US_PING_PERIOD_USEC         60000u  // Pings at least 60 ms apart.
 #define US_ECHO_TIMEOUT_USEC        30000u  // About 5 m.

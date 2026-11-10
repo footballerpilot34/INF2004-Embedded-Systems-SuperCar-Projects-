@@ -47,9 +47,7 @@
 #include <stdio.h>
 
 #include "pico/stdlib.h"
-#include "hardware/clocks.h"
 #include "hardware/gpio.h"
-#include "hardware/pwm.h"
 
 #include "barcode.h"
 #include "encoder.h"
@@ -61,6 +59,7 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "servo.h"
 #include "telemetry.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
@@ -73,9 +72,6 @@
 #define WHEEL_TEST_PAUSE_MSEC   500u
 #define WHEEL_TEST_SPEED        20
 
-#define SERVO_PERIOD_TICKS      19999u  // 20 ms at 1 tick per us.
-#define SERVO_FULL_SCALE_DEG    180
-#define HZ_PER_MHZ              1000000u
 
 #define KEY_START               's'
 #define KEY_STOP                'x'
@@ -88,11 +84,11 @@
 #define KEY_TURN_RIGHT          'r'
 #define KEY_UTURN               'u'
 #define KEY_BARCODE_TEST        't'
+#define KEY_ENCODER_MARK        'e'
 
+static bool g_encoder_marked;
 
 static void          usb_wait(void);
-static void          servo_init(void);
-static void          servo_set_angle(int32_t degrees);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
 static web_command_t serial_poll(void);
@@ -102,6 +98,7 @@ static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
 static void          barcode_report(barcode_result_t result);
 static void          turn_test(barcode_command_t command);
+static void          encoder_calibration_mark(void);
 
 
 /*!
@@ -162,10 +159,30 @@ main (void)
             }
         }
 
-        ultrasonic_task();
+        if (vehicle_is_moving() &&
+            (VEHICLE_OBSTACLE_SCAN != vehicle_state()))
+        {
+            servo_set_angle(SERVO_CENTER_DEG);
+        }
+        // Keep STOP and the UI responsive while the sensor turns. A range
+        // from a previous angle must never be used as a forward reading.
+        if (servo_is_settled())
+        {
+            ultrasonic_task();
+        }
         imu_task();
         barcode_report(barcode_task());
-        vehicle_task();
+        if (vehicle_is_moving() &&
+            (VEHICLE_OBSTACLE_SCAN != vehicle_state()) &&
+            ((!servo_is_settled()) ||
+             !ultrasonic_measurement_ready()))
+        {
+            motor_set(0, 0);
+        }
+        else
+        {
+            vehicle_task();
+        }
         line_diag_task();
         buzzer_task();
 
@@ -202,6 +219,11 @@ main (void)
 static void
 command_run (web_command_t command)
 {
+    if (WEB_CMD_NONE != command && g_encoder_marked)
+    {
+        g_encoder_marked = false;
+        log_printf("Encoder roll mark cancelled by a vehicle command; press 'e' to restart.");
+    }
     switch (command)
     {
     case WEB_CMD_STOP:
@@ -417,61 +439,6 @@ usb_wait (void)
 
 
 /*!
- * @brief Set up a 50 Hz servo PWM signal and centre the ultrasonic servo.
- */
-static void
-servo_init (void)
-{
-    uint32_t slice = pwm_gpio_to_slice_num(PIN_SERVO);
-
-    gpio_set_function(PIN_SERVO, GPIO_FUNC_PWM);
-
-    // NOTE: clk_sys is 125 or 150 MHz, so the divider fits in 8 bits.
-    pwm_set_clkdiv_int_frac(slice,
-                            (uint8_t) (clock_get_hz(clk_sys) / HZ_PER_MHZ),
-                            0u);
-    pwm_set_wrap(slice, SERVO_PERIOD_TICKS);
-    pwm_set_enabled(slice, true);
-    servo_set_angle(SERVO_CENTER_DEG);
-}   /* servo_init() */
-
-
-/*!
- * @brief Turn the ultrasonic servo, limited to SERVO_RANGE_DEG either side
- *        of the centre.
- *
- * @param[in] degrees The requested angle in degrees.
- */
-static void
-servo_set_angle (int32_t degrees)
-{
-    int32_t limited = degrees;
-
-    if (limited < (SERVO_CENTER_DEG - SERVO_RANGE_DEG))
-    {
-        limited = SERVO_CENTER_DEG - SERVO_RANGE_DEG;
-    }
-    else if (limited > (SERVO_CENTER_DEG + SERVO_RANGE_DEG))
-    {
-        limited = SERVO_CENTER_DEG + SERVO_RANGE_DEG;
-    }
-    else
-    {
-        // The angle is already within range.
-    }
-
-    // NOTE: limited is within 0-180 degrees here, so the pulse width is
-    // positive and well under 16 bits.
-    pwm_set_gpio_level(PIN_SERVO,
-                       (uint16_t) (SERVO_MIN_USEC +
-                                   ((limited * (SERVO_MAX_USEC -
-                                                SERVO_MIN_USEC)) /
-                                    SERVO_FULL_SCALE_DEG)));
-    log_servo("Servo: %" PRId32 " degrees.", limited);
-}   /* servo_set_angle() */
-
-
-/*!
  * @brief Set up the START and STOP buttons (active low).
  */
 static void
@@ -543,7 +510,11 @@ serial_poll (void)
     int           key     = getchar_timeout_us(0u);
     web_command_t command = WEB_CMD_NONE;
 
-    if (KEY_STOP == key)
+    if (KEY_ENCODER_MARK == key)
+    {
+        encoder_calibration_mark();
+    }
+    else if (KEY_STOP == key)
     {
         command = WEB_CMD_STOP;
     }
@@ -594,6 +565,42 @@ serial_poll (void)
 
     return (command);
 }   /* serial_poll() */
+
+
+// Measure raw per-wheel edges over a user-measured straight roll. No
+// wheel diameter or encoder counts/revolution assumption is required.
+static void
+encoder_calibration_mark(void)
+{
+    static uint32_t left_start, right_start;
+    if (!vehicle_is_idle())
+    {
+        g_encoder_marked = false;
+        log_printf("Encoder mark: STOP first, then press 'e'.");
+        return;
+    }
+    if (!g_encoder_marked)
+    {
+        left_start = encoder_count(PIN_ENC_LEFT_A);
+        right_start = encoder_count(PIN_ENC_RIGHT_A);
+        g_encoder_marked = true;
+        log_printf("Encoder mark set. Roll straight exactly 300 mm, then 'e' again. "
+                   "Keep the car STOPPED throughout; do not lift/spin wheels.");
+    }
+    else
+    {
+        uint32_t left = encoder_count(PIN_ENC_LEFT_A) - left_start;
+        uint32_t right = encoder_count(PIN_ENC_RIGHT_A) - right_start;
+        g_encoder_marked = false;
+        log_printf("Encoder 300 mm roll: LEFT=%lu RIGHT=%lu edges. "
+                   "Repeat 3 times and record results; calibration not applied.",
+                   (unsigned long)left, (unsigned long)right);
+        if (left == 0u || right == 0u)
+        {
+            log_printf("Encoder calibration invalid: at least one wheel counted no edges.");
+        }
+    }
+}
 
 
 /*!
