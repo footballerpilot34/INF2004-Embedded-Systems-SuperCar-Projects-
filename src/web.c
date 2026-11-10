@@ -303,7 +303,8 @@ static char const g_page_html[] =
     "if(up>d.up)rs++;up=d.up;$('rr').textContent=d.rr;"
     // Battery: red below 3.5 V (low or sagging under load).
     "var vb=$('vb');vb.textContent=d.vb?(d.vb/1000).toFixed(2)+' V, "
-    "lowest '+(d.vm/1000).toFixed(2)+' V since power-up':'not measured';"
+    "lowest '+(d.vm/1000).toFixed(2)+' V since power-up':"
+    "'unavailable (pin shared with Wi-Fi)';"
     "vb.style.color=d.vb&&d.vm<3500?'#f66':'';"
     "$('up').textContent=Math.floor(d.up/60)+' min '+(d.up%60)+' s'+"
     "(rs?' (restarted '+rs+'x since this page opened!)':'');"

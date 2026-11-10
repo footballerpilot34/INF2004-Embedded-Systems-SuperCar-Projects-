@@ -58,7 +58,10 @@
  * interrupts the scan.
  * A decoded LEFT/RIGHT command ('A'/'Z') is kept as the pending turn and
  * carried out at the next crossroad, which line_junction_detect() finds
- * from the side sensor (junction_act()); a newer command replaces it. A
+ * from the side sensor (junction_act()); a newer command replaces it.
+ * Crossroads are only looked for while such a turn is waiting, so no
+ * barcode bar is ever taken for one; a side mark is then confirmed as a
+ * + crossroad, not a bend, by junction_confirm_step(). A
  * U-turn is carried out at once. A turn (TURN state) runs:
  * 0. ADVANCE (crossroad turns only): drive straight for
  *    JUNCTION_ADVANCE_MSEC, so the wheel axle is over the crossing;
@@ -538,11 +541,25 @@ vehicle_task (void)
         junction_confirm_step(now_msec);    // A + crossroad, or a bend?
     }
 
-    junction = line_junction_detect(barcode_is_black(), b_reading,
+    // Crossroads are only looked for once a barcode has been read and its
+    // turn is waiting (a barcode always comes before its crossroad). So a
+    // barcode's own bars, however wide the print, are never taken for a
+    // crossroad, and nor is any mark when no turn is due.
+    junction = line_junction_detect(barcode_is_black(),
+                                    (b_reading &&
+                                     (BARCODE_CMD_NONE != g_pending_turn)),
                                     now_msec, &mark_msec);
     if ((LINE_JUNCTION_FOUND == junction) && gb_junction_confirming)
     {
         // Another mark while the last is being checked: same crossing.
+    }
+    else if ((LINE_JUNCTION_FOUND == junction) && barcode_is_capturing() &&
+             (barcode_scan_size() > 1u))
+    {
+        // A turn is waiting but a new barcode is being read (the last
+        // crossroad was missed): this mark is one of its bars.
+        log_line("Side sensor: %" PRIu32 " ms black mark is a barcode bar, "
+                 "not a crossroad.", mark_msec);
     }
     else if (LINE_JUNCTION_FOUND == junction)
     {

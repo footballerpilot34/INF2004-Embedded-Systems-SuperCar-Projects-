@@ -46,6 +46,7 @@ static uint32_t g_vsys_mv    = 0u;
 static uint32_t g_min_mv     = UINT32_MAX;
 static uint32_t g_next_msec  = 0u;
 static bool     gb_low_said  = false;   // "Battery low" logged already.
+static bool     gb_bad_said  = false;   // "Cannot be right" logged.
 
 
 static uint32_t vsys_read_mv(void);
@@ -75,12 +76,36 @@ power_task (void)
 
     if ((!BARCODE_USE_ANALOG) && ((int32_t) (now_msec - g_next_msec) >= 0))
     {
-        g_next_msec = now_msec + POWER_SAMPLE_MSEC;
-        g_vsys_mv   = vsys_read_mv();
-        gb_measured = true;
-        g_min_mv    = ((g_vsys_mv < g_min_mv) ? g_vsys_mv : g_min_mv);
+        uint32_t mv = vsys_read_mv();
 
-        if ((g_vsys_mv < POWER_LOW_MV) && !gb_low_said)
+        g_next_msec = now_msec + POWER_SAMPLE_MSEC;
+
+        if (mv < POWER_VALID_MIN_MV)
+        {
+            // The Pico could not be running on this: the pin was not read
+            // properly (GP29 is shared with the Wi-Fi chip). Show nothing
+            // rather than a false alarm.
+            if (!gb_bad_said)
+            {
+                log_printf("Power: VSYS read as %" PRIu32 " mV, which "
+                           "cannot be right; battery voltage unavailable.",
+                           mv);
+                gb_bad_said = true;
+            }
+            g_vsys_mv = 0u;
+        }
+        else
+        {
+            g_vsys_mv   = mv;
+            gb_measured = true;
+            g_min_mv    = ((mv < g_min_mv) ? mv : g_min_mv);
+        }
+
+        if ((0u == g_vsys_mv) || (!gb_measured))
+        {
+            // Nothing valid to judge.
+        }
+        else if ((g_vsys_mv < POWER_LOW_MV) && !gb_low_said)
         {
             log_printf("Power: supply only %" PRIu32 ".%02" PRIu32 " V: "
                        "battery low or sagging; charge it.",
@@ -143,27 +168,47 @@ power_vsys_min_mv (void)
 static uint32_t
 vsys_read_mv (void)
 {
-    uint32_t sum = 0u;
+    static bool b_raw_logged = false;
+    uint32_t    sum          = 0u;
+    uint32_t    skipped      = 0u;
+    uint32_t    raw          = 0u;
 
+    // As Raspberry Pi's adc/read_vsys example: wake the Wi-Fi chip (which
+    // also leaves its chip select, GPIO25, high: needed for the reading),
+    // then sample back to back with the ADC free-running.
     cyw43_thread_enter();
-    (void) cyw43_arch_gpio_get(CYW43_WL_GPIO_VBUS_PIN);    // Wake the chip.
+    (void) cyw43_arch_gpio_get(CYW43_WL_GPIO_VBUS_PIN);
 
     adc_gpio_init(PICO_VSYS_PIN);
     adc_select_input(PICO_VSYS_PIN - ADC_FIRST_PIN);
+    adc_fifo_setup(true, false, 0u, false, false);
+    adc_run(true);
 
-    for (uint32_t idx = 0u; idx < (SAMPLES_SKIPPED + SAMPLES); idx++)
+    // The first readings come out low: skip them (and anything stale).
+    while ((!adc_fifo_is_empty()) || (skipped < SAMPLES_SKIPPED))
     {
-        uint32_t raw = adc_read();
-
-        if (idx >= SAMPLES_SKIPPED)
-        {
-            sum += raw;
-        }
+        (void) adc_fifo_get_blocking();
+        skipped++;
     }
 
+    for (uint32_t idx = 0u; idx < SAMPLES; idx++)
+    {
+        sum += adc_fifo_get_blocking();
+    }
+
+    adc_run(false);
+    adc_fifo_drain();
     cyw43_thread_exit();
 
-    return (((sum / SAMPLES) * VSYS_DIVIDER * ADC_REF_MV) / ADC_FULL_SCALE);
+    raw = sum / SAMPLES;
+    if (!b_raw_logged)
+    {
+        log_printf("Power: first VSYS reading: ADC %" PRIu32 " of 4095.",
+                   raw);
+        b_raw_logged = true;
+    }
+
+    return ((raw * VSYS_DIVIDER * ADC_REF_MV) / ADC_FULL_SCALE);
 }   /* vsys_read_mv() */
 
 /*** end of file ***/

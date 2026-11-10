@@ -361,11 +361,10 @@
 // (barcode) sensor instead: the left branch is one long black mark (18 mm
 // wide). A black mark that lasted LINE_JUNCTION_MIN_MSEC to _MAX_MSEC is
 // a crossroad (judged when it ends), and a pending LEFT/RIGHT turn is
-// carried out there. The lower limit sits between a barcode's widest bar
-// (9 mm, ~240 ms at SPEED_SCAN 8, ~38 mm/s) and a branch (18 mm,
-// ~470 ms). Detection stays on while a barcode is read
-// (its bars are far shorter); a crossroad reached mid-scan first ends and
-// decodes the scan, so its command is known before the turn. The
+// carried out there. Detection is ON ONLY once a barcode has been read
+// and its turn is waiting (a barcode always comes before its crossroad),
+// so a barcode's own bars, even a big print's ~19 mm wide bars, are never
+// a crossroad. A branch is 18 mm (~470 ms at SPEED_SCAN 8, ~38 mm/s). The
 // pivot point is the wheel axle, behind the sensors, so the car first
 // drives on for JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
 #define LINE_JUNCTION_MIN_MSEC      340u    // ~13 mm at SPEED_SCAN 8.
@@ -394,6 +393,9 @@
 // ------------------------------------------------------------------------
 #define POWER_SAMPLE_MSEC           1000u   // Read the supply this often.
 #define POWER_LOW_MV                3500u   // Below this: "battery low".
+#define POWER_VALID_MIN_MV          2500u   // Below this the reading is
+                                            // wrong (the Pico would be
+                                            // off): shown as unavailable.
 #define POWER_LOW_HYST_MV           200u    // Warn again once it has been
                                             // this far above, then dips.
 
