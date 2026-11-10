@@ -99,6 +99,22 @@ log_state (char const * p_format, ...)
 
 
 /*!
+ * @brief Print an ultrasonic pan servo message.
+ *
+ * @param[in] p_format A printf format string, then its arguments.
+ */
+void
+log_servo (char const * p_format, ...)
+{
+    va_list args;
+
+    va_start(args, p_format);
+    log_vprintf(LOG_CAT_SERVO, p_format, args);
+    va_end(args);
+}   /* log_servo() */
+
+
+/*!
  * @brief Report the sequence number the next message will get.
  *
  * @return The next sequence number.

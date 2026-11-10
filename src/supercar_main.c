@@ -154,7 +154,7 @@ main (void)
         {
             if (vehicle_is_moving())
             {
-                log_printf("Servo: locked while the car is moving.");
+                log_servo("Servo: locked while the car is moving.");
             }
             else
             {
@@ -467,7 +467,7 @@ servo_set_angle (int32_t degrees)
                                    ((limited * (SERVO_MAX_USEC -
                                                 SERVO_MIN_USEC)) /
                                     SERVO_FULL_SCALE_DEG)));
-    log_printf("Servo: %" PRId32 " degrees.", limited);
+    log_servo("Servo: %" PRId32 " degrees.", limited);
 }   /* servo_set_angle() */
 
 

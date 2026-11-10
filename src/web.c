@@ -200,24 +200,26 @@ static char const g_page_html[] =
     "<button class=\"tb on\" id=t0 onclick=tab(0)>All</button>"
     "<button class=tb id=t1 onclick=tab(1)>Obstacle / Hump</button>"
     "<button class=tb id=t2 onclick=tab(2)>Line / Barcode</button>"
-    "<button class=tb id=t3 onclick=tab(3)>Vehicle state</button></div>"
+    "<button class=tb id=t3 onclick=tab(3)>Vehicle state</button>"
+    "<button class=tb id=t4 onclick=tab(4)>Servo</button></div>"
     "<div id=log></div>"
     "<button class=t style=width:100%;margin-top:8px "
-    "onclick=\"c('clear');lg=[];nw=[0,0,0,0];show();"
+    "onclick=\"c('clear');lg=[];nw=[0,0,0,0,0];show();"
     "$('bc').textContent='-'\">CLEAR OUTPUT</button></div>"
     "<script>var hist=[],q=0;function $(i){return document.getElementById(i)}"
     // Serial monitor: lg holds {c:category,t:text}; tab ft 0 shows all,
-    // 1-3 one category (log_cat_t). nw counts lines unseen in each tab.
-    "var lg=[],ft=0,nw=[0,0,0,0],"
-    "tn=['All','Obstacle / Hump','Line / Barcode','Vehicle state'];"
+    // 1-4 one category (log_cat_t). nw counts lines unseen in each tab.
+    "var lg=[],ft=0,nw=[0,0,0,0,0],"
+    "tn=['All','Obstacle / Hump','Line / Barcode','Vehicle state',"
+    "'Servo'];"
     "function show(){var L=$('log'),"
     "b=L.scrollTop+L.clientHeight>=L.scrollHeight-30,s='';"
     "for(var i=0;i<lg.length;i++){if(!ft||lg[i].c==ft)s+=lg[i].t+'\\n'}"
     "L.textContent=s;if(b)L.scrollTop=L.scrollHeight;"
-    "for(var k=0;k<4;k++){var e=$('t'+k);"
+    "for(var k=0;k<5;k++){var e=$('t'+k);"
     "e.className=k==ft?'tb on':'tb';"
     "e.textContent=tn[k]+(nw[k]?' ('+nw[k]+')':'')}}"
-    "function tab(k){ft=k;if(k)nw[k]=0;else nw=[0,0,0,0];show();"
+    "function tab(k){ft=k;if(k)nw[k]=0;else nw=[0,0,0,0,0];show();"
     "var L=$('log');L.scrollTop=L.scrollHeight}"
     // Barcode history: refetched whenever its number hq changes.
     // Servo lock: moving forces it locked and greys out the checkbox.

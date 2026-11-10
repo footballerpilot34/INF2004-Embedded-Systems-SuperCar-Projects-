@@ -17,13 +17,15 @@ typedef enum
     LOG_CAT_SYSTEM   = 0,   // Start-up, Wi-Fi, buttons, tests: "All" only.
     LOG_CAT_OBSTACLE = 1,   // Obstacle and hump detection.
     LOG_CAT_LINE     = 2,   // Line following, barcodes and crossroads.
-    LOG_CAT_STATE    = 3    // Vehicle state changes.
+    LOG_CAT_STATE    = 3,   // Vehicle state changes.
+    LOG_CAT_SERVO    = 4    // Ultrasonic pan servo.
 } log_cat_t;
 
 void     log_printf(char const * p_format, ...);
 void     log_obstacle(char const * p_format, ...);
 void     log_line(char const * p_format, ...);
 void     log_state(char const * p_format, ...);
+void     log_servo(char const * p_format, ...);
 uint32_t log_next_seq(void);
 bool     log_get(uint32_t seq, char const ** pp_line, log_cat_t * p_cat);
 
