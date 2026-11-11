@@ -22,6 +22,8 @@
 #include "barcode.h"
 #include "line_sensor.h"
 #include "motor.h"
+#include "obstacle.h"
+#include "servo.h"
 #include "telemetry.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
@@ -69,6 +71,14 @@ telemetry_task (void)
     value_print("motor_L", motor_left_speed());
     value_print("motor_R", motor_right_speed());
     value_print("state", (int32_t) state);
+    value_print("servo_deg", servo_angle());
+    obstacle_profile_t const * profile = obstacle_profile();
+    bool bounded = profile->finished && !profile->timed_out &&
+                   profile->left_bounded && profile->right_bounded;
+    value_print("obstacle_width_mm", bounded ? (int32_t)profile->width_mm : -1);
+    value_print("obstacle_left_mm", bounded ? profile->left_mm : 0);
+    value_print("obstacle_right_mm", bounded ? profile->right_mm : 0);
+    value_print("obstacle_edges_confirmed", bounded && profile->edges_confirmed);
 
     // Text only needs sending when it changes, plus a refresh each second
     // in case Teleplot was opened late.

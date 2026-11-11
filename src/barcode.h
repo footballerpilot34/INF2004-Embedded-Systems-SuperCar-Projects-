@@ -38,6 +38,9 @@ barcode_command_t barcode_command(void);
 char const *      barcode_command_name(barcode_command_t command);
 bool              barcode_is_black(void);
 bool              barcode_is_capturing(void);
+bool              barcode_is_enabled(void);
+uint32_t          barcode_edge_count(void);
+barcode_result_t  barcode_last_result(void);
 int32_t           barcode_level(void);
 uint32_t          barcode_scan_size(void);
 

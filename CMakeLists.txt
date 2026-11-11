@@ -103,6 +103,8 @@ add_executable(supercar
     src/log.c
     src/motor.c
     src/power.c
+    src/servo.c
+    src/obstacle.c
     src/telemetry.c
     src/ultrasonic.c
     src/vehicle.c

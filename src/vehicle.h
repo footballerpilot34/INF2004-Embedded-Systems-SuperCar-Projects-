@@ -1,6 +1,6 @@
 /** @file vehicle.h
  *
- * @brief Mission state machine: line following, obstacle stop, humps.
+ * @brief Mission state machine: line following, stopped obstacle scans, humps.
  */
 
 #ifndef VEHICLE_H
@@ -23,8 +23,9 @@ typedef enum
     VEHICLE_TURN,               // Barcode command: turn, then follow.
     VEHICLE_BARCODE_TEST,       // Drive straight, ignoring the line, and
                                 // read barcodes.
-    VEHICLE_BARCODE_STATIC      // Stand still and read barcodes slid past
+    VEHICLE_BARCODE_STATIC,     // Stand still and read barcodes slid past
                                 // the sensor by hand.
+    VEHICLE_OBSTACLE_SCAN       // Braked coarse/fine scan; owns pan servo.
 } vehicle_state_t;
 
 void            vehicle_init(void);

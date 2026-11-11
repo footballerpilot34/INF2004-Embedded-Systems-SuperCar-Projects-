@@ -37,6 +37,27 @@ static uint64_t g_next_ping_usec = 0u;
 static uint64_t g_deadline_usec  = 0u;
 static uint32_t g_range_mm       = ULTRASONIC_NO_RANGE;
 static uint64_t g_range_usec     = 0u;
+static bool     gb_measurement_ready = false;
+static uint32_t g_sample_sequence;
+
+uint32_t ultrasonic_sample_sequence(void) { return g_sample_sequence; }
+
+void
+ultrasonic_invalidate (void)
+{
+    gb_armed = false;
+    gb_waiting = false;
+    g_range_mm = ULTRASONIC_NO_RANGE;
+    gb_measurement_ready = false;
+    // Preserve the minimum interval even when abandoning an active ping.
+    g_next_ping_usec = time_us_64() + US_PING_PERIOD_USEC;
+}
+
+bool
+ultrasonic_measurement_ready (void)
+{
+    return (gb_measurement_ready);
+}
 
 
 /*!
@@ -134,6 +155,9 @@ ultrasonic_task (void)
 
         g_range_mm   = (echo_usec * MM_PER_CM) / USEC_PER_CM_ROUND_TRIP;
         g_range_usec = now_usec;
+        gb_measurement_ready = true;
+        g_sample_sequence++;
+        gb_armed = false;
         gb_waiting   = false;
     }
     else if (now_usec >= g_deadline_usec)
@@ -141,6 +165,9 @@ ultrasonic_task (void)
         // No echo, or out of range: nothing is close, so report clear.
         g_range_mm   = ULTRASONIC_NO_RANGE;
         g_range_usec = now_usec;
+        gb_measurement_ready = true;
+        g_sample_sequence++;
+        gb_armed = false;
         gb_waiting   = false;
     }
     else
