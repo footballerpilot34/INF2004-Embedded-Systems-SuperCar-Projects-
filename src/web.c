@@ -184,7 +184,7 @@ static char const g_page_html[] =
     "the same hotspot.</span><br></span>"
     "Obstacle Detection Range: <b id=r>-</b> cm<br>"
     "IR L/R/Barcode: <b id=i>-</b> &nbsp; Motors L/R: <b id=m>-</b><br>"
-    "IR raw pins L(GP28)/R(GP0): <b id=x>-</b><br>"
+    "IR raw pins L(GP6)/R(GP4): <b id=x>-</b><br>"
     "Encoder ticks L/R: <b id=en>-</b><br>"
     "Encoder pins (edges): <b id=ep>-</b></div>"
     "<div class=c>Barcode message<div id=bc>-</div>"

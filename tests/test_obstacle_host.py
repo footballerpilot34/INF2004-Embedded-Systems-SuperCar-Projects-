@@ -36,6 +36,7 @@ void barcode_set_hand_mode(bool enabled) { (void)enabled; }
 void barcode_set_enabled(bool enabled) { reader_enabled = enabled; }
 bool barcode_is_black(void) { return false; }
 bool barcode_is_capturing(void) { return false; }
+uint32_t barcode_scan_size(void) { return 0u; }
 bool barcode_end_scan(void) { return false; }
 char const * barcode_command_name(barcode_command_t cmd) { (void)cmd; return "test"; }
 int32_t imu_max_tilt_x10(void) { return tilt; }

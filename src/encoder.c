@@ -50,7 +50,7 @@
 static uint32_t const g_watch_pins[ENCODER_NUM_WATCH] =
 {
     PIN_ENC_LEFT_A, PIN_ENC_LEFT_B, PIN_ENC_RIGHT_A, PIN_ENC_RIGHT_B,
-    1u, 7u, 13u, 14u, 15u, 18u
+    5u, 19u, 13u, 14u, 15u, 18u
 };
 
 // Written by the GPIO interrupt only; read anywhere.

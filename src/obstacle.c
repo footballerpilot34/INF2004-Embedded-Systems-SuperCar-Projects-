@@ -1,3 +1,4 @@
+#include "pico/time.h"
 #include <math.h>
 #include <string.h>
 #include "config.h"
@@ -23,6 +24,9 @@ _Static_assert(2 * SERVO_RANGE_DEG / OBSTACLE_SCAN_FINE_DEG + 1 <= SCAN_CAPACITY
 static obstacle_point_t g_points[SCAN_CAPACITY];
 static uint32_t g_count;
 static int32_t g_queue[SCAN_CAPACITY];
+static int32_t g_scan_direction;
+static uint32_t g_background_streak;
+static bool g_searching_right;
 static uint32_t g_queue_count, g_queue_pos;
 static uint32_t g_values[OBSTACLE_SCAN_SAMPLES], g_samples, g_valid;
 static uint32_t g_sequence, g_started;
@@ -31,9 +35,14 @@ static obstacle_profile_t g_profile;
 
 static bool foreground(obstacle_point_t const * p, uint32_t front)
 {
-    return p->kind == OBSTACLE_RETURN_RANGE &&
-        p->range_mm * cosf(p->angle_deg * RAD_PER_DEG) <=
-            front + OBSTACLE_SCAN_PLANE_MM;
+    if (p->kind != OBSTACLE_RETURN_RANGE) {
+        return false;
+    }
+
+    float depth = p->range_mm *
+        cosf(p->angle_deg * RAD_PER_DEG);
+
+    return fabsf(depth - (float)front) <= OBSTACLE_SCAN_PLANE_MM;
 }
 
 // An inconsistent fine reading cannot erase a previously observed coarse
@@ -44,15 +53,50 @@ static bool edge_bracket(obstacle_point_t const * points, uint32_t count,
                          uint32_t * inner, uint32_t * outer)
 {
     *inner = centre;
+    *outer = centre;
+
+    uint32_t streak = 0u;
+    uint32_t first_background = centre;
+    uint32_t last_foreground = centre;
+
     for (int32_t i = (int32_t)centre + step;
          i >= 0 && i < (int32_t)count; i += step) {
-        if (points[i].kind == OBSTACLE_RETURN_UNKNOWN) { continue; }
-        if (!foreground(&points[i], front)) {
-            *outer = (uint32_t)i;
-            return true;
+
+        obstacle_point_t const * point = &points[i];
+
+        if (point->kind != OBSTACLE_RETURN_RANGE) {
+            streak = 0u;
+            continue;
         }
-        *inner = (uint32_t)i;
+
+        float depth = point->range_mm *
+            cosf(point->angle_deg * RAD_PER_DEG);
+
+        if (depth >= (float)front +
+                     OBSTACLE_SCAN_BACKGROUND_GAP_MM) {
+
+            if (streak == 0u) {
+                first_background = (uint32_t)i;
+            }
+
+            ++streak;
+
+            if (streak >= 3u) {
+                *inner = last_foreground;
+                *outer = first_background;
+                return true;
+            }
+
+        } else {
+            streak = 0u;
+
+            if (foreground(point, front)) {
+                last_foreground = (uint32_t)i;
+            }
+        }
     }
+
+    *inner = last_foreground;
     return false;
 }
 
@@ -106,6 +150,12 @@ obstacle_profile_build(obstacle_point_t const * points, uint32_t count,
                                      lateral(front, points[left_outer].angle_deg));
         p->edges_confirmed = points[left_outer].kind == OBSTACLE_RETURN_RANGE &&
                              points[right_outer].kind == OBSTACLE_RETURN_RANGE;
+
+        // Diagnostic safeguard for the 200 mm sleeve test.
+        // Do not accept implausibly narrow obstacle measurements.
+        if (p->width_mm < 100u) {
+            p->edges_confirmed = false;
+        }
         p->exceeds_expected_width = p->width_min_mm > OBSTACLE_EXPECTED_WIDTH_MM;
     }
 }
@@ -140,12 +190,16 @@ obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
     g_started = now_msec;
     g_active = true;
     g_fine = false;
+    g_scan_direction = -1;
+    g_background_streak = 0u;
+    g_searching_right = false;
+
     queue_angle(0);
-    for (int32_t a = -SERVO_RANGE_DEG; a <= SERVO_RANGE_DEG;
-         a += OBSTACLE_SCAN_COARSE_DEG) { queue_angle(a); }
-    log_obstacle("SCAN: wheels braked; coarse sweep 60-120 deg, then fine edges.");
-    log_obstacle("SCAN start: front=%lu mm, sweep span at this depth=%ld mm (expected width <=300).",
-        (unsigned long)forward_mm, (long)(2 * lateral(forward_mm, SERVO_RANGE_DEG)));
+    queue_angle(-OBSTACLE_SCAN_FINE_DEG);
+
+    log_obstacle("SCAN: centre-outward search, left then right.");
+    log_obstacle("SCAN start: front=%lu mm",
+                 (unsigned long)forward_mm);
     aim();
 }
 
@@ -185,8 +239,10 @@ static void store_point(void)
         (long)p.angle_deg, (unsigned long)g_valid,
         g_valid ? (long)g_values[0] : -1L,
         g_valid ? (long)g_values[g_valid - 1u] : -1L);
-    log_obstacle("SCAN point: angle=%ld range=%ld mm return=%u (0 unknown, 1 echo, 2 no echo)",
-        (long)p.angle_deg, p.kind == OBSTACLE_RETURN_RANGE ? (long)p.range_mm : -1L,
+    log_obstacle("SCAN point: t=%lu ms angle=%ld range=%ld mm return=%u",
+        (unsigned long)to_ms_since_boot(get_absolute_time()),
+        (long)p.angle_deg,
+        p.kind == OBSTACLE_RETURN_RANGE ? (long)p.range_mm : -1L,
         (unsigned)p.kind);
 }
 
@@ -242,23 +298,57 @@ obstacle_scan_task(uint32_t now_msec)
             g_points[0].range_mm > OBSTACLE_CLEAR_MM) { finish(false); return; }
         g_profile.front_mm = g_points[0].range_mm;
     }
-    ++g_queue_pos;
-    if (g_queue_pos == g_queue_count && !g_fine) {
-        g_fine = true;
-        // Refine coarse foreground-to-background/unknown transitions.
-        // The profile uses only the contiguous foreground around centre.
-        for (uint32_t i = 0u; i + 1u < g_count; ++i) {
-            if (foreground(&g_points[i], g_profile.front_mm) !=
-                foreground(&g_points[i + 1u], g_profile.front_mm)) {
-                for (int32_t a = g_points[i].angle_deg + OBSTACLE_SCAN_FINE_DEG;
-                     a < g_points[i + 1u].angle_deg; a += OBSTACLE_SCAN_FINE_DEG) {
-                    queue_angle(a);
-                }
-            }
+    obstacle_point_t const * current = NULL;
+    int32_t measured_angle = g_queue[g_queue_pos];
+
+    for (uint32_t i = 0u; i < g_count; ++i) {
+        if (g_points[i].angle_deg == measured_angle) {
+            current = &g_points[i];
+            break;
         }
     }
-    if (g_queue_pos == g_queue_count) { finish(false); }
-    else { aim(); }
+
+    if (measured_angle != 0 && current != NULL) {
+        if (current->kind == OBSTACLE_RETURN_RANGE &&
+            !foreground(current, g_profile.front_mm)) {
+            ++g_background_streak;
+        } else {
+            g_background_streak = 0u;
+        }
+    }
+
+    bool side_finished =
+    measured_angle == g_scan_direction * SERVO_RANGE_DEG;
+
+    ++g_queue_pos;
+
+    if (side_finished && !g_searching_right) {
+        g_searching_right = true;
+        g_scan_direction = 1;
+        g_background_streak = 0u;
+        queue_angle(OBSTACLE_SCAN_FINE_DEG);
+        log_obstacle("SCAN: left search complete; searching right.");
+    } else if (side_finished && g_searching_right) {
+        finish(false);
+        return;
+    } else if (g_queue_pos == g_queue_count) {
+        int32_t next = measured_angle +
+                       g_scan_direction * OBSTACLE_SCAN_FINE_DEG;
+
+        if (next >= -SERVO_RANGE_DEG &&
+            next <= SERVO_RANGE_DEG) {
+            queue_angle(next);
+        } else {
+            finish(false);
+            return;
+        }
+    }
+
+    if (g_queue_pos == g_queue_count) {
+        finish(false);
+    } else {
+        aim();
+    }
 }
 
 void obstacle_scan_cancel(void)

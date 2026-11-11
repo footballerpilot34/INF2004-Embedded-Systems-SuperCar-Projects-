@@ -41,6 +41,7 @@
  * TODO: Record the name of the person who approved this deviation.
  */
 
+#include "obstacle.h"
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -95,6 +96,8 @@ static bool g_encoder_marked;
 static void          usb_wait(void);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
+static bool g_stationary_scan_test = false;
+
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
 static void          imu_calibrate_run(void);
@@ -192,6 +195,28 @@ main (void)
         {
             vehicle_task();
         }
+        if (g_stationary_scan_test)
+        {
+            if (!vehicle_is_idle())
+            {
+                obstacle_scan_cancel();
+                g_stationary_scan_test = false;
+                motor_set(0, 0);
+                log_printf("STATIONARY SCAN TEST CANCELLED");
+            }
+            else
+            {
+                motor_set(0, 0);
+                obstacle_scan_task(to_ms_since_boot(get_absolute_time()));
+
+                if (!obstacle_scan_active())
+                {
+                    g_stationary_scan_test = false;
+                    log_printf("STATIONARY SCAN TEST COMPLETE");
+                }
+            }
+        }
+
         line_diag_task();
         buzzer_task();
 
@@ -578,12 +603,67 @@ serial_poll (void)
     int           key     = getchar_timeout_us(0u);
     web_command_t command = WEB_CMD_NONE;
 
-    if (KEY_ENCODER_MARK == key)
+    if ('p' == key)
+    {
+        log_printf("Encoder pins: GP7=%lu GP28=%lu GP0=%lu GP1=%lu",
+                (unsigned long)encoder_watch_edges(0u),
+                (unsigned long)encoder_watch_edges(1u),
+                (unsigned long)encoder_watch_edges(2u),
+                (unsigned long)encoder_watch_edges(3u));
+    }
+    else if ('t' == key)
+    {
+        static uint32_t step = 0u;
+        static const int32_t angles[] = {60, 90, 120, 90};
+
+        if (vehicle_is_idle())
+        {
+            int32_t angle = angles[step];
+            servo_set_angle(angle);
+            log_printf("SERVO TEST: commanded %ld degrees",
+                       (long)angle);
+            step = (step + 1u) % 4u;
+        }
+        else
+        {
+            log_printf("SERVO TEST: stop the car first.");
+        }
+    }
+    else if ('g' == key)
+    {
+        if (vehicle_is_idle() && !g_stationary_scan_test)
+        {
+            uint32_t range = ultrasonic_range_mm();
+
+            if (range > 0u && range <= OBSTACLE_STOP_MM)
+            {
+                motor_set(0, 0);
+                g_stationary_scan_test = true;
+                obstacle_scan_start(range, to_ms_since_boot(get_absolute_time()));
+                log_printf("STATIONARY SCAN TEST START");
+            }
+            else
+            {
+                log_printf("SCAN TEST: obstacle must be within stop range.");
+            }
+        }
+        else
+        {
+            log_printf("SCAN TEST: stop the car first.");
+        }
+    }
+    else if (KEY_ENCODER_MARK == key)
     {
         encoder_calibration_mark();
     }
     else if (KEY_STOP == key)
     {
+        if (g_stationary_scan_test)
+        {
+            obstacle_scan_cancel();
+            g_stationary_scan_test = false;
+            log_printf("STATIONARY SCAN TEST CANCELLED");
+        }
         command = WEB_CMD_STOP;
     }
     else if (KEY_START == key)

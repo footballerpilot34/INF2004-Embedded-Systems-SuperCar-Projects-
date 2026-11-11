@@ -16,10 +16,10 @@
 // ------------------------------------------------------------------------
 // Pins (current wiring).
 // ------------------------------------------------------------------------
-#define PIN_LINE_LEFT               28u     // Left line IR DOUT (Grove 7).
-#define PIN_LINE_RIGHT              0u      // Right line IR DOUT (Grove 1).
-#define PIN_BARCODE                 26u     // Barcode IR DOUT (Grove 5).
-#define PIN_BARCODE_AO              27u     // Barcode IR AO (Grove 5), ADC1.
+#define PIN_LINE_LEFT               6u      // Left line IR DOUT (Grove 5).
+#define PIN_LINE_RIGHT              4u      // Right line IR DOUT (Grove 3).
+#define PIN_BARCODE                 26u     // Barcode IR DOUT (Grove 6).
+#define PIN_BARCODE_AO              27u     // Barcode IR AO (Grove 6), ADC1.
 #define PIN_IMU_SDA                 2u      // MPU-6050 SDA (I2C1).
 #define PIN_IMU_SCL                 3u      // MPU-6050 SCL (I2C1).
 #define PIN_US_TRIG                 16u     // Ultrasonic TRIG.
@@ -28,17 +28,15 @@
 #define PIN_BUTTON_START            20u     // Robo Pico button, active low.
 #define PIN_BUTTON_STOP             21u     // Robo Pico button, active low.
 #define PIN_BUZZER                  22u     // Robo Pico piezo buzzer.
-// Pin finder (2026-11-06): the LEFT wheel's encoder is on GP6 + GP19
-// (3140 + 3142 edges, healthy quadrature); the RIGHT one on GP4 + GP5,
-// but only GP5 counted (157 edges, GP4 0): VERIFY its wiring.
-#define PIN_ENC_LEFT_A              6u      // Left wheel encoder A.
-#define PIN_ENC_LEFT_B              19u     // Left wheel encoder B (moved
-                                            // from GP7).
-#define PIN_ENC_RIGHT_A             4u      // Right wheel encoder A.
-#define PIN_ENC_RIGHT_B             5u      // Right wheel encoder B.
+// Rewired: both signal wires of each encoder use its Grove port.
+// Counts include both channels; A/B order does not affect unsigned counts.
+#define PIN_ENC_LEFT_A              7u      // Left encoder, Grove 7.
+#define PIN_ENC_LEFT_B              28u     // Left encoder, Grove 7.
+#define PIN_ENC_RIGHT_A             0u      // Right encoder, Grove 1.
+#define PIN_ENC_RIGHT_B             1u      // Right encoder, Grove 1.
 // The pin finder watches the encoder pins and every free GPIO and shows
 // each pin's edges on the web page. Turn it off once the wiring is right.
-#define ENCODER_PIN_FINDER          false
+#define ENCODER_PIN_FINDER          true
 
 // Ultrasonic pan servo: 60 = left, 90 = forward, 120 = right (confirmed).
 // Centred while driving; automatic scans own it while braked. Web slider
@@ -241,8 +239,9 @@
 #define OBSTACLE_SCAN_COARSE_DEG    10
 #define OBSTACLE_SCAN_FINE_DEG      2
 #define OBSTACLE_SCAN_SAMPLES       3u
-#define OBSTACLE_SCAN_PLANE_MM      80u    // Foreground depth tolerance.
-#define OBSTACLE_SCAN_TIMEOUT_MSEC  20000u
+#define OBSTACLE_SCAN_PLANE_MM      20u    // Foreground depth tolerance.
+#define OBSTACLE_SCAN_BACKGROUND_GAP_MM 100u
+#define OBSTACLE_SCAN_TIMEOUT_MSEC  30000u
 
 #define US_PING_PERIOD_USEC         60000u  // Pings at least 60 ms apart.
 #define US_ECHO_TIMEOUT_USEC        30000u  // About 5 m.

@@ -18,7 +18,7 @@
  * same both times; a floating pin follows the pull, so it reads differently.
  *
  * @par Pins (updated pin assignment)
- * LINE_L on GP28 (Grove 7), LINE_R on GP0 (Grove 1), and the IMU on I2C1
+ * LINE_L on GP6 (Grove 5), LINE_R on GP4 (Grove 3), and the IMU on I2C1
  * with SDA GP2 and SCL GP3.
  *
  * @par Coding standard
@@ -41,8 +41,8 @@
 
 // Line IR sensor pins.
 //
-#define LINE_L_PIN              28u
-#define LINE_R_PIN              0u
+#define LINE_L_PIN              6u
+#define LINE_R_PIN              4u
 #define PULL_SETTLE_USEC        50u
 
 // IMU bus settings. 100 kHz is the safest speed for long jumper wires.
@@ -175,8 +175,8 @@ main (void)
             elapsed_ms = 0u;
         }
 
-        ir_report("IR L (GP28)", LINE_L_PIN);
-        ir_report(" | IR R (GP0)", LINE_R_PIN);
+        ir_report("IR L (GP6)", LINE_L_PIN);
+        ir_report(" | IR R (GP4)", LINE_R_PIN);
 
         if (!b_gyro_ok)
         {

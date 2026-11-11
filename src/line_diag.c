@@ -15,8 +15,8 @@
  * white, it is not switching: its potentiometer needs adjusting.
  *
  * @par Analogue values
- * Only the modules' digital DOUT pins are wired to the Pico (GP28 left,
- * GP0 right), so there are no analogue readings to show. The analogue
+ * Only the modules' digital DOUT pins are wired to the Pico (GP6 left,
+ * GP4 right), so there are no analogue readings to show. The analogue
  * outputs (AO) would have to be wired to a free ADC pin.
  */
 
@@ -76,9 +76,10 @@ line_diag_enter (void)
 
     log_line("DIAG ON: motors disabled. Move each IR sensor over black "
              "and white by hand.");
-    log_line("DIAG wiring: LEFT GP28 %s, RIGHT GP0 %s.",
+    log_line("DIAG wiring: LEFT GP%u %s, RIGHT GP%u %s.",
+             PIN_LINE_LEFT,
              (b_left_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"),
-             (b_right_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"));
+             PIN_LINE_RIGHT, (b_right_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"));
     log_line("DIAG now: LEFT=%s RIGHT=%s. Digital DOUT only: no analogue "
              "values are wired.",
              level_text(g_last_raw.b_left_high),
@@ -134,7 +135,7 @@ line_diag_task (void)
         if (raw.b_left_high != g_last_raw.b_left_high)
         {
             g_left_changes++;
-            log_line("DIAG LEFT  GP28: %s -> %s (%s)",
+            log_line("DIAG LEFT  GP%u: %s -> %s (%s)", PIN_LINE_LEFT,
                      level_text(g_last_raw.b_left_high),
                      level_text(raw.b_left_high),
                      colour_text(true, raw.b_left_high));
@@ -143,7 +144,7 @@ line_diag_task (void)
         if (raw.b_right_high != g_last_raw.b_right_high)
         {
             g_right_changes++;
-            log_line("DIAG RIGHT GP0:  %s -> %s (%s)",
+            log_line("DIAG RIGHT GP%u: %s -> %s (%s)", PIN_LINE_RIGHT,
                      level_text(g_last_raw.b_right_high),
                      level_text(raw.b_right_high),
                      colour_text(false, raw.b_right_high));
