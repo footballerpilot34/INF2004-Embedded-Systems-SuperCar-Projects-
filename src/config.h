@@ -16,8 +16,15 @@
 // ------------------------------------------------------------------------
 // Pins (current wiring).
 // ------------------------------------------------------------------------
+// 2026-11-13: GP26 is on BOTH Grove 5 (GP6/GP26) and Grove 6 (GP26/GP27).
+// Tested on the car: the left line sensor's DOUT reached GP26 (its cable
+// puts DOUT on the port's second pin), and so does the barcode sensor's
+// (its LED followed the left line sensor). Two DOUTs on one pin cannot
+// be told apart: the left line sensor's DOUT must be moved onto the GP6
+// wire (and its GP26 wire left unconnected) for these pins to be right.
 #define PIN_LINE_LEFT               6u      // Left line IR DOUT (Grove 5).
 #define PIN_LINE_RIGHT              4u      // Right line IR DOUT (Grove 3).
+                                            // VERIFY: may be GP5 instead.
 #define PIN_BARCODE                 26u     // Barcode IR DOUT (Grove 6).
 #define PIN_BARCODE_AO              27u     // Barcode IR AO (Grove 6), ADC1.
 #define PIN_IMU_SDA                 2u      // MPU-6050 SDA (I2C1).
@@ -97,8 +104,9 @@
 #define PIN_LEFT_MOTOR_B            9u      // M1B
 #define PIN_RIGHT_MOTOR_A           10u     // M2A
 #define PIN_RIGHT_MOTOR_B           11u     // M2B
-#define LEFT_MOTOR_REVERSED         true
-#define RIGHT_MOTOR_REVERSED        true
+#define LEFT_MOTOR_REVERSED         false   // Flipped 2026-11-13: after the
+#define RIGHT_MOTOR_REVERSED        false   // rewiring, WHEEL TEST spun both
+                                            // wheels backwards.
 
 // ------------------------------------------------------------------------
 // IR sensors.
@@ -225,10 +233,14 @@
 // hump/wall PROBE instead (creep closer, climb if the nose tips up). With
 // true the car stops in front of a hump too.
 #define OBSTACLE_STOP_AT_ONCE       true
-#define OBSTACLE_SLOW_MM            500u    // Slow before the stop threshold.
-#define OBSTACLE_STOP_MM            400u    // Brake at or below 40 cm.
+// TEMPORARY (2026-11-13): stop at 30 cm instead of Felix's 40 cm, so
+// barcode tests fit a small space. All three move together (gaps kept).
+#define OBSTACLE_SLOW_MM            400u    // Slow before the stop (was 500).
+#define OBSTACLE_STOP_MM            300u    // Brake at or below 30 cm (was
+                                            // 400).
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
-#define OBSTACLE_CLEAR_MM           450u    // Clear again (hysteresis).
+#define OBSTACLE_CLEAR_MM           350u    // Clear again (hysteresis; was
+                                            // 450).
 #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
 #define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
 
@@ -316,6 +328,10 @@
 // slightly raised, which shrinks and varies the analog swing (fixed DELTA
 // then gave inconsistent reads). true = analog reading as described above.
 #define BARCODE_USE_ANALOG          false   // false = DOUT (GP26) reading.
+// TEMPORARY (2026-11-13): log every black/white change of the barcode
+// sensor (Line / Barcode tab), to check its sensitivity. Set false after.
+#define BARCODE_DEBUG_LOG           false
+#define BARCODE_DEBUG_MAX_PER_SEC   10u     // Lines a second, then a count.
 #define BARCODE_AO_BLACK_IS_HIGH    true    // VERIFY: the web "level"
                                             // must RISE over black.
 #define BARCODE_AO_SAMPLE_USEC      200u    // 5 kHz sampling.

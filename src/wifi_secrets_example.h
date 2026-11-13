@@ -28,7 +28,7 @@
 
 #define HOTSPOT_LIST \
     { "My Phone Hotspot",   "hotspot-password"  }, \
-    { "Friend's Hotspot",   "friend-password"   }
+    { "Ryan's iPhone",   "ryan2606"   }
 
 #endif /* WIFI_SECRETS_H */
 

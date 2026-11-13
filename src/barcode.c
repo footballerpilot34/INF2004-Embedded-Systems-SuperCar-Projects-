@@ -214,6 +214,7 @@ static bool             ao_sample_isr(repeating_timer_t * p_timer);
 static int32_t          ao_darkness(void);
 static void             edge_add(uint32_t edge_usec, uint32_t edge_pos,
                                  bool b_black);
+static void             debug_log_colour(uint32_t edges);
 static bool             scan_has_ended(uint32_t end_gap_usec);
 static uint32_t         end_gap_factor(uint32_t widest, uint32_t narrowest);
 static void             widths_select(void);
@@ -379,8 +380,102 @@ barcode_task (void)
     }
 
     if (BARCODE_NONE != result) { g_last_result = result; }
+
+    if (BARCODE_DEBUG_LOG)
+    {
+        debug_log_colour(head);
+    }
+
     return (result);
 }   /* barcode_task() */
+
+
+/*!
+ * @brief TEMPORARY: log every black/white change the barcode sensor sees,
+ *        to check its sensitivity (BARCODE_DEBUG_LOG in config.h).
+ *
+ * @par
+ * Each line gives the new colour, how long the last colour lasted and how
+ * many edges the interrupt saw meanwhile (more than 1 = flicker between
+ * checks). At most BARCODE_DEBUG_MAX_PER_SEC lines a second are logged,
+ * then one line counting the changes left out, so a barcode cannot flood
+ * the log.
+ *
+ * @param[in] edges The interrupt's edge count now (g_edge_head).
+ */
+static void
+debug_log_colour (uint32_t edges)
+{
+    static bool     b_was_black  = false;
+    static uint32_t since_msec   = 0u;
+    static uint32_t last_edges   = 0u;
+    static uint32_t window_msec  = 0u;
+    static uint32_t lines        = 0u;
+    static uint32_t skipped      = 0u;
+    static bool     b_left_was   = false;   // Left line sensor pin level.
+    uint32_t        now_msec     = to_ms_since_boot(get_absolute_time());
+    bool            b_black      = barcode_is_black();
+    bool            b_left       = gpio_get(PIN_LINE_LEFT);
+
+    // Also the left line sensor's pin, to see which sensor drives which
+    // pin (they share a Grove pin on the Robo Pico).
+    if (b_left != b_left_was)
+    {
+        log_line("Left line sensor pin GP%u: %s.", PIN_LINE_LEFT,
+                 (b_left ? "HIGH" : "LOW"));
+        b_left_was = b_left;
+    }
+
+    // And the right line sensor's port (GP4/GP5): which pin is its DOUT?
+    {
+        static bool b_r4_was = false;
+        static bool b_r5_was = false;
+        bool        b_r4     = gpio_get(4u);
+        bool        b_r5     = gpio_get(5u);
+
+        if ((b_r4 != b_r4_was) || (b_r5 != b_r5_was))
+        {
+            log_line("Right line sensor port: GP4 %s, GP5 %s.",
+                     (b_r4 ? "HIGH" : "LOW"), (b_r5 ? "HIGH" : "LOW"));
+            b_r4_was = b_r4;
+            b_r5_was = b_r5;
+        }
+    }
+
+    if ((now_msec - window_msec) >= 1000u)
+    {
+        if (skipped > 0u)
+        {
+            log_line("Barcode IR: ...%" PRIu32 " more changes in that "
+                     "second not shown.", skipped);
+        }
+        window_msec = now_msec;
+        lines       = 0u;
+        skipped     = 0u;
+    }
+
+    if (b_black != b_was_black)
+    {
+        if (lines < BARCODE_DEBUG_MAX_PER_SEC)
+        {
+            log_line("Barcode IR: %s (GP%u %s) after %" PRIu32 " ms %s, "
+                     "%" PRIu32 " edges.", (b_black ? "BLACK" : "white"),
+                     PIN_BARCODE, (gpio_get(PIN_BARCODE) ? "HIGH" : "LOW"),
+                     (now_msec - since_msec),
+                     (b_was_black ? "black" : "white"),
+                     (edges - last_edges));
+            lines++;
+        }
+        else
+        {
+            skipped++;
+        }
+
+        b_was_black = b_black;
+        since_msec  = now_msec;
+        last_edges  = edges;
+    }
+}   /* debug_log_colour() */
 
 bool barcode_is_enabled(void) { return gb_enabled; }
 uint32_t barcode_edge_count(void) { return g_edge_head; }
