@@ -78,7 +78,7 @@
 #define DUMP_LINE_BYTES         96u     // Must match LOG_LINE_MAX in log.c.
 #define USEC_PER_MSEC           1000u
 #define DUMP_TENTHS             10u     // Distance widths in 0.1 ticks.
-#define BRANCH_MIN_USEC        (LINE_JUNCTION_MIN_MSEC * USEC_PER_MSEC)
+#define BRANCH_MIN_USEC        (BARCODE_FIRST_MARK_MAX_MSEC * USEC_PER_MSEC)
 
 // Lenient decode of one letter, "*X*" (see scan_decode_lenient()).
 #define LENIENT_ELEMENTS        29u     // '*' gap letter gap '*'.

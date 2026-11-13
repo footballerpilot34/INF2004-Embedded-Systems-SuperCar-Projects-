@@ -155,6 +155,11 @@
 #define PIVOT_PULSE_OFF_MSEC        180u    // Braked pause between bursts
                                             // (was 120: turning speed
                                             // 75%, burst power kept).
+// Barcode turns at a crossroad (TURN state) pivot harder: at 20% / 180 ms
+// the car sometimes stalled mid-turn (2026-11-13). Calibration keeps the
+// gentler settings above. Overshoots the line: lower the speed.
+#define TURN_PULSE_SPEED            30      // Burst power in a turn.
+#define TURN_PULSE_OFF_MSEC         120u    // Shorter pause in a turn.
 #define SPEED_HUMP                  23      // Climbing a hump, +25% from 18
                                             // (22.5, rounded).
 // Line-following turns keep BOTH wheels rolling forward, so the car never
@@ -307,6 +312,12 @@
 #define BARCODE_WIDE_SEEN_X10       20u     // Wide seen: widest >= 2.0x
                                             // the narrowest.
 #define BARCODE_MESSAGE_MAX        16u     // Longest message kept.
+#define BARCODE_FIRST_MARK_MAX_MSEC 340u   // A scan whose FIRST black mark
+                                            // lasts this long is dropped
+                                            // (a branch, not a bar). Was
+                                            // LINE_JUNCTION_MIN_MSEC; kept
+                                            // separate so crossroads can
+                                            // go lower (2026-11-13).
 #define BARCODE_GLITCH_USEC         2000u   // A colour shorter than this is
                                             // sensor flicker, not a bar.
 
@@ -394,7 +405,11 @@
 // a crossroad. A branch is 18 mm (~470 ms at SPEED_SCAN 8, ~38 mm/s). The
 // pivot point is the wheel axle, behind the sensors, so the car first
 // drives on for JUNCTION_ADVANCE_MSEC to bring the axle over the crossing.
-#define LINE_JUNCTION_MIN_MSEC      340u    // ~13 mm at SPEED_SCAN 8.
+#define LINE_JUNCTION_MIN_MSEC      150u    // ~5 mm at SPEED_SCAN 8 (was
+                                            // 340, ~13 mm): the crossing
+                                            // line can be thinner than a
+                                            // big print's wide bar; bars
+                                            // are no risk (see above).
 #define LINE_JUNCTION_MAX_MSEC      1050u   // ~40 mm: longer black (the
                                             // mat past a paper edge) is
                                             // not a branch (2026-11-06:
@@ -404,13 +419,6 @@
 #define JUNCTION_ADVANCE_MSEC       1180u   // VERIFY: about the line-sensor
                                             // to axle distance at
                                             // SPEED_SCAN (~32 mm/s).
-// A + crossroad or a sharp bend? The side sensor crosses a line at both.
-// After the mark the car follows on for JUNCTION_CONFIRM_MSEC (part of
-// the ADVANCE above, so it must be shorter): a line sensor white for
-// JUNCTION_BEND_WHITE_MSEC means the line ended ahead (a bend: the turn
-// waits for the real crossroad); both still on black means a + crossroad.
-#define JUNCTION_CONFIRM_MSEC       400u    // ~14 mm at cruise speed.
-#define JUNCTION_BEND_WHITE_MSEC    150u    // Shorter white is a wobble.
 
 // ------------------------------------------------------------------------
 // Supply watch (power.c): VSYS, the battery voltage the Pico gets, shown
