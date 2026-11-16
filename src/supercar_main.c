@@ -90,6 +90,8 @@
 #define KEY_UTURN               'u'
 #define KEY_BARCODE_TEST        't'
 #define KEY_ENCODER_MARK        'e'
+#define KEY_STATIONARY_SCAN     'g'
+#define SCAN_READY_TIMEOUT_MSEC 2000u // Nonblocking wait for a fresh forward ping.
 
 static bool g_encoder_marked;
 
@@ -97,6 +99,8 @@ static void          usb_wait(void);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
 static bool g_stationary_scan_test = false;
+static bool g_stationary_scan_starting = false;
+static uint32_t g_stationary_scan_since = 0u;
 
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
@@ -107,6 +111,9 @@ static char const *  restart_reason(void);
 static void          barcode_report(barcode_result_t result);
 static void          turn_test(barcode_command_t command);
 static void          encoder_calibration_mark(void);
+static void          stationary_scan_test_start(void);
+static void          stationary_scan_test_cancel(void);
+static void          stationary_scan_test_task(void);
 
 
 /*!
@@ -161,9 +168,9 @@ main (void)
         command_run(web_command_take());
         if (web_servo_take(&servo_deg))
         {
-            if (vehicle_is_moving())
+            if (vehicle_is_moving() || g_stationary_scan_test)
             {
-                log_servo("Servo: locked while the car is moving.");
+                log_servo("Servo: locked while moving or scanning.");
             }
             else
             {
@@ -195,27 +202,7 @@ main (void)
         {
             vehicle_task();
         }
-        if (g_stationary_scan_test)
-        {
-            if (!vehicle_is_idle())
-            {
-                obstacle_scan_cancel();
-                g_stationary_scan_test = false;
-                motor_set(0, 0);
-                log_printf("STATIONARY SCAN TEST CANCELLED");
-            }
-            else
-            {
-                motor_set(0, 0);
-                obstacle_scan_task(to_ms_since_boot(get_absolute_time()));
-
-                if (!obstacle_scan_active())
-                {
-                    g_stationary_scan_test = false;
-                    log_printf("STATIONARY SCAN TEST COMPLETE");
-                }
-            }
-        }
+        stationary_scan_test_task();
 
         line_diag_task();
         buzzer_task();
@@ -296,6 +283,15 @@ restart_reason (void)
 static void
 command_run (web_command_t command)
 {
+    if (g_stationary_scan_test &&
+        (command == WEB_CMD_START || command == WEB_CMD_WHEEL_TEST ||
+         command == WEB_CMD_TURN_LEFT || command == WEB_CMD_TURN_RIGHT ||
+         command == WEB_CMD_UTURN || command == WEB_CMD_BARCODE_TEST ||
+         command == WEB_CMD_BARCODE_STATIC || command == WEB_CMD_IMU_CALIBRATE))
+    {
+        web_set_scan_test_status("REJECTED: scan running; STOP before driving or other tests.");
+        return;
+    }
     if (WEB_CMD_NONE != command && g_encoder_marked)
     {
         g_encoder_marked = false;
@@ -304,7 +300,12 @@ command_run (web_command_t command)
     switch (command)
     {
     case WEB_CMD_STOP:
+        stationary_scan_test_cancel();
         vehicle_stop();
+    break;
+
+    case WEB_CMD_STATIONARY_SCAN:
+        stationary_scan_test_start();
     break;
 
     case WEB_CMD_START:
@@ -407,6 +408,105 @@ command_run (web_command_t command)
     break;
     }
 }   /* command_run() */
+
+
+static void
+stationary_scan_test_status(char const * p_status)
+{
+    web_set_scan_test_status(p_status);
+    log_printf("STATIONARY SCAN TEST %s", p_status);
+}
+
+
+static void
+stationary_scan_test_start(void)
+{
+    if (g_stationary_scan_test || obstacle_scan_active())
+    {
+        stationary_scan_test_status("REJECTED: scan already running.");
+    }
+    else if (!vehicle_is_idle())
+    {
+        stationary_scan_test_status("REJECTED: stop the vehicle first.");
+    }
+    else
+    {
+        motor_set(0, 0);
+        g_stationary_scan_test = true;
+        g_stationary_scan_starting = true;
+        g_stationary_scan_since = to_ms_since_boot(get_absolute_time());
+        web_set_scan_test_busy(true);
+        // Completion recentres the servo and invalidates the previous ray.
+        // Never reject a repeat click just because that fresh ping is pending,
+        // and never use the last side-facing echo as a forward safety check.
+        servo_set_angle(SERVO_CENTER_DEG);
+        ultrasonic_invalidate();
+        stationary_scan_test_status("STARTED: waiting for forward reading; wheels braked.");
+    }
+}
+
+
+static void
+stationary_scan_test_cancel(void)
+{
+    if (g_stationary_scan_test)
+    {
+        obstacle_scan_cancel();
+        g_stationary_scan_test = false;
+        g_stationary_scan_starting = false;
+        web_set_scan_test_busy(false);
+        motor_set(0, 0);
+        stationary_scan_test_status("CANCELLED: wheels braked.");
+    }
+}
+
+
+static void
+stationary_scan_test_task(void)
+{
+    if (!g_stationary_scan_test) { return; }
+    if (!vehicle_is_idle())
+    {
+        stationary_scan_test_cancel();
+        return;
+    }
+    motor_set(0, 0);
+    if (g_stationary_scan_starting)
+    {
+        uint32_t now = to_ms_since_boot(get_absolute_time());
+        if (!servo_is_settled() || !ultrasonic_measurement_ready())
+        {
+            if (now - g_stationary_scan_since >= SCAN_READY_TIMEOUT_MSEC)
+            {
+                g_stationary_scan_test = g_stationary_scan_starting = false;
+                web_set_scan_test_busy(false);
+                stationary_scan_test_status("FAILED: no fresh forward reading; wheels braked.");
+            }
+            return;
+        }
+        uint32_t range = ultrasonic_range_mm();
+        g_stationary_scan_starting = false;
+        if (range == 0u || range > OBSTACLE_STOP_MM)
+        {
+            g_stationary_scan_test = false;
+            web_set_scan_test_busy(false);
+            stationary_scan_test_status("REJECTED: obstacle must be within stop range.");
+            return;
+        }
+        obstacle_scan_start(range, now);
+        stationary_scan_test_status("STARTED: scanning; wheels braked.");
+        return;
+    }
+    obstacle_scan_task(to_ms_since_boot(get_absolute_time()));
+    if (!obstacle_scan_active())
+    {
+        g_stationary_scan_test = false;
+        web_set_scan_test_busy(false);
+        stationary_scan_test_status(obstacle_profile()->timed_out ?
+            "FAILED: timed out; results incomplete. Wheels braked." :
+            "COMPLETE: results below; wheels braked.");
+    }
+}
 
 
 /*!
@@ -616,7 +716,7 @@ serial_poll (void)
         static uint32_t step = 0u;
         static const int32_t angles[] = {60, 90, 120, 90};
 
-        if (vehicle_is_idle())
+        if (vehicle_is_idle() && !obstacle_scan_active())
         {
             int32_t angle = angles[step];
             servo_set_angle(angle);
@@ -629,28 +729,9 @@ serial_poll (void)
             log_printf("SERVO TEST: stop the car first.");
         }
     }
-    else if ('g' == key)
+    else if (KEY_STATIONARY_SCAN == key)
     {
-        if (vehicle_is_idle() && !g_stationary_scan_test)
-        {
-            uint32_t range = ultrasonic_range_mm();
-
-            if (range > 0u && range <= OBSTACLE_STOP_MM)
-            {
-                motor_set(0, 0);
-                g_stationary_scan_test = true;
-                obstacle_scan_start(range, to_ms_since_boot(get_absolute_time()));
-                log_printf("STATIONARY SCAN TEST START");
-            }
-            else
-            {
-                log_printf("SCAN TEST: obstacle must be within stop range.");
-            }
-        }
-        else
-        {
-            log_printf("SCAN TEST: stop the car first.");
-        }
+        command = WEB_CMD_STATIONARY_SCAN;
     }
     else if (KEY_ENCODER_MARK == key)
     {
@@ -658,12 +739,6 @@ serial_poll (void)
     }
     else if (KEY_STOP == key)
     {
-        if (g_stationary_scan_test)
-        {
-            obstacle_scan_cancel();
-            g_stationary_scan_test = false;
-            log_printf("STATIONARY SCAN TEST CANCELLED");
-        }
         command = WEB_CMD_STOP;
     }
     else if (KEY_START == key)

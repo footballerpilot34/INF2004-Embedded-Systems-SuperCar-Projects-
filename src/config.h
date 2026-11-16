@@ -61,9 +61,9 @@
 // hotspots) in HOTSPOT_LIST. The car tries each in turn, or the one on the
 // page, and the page is at http://WIFI_HOST_NAME.local or the IP it logs.
 // Each is tried for up to WIFI_TRY_MSEC, round and round until one
-// answers (also when the link drops); the car makes no network of its own.
-// Own-network mode, only if no hotspot is listed: join WIFI_NAME and open
-// http://192.168.4.1.
+// answers (also when the link drops). After WIFI_RECOVERY_MSEC without a
+// connection, join WIFI_NAME and open http://192.168.4.1 to recover the UI;
+// select a hotspot and press USE to retry. No hotspots listed: own network.
 // ------------------------------------------------------------------------
 #define WIFI_NAME                   "SuperCar-AAI14"
 #define WIFI_PASSWORD               "supercar14"    // At least 8 characters.
@@ -79,9 +79,9 @@
                                             // list, "still looking" this
                                             // often instead of every try.
 #define WIFI_CHECK_MSEC             250u    // How often the link is checked.
+#define WIFI_RECOVERY_MSEC          60000u  // Offline this long: recovery AP.
 #define WIFI_PING_MSEC              2000u   // Ping the hotspot this often...
-#define WIFI_PING_LOST_MSEC         10000u  // ...no reply this long: rejoin
-                                            // (only if it ever answered).
+                                            // for diagnostics, not link control.
 
 #if __has_include("wifi_secrets.h")
 #include "wifi_secrets.h"           // HOTSPOT_LIST.
@@ -256,9 +256,27 @@
 #define OBSTACLE_SCAN_COARSE_DEG    10
 #define OBSTACLE_SCAN_FINE_DEG      2
 #define OBSTACLE_SCAN_SAMPLES       3u
-#define OBSTACLE_SCAN_PLANE_MM      20u    // Foreground depth tolerance.
-#define OBSTACLE_SCAN_BACKGROUND_GAP_MM 100u
+#define OBSTACLE_SCAN_EDGE_JUMP_MM  100u   // Minimum near-to-far depth jump;
+                                        // also maximum far-streak depth span.
+#define OBSTACLE_SCAN_EDGE_CONFIRM_RAYS 3u // Clearance safety only; NOT edge detection.
+#define OBSTACLE_SCAN_STABLE_SPREAD_MM 40u // Echo agreement for clearance safety.
+#define OBSTACLE_BYPASS_MARGIN_MM   20u    // Candidate path margin; validate on floor.
 #define OBSTACLE_SCAN_TIMEOUT_MSEC  30000u
+
+// DISPLAY ONLY: provisional effective-beam fit to the supplied bottle scans.
+// Re-measure on this sensor/target; never use this correction for clearance.
+#ifndef OBSTACLE_WIDTH_CALIBRATION_ENABLED
+#define OBSTACLE_WIDTH_CALIBRATION_ENABLED true
+#endif
+#ifndef OBSTACLE_WIDTH_BEAM_HALF_DEG_X10
+#define OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 98 // 9.8 degrees, effective half-angle.
+#endif
+#ifndef OBSTACLE_WIDTH_CAL_MIN_MM
+#define OBSTACLE_WIDTH_CAL_MIN_MM    200u
+#endif
+#ifndef OBSTACLE_WIDTH_CAL_MAX_MM
+#define OBSTACLE_WIDTH_CAL_MAX_MM    320u
+#endif
 
 #define US_PING_PERIOD_USEC         60000u  // Pings at least 60 ms apart.
 #define US_ECHO_TIMEOUT_USEC        30000u  // About 5 m.

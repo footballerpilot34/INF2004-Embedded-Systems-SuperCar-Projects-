@@ -1,4 +1,4 @@
-"""Run the real coarse/fine scanner against simulated rectangular targets."""
+"""Run the real obstacle scanner against simulated targets."""
 from pathlib import Path
 import subprocess
 import tempfile
@@ -9,10 +9,16 @@ with tempfile.TemporaryDirectory() as directory:
     (work / "pico").mkdir()
     (work / "pico/stdlib.h").write_text(
         "#include <stdint.h>\nuint64_t time_us_64(void);\n")
+    (work / "pico/time.h").write_text("""
+#include "stdlib.h"
+static inline uint64_t get_absolute_time(void) { return time_us_64(); }
+static inline uint32_t to_ms_since_boot(uint64_t time) { return time / 1000u; }
+""")
     (work / "test.c").write_text(r'''
 #include <assert.h>
 #include <math.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include "config.h"
 #include "obstacle.h"
 #include "servo.h"
@@ -23,8 +29,10 @@ with tempfile.TemporaryDirectory() as directory:
 static uint32_t now, ready_at, sequence, range_mm, invalidations;
 static int32_t angle = 90;
 static bool measurement_ready;
-static int mode; // 0 background echo, 1 no echo, 2 wide, 3 noisy centre.
+enum { BACKGROUND, NO_ECHO, WIDE, NOISY_CENTRE, OUTLIER, NOISY_EDGE, ONE_ECHO, TWO_ECHO, UNSTABLE };
+static int mode;
 static int width = 300, offset;
+static uint32_t scan_depth = OBSTACLE_CLEAR_MM - 1u;
 static int32_t motor_left, motor_right, tilt;
 static bool reader_enabled;
 uint64_t time_us_64(void) { return (uint64_t)now * 1000; }
@@ -64,18 +72,26 @@ uint32_t ultrasonic_range_mm(void) { return range_mm; }
 
 static void sample(void) {
     float a = (angle - 90) * 0.017453292519943295f;
-    float x = 400.0f * tanf(a);
-    bool hit = mode == 2 || fabsf(x - offset) <= width / 2.0f;
-    range_mm = hit ? (uint32_t)lroundf(400.0f / cosf(a)) :
-        (mode == 1 ? ULTRASONIC_NO_RANGE : (uint32_t)lroundf(2000.0f / cosf(a)));
-    if (mode == 3) { range_mm = 200 + 200 * (sequence % 3); }
-    if (mode == 4 && sequence % 3 == 0) { range_mm = 3000; }
+    float x = scan_depth * tanf(a);
+    bool hit = mode == WIDE || fabsf(x - offset) <= width / 2.0f;
+    range_mm = hit ? (uint32_t)lroundf(scan_depth / cosf(a)) :
+        (mode == NO_ECHO ? ULTRASONIC_NO_RANGE : (uint32_t)lroundf(2000.0f / cosf(a)));
+    if (mode == NOISY_CENTRE || (mode == NOISY_EDGE && !hit)) {
+        range_mm = 200 + 200 * (sequence % 3);
+    }
+    if (mode == OUTLIER && sequence % 3 == 0) { range_mm = 3000; }
+    if (mode == ONE_ECHO && sequence % 3 != 0) { range_mm = ULTRASONIC_NO_RANGE; }
+    if (mode == TWO_ECHO) {
+        if (sequence % 3 == 0) { range_mm = ULTRASONIC_NO_RANGE; }
+        else { range_mm += sequence % 3 == 1 ? -10 : 10; }
+    }
+    if (mode == UNSTABLE) { range_mm = 100 + 200 * (sequence % 3); }
     ++sequence;
     measurement_ready = true;
 }
 
 static void run_scan(void) {
-    obstacle_scan_start(400, now);
+    obstacle_scan_start(scan_depth, now);
     assert(obstacle_scan_active());
     // Reading the same completed ping on multiple control ticks must not
     // satisfy the three independent samples required at an angle.
@@ -94,80 +110,191 @@ static void run_scan(void) {
     assert(obstacle_profile()->finished);
 }
 
-int main(void) {
-    for (width = 200; width <= 300; width += 50) {
-        for (offset = -40; offset <= 40; offset += 40) {
-            mode = 0; run_scan();
-            obstacle_profile_t const * p = obstacle_profile();
-            assert(!p->timed_out && p->centre_seen);
-            assert(p->left_bounded && p->right_bounded && p->edges_confirmed);
-            assert(fabsf((float)p->width_mm - width) / width <= 0.10f);
-            assert(abs(p->left_mm - (offset - width / 2)) <= 10);
-            assert(abs(p->right_mm - (offset + width / 2)) <= 10);
-            assert(p->width_min_mm <= (uint32_t)width);
-            assert(p->width_max_mm >= (uint32_t)width);
-            assert(!p->exceeds_expected_width);
-        }
-    }
-    width = 300; offset = 0; mode = 1; run_scan();
-    assert(obstacle_profile()->left_bounded && obstacle_profile()->right_bounded);
-    assert(!obstacle_profile()->edges_confirmed);
-    assert(obstacle_profile()->left_ray_mm == ULTRASONIC_NO_RANGE);
-    mode = 2; run_scan(); // Obstacle extends beyond both mechanical limits.
-    assert(!obstacle_profile()->left_bounded && !obstacle_profile()->right_bounded);
-    mode = 3; run_scan(); // Inconsistent samples are not labelled no-echo/clear.
-    assert(!obstacle_profile()->centre_seen);
-    mode = 4; run_scan(); // A single multipath outlier must not destroy two agreeing echoes.
-    assert(obstacle_profile()->left_bounded && obstacle_profile()->right_bounded);
-    assert(obstacle_profile()->edges_confirmed);
-    // Regression: actual reported right-edge returns, with a clipped left side.
-    obstacle_point_t actual[] = {
-        {-30, 210, OBSTACLE_RETURN_RANGE}, {-20, 196, OBSTACLE_RETURN_RANGE},
-        {-10, 182, OBSTACLE_RETURN_RANGE}, {0, 180, OBSTACLE_RETURN_RANGE},
-        {10, 183, OBSTACLE_RETURN_RANGE}, {20, 196, OBSTACLE_RETURN_RANGE},
-        {22, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_UNKNOWN},
-        {24, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_UNKNOWN},
-        {26, 501, OBSTACLE_RETURN_RANGE},
-        {28, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_UNKNOWN},
-        {30, 494, OBSTACLE_RETURN_RANGE}
-    };
-    obstacle_profile_t actual_profile;
-    obstacle_profile_build(actual, sizeof(actual) / sizeof(actual[0]), 180, &actual_profile);
-    assert(!actual_profile.left_bounded && actual_profile.right_bounded);
-    assert(actual_profile.right_angle_x10 == 230);
-    assert(actual_profile.right_mm >= 75 && actual_profile.right_mm <= 77);
-    assert(actual_profile.left_observed_mm <= -100);
-    assert(!actual_profile.edges_confirmed && actual_profile.width_mm == 0);
-    // A valid coarse background bracket survives inconsistent fine readings.
-    actual[0] = (obstacle_point_t){-30, 500, OBSTACLE_RETURN_RANGE};
-    obstacle_profile_build(actual, sizeof(actual) / sizeof(actual[0]), 180, &actual_profile);
-    assert(actual_profile.left_bounded && actual_profile.right_bounded);
-    assert(actual_profile.width_mm > 150 && actual_profile.edges_confirmed);
-    obstacle_scan_start(400, now);
-    obstacle_scan_cancel();
-    assert(!obstacle_scan_active() && !obstacle_profile()->finished);
-    assert(servo_angle() == 90);
-    // Stuck sensor/task must terminate the scan with an explicit timeout.
-    obstacle_scan_start(400, now);
-    now += OBSTACLE_SCAN_TIMEOUT_MSEC;
-    obstacle_scan_task(now);
-    assert(!obstacle_scan_active() && obstacle_profile()->timed_out);
-    // Unsigned elapsed-time handling must also work across clock wrap.
-    now = UINT32_MAX - 50;
-    obstacle_scan_start(400, now);
-    now += OBSTACLE_SCAN_TIMEOUT_MSEC;
-    obstacle_scan_task(now);
-    assert(obstacle_profile()->timed_out);
-    assert(invalidations > 0);
 
+static void width_calibration_checks(void) {
+    // The supplied summaries do not contain the individual edge echoes.
+    // Reconstruct a common edge depth that reproduces each reported raw
+    // width, and use the midpoint of the supplied centre-distance range.
+    int left[] = {-23, -19}, right[] = {15, 15};
+    uint32_t reported[] = {193, 125}, front[] = {300, 220};
+    for (unsigned example = 0; example < 2; ++example) {
+        float depth = reported[example] /
+            (tanf(right[example] * 0.017453292519943295f) -
+             tanf(left[example] * 0.017453292519943295f));
+        obstacle_point_t points[31];
+        for (unsigned i = 0; i < 31; ++i) {
+            int a = -30 + 2 * (int)i;
+            float d = a > left[example] && a < right[example] ? depth : 900;
+            points[i] = (obstacle_point_t){a,
+                (uint32_t)lroundf(d / cosf(a * 0.017453292519943295f)),
+                OBSTACLE_RETURN_RANGE};
+        }
+        points[15].range_mm = front[example];
+        obstacle_profile_t p;
+        obstacle_profile_build(points, 31, front[example], &p);
+        assert(p.left_angle_x10 == left[example] * 10);
+        assert(p.right_angle_x10 == right[example] * 10);
+        assert(abs((int)p.width_mm - (int)reported[example]) <= 1);
+        assert(p.edges_confirmed && p.bypass.available);
+        // Candidate coordinates continue to be outside the RAW scan bounds.
+        assert(p.bypass.left_x_mm < p.left_mm && p.bypass.right_x_mm > p.right_mm);
+        assert(p.bypass.turn_clearance_mm == 124);
+        if (OBSTACLE_WIDTH_CALIBRATION_ENABLED) {
+            float beta = OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 / 10.0f;
+            float expected = front[example] *
+                (tanf((right[example] - beta) * 0.017453292519943295f) -
+                 tanf((left[example] + beta) * 0.017453292519943295f));
+            assert(p.calibrated_width_valid);
+            assert(abs((int)p.calibrated_width_mm - (int)lroundf(expected)) <= 1);
+            if (OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 == 98) {
+                assert(abs((int)p.calibrated_width_mm - 80) <= 50);
+                assert(p.calibrated_width_mm == (example == 0 ? 98u : 56u));
+            }
+        } else { assert(!p.calibrated_width_valid); }
+        // Sensitivity to the stated approximate distance intervals. These
+        // are model checks, not independent hardware validation scans.
+        for (uint32_t d = example == 0 ? 280u : 200u;
+             d <= (example == 0 ? 320u : 240u); d += 20u) {
+            points[15].range_mm = d;
+            obstacle_profile_build(points, 31, d, &p);
+            assert(abs((int)p.width_mm - (int)reported[example]) <= 1);
+            if (OBSTACLE_WIDTH_CALIBRATION_ENABLED &&
+                OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 == 98) {
+                assert(p.calibrated_width_valid);
+                assert(abs((int)p.calibrated_width_mm - 80) <= 50);
+            }
+        }
+        // No calibration extrapolation beyond the configured test interval.
+        points[15].range_mm = OBSTACLE_WIDTH_CAL_MIN_MM - 1;
+        obstacle_profile_build(points, 31, points[15].range_mm, &p);
+        assert(!p.calibrated_width_valid);
+        points[15].range_mm = OBSTACLE_WIDTH_CAL_MAX_MM + 1;
+        obstacle_profile_build(points, 31, points[15].range_mm, &p);
+        assert(!p.calibrated_width_valid);
+        // An estimated centre cannot silently become a measured reference.
+        points[15].kind = OBSTACLE_RETURN_NO_ECHO;
+        points[15].range_mm = ULTRASONIC_NO_RANGE;
+        obstacle_profile_build(points, 31, front[example], &p);
+        assert(!p.calibrated_width_valid);
+    }
+}
+
+static void geometry_checks(void) {
+    obstacle_point_t a[] = {
+        {-4, 800, OBSTACLE_RETURN_RANGE}, {-2, 300, OBSTACLE_RETURN_RANGE},
+        {0, 298, OBSTACLE_RETURN_RANGE}, {2, 300, OBSTACLE_RETURN_RANGE},
+        {4, 800, OBSTACLE_RETURN_RANGE}
+    };
+    obstacle_profile_t p;
+    obstacle_profile_build(a, 5, 298, &p);
+    assert(p.left_bounded && p.right_bounded);
+    assert(p.left_angle_x10 == -30 && p.right_angle_x10 == 30);
+    assert(p.left_status == OBSTACLE_EDGE_ESTIMATED && !p.edges_confirmed);
+    assert(p.width_mm > 25 && p.width_mm < 40 && !p.bypass.available);
+    if (OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 >= 30) {
+        assert(!p.calibrated_width_valid); // Beam correction overlaps the edges.
+    }
+    // A SINGLE missing ray bounds an estimate; there is no no-echo streak gate.
+    a[0] = (obstacle_point_t){-4, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
+    a[4] = (obstacle_point_t){4, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
+    obstacle_profile_build(a, 5, 298, &p);
+    assert(p.left_bounded && p.right_bounded && !p.bypass.available);
+    assert(p.left_status == OBSTACLE_EDGE_NO_ECHO && p.right_status == OBSTACLE_EDGE_NO_ECHO);
+    assert(p.left_edge.near_angle_deg == -2 && p.left_edge.far_angle_deg == -4);
+    // A weak single-echo foreground reading remains usable for geometry.
+    a[1].kind = OBSTACLE_RETURN_WEAK_RANGE;
+    obstacle_profile_build(a, 5, 298, &p);
+    assert(p.left_bounded && p.width_mm > 0 && !p.edges_confirmed);
+    // Missing centre uses the pre-scan range for estimation, never clearance.
+    a[2] = (obstacle_point_t){0, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
+    obstacle_profile_build(a, 5, 298, &p);
+    assert(!p.centre_seen && p.left_bounded && p.right_bounded && !p.bypass.available);
+    // Every edge is discovered from the scan, including asymmetric observations.
+    obstacle_point_t actual[] = {
+        {-30,821,OBSTACLE_RETURN_RANGE}, {-28,836,OBSTACLE_RETURN_RANGE},
+        {-26,316,OBSTACLE_RETURN_RANGE}, {-24,332,OBSTACLE_RETURN_RANGE},
+        {0,298,OBSTACLE_RETURN_RANGE}, {14,355,OBSTACLE_RETURN_RANGE},
+        {16,354,OBSTACLE_RETURN_RANGE},
+        {18,ULTRASONIC_NO_RANGE,OBSTACLE_RETURN_NO_ECHO}
+    };
+    obstacle_profile_build(actual, 8, 298, &p);
+    assert(p.left_angle_x10 == -270 && p.right_angle_x10 == 170);
+    assert(p.width_mm == 249 && !p.edges_confirmed && !p.bypass.available);
+    // The same algorithm works with a different pair of physical edges.
+    actual[0].angle_deg = -28; actual[1].angle_deg = -26;
+    actual[2].angle_deg = -24; actual[3].angle_deg = -22;
+    actual[5].angle_deg = 10; actual[6].angle_deg = 12; actual[7].angle_deg = 14;
+    obstacle_profile_build(actual, 8, 298, &p);
+    assert(p.left_angle_x10 == -250 && p.right_angle_x10 == 130);
+    // No distance transition at the range boundary: show a limit estimate.
+    obstacle_point_t wide[] = {{-30,340,OBSTACLE_RETURN_RANGE},
+        {0,298,OBSTACLE_RETURN_RANGE},{30,340,OBSTACLE_RETURN_RANGE}};
+    obstacle_profile_build(wide, 3, 298, &p);
+    assert(p.left_status == OBSTACLE_EDGE_SCAN_LIMIT && p.right_status == OBSTACLE_EDGE_SCAN_LIMIT);
+    assert(!p.edges_confirmed && !p.bypass.available);
+    assert(!p.calibrated_width_valid);
+    // Three clean background returns still qualify for the unchanged safety
+    // gate; weakening any one must prevent candidate generation.
+    obstacle_point_t clean[] = {
+        {-8,800,OBSTACLE_RETURN_RANGE},{-6,800,OBSTACLE_RETURN_RANGE},
+        {-4,800,OBSTACLE_RETURN_RANGE},{-2,300,OBSTACLE_RETURN_RANGE},
+        {0,298,OBSTACLE_RETURN_RANGE},{2,300,OBSTACLE_RETURN_RANGE},
+        {4,800,OBSTACLE_RETURN_RANGE},{6,800,OBSTACLE_RETURN_RANGE},
+        {8,800,OBSTACLE_RETURN_RANGE}
+    };
+    obstacle_profile_build(clean, 9, 298, &p);
+    assert(p.edges_confirmed && p.bypass.available);
+    clean[6].kind = OBSTACLE_RETURN_WEAK_RANGE;
+    obstacle_profile_build(clean, 9, 298, &p);
+    assert(p.left_bounded && p.right_bounded && !p.edges_confirmed && !p.bypass.available);
+    clean[6].kind = OBSTACLE_RETURN_RANGE; clean[7].range_mm = 1600;
+    obstacle_profile_build(clean, 9, 298, &p);
+    assert(!p.edges_confirmed && !p.bypass.available);
+    // A lone jump is displayed immediately even when later readings return
+    // to foreground, but it is NOT upgraded to verified clearance.
+    clean[6].range_mm = 300; clean[7].range_mm = 300;
+    clean[5].range_mm = 800;
+    obstacle_profile_build(clean, 9, 298, &p);
+    assert(p.right_angle_x10 == 10 && !p.edges_confirmed && !p.bypass.available);
+}
+
+int main(void) {
+    width_calibration_checks();
+    geometry_checks();
+    scan_depth = 250; width = 80; offset = 0;
+    for (int test = 0; test < 6; ++test) {
+        int modes[] = {BACKGROUND, ONE_ECHO, TWO_ECHO, UNSTABLE, NO_ECHO, NOISY_CENTRE};
+        mode = modes[test]; run_scan();
+        uint32_t count;
+        obstacle_point_t const * points = obstacle_scan_points(&count);
+        assert(count == 31); // Entire configured 60..120 degree range, even with missing centre.
+        for (unsigned i = 0; i < count; ++i) { assert(points[i].angle_deg == -30 + 2 * (int)i); }
+        if (mode == ONE_ECHO) {
+            assert(points[15].range_mm == scan_depth && points[15].kind == OBSTACLE_RETURN_WEAK_RANGE);
+            assert(obstacle_profile()->left_bounded && obstacle_profile()->right_bounded);
+            assert(!obstacle_profile()->edges_confirmed && !obstacle_profile()->bypass.available);
+        }
+        if (mode == TWO_ECHO) { assert(points[15].range_mm == scan_depth); }
+        if (mode == UNSTABLE) { assert(points[15].range_mm == 300 && points[15].kind == OBSTACLE_RETURN_WEAK_RANGE); }
+        if (mode == BACKGROUND) { assert(obstacle_profile()->edges_confirmed); }
+        if (mode == NO_ECHO) { assert(!obstacle_profile()->bypass.available); }
+    }
+    uint32_t before, after;
+    obstacle_scan_points(&before); obstacle_scan_cancel(); obstacle_scan_points(&after);
+    assert(before == after && !obstacle_scan_active()); // Preserve graph until next scan.
+    obstacle_scan_start(250, now); obstacle_scan_points(&after); assert(after == 0);
+    now += OBSTACLE_SCAN_TIMEOUT_MSEC; obstacle_scan_task(now);
+    assert(obstacle_profile()->timed_out && !obstacle_profile()->bypass.available);
+    assert(invalidations > 0);
     // Exercise the real vehicle state machine with the real scanner.
-    now = 100; ready_at = 0; mode = 0; range_mm = 401;
+
+    now = 100; ready_at = 0; mode = NO_ECHO; range_mm = OBSTACLE_STOP_MM + 1;
     vehicle_init(); vehicle_start(); vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
     assert(reader_enabled);
     vehicle_task();
     assert(motor_left > 0 && motor_right > 0);
-    range_mm = 400; tilt = HUMP_ENTER_PITCH_X10;
+    range_mm = OBSTACLE_STOP_MM; tilt = HUMP_ENTER_PITCH_X10;
     vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Stop outranks tilt.
     assert(!reader_enabled);
@@ -182,7 +309,10 @@ int main(void) {
         assert(now - scan_start <= OBSTACLE_SCAN_TIMEOUT_MSEC + 10);
     }
     assert(vehicle_state() == VEHICLE_BLOCKED);
-    assert(obstacle_profile()->finished && obstacle_profile()->edges_confirmed);
+    assert(obstacle_profile()->finished && !obstacle_profile()->edges_confirmed);
+    assert(obstacle_profile()->left_bounded && obstacle_profile()->right_bounded);
+    assert(!obstacle_profile()->bypass.available);
+    assert(obstacle_profile()->left_status == OBSTACLE_EDGE_NO_ECHO);
     // No echo cannot release BLOCKED; valid distances need sustained clearance.
     range_mm = ULTRASONIC_NO_RANGE;
     for (int i = 0; i < 50; ++i) { now += 10; vehicle_task(); }
@@ -191,7 +321,7 @@ int main(void) {
     vehicle_task(); now += OBSTACLE_CLEAR_MSEC + 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
     assert(reader_enabled);
-    vehicle_stop(); vehicle_start(); range_mm = 399; vehicle_task();
+    vehicle_stop(); vehicle_start(); range_mm = OBSTACLE_STOP_MM - 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Calibration protected.
     vehicle_stop();
     assert(vehicle_state() == VEHICLE_STOPPED && !obstacle_scan_active());
@@ -207,11 +337,14 @@ int main(void) {
     return 0;
 }
 '''.replace("#include <math.h>", "#include <math.h>\n#include <stdlib.h>"))
-    subprocess.run(["cc", "-std=c11", "-Wall", "-Wextra", "-Werror",
-                    "-I", str(work),
-                    "-I", str(ROOT / "src"),
-                    str(work / "test.c"), str(ROOT / "src/obstacle.c"),
-                    str(ROOT / "src/vehicle.c"),
-                    "-lm", "-o", str(work / "test")], check=True, timeout=30)
-    subprocess.run([str(work / "test")], check=True, timeout=10)
+    for definitions in ([], ["-DOBSTACLE_WIDTH_CALIBRATION_ENABLED=false"],
+                        ["-DOBSTACLE_WIDTH_BEAM_HALF_DEG_X10=0"]):
+        subprocess.run(["cc", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                        "-fsanitize=undefined", "-fno-sanitize-recover=all",
+                        *definitions, "-I", str(work),
+                        "-I", str(ROOT / "src"),
+                        str(work / "test.c"), str(ROOT / "src/obstacle.c"),
+                        str(ROOT / "src/vehicle.c"),
+                        "-lm", "-o", str(work / "test")], check=True, timeout=30)
+        subprocess.run([str(work / "test")], check=True, timeout=10)
 print("Obstacle scan host checks passed (geometry, freshness, cancellation, timeout)")

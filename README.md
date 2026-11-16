@@ -1,3 +1,28 @@
+# SuperCar connection (current firmware)
+
+Build the current firmware with `cmake --build build --target supercar -j4`.
+Flash `build/supercar.uf2`; the `robocar` program described below is the older
+manual-driving firmware.
+
+The current SuperCar tries the hotspots in `src/wifi_secrets.h` in order.
+For an iPhone, enable **Allow Others to Join** and **Maximise Compatibility**
+(if available), and leave the Personal Hotspot settings screen open while
+connecting. Verify the advertised name and password match the saved entry.
+Connect your laptop to the same hotspot, then open
+**http://supercar-aai14.local** or the numeric **http://** address printed in
+the USB serial monitor (`UI: open ...`).
+
+If no hotspot connection is established within 60 seconds, the car starts a
+recovery network:
+
+- Wi-Fi: **SuperCar-AAI14**
+- Password: **supercar14**
+- UI: **http://192.168.4.1**
+
+Stay connected if the computer reports no Internet. The recovery network stays
+on until you select a hotspot in the UI and press **USE**, or restart the car.
+With no hotspot list configured, this network starts immediately.
+
 # RoboCar: Wi-Fi car for Robo Pico + Pico W (C / Pico SDK)
 
 Your phone drives the car through a web page that the car serves over its own Wi-Fi.
