@@ -72,7 +72,7 @@
 #define WIDE_RATIO_DEN          4u      // 1.25x the widest narrow.
 #define START_STOP_CHAR         '*'
 #define NUM_CODE39_SYMBOLS      44u
-#define NUM_COMMAND_TEXTS       6u
+#define NUM_COMMAND_TEXTS       3u
 #define REPORT_MIN_ELEMENTS     4u      // Shorter scans are not reported.
 #define DUMP_PER_LINE           10u     // Widths per log line (fits 96).
 #define DUMP_LINE_BYTES         96u     // Must match LOG_LINE_MAX in log.c.
@@ -153,12 +153,9 @@ typedef struct
 // Messages that are commands (exact match); see config.h.
 static command_text_t const g_command_texts[NUM_COMMAND_TEXTS] =
 {
-    { BARCODE_TEXT_LEFT,        BARCODE_CMD_LEFT  },
-    { BARCODE_TEXT_LEFT_SHORT,  BARCODE_CMD_LEFT  },
-    { BARCODE_TEXT_RIGHT,       BARCODE_CMD_RIGHT },
-    { BARCODE_TEXT_RIGHT_SHORT, BARCODE_CMD_RIGHT },
-    { BARCODE_TEXT_UTURN,       BARCODE_CMD_UTURN },
-    { BARCODE_TEXT_UTURN_SHORT, BARCODE_CMD_UTURN }
+    { BARCODE_TEXT_LEFT,  BARCODE_CMD_LEFT  },
+    { BARCODE_TEXT_RIGHT, BARCODE_CMD_RIGHT },
+    { BARCODE_TEXT_UTURN, BARCODE_CMD_UTURN }
 };
 
 // Edge ring, filled by the ISR. The head only ever increases (it wraps

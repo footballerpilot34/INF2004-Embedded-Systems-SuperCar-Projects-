@@ -32,8 +32,9 @@
  *
  * @par Barcodes
  * Every decoded barcode is logged and shown on the web page. A command
- * (see BARCODE_TEXT_... in config.h: 'A' left, 'Z' right) is carried out
- * at the next crossroad (detected in line_sensor.c from the side sensor).
+ * (see BARCODE_TEXT_... in config.h: 'A' left and 'Z' right are carried
+ * out at the next crossroad, detected in line_sensor.c from the side
+ * sensor; 'F' is a U-turn, at once).
  *
  * @par Coding standard
  * BARR-C:2018. Deviation: Rule 6.5.a, see gpio_isr.c.

@@ -510,14 +510,12 @@
 // Messages that are COMMANDS (exact match; Code 39 is upper case).
 // Anything else is shown as a plain message. LEFT and RIGHT are kept
 // until the next crossroad and carried out there; a U-turn is at once.
-// Track barcodes (user, 2026-11-03): 'A' = turn left at the next
-// crossroad, 'Z' = turn right at the next crossroad.
+// Track barcodes (user, 2026-11-17): 'A' = turn left at the next
+// crossroad, 'Z' = turn right, 'F' = U-turn, all at the next crossroad
+// (user, 2026-11-17). No other message is a command.
 #define BARCODE_TEXT_LEFT           "A"
-#define BARCODE_TEXT_LEFT_SHORT     "L"
 #define BARCODE_TEXT_RIGHT          "Z"
-#define BARCODE_TEXT_RIGHT_SHORT    "R"
-#define BARCODE_TEXT_UTURN          "UTURN"
-#define BARCODE_TEXT_UTURN_SHORT    "U"
+#define BARCODE_TEXT_UTURN          "F"
 
 // Barcode turns: pivot (pulsed, like calibration) off the line, then
 // until a line sensor finds a line, then until both are on it; then
@@ -529,6 +527,8 @@
                                             // (x1.33: 75% turn speed).
 #define TURN_UTURN_MAX_MSEC         8000u   // U-turn gives up after this.
 #define TURN_UTURN_LEFT             true    // U-turn pivot: true = left.
+#define TURN_UTURN_SKIP_LINES       1u      // At a + crossroad: side
+                                            // branches to pivot past.
 #define TURN_ALIGN_MAX_MSEC         2000u   // Both-on-line must take less.
 
 // Crossroads (+), detected in line_sensor.c. The two line sensors stay
