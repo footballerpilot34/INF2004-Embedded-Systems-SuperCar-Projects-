@@ -45,7 +45,18 @@
 #define LWIP_MDNS_RESPONDER         1
 #define MDNS_MAX_SERVICES           1
 #define LWIP_NUM_NETIF_CLIENT_DATA  1
-#define MEMP_NUM_SYS_TIMEOUT        (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 3)
+/* mDNS keeps several timers per network while it announces the name
+   (right after the hotspot gives an IP); running out panics lwIP, which
+   froze the car in cyw43_arch_poll() 8 s after power-up (2026-11-17).
+   Each spare costs about 20 bytes. */
+#define MEMP_NUM_SYS_TIMEOUT        (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 16)
+
+/* SuperCar only: record a failed lwIP check before stopping, so the next
+   boot can report it (supercar_main.c). */
+#ifdef SUPERCAR_RECORD_ASSERTS
+void lwip_assert_record(const char *p_message);
+#define LWIP_PLATFORM_ASSERT(x)     lwip_assert_record(x)
+#endif
 
 #define MEM_STATS                   0
 #define SYS_STATS                   0

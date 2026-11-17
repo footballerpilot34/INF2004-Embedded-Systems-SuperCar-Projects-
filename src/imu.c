@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdint.h>
 
+#include "hardware/watchdog.h"
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
@@ -202,6 +203,7 @@ imu_calibrate (void)
         float   magnitude = 0.0f;
 
         sleep_ms(200u);
+        watchdog_update();   // 25 x 200 ms: longer than the watchdog.
         b_ok = sample_read(&g_axes);
         if (b_ok)
         {

@@ -132,6 +132,7 @@ target_link_libraries(supercar
 # Name shown in a phone hotspot's device list (= WIFI_HOST_NAME).
 target_compile_definitions(supercar PRIVATE
     CYW43_HOST_NAME="supercar-aai14"
+    SUPERCAR_RECORD_ASSERTS=1             # lwIP failures are reported
     # A connected serial monitor that stops reading must not starve Wi-Fi polling.
     PICO_STDIO_USB_STDOUT_TIMEOUT_US=1000
 )

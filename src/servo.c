@@ -10,6 +10,14 @@
 
 static int32_t g_angle = -1;
 static uint64_t g_ready_usec;
+static bool gb_released = false;    // Pulse off: idle, not holding.
+
+static uint16_t
+angle_level(int32_t degrees)
+{
+    return (uint16_t)(SERVO_MIN_USEC +
+        degrees * (SERVO_MAX_USEC - SERVO_MIN_USEC) / 180);
+}
 
 void
 servo_init(void)
@@ -31,14 +39,46 @@ servo_set_angle(int32_t degrees)
     degrees = degrees < low ? low : (degrees > high ? high : degrees);
     if (degrees == g_angle)
     {
+        if (gb_released)
+        {
+            // Hold again where it was left: it has not moved, so no
+            // settling wait and no new ultrasonic reading are needed.
+            pwm_set_gpio_level(PIN_SERVO, angle_level(degrees));
+            gb_released = false;
+        }
         return;
     }
     g_angle = degrees;
+    gb_released = false;
     g_ready_usec = time_us_64() + (uint64_t)SERVO_SETTLE_MSEC * 1000u;
     ultrasonic_invalidate();
-    pwm_set_gpio_level(PIN_SERVO, (uint16_t)(SERVO_MIN_USEC +
-        degrees * (SERVO_MAX_USEC - SERVO_MIN_USEC) / 180));
+    pwm_set_gpio_level(PIN_SERVO, angle_level(degrees));
     log_servo("Servo: %ld degrees.", (long)degrees);
+}
+
+/*!
+ * @brief Stop sending the servo's position pulse while the car is idle,
+ *        so it stops holding (and drawing current). Call every tick.
+ *
+ * @par
+ * Released only once it has been settled for SERVO_RELEASE_MSEC and the
+ * caller allows it (car idle, no scan). The next servo_set_angle() holds
+ * it again at once.
+ *
+ * @param[in] b_allow True while nothing needs the servo held.
+ */
+void
+servo_idle_release(bool b_allow)
+{
+    uint64_t release_usec = g_ready_usec +
+                            ((uint64_t)SERVO_RELEASE_MSEC * 1000u);
+
+    if (b_allow && !gb_released && (time_us_64() >= release_usec))
+    {
+        pwm_set_gpio_level(PIN_SERVO, 0u);
+        gb_released = true;
+        log_servo("Servo: released while idle (saves power).");
+    }
 }
 
 int32_t servo_angle(void) { return g_angle; }

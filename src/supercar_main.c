@@ -65,6 +65,7 @@
 #include "motor.h"
 #include "power.h"
 #include "servo.h"
+#include "stage.h"
 #include "telemetry.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
@@ -73,6 +74,8 @@
 
 #define USB_WAIT_MSEC           3000u
 #define USB_POLL_MSEC           100u
+#define RESTART_TEXT_BYTES      96u     // "WATCHDOG: ... froze in ...".
+#define FLASH_BYTES_MAX         0x01000000u // XIP window: 16 MB.
 #define WHEEL_TEST_MSEC         1000u
 #define WHEEL_TEST_PAUSE_MSEC   500u
 #define WHEEL_TEST_SPEED        20
@@ -108,6 +111,8 @@ static void          imu_calibrate_run(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
 static char const *  restart_reason(void);
+void                 lwip_assert_record(char const * p_message);
+void                 isr_hardfault(void);
 static void          barcode_report(barcode_result_t result);
 static void          turn_test(barcode_command_t command);
 static void          encoder_calibration_mark(void);
@@ -133,8 +138,12 @@ main (void)
     stdio_init_all();
     usb_wait();
     log_printf("=== SuperCar AAI14: line + barcode + hump/wall ===");
-    web_set_restart_reason(restart_reason());
-    log_printf("Last restart: %s.", restart_reason());
+    {
+        char const * p_reason = restart_reason();   // Reads it once.
+
+        web_set_restart_reason(p_reason);
+        log_printf("Last restart: %s.", p_reason);
+    }
 
     buzzer_init();
     servo_init();
@@ -155,17 +164,31 @@ main (void)
     log_printf("READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. "
                "Hold GP20 2 s for IMU calibration.");
 
+    // Restart by itself if the loop ever stops (a freeze), instead of
+    // sitting dead; the page then reports a watchdog restart.
+    watchdog_enable(WATCHDOG_MSEC, true);   // Paused while debugging.
+    log_printf("Watchdog on: the car restarts itself if it freezes for "
+               "%u ms.", WATCHDOG_MSEC);
+
     next_tick_usec = time_us_64() + TICK_USEC;
 
     for (;;)
     {
         int32_t servo_deg = 0;
 
-        web_task();
+        watchdog_update();
+        watchdog_hw->scratch[STAGE_TIME_SCRATCH] =
+            to_ms_since_boot(get_absolute_time());
+        web_task();                         // Sets its own stages.
+        stage_set(STAGE_POWER);
         power_task();
+        stage_set(STAGE_BUTTONS);
         command_run(buttons_poll());
+        stage_set(STAGE_SERIAL);
         command_run(serial_poll());
+        stage_set(STAGE_COMMANDS);
         command_run(web_command_take());
+        stage_set(STAGE_SERVO);
         if (web_servo_take(&servo_deg))
         {
             if (vehicle_is_moving() || g_stationary_scan_test)
@@ -185,12 +208,16 @@ main (void)
         }
         // Keep STOP and the UI responsive while the sensor turns. A range
         // from a previous angle must never be used as a forward reading.
+        stage_set(STAGE_ULTRASONIC);
         if (servo_is_settled())
         {
             ultrasonic_task();
         }
+        stage_set(STAGE_IMU);
         imu_task();
+        stage_set(STAGE_BARCODE);
         barcode_report(barcode_task());
+        stage_set(STAGE_VEHICLE);
         if (vehicle_is_moving() &&
             (VEHICLE_OBSTACLE_SCAN != vehicle_state()) &&
             ((!servo_is_settled()) ||
@@ -202,18 +229,26 @@ main (void)
         {
             vehicle_task();
         }
+        stage_set(STAGE_SCAN_TEST);
         stationary_scan_test_task();
+        servo_idle_release(IDLE_POWER_SAVING && vehicle_is_idle() &&
+                           !g_stationary_scan_test &&
+                           !obstacle_scan_active());
 
+        stage_set(STAGE_LINE_DIAG);
         line_diag_task();
+        stage_set(STAGE_BUZZER);
         buzzer_task();
 
         tick_count++;
+        stage_set(STAGE_TELEMETRY);
         if (0u == (tick_count % TELEMETRY_EVERY_TICKS))
         {
             telemetry_task();
         }
 
         // Wait for the next 10 ms tick.
+        stage_set(STAGE_TICK_WAIT);
         while (time_us_64() < next_tick_usec)
         {
             tight_loop_contents();
@@ -233,6 +268,41 @@ main (void)
 
 
 /*!
+ * @brief lwIP's failed-check hook (LWIP_PLATFORM_ASSERT, lwipopts.h):
+ *        record the message for the next boot, then stop. The watchdog
+ *        restarts the Pico, and restart_reason() reports the message.
+ *
+ * @param[in] p_message lwIP's message (a string literal, in flash).
+ */
+void
+lwip_assert_record (char const * p_message)
+{
+    watchdog_hw->scratch[STAGE_FAULT_SCRATCH] = (uint32_t) p_message;
+    watchdog_hw->scratch[STAGE_KIND_SCRATCH]  = STAGE_KIND_ASSERT;
+    panic("lwIP: %s", p_message);   // Prints, then waits for the watchdog.
+}   /* lwip_assert_record() */
+
+
+/*!
+ * @brief CPU hard fault (a bad pointer, for example): record it for the
+ *        next boot, then wait for the watchdog to restart the Pico.
+ *
+ * @par
+ * Replaces the SDK's default handler, which would just stop for good.
+ */
+void
+isr_hardfault (void)
+{
+    watchdog_hw->scratch[STAGE_KIND_SCRATCH] = STAGE_KIND_HARDFAULT;
+
+    for (;;)
+    {
+        // Wait for the watchdog (WATCHDOG_MSEC).
+    }
+}   /* isr_hardfault() */
+
+
+/*!
  * @brief Say why the Pico last started, from the chip's reset flags.
  *
  * @par
@@ -246,12 +316,60 @@ main (void)
 static char const *
 restart_reason (void)
 {
+    static char const * const stage_names[STAGE_COUNT] =
+    {
+        "unknown", "Wi-Fi chip/network polling", "web server",
+        "hotspot joining", "battery reading", "buttons", "serial keys",
+        "running a command", "servo", "ultrasonic", "IMU", "barcode",
+        "vehicle control", "obstacle scan test", "IR diag", "buzzer",
+        "telemetry", "waiting for the next tick"
+    };
+    static char  text[RESTART_TEXT_BYTES];
     uint32_t     flags    = vreg_and_chip_reset_hw->chip_reset;
+    uint32_t     marker   = watchdog_hw->scratch[STAGE_SCRATCH];
+    uint32_t     stage    = (marker & ~STAGE_MAGIC_MASK);
     char const * p_reason = "unknown";
 
-    if (watchdog_caused_reboot())
+    uint32_t     kind     = watchdog_hw->scratch[STAGE_KIND_SCRATCH];
+    uint32_t     message  = watchdog_hw->scratch[STAGE_FAULT_SCRATCH];
+
+    // The freeze finder's record is only valid if we wrote it; clear it so
+    // a later, different restart is not mistaken for this one.
+    watchdog_hw->scratch[STAGE_SCRATCH]      = 0u;
+    watchdog_hw->scratch[STAGE_KIND_SCRATCH] = 0u;
+
+    if (watchdog_enable_caused_reboot() && (STAGE_KIND_ASSERT == kind) &&
+        (message >= XIP_BASE) && (message < (XIP_BASE + FLASH_BYTES_MAX)))
     {
-        p_reason = "software or watchdog reset (e.g. after flashing)";
+        // lwIP stopped on a failed check; its message is a string in flash
+        // (the same firmware is still loaded), so it can be shown.
+        (void) snprintf(text, sizeof(text), "CRASH: network stack check "
+                        "failed: %.60s", (char const *) message);
+        p_reason = text;
+    }
+    else if (watchdog_enable_caused_reboot() &&
+             (STAGE_KIND_HARDFAULT == kind))
+    {
+        (void) snprintf(text, sizeof(text), "CRASH: CPU hard fault in %s",
+                        ((((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
+                          (stage < (uint32_t) STAGE_COUNT)) ?
+                         stage_names[stage] : "unknown"));
+        p_reason = text;
+    }
+    else if (watchdog_enable_caused_reboot())
+    {
+        // Our watchdog fired: the loop stopped for WATCHDOG_MSEC.
+        (void) snprintf(text, sizeof(text), "WATCHDOG: the program froze in "
+                        "%s, %" PRIu32 " s after power-up",
+                        ((((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
+                          (stage < (uint32_t) STAGE_COUNT)) ?
+                         stage_names[stage] : "unknown"),
+                        (watchdog_hw->scratch[STAGE_TIME_SCRATCH] / 1000u));
+        p_reason = text;
+    }
+    else if (watchdog_caused_reboot())
+    {
+        p_reason = "software reset (e.g. after flashing)";
     }
     else if (0u != (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_RUN_BITS))
     {
@@ -840,12 +958,15 @@ wheel_test (void)
     log_printf("Wheel test: LEFT wheel should spin FORWARD...");
     motor_set(WHEEL_TEST_SPEED, 0);
     sleep_ms(WHEEL_TEST_MSEC);
+    watchdog_update();                  // Each wait is under WATCHDOG_MSEC.
     motor_set(0, 0);
     sleep_ms(WHEEL_TEST_PAUSE_MSEC);
+    watchdog_update();
 
     log_printf("Wheel test: RIGHT wheel should spin FORWARD...");
     motor_set(0, WHEEL_TEST_SPEED);
     sleep_ms(WHEEL_TEST_MSEC);
+    watchdog_update();
     motor_set(0, 0);
 
     log_printf("Wheel test done. Fix config.h if either wheel was wrong.");

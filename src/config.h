@@ -80,6 +80,8 @@
                                             // often instead of every try.
 #define WIFI_CHECK_MSEC             250u    // How often the link is checked.
 #define WIFI_RECOVERY_MSEC          60000u  // Offline this long: recovery AP.
+#define WIFI_RECOVERY_RETRY_MSEC    90000u  // Recovery AP with nobody on it
+                                            // this long: retry the hotspot.
 #define WIFI_PING_MSEC              2000u   // Ping the hotspot this often...
                                             // for diagnostics, not link control.
 
@@ -455,6 +457,17 @@
 // ------------------------------------------------------------------------
 // Timing.
 // ------------------------------------------------------------------------
+#define WATCHDOG_MSEC               3000u   // Loop stuck this long: the
+                                            // Pico restarts itself.
+// Idle power saving (Wi-Fi doze with no page open, servo released while
+// idle). OFF while the car runs from a USB power bank: a bank switches
+// itself off when the draw is too low, and these made it do so sooner
+// (2026-11-17). Turn on for a LiPo or AA pack, which do not auto-sleep.
+#define IDLE_POWER_SAVING           false
+#define SERVO_RELEASE_MSEC          2000u   // Idle and settled this long:
+                                            // stop holding the servo.
+#define WIFI_PM_IDLE_MSEC           15000u  // No page request this long:
+                                            // Wi-Fi power saving on.
 #define TICK_USEC                   10000u  // 10 ms control period.
 #define TELEMETRY_EVERY_TICKS       5u      // Teleplot points every 50 ms.
 #define BUTTON_DEBOUNCE_TICKS       3u      // 30 ms START debounce.

@@ -54,6 +54,7 @@
 #include "log.h"
 #include "motor.h"
 #include "power.h"
+#include "stage.h"
 #include "obstacle.h"
 #include "servo.h"
 #include "ultrasonic.h"
@@ -432,6 +433,8 @@ static uint32_t      g_hot_since      = 0u;     // Current phase began (ms).
 static uint32_t      g_hot_tries      = 0u;     // Attempts that failed.
 static uint32_t      g_join_since     = 0u;     // Last "still looking" log.
 static uint32_t      g_offline_since  = 0u;     // Deadline spans all join phases.
+static uint32_t      g_recovery_since = 0u;     // Recovery AP up / last check.
+static bool          gb_pm_saving     = false;  // Wi-Fi power saving on.
 static bool          gb_mdns_started  = false;
 static bool          gb_mdns_registered = false;
 static uint32_t      g_mdns_retry = 0u;
@@ -523,9 +526,12 @@ web_task (void)
 {
     if (gb_wifi_initialized)
     {
+        stage_set(STAGE_WEB_POLL);
         cyw43_arch_poll();
         uint32_t now_msec = to_ms_since_boot(get_absolute_time());
+        stage_set(STAGE_WEB_SERVER);
         server_check(now_msec);
+        stage_set(STAGE_WEB_HOTSPOT);
         hotspot_check(now_msec);
     }
 }   /* web_task() */
@@ -804,6 +810,7 @@ hotspot_start (uint32_t now_msec)
 
     // No Wi-Fi power saving: the page polls every 0.2 s and must not lag.
     (void) cyw43_wifi_pm(&cyw43_state, CYW43_NONE_PM);
+    gb_pm_saving = false;
 
     g_wifi_mode  = WIFI_JOINING;
     g_hot_tries  = 0u;
@@ -1047,10 +1054,27 @@ hotspot_check (uint32_t now_msec)
         return;
     }
 
-    // A working recovery AP stays available until the user requests a
-    // hotspot. Do not keep executing the old station state machine on it.
+    // The recovery AP is temporary: every WIFI_RECOVERY_RETRY_MSEC, if no
+    // device has joined it, go back to the hotspot (the phone's hotspot may
+    // only have been hidden for a while). A device on it keeps it up, so a
+    // user on the recovery page is never cut off.
     if (WIFI_OWN_NETWORK == g_wifi_mode)
     {
+        int stations = 0;
+
+        if ((now_msec - g_recovery_since) >= WIFI_RECOVERY_RETRY_MSEC)
+        {
+            cyw43_wifi_ap_get_stas(&cyw43_state, &stations, NULL);
+            g_recovery_since = now_msec;
+            if (0 == stations)
+            {
+                log_printf("Wi-Fi: nobody on the recovery network; trying "
+                           "the hotspot again.");
+                dhcp_server_deinit(&g_dhcp_server);
+                cyw43_arch_disable_ap_mode();
+                hotspot_start(now_msec);
+            }
+        }
         return;
     }
 
@@ -1065,7 +1089,11 @@ hotspot_check (uint32_t now_msec)
         }
         cyw43_arch_disable_sta_mode();
         own_network_start();
-        log_printf("Wi-Fi: recovery network active. Select a hotspot and USE to retry.");
+        g_recovery_since = now_msec;
+        log_printf("Wi-Fi: recovery network active. Select a hotspot and USE "
+                   "to retry; with nobody on it, the hotspot is retried "
+                   "every %" PRIu32 " s.",
+                   (uint32_t) (WIFI_RECOVERY_RETRY_MSEC / 1000u));
         return;
     }
 
@@ -1099,6 +1127,7 @@ hotspot_check (uint32_t now_msec)
             cyw43_arch_disable_sta_mode();
             cyw43_arch_enable_sta_mode();
             (void) cyw43_wifi_pm(&cyw43_state, CYW43_NONE_PM);
+            gb_pm_saving = false;
             g_hot_phase = HOTSPOT_RESETTING;
         }
         break;
@@ -1174,6 +1203,26 @@ hotspot_check (uint32_t now_msec)
         else
         {
             hotspot_online(now_msec, p_netif); // Also catches in-place IP changes.
+
+            // Power saving while nobody has the page open: the radio then
+            // dozes between beacons. A page poll (every 0.2 s) wakes it
+            // fully again, so an open page never lags.
+            {
+                bool b_idle = (IDLE_POWER_SAVING &&
+                               ((now_msec - g_http_last_reply) >=
+                                WIFI_PM_IDLE_MSEC));
+
+                if (b_idle != gb_pm_saving)
+                {
+                    (void) cyw43_wifi_pm(&cyw43_state,
+                                         (b_idle ? CYW43_DEFAULT_PM
+                                                 : CYW43_NONE_PM));
+                    gb_pm_saving = b_idle;
+                    log_printf("Wi-Fi: power saving %s.",
+                               (b_idle ? "on (no page open)"
+                                       : "off (page open)"));
+                }
+            }
             // A phone may stop answering ICMP while still forwarding HTTP.
             // Only link/lease loss above can tear down a working connection.
             if ((int32_t) (now_msec - g_ping_next) >= 0)
