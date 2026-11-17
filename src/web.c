@@ -159,6 +159,10 @@ static char const g_page_html[] =
     ".tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}"
     ".tb{font-size:13px;padding:8px 10px;background:#333;border-radius:8px}"
     ".tb.on{background:#36c}"
+    ".ft{background:#538;border-radius:10px;padding:10px}"
+    ".ft summary{font-size:18px;cursor:pointer;color:#fff}"
+    ".ft label{display:block;margin:8px 0}"
+    ".ft button{width:100%;margin-top:6px;background:#2a7}"
     "#cn{padding:8px 10px;border-radius:8px;margin-bottom:8px;"
     "font-weight:bold;background:#555}"
     "#bh{font-family:monospace;font-size:13px;max-height:150px;"
@@ -169,15 +173,24 @@ static char const g_page_html[] =
     "<button id=a onclick=\"c('start')\">START</button>"
     "<button id=b onclick=\"c('stop')\">STOP/RESET</button>"
     "<button id=w onclick=\"c('wheel')\">WHEEL TEST</button>"
-    "<button class=t onclick=\"c('bt')\">BARCODE TEST</button>"
-    "<button class=t style=grid-column:1/3;background:#746 "
-    "onclick=\"c('bs')\">BARCODE TEST (STATIC)</button></div>"
+    "<details class=ft><summary>FEATURE TEST</summary>"
+    "<label><input type=checkbox id=fl checked> IR line detection "
+    "<span class=hint>(off: drive straight)</span></label>"
+    "<label><input type=checkbox id=fo checked> Collision avoidance "
+    "<span class=hint>(off: stop, go on when clear)</span></label>"
+    "<label><input type=checkbox id=fb checked> Barcode scanning "
+    "<span class=hint>(off: ignored)</span></label>"
+    "<button class=t onclick=\"c('ft'+['fl','fo','fb'].map(function(i)"
+    "{return document.getElementById(i).checked?1:0}).join(''))\">"
+    "RUN FEATURE TEST</button></details></div>"
     "<details class=c><summary>More controls</summary><div class=g "
     "style=margin-top:8px>"
     "<button id=k onclick=\"c('calibrate')\">CALIBRATE IMU</button>"
     "<button id=d onclick=\"c('diag')\">IR DIAG on/off</button>"
     "<button id=v onclick=\"c('black')\">LEARN BLACK</button>"
     "<button id=n onclick=\"c('white')\">LEARN WHITE</button>"
+    "<button class=t style=grid-column:1/3 onclick=\"c('mark')\">ENCODER MARK "
+    "(roll 300 mm between two presses)</button>"
     "<button id=scanTest class=t style=grid-column:1/3 onclick=\"c('scan')\">STATIONARY SCAN TEST</button>"
     "</div></details>"
     // Servo: only while unlocked, and never while the car moves (the car
@@ -390,6 +403,9 @@ _Static_assert(sizeof(g_scan_script) - 1u + HEADER_BYTES <= TCP_SND_BUF,
                "Scan script must fit in one TCP send queue");
 
 static web_command_t g_pending = WEB_CMD_NONE;
+static bool          gb_feat_line    = true;   // FEATURE TEST choices.
+static bool          gb_feat_avoid   = true;
+static bool          gb_feat_barcode = true;
 static bool          gb_wifi_initialized = false;
 static bool          gb_http_listening = false;
 static uint32_t      g_http_retry = 0u;
@@ -1241,6 +1257,22 @@ hotspot_check (uint32_t now_msec)
 
 
 /*!
+ * @brief Report the features chosen for the last FEATURE TEST.
+ *
+ * @param[out] p_line    Follow the line.
+ * @param[out] p_avoid   Go round obstacles.
+ * @param[out] p_barcode Read barcodes.
+ */
+void
+web_features (bool * p_line, bool * p_avoid, bool * p_barcode)
+{
+    *p_line    = gb_feat_line;
+    *p_avoid   = gb_feat_avoid;
+    *p_barcode = gb_feat_barcode;
+}   /* web_features() */
+
+
+/*!
  * @brief Take the command from the last web button press, if any.
  *
  * @return The pending command, or WEB_CMD_NONE. It is cleared once taken.
@@ -1620,6 +1652,18 @@ command_parse (char const * p_name)
     else if (0 == strcmp(p_name, "scan"))
     {
         if (g_pending != WEB_CMD_STOP) { g_pending = WEB_CMD_STATIONARY_SCAN; }
+    }
+    else if ((0 == strncmp(p_name, "ft", 2u)) && (5u == strlen(p_name)))
+    {
+        // "ft" + three 0/1 digits: line, obstacle avoidance, barcode.
+        gb_feat_line    = ('1' == p_name[2]);
+        gb_feat_avoid   = ('1' == p_name[3]);
+        gb_feat_barcode = ('1' == p_name[4]);
+        g_pending       = WEB_CMD_FEATURE_TEST;
+    }
+    else if (0 == strcmp(p_name, "mark"))
+    {
+        g_pending = WEB_CMD_ENCODER_MARK;   // Same as serial 'e'.
     }
     else if (0 == strcmp(p_name, "clear"))
     {

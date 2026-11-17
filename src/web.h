@@ -26,12 +26,16 @@ typedef enum
     WEB_CMD_UTURN,          // Test: act as if a barcode said UTURN.
     WEB_CMD_BARCODE_TEST,   // Drive straight, ignoring the line sensors.
     WEB_CMD_BARCODE_STATIC, // Stand still; barcodes are slid past by hand.
-    WEB_CMD_STATIONARY_SCAN // Motors off; test the existing obstacle scan.
+    WEB_CMD_STATIONARY_SCAN, // Motors off; test the existing obstacle scan.
+    WEB_CMD_ENCODER_MARK,   // Encoder 300 mm roll: start, then finish.
+    WEB_CMD_FEATURE_TEST    // Run with chosen features (web_features()).
 } web_command_t;
 
 bool          web_init(void);
 void          web_task(void);
 web_command_t web_command_take(void);
+void          web_features(bool * p_line, bool * p_avoid,
+                           bool * p_barcode);
 char const *  web_wifi_text(void);
 void          web_set_restart_reason(char const * p_reason);
 // Pass a string literal; feedback remains visible until the next test event.

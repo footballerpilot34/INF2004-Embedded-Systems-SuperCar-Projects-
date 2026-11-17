@@ -201,8 +201,10 @@ main (void)
             }
         }
 
+        // The scan and the bypass aim the servo themselves.
         if (vehicle_is_moving() &&
-            (VEHICLE_OBSTACLE_SCAN != vehicle_state()))
+            (VEHICLE_OBSTACLE_SCAN != vehicle_state()) &&
+            (VEHICLE_BYPASS != vehicle_state()))
         {
             servo_set_angle(SERVO_CENTER_DEG);
         }
@@ -220,6 +222,7 @@ main (void)
         stage_set(STAGE_VEHICLE);
         if (vehicle_is_moving() &&
             (VEHICLE_OBSTACLE_SCAN != vehicle_state()) &&
+            (VEHICLE_BYPASS != vehicle_state()) &&
             ((!servo_is_settled()) ||
              !ultrasonic_measurement_ready()))
         {
@@ -405,15 +408,20 @@ command_run (web_command_t command)
         (command == WEB_CMD_START || command == WEB_CMD_WHEEL_TEST ||
          command == WEB_CMD_TURN_LEFT || command == WEB_CMD_TURN_RIGHT ||
          command == WEB_CMD_UTURN || command == WEB_CMD_BARCODE_TEST ||
+         command == WEB_CMD_FEATURE_TEST ||
          command == WEB_CMD_BARCODE_STATIC || command == WEB_CMD_IMU_CALIBRATE))
     {
         web_set_scan_test_status("REJECTED: scan running; STOP before driving or other tests.");
         return;
     }
-    if (WEB_CMD_NONE != command && g_encoder_marked)
+    // Any other command cancels an unfinished roll measurement; the mark
+    // command itself (the second press) must not, or it never finishes.
+    if ((WEB_CMD_NONE != command) && (WEB_CMD_ENCODER_MARK != command) &&
+        g_encoder_marked)
     {
         g_encoder_marked = false;
-        log_printf("Encoder roll mark cancelled by a vehicle command; press 'e' to restart.");
+        log_printf("Encoder roll mark cancelled by a vehicle command; "
+                   "press 'e' to restart.");
     }
     switch (command)
     {
@@ -424,6 +432,10 @@ command_run (web_command_t command)
 
     case WEB_CMD_STATIONARY_SCAN:
         stationary_scan_test_start();
+    break;
+
+    case WEB_CMD_ENCODER_MARK:
+        encoder_calibration_mark();     // Same as serial 'e'.
     break;
 
     case WEB_CMD_START:
@@ -506,6 +518,22 @@ command_run (web_command_t command)
         else
         {
             vehicle_barcode_test();
+        }
+    break;
+
+    case WEB_CMD_FEATURE_TEST:
+        if (line_diag_is_active())
+        {
+            log_printf("IR DIAG is on (motors off): turn it off first.");
+        }
+        else
+        {
+            bool b_line    = true;
+            bool b_avoid   = true;
+            bool b_barcode = true;
+
+            web_features(&b_line, &b_avoid, &b_barcode);
+            vehicle_feature_test(b_line, b_avoid, b_barcode);
         }
     break;
 
@@ -917,7 +945,7 @@ encoder_calibration_mark(void)
     if (!vehicle_is_idle())
     {
         g_encoder_marked = false;
-        log_printf("Encoder mark: STOP first, then press 'e'.");
+        log_printf("Encoder mark: STOP first, then press 'e' / ENCODER MARK.");
         return;
     }
     if (!g_encoder_marked)
@@ -925,8 +953,11 @@ encoder_calibration_mark(void)
         left_start = encoder_count(PIN_ENC_LEFT_A);
         right_start = encoder_count(PIN_ENC_RIGHT_A);
         g_encoder_marked = true;
-        log_printf("Encoder mark set. Roll straight exactly 300 mm, then 'e' again. "
-                   "Keep the car STOPPED throughout; do not lift/spin wheels.");
+        // Two lines: a log line holds at most 96 characters.
+        log_printf("Encoder mark set. Roll straight exactly 300 mm, then "
+                   "press 'e' / ENCODER MARK again.");
+        log_printf("Keep the car STOPPED throughout; do not lift or spin the "
+                   "wheels.");
     }
     else
     {

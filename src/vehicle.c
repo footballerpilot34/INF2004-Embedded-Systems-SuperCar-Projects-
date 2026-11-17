@@ -98,6 +98,7 @@
 #include "log.h"
 #include "motor.h"
 #include "obstacle.h"
+#include "bypass.h"
 #include "ultrasonic.h"
 #include "vehicle.h"
 
@@ -202,6 +203,11 @@ static bool              gb_turn_left_on = true; // Left was last on black.
 static bool              gb_turn_advance = false; // Next turn: ADVANCE first.
 static bool              gb_junction_deferred = false; // Crossroad waiting
                                                        // for a decode.
+static bool              gb_feat_line    = true;  // Follow the line (else
+                                                  // drive straight).
+static bool              gb_feat_avoid   = true;  // Scan and go round (else
+                                                  // stop and wait).
+static bool              gb_feat_barcode = true;  // Read barcodes.
 static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
                                                             // crossroad.
 
@@ -257,10 +263,51 @@ vehicle_start (void)
 {
     if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
     {
-        g_pending_turn = BARCODE_CMD_NONE;  // A new run: no old turn.
+        gb_feat_line    = true;     // A full run: every feature on.
+        gb_feat_avoid   = true;
+        gb_feat_barcode = true;
+        g_pending_turn  = BARCODE_CMD_NONE;  // A new run: no old turn.
         state_enter(VEHICLE_LINE_CAL, now_msec_get());
     }
 }   /* vehicle_start() */
+
+
+/*!
+ * @brief Start a FEATURE TEST run: each feature on or off.
+ *
+ * @par
+ * - b_line:    follow the line with the IR sensors (from LINE_CAL, as
+ *              START); off: drive straight ahead (BARCODE_TEST).
+ * - b_avoid:   at an obstacle, scan and go round it (bypass.c); off:
+ *              stop, and drive on once it has gone (BLOCKED).
+ * - b_barcode: read barcodes (and beep and act on them); off: ignore.
+ * Works from READY or STOPPED only. STOP ends it.
+ *
+ * @param[in] b_line    Follow the line.
+ * @param[in] b_avoid   Go round obstacles.
+ * @param[in] b_barcode Read barcodes.
+ */
+void
+vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode)
+{
+    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    {
+        gb_feat_line    = b_line;
+        gb_feat_avoid   = b_avoid;
+        gb_feat_barcode = b_barcode;
+        g_pending_turn  = BARCODE_CMD_NONE;
+        log_state("FEATURE TEST: line %s, obstacles %s, barcodes %s.",
+                  (b_line ? "FOLLOWED" : "ignored (straight)"),
+                  (b_avoid ? "AVOIDED" : "stop and wait"),
+                  (b_barcode ? "READ" : "ignored"));
+        state_enter((b_line ? VEHICLE_LINE_CAL : VEHICLE_BARCODE_TEST),
+                    now_msec_get());
+    }
+    else
+    {
+        log_printf("Stop the car before FEATURE TEST.");
+    }
+}   /* vehicle_feature_test() */
 
 
 /*!
@@ -407,17 +454,8 @@ vehicle_pending_turn (void)
 void
 vehicle_barcode_test (void)
 {
-    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
-    {
-        log_state("BARCODE TEST: driving straight, line sensors ignored. "
-                  "STOP to end.");
-        g_pending_turn = BARCODE_CMD_NONE;  // A new run: no old turn.
-        state_enter(VEHICLE_BARCODE_TEST, now_msec_get());
-    }
-    else
-    {
-        log_printf("Stop the car before BARCODE TEST.");
-    }
+    // Kept for the serial key: a feature test with only barcodes on.
+    vehicle_feature_test(false, false, true);
 }   /* vehicle_barcode_test() */
 
 
@@ -465,11 +503,12 @@ vehicle_task (void)
     // tilt handling can issue another movement command.
     if (OBSTACLE_STOP_AT_ONCE && vehicle_is_moving() &&
         (VEHICLE_BLOCKED != g_state) &&
-        (VEHICLE_OBSTACLE_SCAN != g_state) && (range_mm <= OBSTACLE_STOP_MM))
+        (VEHICLE_OBSTACLE_SCAN != g_state) &&
+        (VEHICLE_BYPASS != g_state) && (range_mm <= OBSTACLE_STOP_MM))
     {
         log_obstacle("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
-        state_enter((VEHICLE_BARCODE_TEST == g_state ?
-                     VEHICLE_STOPPED : VEHICLE_OBSTACLE_SCAN), now_msec);
+        state_enter((gb_feat_avoid ? VEHICLE_OBSTACLE_SCAN : VEHICLE_BLOCKED),
+                    now_msec);
         if (VEHICLE_OBSTACLE_SCAN == g_state)
         {
             obstacle_scan_start(range_mm, now_msec);
@@ -534,8 +573,30 @@ vehicle_task (void)
         obstacle_scan_task(now_msec);
         if (!obstacle_scan_active())
         {
-            state_enter(VEHICLE_BLOCKED, now_msec);
+            state_enter((bypass_begin(obstacle_profile(), now_msec,
+                                      gb_feat_line) ?
+                         VEHICLE_BYPASS : VEHICLE_BLOCKED), now_msec);
         }
+    break;
+
+    case VEHICLE_BYPASS:
+    {
+        bypass_result_t result = bypass_step(now_msec, range_mm);
+
+        if (BYPASS_DONE == result)
+        {
+            state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
+                                      : VEHICLE_BARCODE_TEST), now_msec);
+        }
+        else if (BYPASS_FAILED == result)
+        {
+            state_enter(VEHICLE_STOPPED, now_msec);
+        }
+        else
+        {
+            // Still going round.
+        }
+    }
     break;
 
     case VEHICLE_LINE_CAL:
@@ -620,6 +681,10 @@ vehicle_state_name (vehicle_state_t state)
         p_name = "OBSTACLE_SCAN";
     break;
 
+    case VEHICLE_BYPASS:
+        p_name = "BYPASS";
+    break;
+
     case VEHICLE_READY:
         p_name = "READY";
     break;
@@ -653,7 +718,7 @@ vehicle_state_name (vehicle_state_t state)
     break;
 
     case VEHICLE_BARCODE_TEST:
-        p_name = "BARCODE_TEST";
+        p_name = "FEATURE_TEST";
     break;
 
     case VEHICLE_BARCODE_STATIC:
@@ -1013,7 +1078,8 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
     else if ((now_msec - g_clear_msec) > OBSTACLE_CLEAR_MSEC)
     {
         log_obstacle("Obstacle cleared -> resuming.\n");
-        state_enter(VEHICLE_FOLLOW_LINE, now_msec);
+        state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
+                                  : VEHICLE_BARCODE_TEST), now_msec);
     }
     else
     {
@@ -1035,7 +1101,7 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm)
 {
     if (range_mm <= OBSTACLE_STOP_MM)
     {
-        log_obstacle("BARCODE TEST: obstacle at %" PRIu32 " mm -> stopped.",
+        log_obstacle("FEATURE TEST: obstacle at %" PRIu32 " mm -> stopped.",
                      range_mm);
         state_enter(VEHICLE_STOPPED, now_msec);
     }
@@ -1071,6 +1137,10 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     if ((VEHICLE_LINE_CAL == state) || (VEHICLE_BARCODE_TEST == state))
     {
         obstacle_scan_cancel();  // New mission: discard the previous profile.
+    }
+    if ((VEHICLE_BYPASS == g_state) && (VEHICLE_BYPASS != state))
+    {
+        bypass_cancel();
     }
     if (state != g_state)
     {
@@ -1110,9 +1180,10 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     // Barcodes are only read while following the line normally, or in
     // either BARCODE TEST.
     barcode_set_hand_mode(VEHICLE_BARCODE_STATIC == state);
-    barcode_set_enabled((VEHICLE_FOLLOW_LINE == state) ||
-                        (VEHICLE_BARCODE_TEST == state) ||
-                        (VEHICLE_BARCODE_STATIC == state));
+    barcode_set_enabled(gb_feat_barcode &&
+                        ((VEHICLE_FOLLOW_LINE == state) ||
+                         (VEHICLE_BARCODE_TEST == state) ||
+                         (VEHICLE_BARCODE_STATIC == state)));
 
     if ((VEHICLE_FOLLOW_LINE != state) && (VEHICLE_PROBE != state) &&
         (VEHICLE_HUMP != state) && (VEHICLE_LINE_CAL != state))

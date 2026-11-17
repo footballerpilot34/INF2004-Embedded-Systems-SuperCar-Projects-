@@ -240,14 +240,13 @@
 // hump/wall PROBE instead (creep closer, climb if the nose tips up). With
 // true the car stops in front of a hump too.
 #define OBSTACLE_STOP_AT_ONCE       true
-// TEMPORARY (2026-11-13): stop at 30 cm instead of Felix's 40 cm, so
-// barcode tests fit a small space. All three move together (gaps kept).
-#define OBSTACLE_SLOW_MM            400u    // Slow before the stop (was 500).
-#define OBSTACLE_STOP_MM            300u    // Brake at or below 30 cm (was
-                                            // 400).
+// TEMPORARY: stop at 25 cm (Felix's was 40 cm; 20 and 30 cm tried on
+// 2026-11-17: 30 cm made the bypass too wide). The +/-30 deg scan then
+// sees about +/-145 mm sideways. All three move together (gaps kept).
+#define OBSTACLE_SLOW_MM            350u    // Slow before the stop.
+#define OBSTACLE_STOP_MM            250u    // Brake at or below 25 cm.
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
-#define OBSTACLE_CLEAR_MM           350u    // Clear again (hysteresis; was
-                                            // 450).
+#define OBSTACLE_CLEAR_MM           300u    // Clear again (hysteresis).
 #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
 #define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
 
@@ -264,6 +263,124 @@
 #define OBSTACLE_SCAN_STABLE_SPREAD_MM 40u // Echo agreement for clearance safety.
 #define OBSTACLE_BYPASS_MARGIN_MM   20u    // Candidate path margin; validate on floor.
 #define OBSTACLE_SCAN_TIMEOUT_MSEC  30000u
+
+// ------------------------------------------------------------------------
+// Obstacle bypass (bypass.c): go round the obstacle and back onto the
+// same line, which runs straight on behind it. The way out is a smooth
+// CURVE, steered by running the wheels at different speeds (both forward):
+// heading 0 at first, turning more and more as the car nears the obstacle,
+// reaching the side-step at its front face. The curve is recorded on a
+// STACK as short moves (heading, mm); coming back pops them in reverse,
+// mirrored, so the return starts steep and flattens out onto the line.
+//   1 SCAN:   the full 60-120 deg scan picks the side (obstacle.c);
+//   2 OUT:    the curve, pushed every BYPASS_SEGMENT_MM. Something closer
+//             than the known face: re-scan only towards that side (90 -> 60
+//             deg for left, 90 -> 120 for right) and plan a new curve;
+//   3 PASS:   straighten up (pushed) and drive on, the sensor watching the
+//             obstacle, until it has ended (the straight part: not pushed);
+//   4 RETURN: pop each move, mirrored; the line found (line following on):
+//             line up on it and clear the stack;
+//   5 Stack empty: turn straight; back on the original path.
+// Distances and heading come from the wheel encoders. STOP ends it at
+// once; any step that cannot finish brakes the car.
+// ------------------------------------------------------------------------
+#define BYPASS_ENABLED              true    // false: stay BLOCKED (old way).
+// Wheel encoders, measured 2026-11-17 rolling 300 mm along a straight
+// edge: LEFT 3992, RIGHT 4113 edges.
+#define ENC_LEFT_EDGES_PER_M        13307u
+#define ENC_RIGHT_EDGES_PER_M       13710u
+#define WHEEL_TRACK_MM              125u    // Between the wheel centres.
+// The curve out: sideways offset grows as (distance travelled / distance
+// to the face) squared, so the heading starts at 0 and steepens near it.
+#define BYPASS_CURVE_END_PCT        90u     // The side-step is done this
+                                            // far (%) to the face; then
+                                            // straight past it.
+// Too close to curve round (a bigger obstacle seen late): reverse
+// straight, holding the heading, until this much is clear ahead (or
+// BYPASS_BACKUP_MAX_MM reversed), then carry on.
+#define BYPASS_BACKUP_TRIGGER_MM    150u    // Nearer than this: back up.
+#define BYPASS_BACKUP_CLEAR_MM      200u    // Back up until this is clear,
+#define BYPASS_BACKUP_MAX_MM        150u    // or this far at most.
+#define BYPASS_BACKUP_MAX_COUNT     3u      // Back-ups per bypass at most.
+// Coming back, the sensor keeps watching the obstacle's side; while it
+// is still there the car holds straight instead of turning in. Once it
+// has gone (BYPASS_SIDE_CLEAR_COUNT far echoes), this much further,
+// then the turn back carries on.
+#define BYPASS_RETURN_GUARD_EXTRA_MM 80u
+#define BYPASS_SEGMENT_MM           20u     // One stack move per this.
+#define BYPASS_STEER_KP_X10         5       // Wheel speed difference per
+                                            // degree of heading error (x10).
+#define BYPASS_STEER_MAX            5       // Largest wheel difference (%):
+                                            // inner wheel never below
+#define BYPASS_WHEEL_MIN            7       // this (was 5: stalled; the
+                                            // motors stall at 6 or less),
+                                            // so it keeps driving
+                                            // forward (a stopped wheel is
+                                            // dragged back, and the
+                                            // encoders count that as
+                                            // forward: wrong heading).
+// Heading comes from LEFT minus RIGHT wheel travel. If the encoder or
+// motor called "left" is really on the right, the car curves the wrong
+// way round and never reaches the side-step: flip this.
+#define BYPASS_ODO_SWAP_LR          false
+#define BYPASS_POSE_LOG_MSEC        500u    // Log position this often.
+#define BYPASS_LOOKAHEAD_MM         100u    // Steer back onto the curve
+                                            // over about this distance.
+#define BYPASS_PIVOT_SLIP_X100      100u    // Pivot counts x this / 100:
+                                            // turns short -> raise it.
+#define BYPASS_PIVOT_SPEED          17      // Steady pivot power (was 30:
+                                            // too violent; stalls below
+                                            // about 15; 20 -> 18 -> 17).
+#define BYPASS_DRIVE_SPEED          12      // Straight-line power (14 ->
+                                            // 13 -> 12; 12 - 5 keeps the
+                                            // inner wheel at 7, above
+                                            // stalling).
+// 10 cm less each (2026-11-17, small test space).
+#define BYPASS_SIDE_MARGIN_MM       30u     // Gap kept between the car's
+                                            // side and the obstacle's edge
+                                            // (clearance = half the car's
+                                            // width + this).
+#define BYPASS_BEAM_CORRECTION_DEG  4       // Move scanned edges inwards by
+                                            // this (the beam is ~15 deg
+                                            // wide: an 8.5 cm bottle scans
+                                            // as 19.3 cm). Fitted to round
+                                            // bottles at ~25 cm; 0 = off.
+#define BYPASS_MIN_SHIFT_MM         50u     // Sideways shift: at least (was
+                                            // 150; the turning clearance
+                                            // already gives about 120),
+#define BYPASS_MAX_SHIFT_MM         300u    // and at most (was 400).
+#define BYPASS_ASSUMED_DEPTH_MM     50u     // Depth driven past before the
+                                            // sideways sensor is trusted
+                                            // (was 150).
+#define BYPASS_PASS_MAX_MM          700u    // Give up passing after this
+                                            // (was 800).
+#define BYPASS_SIDE_CLEAR_COUNT     3u      // Far side echoes in a row =
+                                            // obstacle ended.
+#define BYPASS_STACK_MAX            64u     // Moves pushed at most
+                                            // (20 mm each).
+#define BYPASS_RESCAN_MARGIN_MM     40u     // Going out, an echo this much
+                                            // closer than the known face:
+                                            // something new, re-scan.
+#define BYPASS_RESCAN_NEAR_MM       400u    // A re-scan echo counts as the
+                                            // obstacle only within this.
+#define BYPASS_RESCAN_MIN_MM        50u     // Drive at least this far on
+                                            // each move first.
+#define BYPASS_RESCAN_STEP_DEG      5       // Half-sweep step.
+#define BYPASS_EDGE_JUMP_MM         100u    // Echo this much further (or
+                                            // none) = the edge.
+#define BYPASS_EDGE_TURN_DEG        20      // Edge past the half-sweep:
+                                            // turn this much more, re-scan.
+#define BYPASS_HEADING_MAX_DEG      75      // Never turn further off line.
+#define BYPASS_EXPLORE_SCAN_LIMIT   true    // No side usable but the
+                                            // obstacle runs past the sweep:
+                                            // turn that way, look again.
+#define BYPASS_LINE_ADVANCE_MM      40u     // Line found: bring the axle
+                                            // over it before aligning.
+#define BYPASS_ALIGN_MAX_DEG        80u     // Align pivot gives up after.
+#define BYPASS_FRONT_STOP_MM        120u    // Something this close ahead
+                                            // while driving out/in: stop.
+#define BYPASS_STEP_MAX_MSEC        15000u  // Any one step taking longer
+                                            // brakes the car (stuck).
 
 // DISPLAY ONLY: provisional effective-beam fit to the supplied bottle scans.
 // Re-measure on this sensor/target; never use this correction for clearance.
