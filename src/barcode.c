@@ -14,9 +14,9 @@
  *    character only, so a steady speed is needed but its value is not.
  * 4. If a forward decode fails, the scan is decoded in reverse, so the
  *    car can cross the barcode in either direction.
- * 5. The message is checked against the command texts in config.h
- *    (BARCODE_TEXT_...): a match is a command (turn left or right at the
- *    next crossroad, U-turn); anything else is a message.
+ * 5. A single letter A-Z is a command, looked up in config.h
+ *    (BARCODE_LETTER_COMMANDS: left, right, straight or U-turn at the
+ *    next crossroad); anything else is a message.
  *
  * @par Long black marks
  * A scan is never dropped while still on a long first bar: when the thin
@@ -72,7 +72,6 @@
 #define WIDE_RATIO_DEN          4u      // 1.25x the widest narrow.
 #define START_STOP_CHAR         '*'
 #define NUM_CODE39_SYMBOLS      44u
-#define NUM_COMMAND_TEXTS       3u
 #define REPORT_MIN_ELEMENTS     4u      // Shorter scans are not reported.
 #define DUMP_PER_LINE           10u     // Widths per log line (fits 96).
 #define DUMP_LINE_BYTES         96u     // Must match LOG_LINE_MAX in log.c.
@@ -135,12 +134,6 @@ static code39_t const g_code39[NUM_CODE39_SYMBOLS] =
     { 0x0A8u, '$' }, { 0x0A2u, '/' }, { 0x08Au, '+' }, { 0x02Au, '%' }
 };
 
-typedef struct
-{
-    char const *      p_text;
-    barcode_command_t command;
-} command_text_t;
-
 // Narrow/wide splits learned from a cleanly decoded letter.
 typedef struct
 {
@@ -150,13 +143,9 @@ typedef struct
     uint32_t unit;          // One narrow unit (1/15 of the letter).
 } split_t;
 
-// Messages that are commands (exact match); see config.h.
-static command_text_t const g_command_texts[NUM_COMMAND_TEXTS] =
-{
-    { BARCODE_TEXT_LEFT,  BARCODE_CMD_LEFT  },
-    { BARCODE_TEXT_RIGHT, BARCODE_CMD_RIGHT },
-    { BARCODE_TEXT_UTURN, BARCODE_CMD_UTURN }
-};
+// One command letter per letter A-Z; see config.h.
+_Static_assert(sizeof(BARCODE_LETTER_COMMANDS) == 27u,
+               "BARCODE_LETTER_COMMANDS needs exactly one entry per letter");
 
 // Edge ring, filled by the ISR. The head only ever increases (it wraps
 // naturally at 2^32), so head - tail is the number of unread edges.
@@ -616,6 +605,10 @@ barcode_command_name (barcode_command_t command)
 
     case BARCODE_CMD_UTURN:
         p_name = "U-TURN";
+    break;
+
+    case BARCODE_CMD_STRAIGHT:
+        p_name = "GO STRAIGHT";
     break;
 
     case BARCODE_CMD_NONE:
@@ -1744,22 +1737,42 @@ element_get (uint32_t index, bool b_reverse)
 
 
 /*!
- * @brief Check whether a message is one of the command texts.
+ * @brief Look a message up in BARCODE_LETTER_COMMANDS.
  *
  * @param[in] p_message The decoded message.
  *
- * @return The command, or BARCODE_CMD_NONE if it is a plain message.
+ * @return The letter's command, or BARCODE_CMD_NONE if the message is not
+ *         a single letter A-Z (a plain message).
  */
 static barcode_command_t
 command_match (char const * p_message)
 {
     barcode_command_t command = BARCODE_CMD_NONE;
+    char              letter  = p_message[0];
 
-    for (uint32_t idx = 0u; idx < NUM_COMMAND_TEXTS; idx++)
+    if (('A' <= letter) && (letter <= 'Z') && ('\0' == p_message[1]))
     {
-        if (0 == strcmp(p_message, g_command_texts[idx].p_text))
+        switch (BARCODE_LETTER_COMMANDS[letter - 'A'])
         {
-            command = g_command_texts[idx].command;
+        case 'L':
+            command = BARCODE_CMD_LEFT;
+        break;
+
+        case 'R':
+            command = BARCODE_CMD_RIGHT;
+        break;
+
+        case 'S':
+            command = BARCODE_CMD_STRAIGHT;
+        break;
+
+        case 'U':
+            command = BARCODE_CMD_UTURN;
+        break;
+
+        default:
+            command = BARCODE_CMD_NONE;     // Not a command letter.
+        break;
         }
     }
 

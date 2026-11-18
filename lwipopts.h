@@ -11,7 +11,7 @@
 #define MEM_ALIGNMENT               4
 #define MEM_SIZE                    4000
 #define MEMP_NUM_TCP_SEG            32
-#define MEMP_NUM_TCP_PCB            10     /* page polls overlap */
+#define MEMP_NUM_TCP_PCB            11     /* page polls overlap, + MQTT */
 #define MEMP_NUM_ARP_QUEUE          10
 #define PBUF_POOL_SIZE              24
 
@@ -50,6 +50,14 @@
    froze the car in cyw43_arch_poll() 8 s after power-up (2026-11-17).
    Each spare costs about 20 bytes. */
 #define MEMP_NUM_SYS_TIMEOUT        (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 16)
+
+/* MQTT (mqtt_comm.c): one client. Its send buffer holds a few JSON
+   messages (telemetry is ~250 bytes); a full buffer drops a message
+   rather than blocking. The client's cyclic timer fits in the spare
+   timeouts above. */
+#define MQTT_OUTPUT_RINGBUF_SIZE    2048
+#define MQTT_REQ_MAX_IN_FLIGHT      8
+#define MQTT_VAR_HEADER_BUFFER_LEN  128
 
 /* SuperCar only: record a failed lwIP check before stopping, so the next
    boot can report it (supercar_main.c). */

@@ -44,6 +44,9 @@ void          web_set_scan_test_busy(bool busy);
 void          web_barcode_record(char const * p_message,
                                  barcode_command_t command);
 bool          web_servo_take(int32_t * p_degrees);
+bool          web_is_online(void);
+char const *  web_restart_reason(void);
+void          web_command_submit(char const * p_name);
 
 #endif /* WEB_H */
 

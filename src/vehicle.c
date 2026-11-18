@@ -57,9 +57,9 @@
  * (scan_hold_line()), because bar widths are measured in time. Normal
  * line-following steering is suspended; only an obstacle (or a hump)
  * interrupts the scan.
- * A decoded command (LEFT 'A', RIGHT 'Z', U-turn 'F') is kept as the
- * pending turn and carried out at the next crossroad, which
- * line_junction_detect() finds from the side sensor (junction_act()); a
+ * A decoded command (every letter A-Z: left, right, straight or U-turn,
+ * BARCODE_LETTER_COMMANDS) is kept as the pending turn and carried out at
+ * the next crossroad, which line_junction_detect() finds from the side sensor (junction_act()); a
  * newer command replaces it.
  * Crossroads are only looked for while such a turn is waiting, so no
  * barcode bar is ever taken for one. A
@@ -327,7 +327,8 @@ vehicle_stop (void)
  *
  * @par
  * While on a run (following, BARCODE TEST, or held up by an obstacle or
- * hump), every command (left, right, U-turn) becomes the pending turn,
+ * hump), every command (left, right, straight, U-turn) becomes the
+ * pending turn,
  * carried out at the next crossroad (a newer command replaces it). A test
  * key with the car stopped turns it at once and
  * stops again, to tune TURN_90_MSEC. A barcode decoded once the car has
@@ -352,6 +353,10 @@ vehicle_barcode_command (barcode_command_t command, bool b_test)
     if (BARCODE_CMD_NONE == command)
     {
         // A plain message: keep following.
+    }
+    else if (b_test && b_stopped && (BARCODE_CMD_STRAIGHT == command))
+    {
+        log_line("GO STRAIGHT: nothing to turn on the bench.");
     }
     else if (b_test && b_stopped)
     {
@@ -409,7 +414,12 @@ junction_seen (uint32_t now_msec)
 static void
 junction_act (uint32_t now_msec, uint32_t already_msec)
 {
-    if (BARCODE_CMD_NONE != g_pending_turn)
+    if (BARCODE_CMD_STRAIGHT == g_pending_turn)
+    {
+        log_line("Crossroad: GO STRAIGHT, carrying on.");
+        g_pending_turn = BARCODE_CMD_NONE;
+    }
+    else if (BARCODE_CMD_NONE != g_pending_turn)
     {
         log_line("Crossroad: %s now.", barcode_command_name(g_pending_turn));
         g_turn_cmd      = g_pending_turn;

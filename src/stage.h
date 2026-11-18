@@ -45,6 +45,7 @@ typedef enum
     STAGE_LINE_DIAG,
     STAGE_BUZZER,
     STAGE_TELEMETRY,
+    STAGE_MQTT,             // MQTT connection and publishing.
     STAGE_TICK_WAIT,        // Idle, waiting for the next 10 ms tick.
     STAGE_COUNT
 } stage_t;

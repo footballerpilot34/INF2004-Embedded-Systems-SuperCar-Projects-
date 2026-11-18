@@ -53,6 +53,7 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "mqtt_comm.h"
 #include "power.h"
 #include "stage.h"
 #include "obstacle.h"
@@ -192,6 +193,10 @@ static char const g_page_html[] =
     "<button class=t style=grid-column:1/3 onclick=\"c('mark')\">ENCODER MARK "
     "(roll 300 mm between two presses)</button>"
     "<button id=scanTest class=t style=grid-column:1/3 onclick=\"c('scan')\">STATIONARY SCAN TEST</button>"
+    "<span style=grid-column:1/3>MQTT broker: <input id=mbx "
+    "placeholder=\"IP or name, empty = off\" style=font-size:14px;width:55%> "
+    "<button class=tb onclick=\"c('mb'+$('mbx').value.trim())\">SET</button>"
+    "</span>"
     "</div></details>"
     // Servo: only while unlocked, and never while the car moves (the car
     // also ignores it then).
@@ -205,6 +210,7 @@ static char const g_page_html[] =
     "</div>"
     "<div class=c>Car State: <b id=s>-</b><br>"
     "Wi-Fi: <b id=wf>-</b><br>"
+    "MQTT: <b id=mq>-</b><br>"
     "Uptime: <b id=up>-</b> &nbsp; Last restart: <b id=rr>-</b><br>"
     "Battery (VSYS): <b id=vb>-</b><br>"
     "<span id=hw style=display:none>Hotspot: <select id=hs "
@@ -349,6 +355,7 @@ static char const g_dashboard_js[] =
     "if(lg.length>500)lg.splice(0,lg.length-500);"
     "if(d.log.length||d.nx<q)show();q=d.nx;"
     "$('s').textContent=d.st;$('wf').textContent=d.wf;"
+    "$('mq').textContent=d.mq;"
     // Uptime going back to zero while powered = the Pico restarted.
     "if(up>d.up)rs++;up=d.up;$('rr').textContent=d.rr;"
     // Battery: red below 3.5 V (low or sagging under load).
@@ -600,6 +607,43 @@ web_set_restart_reason (char const * p_reason)
 {
     gp_restart_reason = p_reason;
 }   /* web_set_restart_reason() */
+
+
+/*!
+ * @brief Report why the Pico last started (for MQTT's heartbeat).
+ *
+ * @return The text set by web_set_restart_reason().
+ */
+char const *
+web_restart_reason (void)
+{
+    return (gp_restart_reason);
+}   /* web_restart_reason() */
+
+
+/*!
+ * @brief Report whether the car is on a hotspot (so MQTT can connect).
+ *
+ * @return True once joined with an IP address.
+ */
+bool
+web_is_online (void)
+{
+    return (WIFI_JOINED == g_wifi_mode);
+}   /* web_is_online() */
+
+
+/*!
+ * @brief Take a command word from elsewhere (MQTT) exactly as if the web
+ *        page had sent it.
+ *
+ * @param[in] p_name The command word, e.g. "start", "stop", "ft111".
+ */
+void
+web_command_submit (char const * p_name)
+{
+    command_parse(p_name);
+}   /* web_command_submit() */
 
 
 // Call with a string literal (same lifetime convention as restart reason).
@@ -1665,6 +1709,10 @@ command_parse (char const * p_name)
     {
         g_pending = WEB_CMD_ENCODER_MARK;   // Same as serial 'e'.
     }
+    else if (0 == strncmp(p_name, "mb", 2u))
+    {
+        mqtt_comm_set_broker(p_name + 2);   // "mb<host>"; "mb" alone: off.
+    }
     else if (0 == strcmp(p_name, "clear"))
     {
         barcode_clear_message();
@@ -1870,6 +1918,9 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 ",\"wf\":");
     length += json_string(p_out + length, capacity - length,
                           web_wifi_text());
+    length += append_text(p_out + length, capacity - length, ",\"mq\":");
+    length += json_string(p_out + length, capacity - length,
+                          mqtt_comm_status_text());
     length += append_text(p_out + length, capacity - length,
                           ",\"oa\":%d,\"sst\":", obstacle_scan_active() || gb_scan_test_busy);
     length += json_string(p_out + length, capacity - length, gp_scan_test_status);

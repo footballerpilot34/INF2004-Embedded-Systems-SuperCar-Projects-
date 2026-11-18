@@ -85,6 +85,22 @@
 #define WIFI_PING_MSEC              2000u   // Ping the hotspot this often...
                                             // for diagnostics, not link control.
 
+// MQTT telemetry and commands (mqtt_comm.c). Topics are under
+// MQTT_TOPIC_PREFIX; see mqtt_comm.h. The broker must be reachable from
+// the hotspot: a laptop on the same hotspot running Mosquitto (listening
+// on all addresses, anonymous allowed), or a public test broker if the
+// hotspot has internet. Set it here, or at run time on the web page
+// (More controls -> MQTT broker); "" = off until set there.
+#define MQTT_ENABLED                true
+#define MQTT_BROKER_HOST            ""      // IP address or host name.
+#define MQTT_BROKER_PORT            1883u
+#define MQTT_CLIENT_ID              "supercar-aai14"
+#define MQTT_TOPIC_PREFIX           "inf2004/aai14/supercar"
+#define MQTT_KEEPALIVE_S            10u     // Broker drops us after 1.5x.
+#define MQTT_RETRY_MSEC             5000u   // Wait between attempts.
+#define MQTT_TELEMETRY_MSEC         250u    // Live readings, 4 per second.
+#define MQTT_HEARTBEAT_MSEC         2000u   // Heartbeat.
+
 #if __has_include("wifi_secrets.h")
 #include "wifi_secrets.h"           // HOTSPOT_LIST.
 #endif
@@ -507,15 +523,14 @@
                                             // 7 still did, 2026-11-10).
 #define SCAN_TRIM_EXTRA             2       // Far-side wheel: SPEED_SCAN + 2.
 
-// Messages that are COMMANDS (exact match; Code 39 is upper case).
-// Anything else is shown as a plain message. LEFT and RIGHT are kept
-// until the next crossroad and carried out there; a U-turn is at once.
-// Track barcodes (user, 2026-11-17): 'A' = turn left at the next
-// crossroad, 'Z' = turn right, 'F' = U-turn, all at the next crossroad
-// (user, 2026-11-17). No other message is a command.
-#define BARCODE_TEXT_LEFT           "A"
-#define BARCODE_TEXT_RIGHT          "Z"
-#define BARCODE_TEXT_UTURN          "F"
+// Every single-letter barcode is a command, carried out at the next
+// crossroad (user, 2026-11-18). One character per letter, A to Z:
+//   L = turn left, R = turn right, S = go straight, U = U-turn.
+// Fixed by the user: A = left, F = U-turn, Z = right. The rest cycle
+// L R S U, with L, R, S and U standing for themselves. Anything longer
+// than one letter is a plain message.
+//                                   ABCDEFGHIJKLMNOPQRSTUVWXYZ
+#define BARCODE_LETTER_COMMANDS     "LRSULUSULRSLLRSULRSUURSULR"
 
 // Barcode turns: pivot (pulsed, like calibration) off the line, then
 // until a line sensor finds a line, then until both are on it; then

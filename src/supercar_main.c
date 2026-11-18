@@ -32,9 +32,9 @@
  *
  * @par Barcodes
  * Every decoded barcode is logged and shown on the web page. A command
- * (see BARCODE_TEXT_... in config.h: 'A' left and 'Z' right are carried
- * out at the next crossroad, detected in line_sensor.c from the side
- * sensor; 'F' is a U-turn, at once).
+ * (any single letter, see BARCODE_LETTER_COMMANDS in config.h: left,
+ * right, straight or U-turn) is carried out at the next crossroad,
+ * detected in line_sensor.c from the side sensor.
  *
  * @par Coding standard
  * BARR-C:2018. Deviation: Rule 6.5.a, see gpio_isr.c.
@@ -64,6 +64,7 @@
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
+#include "mqtt_comm.h"
 #include "power.h"
 #include "servo.h"
 #include "stage.h"
@@ -159,6 +160,7 @@ main (void)
     (void) imu_init();
 
     (void) web_init();  // Logs its own result; the car runs either way.
+    mqtt_comm_init();   // Connects once on a hotspot with a broker set.
     power_init();       // After Wi-Fi: shares GP29 with the Wi-Fi chip.
 
     vehicle_init();
@@ -181,6 +183,8 @@ main (void)
         watchdog_hw->scratch[STAGE_TIME_SCRATCH] =
             to_ms_since_boot(get_absolute_time());
         web_task();                         // Sets its own stages.
+        stage_set(STAGE_MQTT);
+        mqtt_comm_task();
         stage_set(STAGE_POWER);
         power_task();
         stage_set(STAGE_BUTTONS);
@@ -326,7 +330,7 @@ restart_reason (void)
         "hotspot joining", "battery reading", "buttons", "serial keys",
         "running a command", "servo", "ultrasonic", "IMU", "barcode",
         "vehicle control", "obstacle scan test", "IR diag", "buzzer",
-        "telemetry", "waiting for the next tick"
+        "telemetry", "MQTT", "waiting for the next tick"
     };
     static char  text[RESTART_TEXT_BYTES];
     uint32_t     flags    = vreg_and_chip_reset_hw->chip_reset;
@@ -720,6 +724,7 @@ barcode_report (barcode_result_t result)
 
         buzzer_beep_soft(BARCODE_BEEP_MSEC);   // A barcode was read.
         web_barcode_record(barcode_message(), command);
+        mqtt_comm_barcode(barcode_message(), command);
 
         if (BARCODE_CMD_NONE == command)
         {

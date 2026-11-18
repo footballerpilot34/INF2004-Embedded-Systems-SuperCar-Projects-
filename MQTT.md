@@ -1,0 +1,155 @@
+# MQTT telemetry and commands
+
+The car publishes its telemetry to an MQTT broker over the Wi-Fi hotspot and
+takes commands from it. The code is in `src/mqtt_comm.c` and uses lwIP's MQTT
+client, polled from the main loop. The settings are in `src/config.h`, under
+`MQTT_*`.
+
+## 1. Broker set-up
+
+The broker has to be reachable from the hotspot the car joins. There are two
+ways to run one.
+
+**A laptop on the same hotspot (recommended):**
+
+1. Install Mosquitto (https://mosquitto.org/download/).
+2. Create `mosquitto.conf` with these two lines:
+   ```
+   listener 1883 0.0.0.0
+   allow_anonymous true
+   ```
+3. Run `mosquitto -c mosquitto.conf -v`. On Windows, allow TCP port 1883
+   through the firewall when asked.
+4. Find the laptop's IP on the hotspot with `ipconfig` or `ifconfig`, for
+   example `172.20.10.2`.
+
+**A public test broker** works if the hotspot has internet, for example
+`broker.hivemq.com`. Anyone can read and publish on a public broker,
+including on the command topic, so use it only for testing.
+
+**Point the car at the broker** in one of two ways:
+
+- On the web page, open **More controls** and enter the IP or name under
+  **MQTT broker**, then press **SET**. This lasts until the car restarts.
+- Set `MQTT_BROKER_HOST` in `src/config.h`. This makes it permanent.
+
+The page shows the connection under **MQTT**, for example
+`Connected to 172.20.10.2 (812 sent, 0 dropped)`.
+
+## 2. Watching it
+
+```
+mosquitto_sub -h 172.20.10.2 -t "inf2004/aai14/supercar/#" -v
+```
+
+MQTT Explorer (a free GUI) works as well. Connect it to the same broker and
+open the `inf2004/aai14/supercar` tree.
+
+## 3. Topics
+
+The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
+
+| Topic | Direction | QoS / retained | When |
+|---|---|---|---|
+| `…/online` | car → | 1, retained | `1` on connect. The broker sends `0` (the car's will) if the car drops off. |
+| `…/heartbeat` | car → | 0 | Every 2 s (`MQTT_HEARTBEAT_MSEC`). |
+| `…/telemetry` | car → | 0 | Every 250 ms (`MQTT_TELEMETRY_MSEC`). |
+| `…/barcode` | car → | 1 | Each decoded barcode. |
+| `…/obstacle` | car → | 1 | Each finished obstacle scan. |
+| `…/hump` | car → | 1, retained | Each hump, once the car is level again. |
+| `…/cmd` | → car | 1 | A command word (see section 5). |
+| `…/cmd/ack` | car → | 1 | The command word, once the car has taken it. |
+
+## 4. Payloads (JSON)
+
+**heartbeat**
+
+```json
+{"seq":42,"up":84,"vb":4870,"sent":812,"drop":0,"conn":1,
+ "wifi":"Hotspot \"Ryan\" at 172.20.10.3, signal -58 dBm, ...",
+ "rr":"power-up"}
+```
+
+| Field | Meaning |
+|---|---|
+| `seq` | Heartbeat number. A gap means heartbeats were lost. |
+| `up` | Uptime in seconds. A drop back towards 0 means the car restarted. |
+| `vb` | Battery (VSYS) in mV. 0 means unavailable. |
+| `sent`, `drop` | MQTT messages queued, and messages that didn't fit or were made while offline. |
+| `conn` | MQTT connections so far. More than 1 means it has reconnected. |
+| `wifi` | Wi-Fi status text. |
+| `rr` | Reason for the last restart. |
+
+**telemetry**
+
+```json
+{"t":84250,"st":"FOLLOW_LINE","bp":"","ml":9,"mr":9,"el":40211,"er":41570,
+ "l":1,"r":1,"b":0,"rg":612,"pt":12,"rl":-4,"sv":90,"pend":"TURN LEFT"}
+```
+
+| Field | Meaning |
+|---|---|
+| `t` | ms since boot. |
+| `st` | Car state: `READY`, `LINE_CAL`, `FOLLOW_LINE`, `FEATURE_TEST`, `TURN`, `OBSTACLE_SCAN`, `BYPASS`, `HUMP`, `BLOCKED`, `STOPPED`, and so on. |
+| `bp` | Bypass step while in `BYPASS` (`out`, `pass`, `return`, …), otherwise empty. |
+| `ml`, `mr` | Left and right motor power in %. |
+| `el`, `er` | Left and right encoder edges since boot (about 13.3 and 13.7 per mm). |
+| `l`, `r`, `b` | Left line, right line and barcode sensor. 1 means black. |
+| `rg` | Ultrasonic range in mm. -1 means nothing in range. |
+| `pt`, `rl` | Pitch and roll in tenths of a degree. |
+| `sv` | Servo angle in degrees. 90 is straight ahead. |
+| `pend` | Turn waiting for the next crossroad, or empty. |
+
+**barcode**: `{"msg":"A","cmd":"TURN LEFT","t":51230}`. `cmd` is one of
+`TURN LEFT`, `TURN RIGHT`, `GO STRAIGHT`, `U-TURN` or `MESSAGE`. Every letter
+from A to Z is a command. The table is `BARCODE_LETTER_COMMANDS` in
+`config.h`.
+
+**obstacle**:
+
+```json
+{"front":248,"left":-62,"right":31,"mid":-15,"width":93,
+ "lst":"CONFIRMED","rst":"ESTIMATED","t":60110}
+```
+
+All distances are in mm, measured from the car. `front` is the distance
+ahead. `left`, `right` and `mid` are the edges and middle across the car's
+path (+ is right). `width` is the obstacle's width. `lst` and `rst` say how
+sure the scan is of each edge.
+
+**hump**: `{"peak_tilt_x10":118,"run_peak_tilt_x10":131,"t":70400}` holds
+this hump's highest tilt and the highest of the run, in tenths of a degree.
+
+## 5. Commands (`…/cmd`)
+
+These are the same words the web page sends, as plain text, in any case:
+
+| Word | Does |
+|---|---|
+| `start` | Start: calibrate on the line, then follow it. |
+| `stop` | Stop at once, from any state. |
+| `ftLAB` | Feature test. L, A and B are each `1`/`0` for line following, obstacle avoidance and barcodes. `ft111` turns all three on. |
+| `bt` | Barcode test: drive straight and read barcodes. |
+| `calibrate` | Calibrate the IMU (car still and level). |
+| `wheel` | Wheel test (car lifted). |
+| `scan` | Stationary obstacle scan test. |
+| `clear` | Clear the barcode message, history and log. |
+
+```
+mosquitto_pub -h 172.20.10.2 -t inf2004/aai14/supercar/cmd -m stop
+```
+
+The car answers on `…/cmd/ack` with the word it took. A broker change
+(`mb…`) is only accepted from the web page, so MQTT can't cut itself off.
+
+## 6. Recovery
+
+- **Wi-Fi drops:** MQTT disconnects, and the hotspot code rejoins on its
+  own.
+- **Connection fails or drops:** after any failure, or if the broker goes
+  quiet, the car tries again every 5 s (`MQTT_RETRY_MSEC`), for ever. A
+  broker name is looked up again on each try.
+- **Keepalive:** the keepalive is 10 s, so the broker notices a dead car
+  within about 15 s and publishes `online` = `0`.
+- **Driving is unaffected:** if the send buffer is full, a message is
+  dropped and counted in `drop`, rather than holding up the car.

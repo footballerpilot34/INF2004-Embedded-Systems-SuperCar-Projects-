@@ -103,6 +103,7 @@ add_executable(supercar
     src/line_sensor.c
     src/log.c
     src/motor.c
+    src/mqtt_comm.c
     src/power.c
     src/servo.c
     src/obstacle.c
@@ -128,6 +129,7 @@ target_link_libraries(supercar
     m
     pico_cyw43_arch_lwip_poll             # Wi-Fi hotspot + web UI
     pico_lwip_mdns                        # http://supercar-aai14.local
+    pico_lwip_mqtt                        # MQTT telemetry and commands
 )
 
 # Name shown in a phone hotspot's device list (= WIFI_HOST_NAME).

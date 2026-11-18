@@ -23,7 +23,8 @@ typedef enum
     BARCODE_CMD_NONE,   // A plain message: show it, keep following.
     BARCODE_CMD_LEFT,   // Turn left at the next crossroad.
     BARCODE_CMD_RIGHT,  // Turn right at the next crossroad.
-    BARCODE_CMD_UTURN   // Turn round and follow the line back.
+    BARCODE_CMD_UTURN,  // Turn round at the next crossroad.
+    BARCODE_CMD_STRAIGHT // Go straight on at the next crossroad.
 } barcode_command_t;
 
 void              barcode_init(void);
