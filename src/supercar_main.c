@@ -104,12 +104,15 @@ static void          usb_wait(void);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
 static bool g_stationary_scan_test = false;
+static bool gb_imu_cal_due = true;      // Calibrate at power-up, and
+static bool gb_was_online  = false;     // on joining a hotspot.
 static bool g_stationary_scan_starting = false;
 static uint32_t g_stationary_scan_since = 0u;
 
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
 static void          imu_calibrate_run(void);
+static void          imu_auto_calibrate(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
 static char const *  restart_reason(void);
@@ -183,6 +186,8 @@ main (void)
         watchdog_hw->scratch[STAGE_TIME_SCRATCH] =
             to_ms_since_boot(get_absolute_time());
         web_task();                         // Sets its own stages.
+        stage_set(STAGE_COMMANDS);
+        imu_auto_calibrate();
         stage_set(STAGE_MQTT);
         mqtt_comm_task();
         stage_set(STAGE_POWER);
@@ -683,8 +688,46 @@ turn_test (barcode_command_t command)
 
 
 /*!
+ * @brief Calibrate the IMU by itself at power-up and each time the car
+ *        joins a hotspot, while it is parked (it must be still; the 5 s
+ *        calibration holds up the loop). Run from the main loop, so the
+ *        success beep is ended by buzzer_task().
+ */
+static void
+imu_auto_calibrate (void)
+{
+    bool b_online = web_is_online();
+
+    if (b_online && !gb_was_online)
+    {
+        gb_imu_cal_due = true;          // Just joined a hotspot.
+    }
+    gb_was_online = b_online;
+
+    if (gb_imu_cal_due && vehicle_is_idle() && !line_diag_is_active())
+    {
+        gb_imu_cal_due = false;
+        log_printf("IMU: calibrating by itself (%s). Keep the car still "
+                   "and level for 5 s...",
+                   (b_online ? "on the hotspot" : "power-up"));
+        imu_calibrate_run();
+    }
+    else if (gb_imu_cal_due && vehicle_is_moving())
+    {
+        gb_imu_cal_due = false;         // Joined mid-run: keep the old one.
+        log_printf("IMU: joined the hotspot while driving; calibration "
+                   "skipped.");
+    }
+    else
+    {
+        // Nothing due, or waiting for the car to park.
+    }
+}   /* imu_auto_calibrate() */
+
+
+/*!
  * @brief Calibrate the LSM303DLHC pitch reference while the car is still,
- *        and log the result (no beep).
+ *        log the result, and beep softly (as for a barcode) if it worked.
  */
 static void
 imu_calibrate_run (void)
@@ -697,6 +740,7 @@ imu_calibrate_run (void)
     {
         log_printf("IMU calibrated. Pitch/roll baseline set; hump "
                    "detection enabled.");
+        buzzer_beep_soft(BARCODE_BEEP_MSEC);    // As for a barcode.
     }
     else
     {

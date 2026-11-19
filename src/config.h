@@ -90,9 +90,12 @@
 // the hotspot: a laptop on the same hotspot running Mosquitto (listening
 // on all addresses, anonymous allowed), or a public test broker if the
 // hotspot has internet. Set it here, or at run time on the web page
-// (More controls -> MQTT broker); "" = off until set there.
+// (More controls -> MQTT broker) or with tools/mqtt_car.ps1, which sends
+// the laptop's current address; "" = off until set there. The car keeps
+// trying (every MQTT_RETRY_MSEC) whenever it is on a hotspot.
 #define MQTT_ENABLED                true
-#define MQTT_BROKER_HOST            ""      // IP address or host name.
+#define MQTT_BROKER_HOST            "172.20.10.3"   // The laptop on the
+                                                    // iPhone hotspot.
 #define MQTT_BROKER_PORT            1883u
 #define MQTT_CLIENT_ID              "supercar-aai14"
 #define MQTT_TOPIC_PREFIX           "inf2004/aai14/supercar"
