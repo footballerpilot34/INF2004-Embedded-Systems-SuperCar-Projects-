@@ -48,6 +48,7 @@
 
 #include "barcode.h"
 #include "encoder.h"
+#include "hump.h"
 #include "config.h"
 #include "imu.h"
 #include "line_sensor.h"
@@ -181,7 +182,10 @@ static char const g_page_html[] =
     "<span class=hint>(off: stop, go on when clear)</span></label>"
     "<label><input type=checkbox id=fb checked> Barcode scanning "
     "<span class=hint>(off: ignored)</span></label>"
-    "<button class=t onclick=\"c('ft'+['fl','fo','fb'].map(function(i)"
+    "<label><input type=checkbox id=fh checked> Hump / IMU "
+    "<span class=hint>(off: tilt ignored)</span></label>"
+    "<button class=t onclick=\"c('ft'+['fl','fo','fb','fh'].map("
+    "function(i)"
     "{return document.getElementById(i).checked?1:0}).join(''))\">"
     "RUN FEATURE TEST</button></details></div>"
     "<details class=c><summary>More controls</summary><div class=g "
@@ -250,6 +254,7 @@ static char const g_page_html[] =
     "<span class=leg><span style=color:#ff6464>Pitch</span> &nbsp;"
     "<span style=color:#58d8ff>Roll</span></span>"
     "<div class=vals id=pv>Pitch - &nbsp; Peak tilt -</div>"
+    "<div class=vals id=hv>Height now -</div>"
     "<canvas id=pc></canvas><div class=hint>Fixed scale: -30 to +30 degrees. "
     "Pitch is low-pass filtered; calibrate (hold GP20 2 s) while still "
     "and level.</div></div>"
@@ -396,7 +401,11 @@ static char const g_dashboard_js[] =
     "$('mv').textContent='MX '+val('mx')+' G   MY '+val('my')+"
     "' G   MZ '+val('mz')+' G'}"
     "$('pv').textContent='Pitch '+(d.ic?(d.pt/1000).toFixed(1)+' deg':'-')+"
+    "'   Roll '+(d.ic?(d.rl/1000).toFixed(1)+' deg':'-')+"
     "'   Peak tilt '+(d.pk/10).toFixed(1)+' deg';"
+    "$('hv').textContent='Height now '+(d.hz/10).toFixed(1)+' mm   "
+    "last hump peak '+(d.hh/10).toFixed(1)+' mm   highest this run '+"
+    "(d.hr/10).toFixed(1)+' mm ('+d.hn+' humps)';"
     "draw('ac',['ax','ay','az'],1.2);draw('pc',['pt','rl'],30.0);"
     "draw('mc',['mx','my','mz'],0.8);"
     "ok=Date.now();setTimeout(u,d.more?50:200)})"
@@ -413,6 +422,7 @@ static web_command_t g_pending = WEB_CMD_NONE;
 static bool          gb_feat_line    = true;   // FEATURE TEST choices.
 static bool          gb_feat_avoid   = true;
 static bool          gb_feat_barcode = true;
+static bool          gb_feat_hump    = true;
 static bool          gb_wifi_initialized = false;
 static bool          gb_http_listening = false;
 static uint32_t      g_http_retry = 0u;
@@ -1306,13 +1316,16 @@ hotspot_check (uint32_t now_msec)
  * @param[out] p_line    Follow the line.
  * @param[out] p_avoid   Go round obstacles.
  * @param[out] p_barcode Read barcodes.
+ * @param[out] p_hump    Detect, climb and measure humps (IMU).
  */
 void
-web_features (bool * p_line, bool * p_avoid, bool * p_barcode)
+web_features (bool * p_line, bool * p_avoid, bool * p_barcode,
+              bool * p_hump)
 {
     *p_line    = gb_feat_line;
     *p_avoid   = gb_feat_avoid;
     *p_barcode = gb_feat_barcode;
+    *p_hump    = gb_feat_hump;
 }   /* web_features() */
 
 
@@ -1697,12 +1710,15 @@ command_parse (char const * p_name)
     {
         if (g_pending != WEB_CMD_STOP) { g_pending = WEB_CMD_STATIONARY_SCAN; }
     }
-    else if ((0 == strncmp(p_name, "ft", 2u)) && (5u == strlen(p_name)))
+    else if ((0 == strncmp(p_name, "ft", 2u)) &&
+             ((5u == strlen(p_name)) || (6u == strlen(p_name))))
     {
-        // "ft" + three 0/1 digits: line, obstacle avoidance, barcode.
+        // "ft" + 0/1 digits: line, obstacle avoidance, barcode, hump.
+        // Without the fourth (older "ft111"), humps are on.
         gb_feat_line    = ('1' == p_name[2]);
         gb_feat_avoid   = ('1' == p_name[3]);
         gb_feat_barcode = ('1' == p_name[4]);
+        gb_feat_hump    = (('\0' == p_name[5]) || ('1' == p_name[5]));
         g_pending       = WEB_CMD_FEATURE_TEST;
     }
     else if (0 == strcmp(p_name, "mark"))
@@ -1845,7 +1861,9 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 "\"ml\":%" PRId32 ",\"mr\":%" PRId32 ","
                                 "\"imu\":%d,\"iv\":%d,\"ic\":%d,"
                                 "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
-                                "\"pk\":%" PRId32 ","
+                                "\"pk\":%" PRId32 ",\"hh\":%" PRId32 ","
+                                "\"hr\":%" PRId32 ",\"hn\":%" PRIu32 ","
+                                "\"hz\":%" PRId32 ","
                                 "\"lh\":%d,\"rh\":%d,"
                                 "\"el\":%" PRIu32 ",\"er\":%" PRIu32 ","
                                 "\"ax\":%" PRId32 ",\"ay\":%" PRId32 ","
@@ -1862,9 +1880,12 @@ status_build (char * p_out, size_t capacity, uint32_t since)
                                 (imu_is_ok() ? 1 : 0),
                                 (imu_reading_is_valid() ? 1 : 0),
                                 (imu_is_calibrated() ? 1 : 0),
-                                (imu_pitch_x10() * 10),
-                                (imu_roll_x10() * 10),
+                                (imu_pitch_x10() * 100),    // mdeg.
+                                (imu_roll_x10() * 100),
                                 vehicle_hump_peak_tilt_x10(),
+                                hump_last_height_x10(),
+                                hump_run_height_x10(),
+                                hump_count(), hump_height_x10(),
                                 (raw.b_left_high ? 1 : 0),
                                 (raw.b_right_high ? 1 : 0),
                                 encoder_count(PIN_ENC_LEFT_A),

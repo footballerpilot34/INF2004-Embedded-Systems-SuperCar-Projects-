@@ -32,6 +32,7 @@
 #include "bypass.h"
 #include "config.h"
 #include "encoder.h"
+#include "hump.h"
 #include "imu.h"
 #include "line_sensor.h"
 #include "log.h"
@@ -78,8 +79,7 @@ static uint32_t        g_hb_seq       = 0u;
 static uint32_t        g_next_tele    = 0u;
 static uint32_t        g_next_hb      = 0u;
 static bool            gb_scan_done   = false;  // Last obstacle scan seen.
-static vehicle_state_t g_last_state   = VEHICLE_READY;
-static int32_t         g_run_peak_x10 = 0;      // Highest hump tilt so far.
+static uint32_t        g_humps_seen   = 0u;     // hump_count() published.
 static bool            gb_cmd_topic   = false;  // Incoming is on cmd.
 static char            g_cmd_in[CMD_BYTES];
 static uint32_t        g_cmd_len      = 0u;
@@ -605,7 +605,8 @@ publish_telemetry (uint32_t now_msec)
                     "\"el\":%" PRIu32 ",\"er\":%" PRIu32 ","
                     "\"l\":%d,\"r\":%d,\"b\":%d,\"rg\":%" PRId32 ","
                     "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
-                    "\"sv\":%" PRId32 ",\"pend\":\"%s\"}",
+                    "\"sv\":%" PRId32 ",\"hh\":%" PRId32 ".%" PRId32 ","
+                    "\"pend\":\"%s\"}",
                     now_msec, vehicle_state_name(state),
                     ((VEHICLE_BYPASS == state) ? bypass_phase_name() : ""),
                     motor_left_speed(), motor_right_speed(),
@@ -617,7 +618,8 @@ publish_telemetry (uint32_t now_msec)
                     ((ULTRASONIC_NO_RANGE == range) ? NO_RANGE_JSON
                                                     : (int32_t) range),
                     imu_pitch_x10(), imu_roll_x10(),
-                    (int32_t) servo_angle(),
+                    (int32_t) servo_angle(), (hump_height_x10() / 10),
+                    (hump_height_x10() % 10),
                     ((BARCODE_CMD_NONE == pending) ? ""
                                      : barcode_command_name(pending)));
     publish(g_topic_tele, payload, 0u, 0u);
@@ -656,15 +658,14 @@ publish_heartbeat (uint32_t now_msec)
 
 /*!
  * @brief Publish an obstacle scan once it finishes, and a hump once it is
- *        cleared (with the highest peak of the run so far).
+ *        cleared (its height, and the highest of the run so far).
  */
 static void
 publish_events (void)
 {
     char                       payload[PAYLOAD_BYTES];
     obstacle_profile_t const * p_scan = obstacle_profile();
-    vehicle_state_t            state  = vehicle_state();
-    int32_t                    peak   = vehicle_hump_peak_tilt_x10();
+    uint32_t                   humps  = hump_count();
 
     if (p_scan->finished && !gb_scan_done)
     {
@@ -683,20 +684,25 @@ publish_events (void)
     }
     gb_scan_done = p_scan->finished;
 
-    if ((VEHICLE_HUMP == g_last_state) && (VEHICLE_HUMP != state))
+    // Only a cleared hump counts (not one abandoned as BLOCKED or STOP).
+    // A new run sets the count back to 0: nothing to publish then.
+    if (humps > g_humps_seen)
     {
-        if (peak > g_run_peak_x10)
-        {
-            g_run_peak_x10 = peak;
-        }
         (void) snprintf(payload, PAYLOAD_BYTES,
-                        "{\"peak_tilt_x10\":%" PRId32 ","
+                        "{\"height_mm\":%" PRId32 ".%" PRId32 ","
+                        "\"peak_tilt_x10\":%" PRId32 ","
+                        "\"run_height_mm\":%" PRId32 ".%" PRId32 ","
                         "\"run_peak_tilt_x10\":%" PRId32 ","
-                        "\"t\":%" PRIu32 "}",
-                        peak, g_run_peak_x10, now_msec_get());
+                        "\"n\":%" PRIu32 ",\"t\":%" PRIu32 "}",
+                        (hump_last_height_x10() / 10),
+                        (hump_last_height_x10() % 10),
+                        hump_last_tilt_x10(),
+                        (hump_run_height_x10() / 10),
+                        (hump_run_height_x10() % 10), hump_run_tilt_x10(),
+                        humps, now_msec_get());
         publish(g_topic_hump, payload, 1u, 1u);
     }
-    g_last_state = state;
+    g_humps_seen = humps;
 }   /* publish_events() */
 
 

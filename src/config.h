@@ -421,11 +421,35 @@
 #define US_STALE_MSEC               200u    // Range older than this is
                                             // treated as unknown.
 
-// LSM303DLHC pitch uses Y-forward / Z-up axes (see IMU mounting diagram).
+// LSM303DLHC pitch: the sensor's -Y is forward, Z up (imu.c flips it).
 // Tilt is low-pass filtered; thresholds provide hysteresis against noise.
-#define HUMP_ENTER_PITCH_X10        80      // 8.0 deg nose up: on a hump.
-#define HUMP_LEVEL_PITCH_X10        30      // Within 3.0 deg: level again.
-#define HUMP_LEVEL_MSEC             700u    // Level after tilt excursion: done.
+// The course hump is only 4-5 mm high (2026-11-19): about 2.5 deg of
+// nose-up pitch, against about 0.5 deg on the flat at cruise. So a hump
+// is NOSE-UP PITCH only: pulling away reads nose-down (-3 deg), and roll
+// jumped to 4-10 deg on the hump (wobble: 5 mm across the track is only
+// 2.3 deg), so neither counts. HUMP ignores the ultrasonic, so a false
+// hump is unsafe: keep the threshold clear of the flat's noise.
+#define HUMP_ENTER_PITCH_X10        20      // 2.0 deg nose up: on a hump.
+#define HUMP_LEVEL_PITCH_X10        10      // Within 1.0 deg: level again.
+#define HUMP_ENTER_MSEC             100u    // Tilted this long: a hump. A
+                                            // jolt tilts the reading for
+                                            // less.
+// Front to rear axle centres. A hump shorter than the car tips it by
+// asin(height / wheelbase) when the front wheels are on top, so this
+// gives the height of a short hump (hump.c). Measured 2026-11-19: drive
+// axle to caster ball contact, about 85 mm.
+#define HUMP_WHEELBASE_MM           85u
+#define HUMP_SETTLE_MSEC            1000u   // No hump looked for this long
+                                            // after setting off: pulling
+                                            // away read as -3 deg for 258
+                                            // ms on the flat (2026-11-19).
+#define HUMP_LEVEL_MSEC             400u    // Level after tilt excursion: done.
+#define HUMP_PASS_MM                250u    // Or driven this far on it
+                                            // (rest of the hump + the
+                                            // wheelbase): done, unless
+                                            // still tilted. Speeding up
+                                            // reads as tilt and could keep
+                                            // it "not level" for ever.
 #define HUMP_MIN_MSEC               500u    // Shortest possible hump.
 #define HUMP_MAX_MSEC               8000u   // Longer than this: stop.
 #define HUMP_IGNORE_RANGE_MSEC      500u    // Ignore ultrasonic after a
@@ -604,7 +628,6 @@
 #define TELEMETRY_EVERY_TICKS       5u      // Teleplot points every 50 ms.
 #define BUTTON_DEBOUNCE_TICKS       3u      // 30 ms START debounce.
 #define BUTTON_LONG_PRESS_TICKS     200u    // Hold START 2 s: calibrate.
-#define CAL_DONE_BEEP_MSEC          150u    // Beep when calibration ends.
 #define BARCODE_BEEP_MSEC           80u     // Soft beep: barcode read.
 #define BUZZER_SOFT_DUTY_PERCENT    5u     // Soft beep loudness (PWM duty;
                                             // 50 = normal beep). Lower is

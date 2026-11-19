@@ -536,9 +536,10 @@ command_run (web_command_t command)
             bool b_line    = true;
             bool b_avoid   = true;
             bool b_barcode = true;
+            bool b_hump    = true;
 
-            web_features(&b_line, &b_avoid, &b_barcode);
-            vehicle_feature_test(b_line, b_avoid, b_barcode);
+            web_features(&b_line, &b_avoid, &b_barcode, &b_hump);
+            vehicle_feature_test(b_line, b_avoid, b_barcode, b_hump);
         }
     break;
 
@@ -682,12 +683,8 @@ turn_test (barcode_command_t command)
 
 
 /*!
- * @brief Calibrate the IMU and beep once if it worked.
- *
- * @par
- * If the IMU was not found at power-up, this tries to find it again, so a
- * loose wire can be fixed without a reset.
- * @brief Calibrate the LSM303DLHC pitch reference while the car is still.
+ * @brief Calibrate the LSM303DLHC pitch reference while the car is still,
+ *        and log the result (no beep).
  */
 static void
 imu_calibrate_run (void)
@@ -698,14 +695,13 @@ imu_calibrate_run (void)
     }
     else if (imu_calibrate())
     {
-        log_obstacle("IMU calibrated. Pitch/roll baseline set; hump "
-                     "detection enabled.");
-        buzzer_beep(CAL_DONE_BEEP_MSEC);
+        log_printf("IMU calibrated. Pitch/roll baseline set; hump "
+                   "detection enabled.");
     }
     else
     {
-        log_obstacle("IMU calibration failed. Keep it still, level and "
-                     "try again.");
+        log_printf("IMU calibration failed. Keep it still, level and "
+                   "try again.");
     }
 }   /* imu_calibrate_run() */
 

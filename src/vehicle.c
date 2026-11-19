@@ -94,6 +94,7 @@
 
 #include "barcode.h"
 #include "config.h"
+#include "hump.h"
 #include "imu.h"
 #include "line_sensor.h"
 #include "log.h"
@@ -132,6 +133,8 @@ static int32_t         g_hump_peak_tilt_x10 = 0;
 static bool            gb_level       = false;
 static bool            gb_clear       = false;
 static bool            gb_hump_tilted = false;
+static bool            gb_tilting     = false;  // Over HUMP_ENTER, since
+static uint32_t        g_tilt_msec    = 0u;     // g_tilt_msec.
 static bool            gb_last_left   = true;   // Line last seen left.
 
 // Which sensors last saw the line, so the car knows which limit it left by.
@@ -210,6 +213,8 @@ static bool              gb_feat_line    = true;  // Follow the line (else
 static bool              gb_feat_avoid   = true;  // Scan and go round (else
                                                   // stop and wait).
 static bool              gb_feat_barcode = true;  // Read barcodes.
+static bool              gb_feat_hump    = true;  // Climb and measure humps
+                                                  // (else tilt is ignored).
 static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
                                                             // crossroad.
 
@@ -239,8 +244,11 @@ static void     follow_line_step(uint32_t now_msec, uint32_t range_mm,
 static void     probe_step(uint32_t now_msec, uint32_t range_mm,
                            int32_t pitch_x10);
 static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
+static bool     hump_tilt_held(uint32_t now_msec, int32_t tilt_x10);
+static void     log_tenths(char const * p_what, int32_t value_x10);
 static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
-static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm);
+static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm,
+                                  int32_t tilt_x10);
 
 
 /*!
@@ -268,7 +276,9 @@ vehicle_start (void)
         gb_feat_line    = true;     // A full run: every feature on.
         gb_feat_avoid   = true;
         gb_feat_barcode = true;
+        gb_feat_hump    = true;
         g_pending_turn  = BARCODE_CMD_NONE;  // A new run: no old turn.
+        hump_new_run();                      // Nor the last run's humps.
         state_enter(VEHICLE_LINE_CAL, now_msec_get());
     }
 }   /* vehicle_start() */
@@ -283,25 +293,33 @@ vehicle_start (void)
  * - b_avoid:   at an obstacle, scan and go round it (bypass.c); off:
  *              stop, and drive on once it has gone (BLOCKED).
  * - b_barcode: read barcodes (and beep and act on them); off: ignore.
+ * - b_hump:    when the nose tips up, climb the hump (HUMP) and measure
+ *              it (hump.c), with or without the line; off: tilt ignored.
  * Works from READY or STOPPED only. STOP ends it.
  *
  * @param[in] b_line    Follow the line.
  * @param[in] b_avoid   Go round obstacles.
  * @param[in] b_barcode Read barcodes.
+ * @param[in] b_hump    Climb and measure humps.
  */
 void
-vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode)
+vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode,
+                      bool b_hump)
 {
     if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
     {
         gb_feat_line    = b_line;
         gb_feat_avoid   = b_avoid;
         gb_feat_barcode = b_barcode;
+        gb_feat_hump    = b_hump;
         g_pending_turn  = BARCODE_CMD_NONE;
-        log_state("FEATURE TEST: line %s, obstacles %s, barcodes %s.",
+        hump_new_run();
+        log_state("FEATURE TEST: line %s, obstacles %s, barcodes %s, "
+                  "humps %s.",
                   (b_line ? "FOLLOWED" : "ignored (straight)"),
                   (b_avoid ? "AVOIDED" : "stop and wait"),
-                  (b_barcode ? "READ" : "ignored"));
+                  (b_barcode ? "READ" : "ignored"),
+                  (b_hump ? "CLIMBED" : "ignored"));
         state_enter((b_line ? VEHICLE_LINE_CAL : VEHICLE_BARCODE_TEST),
                     now_msec_get());
     }
@@ -459,7 +477,7 @@ void
 vehicle_barcode_test (void)
 {
     // Kept for the serial key: a feature test with only barcodes on.
-    vehicle_feature_test(false, false, true);
+    vehicle_feature_test(false, false, true, false);
 }   /* vehicle_barcode_test() */
 
 
@@ -497,18 +515,26 @@ vehicle_task (void)
 {
     uint32_t now_msec  = now_msec_get();
     uint32_t range_mm  = ultrasonic_range_mm();
-    int32_t  tilt_x10  = imu_max_tilt_x10();
+    int32_t  tilt_x10  = imu_pitch_x10();    // Humps: pitch only (config.h).
     bool     b_reading = ((VEHICLE_FOLLOW_LINE == g_state) ||
                           (VEHICLE_BARCODE_TEST == g_state));
     uint32_t mark_msec = 0u;
     line_junction_t junction = LINE_JUNCTION_NONE;
+
+    // Hump height: add up the climb while driving forwards.
+    hump_task(((VEHICLE_FOLLOW_LINE == g_state) ||
+               (VEHICLE_PROBE == g_state) || (VEHICLE_HUMP == g_state) ||
+               (VEHICLE_BARCODE_TEST == g_state)),
+              (VEHICLE_HUMP == g_state));
 
     // Apply the immediate stop before junctions, calibration, turns or
     // tilt handling can issue another movement command.
     if (OBSTACLE_STOP_AT_ONCE && vehicle_is_moving() &&
         (VEHICLE_BLOCKED != g_state) &&
         (VEHICLE_OBSTACLE_SCAN != g_state) &&
-        (VEHICLE_BYPASS != g_state) && (range_mm <= OBSTACLE_STOP_MM))
+        (VEHICLE_BYPASS != g_state) && (VEHICLE_HUMP != g_state) &&
+        ((int32_t) (now_msec - g_ignore_until) >= 0) &&
+        (range_mm <= OBSTACLE_STOP_MM))
     {
         log_obstacle("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
         state_enter((gb_feat_avoid ? VEHICLE_OBSTACLE_SCAN : VEHICLE_BLOCKED),
@@ -628,7 +654,7 @@ vehicle_task (void)
     break;
 
     case VEHICLE_BARCODE_TEST:
-        barcode_test_step(now_msec, range_mm);
+        barcode_test_step(now_msec, range_mm, tilt_x10);
     break;
 
     case VEHICLE_BARCODE_STATIC:    // Barcodes are read by barcode_task().
@@ -760,8 +786,7 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
     bool b_range_used = ((int32_t) (now_msec - g_ignore_until) >= 0);
 
-    if ((tilt_x10 >= HUMP_ENTER_PITCH_X10) ||
-        (tilt_x10 <= -HUMP_ENTER_PITCH_X10))
+    if (hump_tilt_held(now_msec, tilt_x10))
     {
         state_enter(VEHICLE_HUMP, now_msec);
     }
@@ -992,10 +1017,8 @@ turn_finish (uint32_t now_msec, line_state_t line, line_last_t last,
 static void
 probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
-    if ((tilt_x10 >= HUMP_ENTER_PITCH_X10) ||
-        (tilt_x10 <= -HUMP_ENTER_PITCH_X10))
+    if (hump_tilt_held(now_msec, tilt_x10))
     {
-        log_obstacle("Probe: nose tipped up -> HUMP, climbing.\n");
         state_enter(VEHICLE_HUMP, now_msec);
     }
     else if (range_mm > OBSTACLE_CLEAR_MM)
@@ -1017,6 +1040,68 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 
 
 /*!
+ * @brief Decide whether the car is on a hump: nose up by HUMP_ENTER_PITCH
+ *        for HUMP_ENTER_MSEC without a break. A jolt (pulling away,
+ *        braking, a bump) tilts the reading for less.
+ *
+ * @param[in] now_msec The current time.
+ * @param[in] tilt_x10 The pitch, nose up positive, in tenths of a degree.
+ *
+ * @return True once the tilt has lasted (logged with pitch and roll).
+ */
+static bool
+hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
+{
+    bool b_held     = false;
+    bool b_settling = ((VEHICLE_PROBE != g_state) &&
+                       ((now_msec - g_entered_msec) < HUMP_SETTLE_MSEC));
+
+    // Pulling away (or setting off again after a turn or a hump) tilts
+    // the reading for a while: no hump is looked for until it settles.
+    // Only nose up counts: a hump starts with a climb.
+    if (!gb_feat_hump || b_settling || (tilt_x10 < HUMP_ENTER_PITCH_X10))
+    {
+        gb_tilting = false;
+    }
+    else if (!gb_tilting)
+    {
+        gb_tilting  = true;
+        g_tilt_msec = now_msec;
+    }
+    else if ((now_msec - g_tilt_msec) >= HUMP_ENTER_MSEC)
+    {
+        b_held = true;
+        log_obstacle("Tilted for %" PRIu32 " ms -> HUMP, climbing.",
+                     (now_msec - g_tilt_msec));
+        log_tenths("  pitch", imu_pitch_x10());
+        log_tenths("  roll", imu_roll_x10());
+    }
+    else
+    {
+        // Tilted, but not for long enough yet.
+    }
+
+    return (b_held);
+}   /* hump_tilt_held() */
+
+
+/*!
+ * @brief Log an angle in tenths of a degree as degrees, e.g. "-3.4 deg".
+ *
+ * @param[in] p_what    The label.
+ * @param[in] value_x10 The angle, in tenths of a degree.
+ */
+static void
+log_tenths (char const * p_what, int32_t value_x10)
+{
+    int32_t size = ((value_x10 < 0) ? -value_x10 : value_x10);
+
+    log_obstacle("%s %s%" PRId32 ".%" PRId32 " deg", p_what,
+                 ((value_x10 < 0) ? "-" : ""), (size / 10), (size % 10));
+}   /* log_tenths() */
+
+
+/*!
  * @brief HUMP: climb and descend, ignoring the ultrasonic.
  *
  * @param[in] now_msec  The current time.
@@ -1028,8 +1113,8 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
     int32_t  magnitude = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
     uint32_t in_hump   = now_msec - g_entered_msec;
 
-    // A single raised wheel may produce roll rather than pitch. Track an
-    // excursion on either axis, then finish only after both return near base.
+    // Pitch only (roll is wobble on a 4-5 mm hump: config.h). Up or down
+    // counts as tilted; finish only once it is back near level.
     if (magnitude >= HUMP_ENTER_PITCH_X10)
     {
         gb_hump_tilted = true;
@@ -1053,21 +1138,38 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         // Still level.
     }
 
-    if (gb_hump_tilted && gb_level && (in_hump > HUMP_MIN_MSEC) &&
-        ((now_msec - g_level_msec) > HUMP_LEVEL_MSEC))
+    if (gb_hump_tilted && (in_hump > HUMP_MIN_MSEC) &&
+        ((gb_level && ((now_msec - g_level_msec) > HUMP_LEVEL_MSEC)) ||
+         ((hump_on_mm() >= (int32_t) HUMP_PASS_MM) &&
+          (magnitude < HUMP_ENTER_PITCH_X10))))
     {
-        log_obstacle("Hump cleared after %" PRIu32 " ms.\n", in_hump);
+        hump_finish(g_hump_peak_tilt_x10);
+        log_obstacle("Hump cleared after %" PRIu32 " ms, %" PRId32 " mm "
+                     "driven: peak height %" PRId32 ".%" PRId32 " mm, "
+                     "peak tilt %" PRId32 ".%" PRId32 " deg.", in_hump,
+                     hump_on_mm(), (hump_last_height_x10() / 10),
+                     (hump_last_height_x10() % 10),
+                     (g_hump_peak_tilt_x10 / 10),
+                     (g_hump_peak_tilt_x10 % 10));
+        log_obstacle("Highest this run: %" PRId32 ".%" PRId32 " mm (%"
+                     PRIu32 " humps).\n", (hump_run_height_x10() / 10),
+                     (hump_run_height_x10() % 10), hump_count());
         g_ignore_until = now_msec + HUMP_IGNORE_RANGE_MSEC;
-        state_enter(VEHICLE_FOLLOW_LINE, now_msec);
+        state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
+                                  : VEHICLE_BARCODE_TEST), now_msec);
     }
     else if (in_hump > HUMP_MAX_MSEC)
     {
         log_obstacle("Hump took too long (stalled?) -> BLOCKED.\n");
         state_enter(VEHICLE_BLOCKED, now_msec);
     }
-    else
+    else if (gb_feat_line)
     {
         line_steer(SPEED_HUMP, now_msec);
+    }
+    else
+    {
+        motor_set(SPEED_HUMP, SPEED_HUMP);  // Feature test: straight over.
     }
 }   /* hump_step() */
 
@@ -1109,15 +1211,27 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
 /*!
  * @brief BARCODE TEST: drive straight at the same speeds as START (cruise,
  *        scan speed while a barcode is read, creep near an obstacle); stop
- *        at an obstacle. Only the line sensors are ignored.
+ *        at an obstacle; climb a hump (HUMP, straight). Only the line
+ *        sensors are ignored.
  *
  * @param[in] now_msec The current time.
  * @param[in] range_mm The forward range.
+ * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-barcode_test_step (uint32_t now_msec, uint32_t range_mm)
+barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
-    if (range_mm <= OBSTACLE_STOP_MM)
+    bool b_range_used = ((int32_t) (now_msec - g_ignore_until) >= 0);
+
+    if (hump_tilt_held(now_msec, tilt_x10))
+    {
+        state_enter(VEHICLE_HUMP, now_msec);
+    }
+    else if (!b_range_used)
+    {
+        motor_set(SPEED_CRUISE, SPEED_CRUISE);  // Just off a hump.
+    }
+    else if (range_mm <= OBSTACLE_STOP_MM)
     {
         log_obstacle("FEATURE TEST: obstacle at %" PRIu32 " mm -> stopped.",
                      range_mm);
@@ -1173,6 +1287,7 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     path_reset(false);                  // Valid again once on the line.
     gb_level       = false;
     gb_clear       = false;
+    gb_tilting     = false;             // A tilt must build up afresh.
     if (VEHICLE_HUMP == state)
     {
         g_hump_peak_tilt_x10 = 0;

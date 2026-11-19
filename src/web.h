@@ -35,7 +35,7 @@ bool          web_init(void);
 void          web_task(void);
 web_command_t web_command_take(void);
 void          web_features(bool * p_line, bool * p_avoid,
-                           bool * p_barcode);
+                           bool * p_barcode, bool * p_hump);
 char const *  web_wifi_text(void);
 void          web_set_restart_reason(char const * p_reason);
 // Pass a string literal; feedback remains visible until the next test event.

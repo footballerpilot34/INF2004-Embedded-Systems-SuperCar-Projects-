@@ -38,7 +38,7 @@ void            vehicle_barcode_command(barcode_command_t command,
 barcode_command_t vehicle_pending_turn(void);
 void            vehicle_barcode_test(void);
 void            vehicle_feature_test(bool b_line, bool b_avoid,
-                                     bool b_barcode);
+                                     bool b_barcode, bool b_hump);
 void            vehicle_barcode_static(void);
 void            vehicle_task(void);
 vehicle_state_t vehicle_state(void);

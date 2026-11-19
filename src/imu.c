@@ -25,7 +25,11 @@
 #define IMU_I2C                         i2c1
 #define IMU_I2C_HZ                      100000u
 #define I2C_TIMEOUT_USEC                5000u
-#define SAMPLE_PERIOD_USEC              200000u
+// 50 readings a second (the accelerometer updates at 100 Hz). At 5 a
+// second with the filter below, pitch lagged ~0.5 s: a 4-5 mm hump was
+// only seen on the way down (2026-11-19). One reading is two I2C reads of
+// about 0.8 ms each at 100 kHz.
+#define SAMPLE_PERIOD_USEC              20000u
 
 #define ACCEL_ADDRESS                   0x19u
 #define MAG_ADDRESS                     0x1Eu
@@ -53,7 +57,7 @@
 #define CALIBRATION_SAMPLES              25u
 #define ACCEL_MIN_MG                     800
 #define ACCEL_MAX_MG                     1200
-#define PITCH_FILTER_DIVISOR             3
+#define PITCH_FILTER_DIVISOR             4      // ~80 ms at 50 Hz.
 #define RAD_TO_TENTH_DEG                 572.958f
 
 
@@ -123,7 +127,8 @@ imu_init (void)
 
     if (accel_ok && mag_ok)
     {
-        accel_ok = reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG1, 0x27u) &&
+        // CTRL_REG1 0x57: 100 Hz, X, Y and Z on (was 0x27: 10 Hz).
+        accel_ok = reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG1, 0x57u) &&
                    reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG4, 0x88u);
         mag_ok   = reg_write(MAG_ADDRESS, MAG_CRA_REG, 0x10u) &&
                    reg_write(MAG_ADDRESS, MAG_CRB_REG, 0x20u) &&
@@ -149,7 +154,7 @@ imu_init (void)
 
 
 /*!
- * @brief Refresh all six physical axis values every 200 ms.
+ * @brief Refresh all six physical axis values every 20 ms.
  *
  * Call from the main control loop. The filtered pitch is the only derived
  * value; the other five axes remain direct physical-unit readings.
@@ -379,12 +384,16 @@ accel_mg (uint8_t msb, uint8_t lsb)
 
 
 /*!
- * @brief Calculate raw pitch for Y-forward / Z-up sensor mounting.
+ * @brief Calculate raw pitch, nose up positive.
+ *
+ * @par
+ * On the car the sensor's Y axis points backwards (Z up): checked
+ * 2026-11-19, nose up read negative with +Y. So -Y is forward.
  */
 static int32_t
 raw_pitch_x10 (imu_axes_t const * p_axes)
 {
-    float angle = atan2f((float) p_axes->ay_mg, (float) p_axes->az_mg);
+    float angle = atan2f((float) -p_axes->ay_mg, (float) p_axes->az_mg);
 
     return ((int32_t) (angle * RAD_TO_TENTH_DEG));
 }   /* raw_pitch_x10() */

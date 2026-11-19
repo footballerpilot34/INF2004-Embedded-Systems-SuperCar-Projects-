@@ -12,6 +12,18 @@ ways to run one.
 
 **A laptop on the same hotspot (recommended):**
 
+On Windows, the quick way is:
+
+1. `winget install --id EclipseFoundation.Mosquitto -e`. This installs
+   Mosquitto as a service that listens on localhost only.
+2. From an administrator PowerShell, run
+   `powershell -ExecutionPolicy Bypass -File tools\mqtt_broker_setup.ps1`.
+   It opens the service to the network, allows TCP 1883 through the
+   firewall and prints the laptop's IP addresses. Run it with `-Undo` to
+   reverse it.
+
+Or by hand:
+
 1. Install Mosquitto (https://mosquitto.org/download/).
 2. Create `mosquitto.conf` with these two lines:
    ```
@@ -84,7 +96,8 @@ The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
 
 ```json
 {"t":84250,"st":"FOLLOW_LINE","bp":"","ml":9,"mr":9,"el":40211,"er":41570,
- "l":1,"r":1,"b":0,"rg":612,"pt":12,"rl":-4,"sv":90,"pend":"TURN LEFT"}
+ "l":1,"r":1,"b":0,"rg":612,"pt":12,"rl":-4,"sv":90,"hh":0,
+ "pend":"TURN LEFT"}
 ```
 
 | Field | Meaning |
@@ -98,6 +111,7 @@ The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
 | `rg` | Ultrasonic range in mm. -1 means nothing in range. |
 | `pt`, `rl` | Pitch and roll in tenths of a degree. |
 | `sv` | Servo angle in degrees. 90 is straight ahead. |
+| `hh` | Height the car is on now, in mm (one decimal): how far the raised end is above the floor. About 0 on the flat. |
 | `pend` | Turn waiting for the next crossroad, or empty. |
 
 **barcode**: `{"msg":"A","cmd":"TURN LEFT","t":51230}`. `cmd` is one of
@@ -117,8 +131,25 @@ ahead. `left`, `right` and `mid` are the edges and middle across the car's
 path (+ is right). `width` is the obstacle's width. `lst` and `rst` say how
 sure the scan is of each edge.
 
-**hump**: `{"peak_tilt_x10":118,"run_peak_tilt_x10":131,"t":70400}` holds
-this hump's highest tilt and the highest of the run, in tenths of a degree.
+**hump**:
+
+```json
+{"height_mm":4.6,"peak_tilt_x10":31,"run_height_mm":5.1,
+ "run_peak_tilt_x10":35,"n":2,"t":70400}
+```
+
+`height_mm` is the hump's peak height in mm (one decimal), and
+`peak_tilt_x10` its highest tilt in tenths of a degree. The `run_` fields
+are the highest of the run so far (the highest hump peak), and `n` counts
+the humps cleared. A new run (START or a feature test) starts them again.
+The height the car is on at any moment is `hh` in the telemetry.
+
+The height is worked out from the IMU, in two ways, and the larger is
+used. A hump shorter than the car (like the 4-5 mm course hump) only tips
+it, so the raised end is the wheelbase (`HUMP_WHEELBASE_MM`, 85 mm) times
+sin(pitch) above the floor. For a longer hump, the distance driven (from
+the encoders) times sin(pitch) is added up. Speeding up, braking and jolts
+read as extra tilt, so a steady crossing gives the best figure.
 
 ## 5. Commands (`…/cmd`)
 
@@ -128,7 +159,7 @@ These are the same words the web page sends, as plain text, in any case:
 |---|---|
 | `start` | Start: calibrate on the line, then follow it. |
 | `stop` | Stop at once, from any state. |
-| `ftLAB` | Feature test. L, A and B are each `1`/`0` for line following, obstacle avoidance and barcodes. `ft111` turns all three on. |
+| `ftLABH` | Feature test. L, A, B and H are each `1`/`0` for line following, obstacle avoidance, barcodes and humps (IMU). `ft1111` turns all four on; `ft0001` drives straight and only climbs and measures humps. The older three-digit form (`ft111`) leaves humps on. |
 | `bt` | Barcode test: drive straight and read barcodes. |
 | `calibrate` | Calibrate the IMU (car still and level). |
 | `wheel` | Wheel test (car lifted). |

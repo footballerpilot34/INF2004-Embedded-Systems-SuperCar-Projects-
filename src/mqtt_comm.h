@@ -7,10 +7,12 @@
  *              drops off; retained.
  * - heartbeat  every MQTT_HEARTBEAT_MSEC: uptime, battery, Wi-Fi, counts.
  * - telemetry  every MQTT_TELEMETRY_MSEC: state, motors, encoders, line
- *              sensors, range, pitch/roll, servo, pending turn.
+ *              sensors, range, pitch/roll, servo, hump height so far,
+ *              pending turn.
  * - barcode    each decoded barcode: message and command (QoS 1).
  * - obstacle   each finished obstacle scan: front, edges, width (QoS 1).
- * - hump       each hump cleared: peak tilt (QoS 1).
+ * - hump       each hump cleared: height and peak tilt, and the highest
+ *              of the run (QoS 1, retained).
  * - cmd        SUBSCRIBED: the same command words as the web page
  *              ("start", "stop", "ft111", ...).
  * - cmd/ack    the command word, once taken.

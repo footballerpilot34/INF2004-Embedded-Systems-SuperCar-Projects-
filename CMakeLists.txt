@@ -98,6 +98,7 @@ add_executable(supercar
     src/encoder.c
     src/buzzer.c
     src/gpio_isr.c
+    src/hump.c
     src/imu.c
     src/line_diag.c
     src/line_sensor.c
