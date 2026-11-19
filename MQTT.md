@@ -103,7 +103,7 @@ The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
 | Field | Meaning |
 |---|---|
 | `t` | ms since boot. |
-| `st` | Car state: `READY`, `LINE_CAL`, `FOLLOW_LINE`, `FEATURE_TEST`, `TURN`, `OBSTACLE_SCAN`, `BYPASS`, `HUMP`, `BLOCKED`, `STOPPED`, and so on. |
+| `st` | Car state: `READY`, `LINE_CAL`, `FOLLOW_LINE`, `FEATURE_TEST`, `TURN`, `OBSTACLE_SCAN`, `BYPASS`, `HUMP`, `BLOCKED`, `STOPPED`, `PICKED_UP` (lifted off the floor while driving: the end of the demo), and so on. |
 | `bp` | Bypass step while in `BYPASS` (`out`, `pass`, `return`, …), otherwise empty. |
 | `ml`, `mr` | Left and right motor power in %. |
 | `el`, `er` | Left and right encoder edges since boot (about 13.3 and 13.7 per mm). |

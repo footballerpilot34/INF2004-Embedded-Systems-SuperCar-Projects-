@@ -26,8 +26,10 @@ typedef enum
     VEHICLE_BARCODE_STATIC,     // Stand still and read barcodes slid past
                                 // the sensor by hand.
     VEHICLE_OBSTACLE_SCAN,      // Braked coarse/fine scan; owns pan servo.
-    VEHICLE_BYPASS              // Going round the obstacle, back to the
+    VEHICLE_BYPASS,             // Going round the obstacle, back to the
                                 // line (bypass.c); owns the servo.
+    VEHICLE_PICKED_UP           // Lifted off the floor while driving: the
+                                // end of the demo. Braked; START again.
 } vehicle_state_t;
 
 void            vehicle_init(void);

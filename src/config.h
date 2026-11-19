@@ -466,6 +466,15 @@
                                             // it "not level" for ever.
 #define HUMP_MIN_MSEC               500u    // Shortest possible hump.
 #define HUMP_MAX_MSEC               8000u   // Longer than this: stop.
+// Picked up: lifted, the three IR sensors (left, right, barcode) see no
+// floor, which reads as black on all three at once. Measured 2026-11-19:
+// all three black from the moment of lifting, in every hold (level,
+// tipped forward, tipped sideways); on the floor never all three, except
+// for ~0.35 s over a crossroad branch. Wheel speed (only ~35% up when
+// lifted, less than rolling off a hump) and tilt (none in a level lift)
+// are not used.
+#define PICKUP_FLOORLESS_MSEC       800u    // All three black this long.
+
 #define HUMP_IGNORE_RANGE_MSEC      500u    // Ignore ultrasonic after a
                                             // hump (it may see the floor).
 

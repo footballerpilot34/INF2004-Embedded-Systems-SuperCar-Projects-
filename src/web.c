@@ -1770,7 +1770,8 @@ scan_build(char * p_out, size_t capacity)
     }
     bool active = obstacle_scan_active() || gb_scan_test_busy;
     bool can_scan = !active && (vehicle_state() == VEHICLE_READY ||
-                               vehicle_state() == VEHICLE_STOPPED);
+                               vehicle_state() == VEHICLE_STOPPED ||
+                               vehicle_state() == VEHICLE_PICKED_UP);
     char const * state = active ? "Scanning" :
         p->cancelled || p->timed_out ? "Failed" : count == 0u ? "Idle" :
         p->finished && valid > 0u ? "Complete" : "Failed";

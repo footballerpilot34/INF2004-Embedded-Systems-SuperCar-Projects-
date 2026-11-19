@@ -134,6 +134,8 @@ static bool            gb_level       = false;
 static bool            gb_clear       = false;
 static bool            gb_hump_tilted = false;
 static uint32_t        g_hump_off_msec = 0u;    // When HUMP last ended.
+static bool            gb_floorless   = false;  // No floor seen, since
+static uint32_t        g_floorless_msec = 0u;   // this time.
 static bool            gb_hump_over   = false;  // Past the top of it.
 static uint32_t        g_top_msec     = 0u;     // When it went over.
 static int32_t         g_top_speed    = 0;      // Speed then.
@@ -253,6 +255,8 @@ static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
 static bool     hump_tilt_held(uint32_t now_msec, int32_t tilt_x10);
 static int32_t  hump_speed(uint32_t now_msec, uint32_t in_hump_msec);
 static int32_t  cruise_speed(uint32_t now_msec);
+static bool     is_parked(vehicle_state_t state);
+static bool     picked_up(uint32_t now_msec);
 static void     log_tenths(char const * p_what, int32_t value_x10);
 static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
 static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm,
@@ -279,7 +283,7 @@ vehicle_init (void)
 void
 vehicle_start (void)
 {
-    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    if (is_parked(g_state))
     {
         gb_feat_line    = true;     // A full run: every feature on.
         gb_feat_avoid   = true;
@@ -314,7 +318,7 @@ void
 vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode,
                       bool b_hump)
 {
-    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    if (is_parked(g_state))
     {
         gb_feat_line    = b_line;
         gb_feat_avoid   = b_avoid;
@@ -367,8 +371,7 @@ void
 vehicle_barcode_command (barcode_command_t command, bool b_test)
 {
     uint32_t now_msec  = now_msec_get();
-    bool     b_stopped = ((VEHICLE_READY == g_state) ||
-                          (VEHICLE_STOPPED == g_state));
+    bool     b_stopped = is_parked(g_state);
     bool     b_moving  = ((VEHICLE_FOLLOW_LINE == g_state) ||
                           (VEHICLE_BARCODE_TEST == g_state) ||
                           (VEHICLE_BARCODE_STATIC == g_state) ||
@@ -500,7 +503,7 @@ vehicle_barcode_test (void)
 void
 vehicle_barcode_static (void)
 {
-    if ((VEHICLE_READY == g_state) || (VEHICLE_STOPPED == g_state))
+    if (is_parked(g_state))
     {
         log_state("BARCODE TEST (STATIC): motors off. Slide a barcode "
                   "slowly past the side sensor. STOP to end.");
@@ -528,6 +531,17 @@ vehicle_task (void)
                           (VEHICLE_BARCODE_TEST == g_state));
     uint32_t mark_msec = 0u;
     line_junction_t junction = LINE_JUNCTION_NONE;
+
+    // Lifted off the floor while driving: the end of the demo.
+    if (vehicle_is_moving() && picked_up(now_msec))
+    {
+        log_state("Picked up (no floor under any IR sensor for %" PRIu32
+                  " ms) -> stopped. End of the demo.",
+                  (now_msec - g_floorless_msec));
+        state_enter(VEHICLE_PICKED_UP, now_msec);
+        motor_set(0, 0);
+        return;
+    }
 
     // Hump height: add up the climb while driving forwards.
     hump_task(((VEHICLE_FOLLOW_LINE == g_state) ||
@@ -668,6 +682,7 @@ vehicle_task (void)
     case VEHICLE_BARCODE_STATIC:    // Barcodes are read by barcode_task().
     case VEHICLE_READY:
     case VEHICLE_STOPPED:
+    case VEHICLE_PICKED_UP:
     default:
         motor_set(0, 0);
     break;
@@ -696,8 +711,7 @@ vehicle_state (void)
 bool
 vehicle_is_moving (void)
 {
-    return ((VEHICLE_READY != g_state) && (VEHICLE_STOPPED != g_state) &&
-            (VEHICLE_BARCODE_STATIC != g_state));
+    return (!is_parked(g_state) && (VEHICLE_BARCODE_STATIC != g_state));
 }   /* vehicle_is_moving() */
 
 
@@ -745,6 +759,10 @@ vehicle_state_name (vehicle_state_t state)
 
     case VEHICLE_STOPPED:
         p_name = "STOPPED";
+    break;
+
+    case VEHICLE_PICKED_UP:
+        p_name = "PICKED_UP";
     break;
 
     case VEHICLE_LINE_CAL:
@@ -1257,6 +1275,57 @@ cruise_speed (uint32_t now_msec)
 
 
 /*!
+ * @brief Report whether a state is a parked one: braked, waiting for
+ *        START (READY, STOPPED, PICKED_UP).
+ *
+ * @param[in] state The state.
+ *
+ * @return True if parked.
+ */
+static bool
+is_parked (vehicle_state_t state)
+{
+    return ((VEHICLE_READY == state) || (VEHICLE_STOPPED == state) ||
+            (VEHICLE_PICKED_UP == state));
+}   /* is_parked() */
+
+
+/*!
+ * @brief Decide whether the car has been picked up: all three IR sensors
+ *        (left, right, barcode) black for PICKUP_FLOORLESS_MSEC without a
+ *        break. Lifted, they see no floor (config.h).
+ *
+ * @param[in] now_msec The current time.
+ *
+ * @return True once the floor has been missing long enough.
+ */
+static bool
+picked_up (uint32_t now_msec)
+{
+    line_state_t line    = line_sensor_read();
+    bool         b_none  = (line.b_left_black && line.b_right_black &&
+                            barcode_is_black());
+    bool         b_found = false;
+
+    if (!b_none)
+    {
+        gb_floorless = false;
+    }
+    else if (!gb_floorless)
+    {
+        gb_floorless     = true;
+        g_floorless_msec = now_msec;
+    }
+    else
+    {
+        b_found = ((now_msec - g_floorless_msec) >= PICKUP_FLOORLESS_MSEC);
+    }
+
+    return (b_found);
+}   /* picked_up() */
+
+
+/*!
  * @brief BLOCKED: stay braked until the way is clear for a while.
  *
  * @param[in] now_msec The current time.
@@ -1374,6 +1443,7 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     gb_level       = false;
     gb_clear       = false;
     gb_tilting     = false;             // A tilt must build up afresh.
+    gb_floorless   = false;             // So must a missing floor.
     if (VEHICLE_HUMP == state)
     {
         g_hump_peak_tilt_x10 = 0;
