@@ -57,7 +57,10 @@
 #define CALIBRATION_SAMPLES              25u
 #define ACCEL_MIN_MG                     800
 #define ACCEL_MAX_MG                     1200
-#define PITCH_FILTER_DIVISOR             4      // ~80 ms at 50 Hz.
+// ~160 ms at 50 Hz. Driving vibration swung pitch by 2-6 deg reading to
+// reading with 4; the hump lasts 2-3 s at cruise, so this costs nothing.
+// The filter runs in hundredths so it settles to within 0.1 deg.
+#define PITCH_FILTER_DIVISOR             8
 #define RAD_TO_TENTH_DEG                 572.958f
 
 
@@ -70,6 +73,8 @@ static int32_t      g_pitch_zero_x10    = 0;
 static int32_t      g_roll_zero_x10     = 0;
 static int32_t      g_pitch_x10         = 0;
 static int32_t      g_roll_x10          = 0;
+static int32_t      g_pitch_x100        = 0;    // Filter state.
+static int32_t      g_roll_x100         = 0;
 
 
 static bool    reg_write(uint8_t address, uint8_t reg, uint8_t value);
@@ -174,9 +179,12 @@ imu_task (void)
             {
                 int32_t pitch = raw_pitch_x10(&g_axes) - g_pitch_zero_x10;
                 int32_t roll = raw_roll_x10(&g_axes) - g_roll_zero_x10;
-                g_pitch_x10 += (pitch - g_pitch_x10) /
-                               PITCH_FILTER_DIVISOR;
-                g_roll_x10 += (roll - g_roll_x10) / PITCH_FILTER_DIVISOR;
+                g_pitch_x100 += ((pitch * 10) - g_pitch_x100) /
+                                PITCH_FILTER_DIVISOR;
+                g_roll_x100  += ((roll * 10) - g_roll_x100) /
+                                PITCH_FILTER_DIVISOR;
+                g_pitch_x10   = g_pitch_x100 / 10;
+                g_roll_x10    = g_roll_x100 / 10;
             }
         }
     }
@@ -239,6 +247,8 @@ imu_calibrate (void)
         g_roll_zero_x10 = (int32_t) (roll_sum / CALIBRATION_SAMPLES);
         g_pitch_x10 = 0;
         g_roll_x10 = 0;
+        g_pitch_x100 = 0;
+        g_roll_x100 = 0;
         gb_calibrated = true;
     }
     gb_reading_valid = b_ok;
@@ -307,6 +317,22 @@ imu_roll_x10 (void)
 {
     return (gb_calibrated && gb_reading_valid ? g_roll_x10 : 0);
 }   /* imu_roll_x10() */
+
+
+/*!
+ * @brief Return the total tilt from level, whichever way: the square root
+ *        of pitch squared plus roll squared (small angles).
+ *
+ * @return Tenths of a degree, never negative.
+ */
+int32_t
+imu_total_tilt_x10 (void)
+{
+    float pitch = (float) imu_pitch_x10();
+    float roll  = (float) imu_roll_x10();
+
+    return ((int32_t) (sqrtf((pitch * pitch) + (roll * roll)) + 0.5f));
+}   /* imu_total_tilt_x10() */
 
 
 /*!

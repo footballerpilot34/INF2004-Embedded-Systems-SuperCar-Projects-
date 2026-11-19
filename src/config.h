@@ -178,8 +178,18 @@
 // gentler settings above. Overshoots the line: lower the speed.
 #define TURN_PULSE_SPEED            30      // Burst power in a turn.
 #define TURN_PULSE_OFF_MSEC         120u    // Shorter pause in a turn.
-#define SPEED_HUMP                  23      // Climbing a hump, +25% from 18
-                                            // (22.5, rounded).
+// Climbing a hump: speed up gently from SPEED_CRUISE to SPEED_HUMP over
+// HUMP_RAMP_MSEC. Was 23 at once (2026-11-19): on the 4-5 mm course hump
+// that jerk read as 7-8 deg of tilt (the hump itself is ~3.4 deg) and
+// doubled the measured height.
+#define SPEED_HUMP                  12      // Most power on a hump.
+#define HUMP_RAMP_MSEC              300u    // Cruise to SPEED_HUMP in this,
+                                            // and back down after.
+// Extra power is for the climb only: once the tilt has fallen this far
+// below its peak, the car is over the top and eases back to cruise.
+// Holding 12 down the far side sped the car up, then it jerked as it
+// dropped to cruise on the flat (2026-11-19).
+#define HUMP_TOP_DROP_X10           15      // 1.5 deg below the peak.
 // Line-following turns keep BOTH wheels rolling forward, so the car never
 // pauses to turn: the outer wheel speeds up and the inner wheel slows
 // (never 0, which would brake it and pivot the car on that wheel). The
@@ -423,30 +433,34 @@
 
 // LSM303DLHC pitch: the sensor's -Y is forward, Z up (imu.c flips it).
 // Tilt is low-pass filtered; thresholds provide hysteresis against noise.
-// The course hump is only 4-5 mm high (2026-11-19): about 2.5 deg of
-// nose-up pitch, against about 0.5 deg on the flat at cruise. So a hump
-// is NOSE-UP PITCH only: pulling away reads nose-down (-3 deg), and roll
-// jumped to 4-10 deg on the hump (wobble: 5 mm across the track is only
-// 2.3 deg), so neither counts. HUMP ignores the ultrasonic, so a false
-// hump is unsafe: keep the threshold clear of the flat's noise.
-#define HUMP_ENTER_PITCH_X10        20      // 2.0 deg nose up: on a hump.
-#define HUMP_LEVEL_PITCH_X10        10      // Within 1.0 deg: level again.
-#define HUMP_ENTER_MSEC             100u    // Tilted this long: a hump. A
+// A hump is TOTAL TILT, sqrt(pitch^2 + roll^2), either way. Measured on
+// the course hump, car still (2026-11-19; caster at the front):
+// - caster on top:          pitch +7.4, roll -0.1 deg (nose up);
+// - one drive wheel on top: pitch -2.0, roll +4.5 deg (one rear corner up).
+// Driving over it, the drive-wheel case is what shows: pitch -2..-5 and
+// roll +4..+11 for 2-3 s. Still on the flat: within 0.4 deg. HUMP ignores
+// the ultrasonic, so a false hump is unsafe: keep clear of the noise.
+#define HUMP_ENTER_PITCH_X10        30      // 3.0 deg tilt: on a hump.
+#define HUMP_LEVEL_PITCH_X10        15      // Within 1.5 deg: level again.
+#define HUMP_ENTER_MSEC             300u    // Tilted this long: a hump. A
                                             // jolt tilts the reading for
-                                            // less.
-// Front to rear axle centres. A hump shorter than the car tips it by
-// asin(height / wheelbase) when the front wheels are on top, so this
-// gives the height of a short hump (hump.c). Measured 2026-11-19: drive
-// axle to caster ball contact, about 85 mm.
+                                            // less; the hump lasts 2-3 s.
+// Drive axle to caster ball contact (measured 2026-11-19). The caster
+// raised by h tips the car by asin(h / wheelbase); one drive wheel raised
+// by h rolls it by asin(h / WHEEL_TRACK_MM). hump.c uses both.
 #define HUMP_WHEELBASE_MM           85u
+// A hump's height is the highest height HELD this long: one bounce (the
+// wheel dropping off the edge) read up to twice the still height.
+#define HUMP_STEADY_MSEC            200u
 #define HUMP_SETTLE_MSEC            1000u   // No hump looked for this long
                                             // after setting off: pulling
                                             // away read as -3 deg for 258
                                             // ms on the flat (2026-11-19).
 #define HUMP_LEVEL_MSEC             400u    // Level after tilt excursion: done.
-#define HUMP_PASS_MM                250u    // Or driven this far on it
+#define HUMP_PASS_MM                200u    // Or driven this far on it
                                             // (rest of the hump + the
-                                            // wheelbase): done, unless
+                                            // 85 mm wheelbase; 250 ran on
+                                            // far past it): done, unless
                                             // still tilted. Speeding up
                                             // reads as tilt and could keep
                                             // it "not level" for ever.

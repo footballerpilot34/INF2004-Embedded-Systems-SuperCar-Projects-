@@ -1,30 +1,28 @@
 /** @file hump.c
  *
- * @brief Hump height: how high the car climbs, from pitch and distance.
+ * @brief Hump height: how high the car is lifted, from pitch and roll.
  *
  * @par Method
- * Two estimates; the larger is used.
- * - Tipping: a hump shorter than the car only tips it. With one axle on
- *   top and the other on the floor, sin(pitch) = height / wheelbase, so
- *   the raised end is HUMP_WHEELBASE_MM x sin(pitch) above the floor. The
- *   course hump (4-5 mm) is of this kind.
- * - Climbing: each control tick, the distance driven (encoders, the two
- *   wheels averaged) times sin(pitch) is the height gained or lost. Added
- *   up, this follows a hump longer than the car. The sum restarts at 0
- *   whenever the car is level (within HUMP_LEVEL_PITCH_X10) and not on a
- *   hump, so noise and calibration error cannot build up; it only adds up
- *   while the car drives forwards (vehicle.c says when).
- * Both are worked out all the time: hump_height_x10() is the height the
- * car is on now, and a hump's height is the highest of it while the car
- * was on that hump.
+ * The car stands on three points: two drive wheels (WHEEL_TRACK_MM apart)
+ * and a caster HUMP_WHEELBASE_MM in front of them. A hump shorter than
+ * the car lifts one of them at a time:
+ * - the caster lifted by h tips the nose up:  h = wheelbase x sin(pitch);
+ * - one drive wheel lifted by h rolls the car: h = track x sin(roll)
+ *   (and tips the nose down by half as much, measured -2 deg at +4.5 deg
+ *   of roll on the course hump).
+ * The larger of the two is the height the car is on now (either sign).
+ * A hump's height is the highest height HELD for HUMP_STEADY_MSEC while
+ * the car was on it (the lowest of the last HUMP_STEADY_MSEC of readings,
+ * at its highest): one bounce does not count.
+ * Measured on the course hump with the car still: 10.9 mm from the
+ * caster, 9.8 mm from one drive wheel (2026-11-19).
  *
  * @par Accuracy
- * - The IMU's reading of pitch includes speeding up and braking, and
- *   jolts as the wheels meet the hump: those read as extra tilt.
- * - Wheel slip on a climb counts as distance: the climb reads high.
- * - Without IMU calibration the pitch reads 0, and so does the height.
+ * - The IMU's reading includes speeding up, braking and jolts as the
+ *   wheels meet the hump: those read as extra tilt (filtered in imu.c).
+ * - Without IMU calibration pitch and roll read 0, and so does the height.
  *
- * Heights are in tenths of a mm ("_x10"), as the course hump is small.
+ * Heights are in tenths of a mm ("_x10").
  */
 
 #include <math.h>
@@ -44,9 +42,13 @@
                               (float) (ENC_LEFT_EDGES_PER_M +              \
                                        ENC_RIGHT_EDGES_PER_M)) / 1000.0f)
 
+// Readings kept for the steady height: one per control tick.
+#define STEADY_TICKS        ((HUMP_STEADY_MSEC * 1000u) / TICK_USEC)
+
+static float    g_recent[STEADY_TICKS];         // The last readings.
+static uint32_t g_recent_next  = 0u;
 static uint32_t g_last_pos     = 0u;
 static bool     gb_pos_valid   = false;
-static float    g_sum_mm       = 0.0f;  // Climbing sum (see above).
 static float    g_now_mm       = 0.0f;  // Height the car is on now.
 static float    g_peak_mm      = 0.0f;  // Highest of it on this hump.
 static float    g_on_mm        = 0.0f;  // Driven since HUMP began.
@@ -58,22 +60,39 @@ static uint32_t g_count        = 0u;    // Humps cleared this run.
 
 
 /*!
+ * @brief Lifted by this much at this tilt.
+ *
+ * @param[in] base_mm  The distance to the point that stays down.
+ * @param[in] tilt_x10 The tilt, in tenths of a degree (either sign).
+ *
+ * @return The height, in mm.
+ */
+static float
+lift_mm (uint32_t base_mm, int32_t tilt_x10)
+{
+    int32_t size = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
+
+    return ((float) base_mm * sinf((float) size * RAD_PER_TENTH_DEG));
+}   /* lift_mm() */
+
+
+/*!
  * @brief Work out the height the car is on. Call every control tick.
  *
- * @param[in] b_forward True while the car drives forwards (line following,
- *                      probing, climbing, feature test).
- * @param[in] b_on_hump True while the car is in HUMP: the climbing sum and
- *                      the peak then keep going even when it is level.
+ * @param[in] b_forward Unused (kept for the caller); the height does not
+ *                      depend on how the car moves.
+ * @param[in] b_on_hump True while the car is in HUMP: its peak is kept.
  */
 void
 hump_task (bool b_forward, bool b_on_hump)
 {
     uint32_t pos    = encoder_position();
-    int32_t  pitch  = imu_pitch_x10();
-    int32_t  size   = ((pitch < 0) ? -pitch : pitch);
+    float    caster = lift_mm(HUMP_WHEELBASE_MM, imu_pitch_x10());
+    float    wheel  = lift_mm(WHEEL_TRACK_MM, imu_roll_x10());
     float    mm     = 0.0f;
-    float    tipped = 0.0f;
-    float    climb  = 0.0f;
+    float    steady = 0.0f;
+
+    (void) b_forward;
 
     if (gb_pos_valid)
     {
@@ -82,38 +101,32 @@ hump_task (bool b_forward, bool b_on_hump)
     g_last_pos   = pos;
     gb_pos_valid = true;
 
+    g_now_mm = ((caster > wheel) ? caster : wheel);
+
+    // Held for HUMP_STEADY_MSEC: the lowest of the recent readings.
+    g_recent[g_recent_next] = g_now_mm;
+    g_recent_next = ((g_recent_next + 1u) % STEADY_TICKS);
+    steady = g_recent[0];
+    for (uint32_t idx = 1u; idx < STEADY_TICKS; idx++)
+    {
+        if (g_recent[idx] < steady)
+        {
+            steady = g_recent[idx];
+        }
+    }
+
     if (b_on_hump)
     {
         g_on_mm += mm;
+        if (steady > g_peak_mm)
+        {
+            g_peak_mm = steady;
+        }
     }
     else
     {
         g_on_mm = 0.0f;
-    }
-
-    if (!b_on_hump && (size <= HUMP_LEVEL_PITCH_X10))
-    {
-        g_sum_mm  = 0.0f;               // On the flat: start again.
-        g_peak_mm = 0.0f;
-    }
-    else if (b_forward)
-    {
-        g_sum_mm += mm * sinf((float) pitch * RAD_PER_TENTH_DEG);
-    }
-    else
-    {
-        // Tilted but not driving forwards (pivoting, stopped): no change.
-    }
-
-    // Either end raised: the size of the tilt says by how much.
-    tipped   = (float) HUMP_WHEELBASE_MM *
-               sinf((float) size * RAD_PER_TENTH_DEG);
-    climb    = ((g_sum_mm < 0.0f) ? -g_sum_mm : g_sum_mm);
-    g_now_mm = ((tipped > climb) ? tipped : climb);
-    if ((b_on_hump || (size > HUMP_LEVEL_PITCH_X10)) &&
-        (g_now_mm > g_peak_mm))
-    {
-        g_peak_mm = g_now_mm;
+        g_peak_mm = steady;     // Includes the climb before it was seen.
     }
 }   /* hump_task() */
 
@@ -157,8 +170,8 @@ hump_new_run (void)
 /*!
  * @brief Report the height the car is on now, for live display.
  *
- * @return Tenths of a mm above the floor (the raised end); about 0 on the
- *         flat.
+ * @return Tenths of a mm: how far the raised point is above the floor;
+ *         about 0 on the flat.
  */
 int32_t
 hump_height_x10 (void)

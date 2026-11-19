@@ -133,6 +133,12 @@ static int32_t         g_hump_peak_tilt_x10 = 0;
 static bool            gb_level       = false;
 static bool            gb_clear       = false;
 static bool            gb_hump_tilted = false;
+static uint32_t        g_hump_off_msec = 0u;    // When HUMP last ended.
+static bool            gb_hump_over   = false;  // Past the top of it.
+static uint32_t        g_top_msec     = 0u;     // When it went over.
+static int32_t         g_top_speed    = 0;      // Speed then.
+static int32_t         g_hump_speed   = 0;      // Speed on it now.
+static int32_t         g_exit_speed   = 0;      // Speed as HUMP ended.
 static bool            gb_tilting     = false;  // Over HUMP_ENTER, since
 static uint32_t        g_tilt_msec    = 0u;     // g_tilt_msec.
 static bool            gb_last_left   = true;   // Line last seen left.
@@ -245,6 +251,8 @@ static void     probe_step(uint32_t now_msec, uint32_t range_mm,
                            int32_t pitch_x10);
 static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
 static bool     hump_tilt_held(uint32_t now_msec, int32_t tilt_x10);
+static int32_t  hump_speed(uint32_t now_msec, uint32_t in_hump_msec);
+static int32_t  cruise_speed(uint32_t now_msec);
 static void     log_tenths(char const * p_what, int32_t value_x10);
 static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
 static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm,
@@ -515,7 +523,7 @@ vehicle_task (void)
 {
     uint32_t now_msec  = now_msec_get();
     uint32_t range_mm  = ultrasonic_range_mm();
-    int32_t  tilt_x10  = imu_pitch_x10();    // Humps: pitch only (config.h).
+    int32_t  tilt_x10  = imu_total_tilt_x10();  // Humps (config.h).
     bool     b_reading = ((VEHICLE_FOLLOW_LINE == g_state) ||
                           (VEHICLE_BARCODE_TEST == g_state));
     uint32_t mark_msec = 0u;
@@ -813,7 +821,7 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     }
     else
     {
-        line_steer(SPEED_CRUISE, now_msec);
+        line_steer(cruise_speed(now_msec), now_msec);
     }
 }   /* follow_line_step() */
 
@@ -1040,12 +1048,12 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 
 
 /*!
- * @brief Decide whether the car is on a hump: nose up by HUMP_ENTER_PITCH
- *        for HUMP_ENTER_MSEC without a break. A jolt (pulling away,
- *        braking, a bump) tilts the reading for less.
+ * @brief Decide whether the car is on a hump: tilted (any way) by
+ *        HUMP_ENTER_PITCH for HUMP_ENTER_MSEC without a break. A jolt
+ *        (pulling away, braking, a bump) tilts the reading for less.
  *
  * @param[in] now_msec The current time.
- * @param[in] tilt_x10 The pitch, nose up positive, in tenths of a degree.
+ * @param[in] tilt_x10 The total tilt, in tenths of a degree.
  *
  * @return True once the tilt has lasted (logged with pitch and roll).
  */
@@ -1058,7 +1066,6 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
 
     // Pulling away (or setting off again after a turn or a hump) tilts
     // the reading for a while: no hump is looked for until it settles.
-    // Only nose up counts: a hump starts with a climb.
     if (!gb_feat_hump || b_settling || (tilt_x10 < HUMP_ENTER_PITCH_X10))
     {
         gb_tilting = false;
@@ -1113,8 +1120,7 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
     int32_t  magnitude = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
     uint32_t in_hump   = now_msec - g_entered_msec;
 
-    // Pitch only (roll is wobble on a 4-5 mm hump: config.h). Up or down
-    // counts as tilted; finish only once it is back near level.
+    // Total tilt (config.h); finish only once it is back near level.
     if (magnitude >= HUMP_ENTER_PITCH_X10)
     {
         gb_hump_tilted = true;
@@ -1122,6 +1128,17 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         {
             g_hump_peak_tilt_x10 = magnitude;
         }
+    }
+
+    // Tilt falling from its peak: over the top, so ease off (config.h).
+    if (!gb_hump_over && gb_hump_tilted &&
+        ((magnitude + HUMP_TOP_DROP_X10) <= g_hump_peak_tilt_x10))
+    {
+        gb_hump_over = true;
+        g_top_msec   = now_msec;
+        g_top_speed  = g_hump_speed;
+        log_obstacle("Hump: over the top after %" PRIu32 " ms -> easing "
+                     "back to cruise.", in_hump);
     }
 
     if (!gb_hump_tilted || (magnitude > HUMP_LEVEL_PITCH_X10))
@@ -1154,7 +1171,9 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         log_obstacle("Highest this run: %" PRId32 ".%" PRId32 " mm (%"
                      PRIu32 " humps).\n", (hump_run_height_x10() / 10),
                      (hump_run_height_x10() % 10), hump_count());
-        g_ignore_until = now_msec + HUMP_IGNORE_RANGE_MSEC;
+        g_ignore_until  = now_msec + HUMP_IGNORE_RANGE_MSEC;
+        g_hump_off_msec = now_msec;     // Slow back down gently from here.
+        g_exit_speed    = g_hump_speed;
         state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
                                   : VEHICLE_BARCODE_TEST), now_msec);
     }
@@ -1165,13 +1184,76 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
     }
     else if (gb_feat_line)
     {
-        line_steer(SPEED_HUMP, now_msec);
+        line_steer(hump_speed(now_msec, in_hump), now_msec);
     }
     else
     {
-        motor_set(SPEED_HUMP, SPEED_HUMP);  // Feature test: straight over.
+        int32_t speed = hump_speed(now_msec, in_hump);
+
+        motor_set(speed, speed);            // Feature test: straight over.
     }
 }   /* hump_step() */
+
+
+/*!
+ * @brief The speed on a hump: up from SPEED_CRUISE to SPEED_HUMP over
+ *        HUMP_RAMP_MSEC for the climb; once over the top, back down to
+ *        SPEED_CRUISE over HUMP_RAMP_MSEC (config.h). No step: a jerk
+ *        reads as tilt, and the far side is downhill.
+ *
+ * @param[in] now_msec     The current time.
+ * @param[in] in_hump_msec How long the car has been in HUMP.
+ *
+ * @return The motor power, in %.
+ */
+static int32_t
+hump_speed (uint32_t now_msec, uint32_t in_hump_msec)
+{
+    uint32_t span = (gb_hump_over ? (now_msec - g_top_msec) : in_hump_msec);
+    uint32_t done = ((span < HUMP_RAMP_MSEC) ? span : HUMP_RAMP_MSEC);
+
+    if (gb_hump_over)
+    {
+        g_hump_speed = g_top_speed - (((g_top_speed - SPEED_CRUISE) *
+                                       (int32_t) done) /
+                                      (int32_t) HUMP_RAMP_MSEC);
+    }
+    else
+    {
+        g_hump_speed = SPEED_CRUISE + (((SPEED_HUMP - SPEED_CRUISE) *
+                                        (int32_t) done) /
+                                       (int32_t) HUMP_RAMP_MSEC);
+    }
+
+    return (g_hump_speed);
+}   /* hump_speed() */
+
+
+/*!
+ * @brief The cruising speed: SPEED_CRUISE, except just after a hump left
+ *        above it, when it comes down from that speed over
+ *        HUMP_RAMP_MSEC. Dropping straight from 12 to 9 jerked the car
+ *        (2026-11-19).
+ *
+ * @param[in] now_msec The current time.
+ *
+ * @return The motor power, in %.
+ */
+static int32_t
+cruise_speed (uint32_t now_msec)
+{
+    uint32_t since = now_msec - g_hump_off_msec;
+    int32_t  speed = SPEED_CRUISE;
+
+    if ((0u != g_hump_off_msec) && (since < HUMP_RAMP_MSEC) &&
+        (g_exit_speed > SPEED_CRUISE))
+    {
+        speed = g_exit_speed - (((g_exit_speed - SPEED_CRUISE) *
+                                 (int32_t) since) / (int32_t) HUMP_RAMP_MSEC);
+    }
+
+    return (speed);
+}   /* cruise_speed() */
 
 
 /*!
@@ -1229,7 +1311,9 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     }
     else if (!b_range_used)
     {
-        motor_set(SPEED_CRUISE, SPEED_CRUISE);  // Just off a hump.
+        int32_t speed = cruise_speed(now_msec);
+
+        motor_set(speed, speed);                // Just off a hump.
     }
     else if (range_mm <= OBSTACLE_STOP_MM)
     {
@@ -1247,7 +1331,9 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     }
     else
     {
-        motor_set(SPEED_CRUISE, SPEED_CRUISE);
+        int32_t speed = cruise_speed(now_msec);
+
+        motor_set(speed, speed);
     }
 }   /* barcode_test_step() */
 
@@ -1292,6 +1378,8 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
     {
         g_hump_peak_tilt_x10 = 0;
         gb_hump_tilted = false;
+        gb_hump_over   = false;
+        g_hump_speed   = SPEED_CRUISE;
     }
 
     if (VEHICLE_LINE_CAL == state)

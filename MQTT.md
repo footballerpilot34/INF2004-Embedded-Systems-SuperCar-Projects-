@@ -144,12 +144,12 @@ are the highest of the run so far (the highest hump peak), and `n` counts
 the humps cleared. A new run (START or a feature test) starts them again.
 The height the car is on at any moment is `hh` in the telemetry.
 
-The height is worked out from the IMU, in two ways, and the larger is
-used. A hump shorter than the car (like the 4-5 mm course hump) only tips
-it, so the raised end is the wheelbase (`HUMP_WHEELBASE_MM`, 85 mm) times
-sin(pitch) above the floor. For a longer hump, the distance driven (from
-the encoders) times sin(pitch) is added up. Speeding up, braking and jolts
-read as extra tilt, so a steady crossing gives the best figure.
+The height is worked out from the IMU. A hump shorter than the car only
+tips it: with the caster on top, the nose rises by the wheelbase
+(`HUMP_WHEELBASE_MM`, 85 mm) times sin(pitch); with one drive wheel on top,
+that corner rises by the track (`WHEEL_TRACK_MM`, 125 mm) times sin(roll).
+The larger of the two is the height. Speeding up, braking and jolts read
+as extra tilt, so a steady crossing gives the best figure.
 
 ## 5. Commands (`…/cmd`)
 

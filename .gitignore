@@ -1,2 +1,5 @@
 build
 !.vscode/*
+
+# MQTT logs from mosquitto_sub (local test records, not code)
+mqtt_log*.txt

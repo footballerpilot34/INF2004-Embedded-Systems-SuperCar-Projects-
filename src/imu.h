@@ -29,6 +29,7 @@ void    imu_get_axes(imu_axes_t * p_axes);
 int32_t imu_pitch_x10(void);
 int32_t imu_roll_x10(void);
 int32_t imu_max_tilt_x10(void);
+int32_t imu_total_tilt_x10(void);
 
 #endif /* IMU_H */
 
