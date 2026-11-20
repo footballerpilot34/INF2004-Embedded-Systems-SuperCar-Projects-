@@ -94,6 +94,7 @@
 
 #include "barcode.h"
 #include "config.h"
+#include "encoder.h"
 #include "hump.h"
 #include "imu.h"
 #include "line_sensor.h"
@@ -141,6 +142,12 @@ static bool            gb_hump_over   = false;  // Past the top of it.
 static uint32_t        g_top_msec     = 0u;     // When it went over.
 static int32_t         g_top_speed    = 0;      // Speed then.
 static int32_t         g_hump_speed   = 0;      // Speed on it now.
+static int32_t         g_hump_extra   = 0;      // Power added for stalls.
+static uint32_t        g_boost_msec   = 0u;     // Last stall boost.
+static uint32_t        g_stall_edges  = 0u;     // Edges at window start.
+static uint32_t        g_stall_window = 0u;     // Window start.
+static uint32_t        g_stall_since  = 0u;     // Stalled since.
+static bool            gb_stalled     = false;  // Last window stalled.
 static int32_t         g_exit_speed   = 0;      // Speed as HUMP ended.
 static bool            gb_tilting     = false;  // Over HUMP_ENTER, since
 static uint32_t        g_tilt_msec    = 0u;     // g_tilt_msec.
@@ -254,6 +261,8 @@ static void     probe_step(uint32_t now_msec, uint32_t range_mm,
                            int32_t pitch_x10);
 static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
 static bool     hump_tilt_held(uint32_t now_msec, int32_t tilt_x10);
+static void     stall_update(uint32_t now_msec);
+static uint32_t stall_msec(uint32_t now_msec);
 static int32_t  hump_speed(uint32_t now_msec, uint32_t in_hump_msec);
 static int32_t  cruise_speed(uint32_t now_msec);
 static bool     is_parked(vehicle_state_t state);
@@ -562,6 +571,8 @@ vehicle_task (void)
         motor_set(0, 0);
         return;
     }
+
+    stall_update(now_msec);
 
     // Hump height: add up the climb while driving forwards.
     hump_task(((VEHICLE_FOLLOW_LINE == g_state) ||
@@ -1087,8 +1098,9 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 
 /*!
  * @brief Decide whether the car is on a hump: tilted (any way) by
- *        HUMP_ENTER_PITCH for HUMP_ENTER_MSEC without a break. A jolt
- *        (pulling away, braking, a bump) tilts the reading for less.
+ *        HUMP_ENTER_PITCH for HUMP_ENTER_MSEC without a break (a jolt
+ *        tilts the reading for less), or stalled on a slope: wheels still
+ *        for HUMP_STALL_MSEC while tilted by HUMP_STALL_TILT.
  *
  * @param[in] now_msec The current time.
  * @param[in] tilt_x10 The total tilt, in tenths of a degree.
@@ -1104,7 +1116,17 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
 
     // Pulling away (or setting off again after a turn or a hump) tilts
     // the reading for a while: no hump is looked for until it settles.
-    if (!gb_feat_hump || b_settling || (tilt_x10 < HUMP_ENTER_PITCH_X10))
+    if (gb_feat_hump && !b_settling && (tilt_x10 >= HUMP_STALL_TILT_X10) &&
+        (stall_msec(now_msec) >= HUMP_STALL_MSEC))
+    {
+        b_held = true;          // Stuck on the ramp: power now (config.h).
+        log_obstacle("Stalled on a slope for %" PRIu32 " ms -> HUMP, "
+                     "more power.", stall_msec(now_msec));
+        log_tenths("  pitch", imu_pitch_x10());
+        log_tenths("  roll", imu_roll_x10());
+    }
+    else if (!gb_feat_hump || b_settling ||
+             (tilt_x10 < HUMP_ENTER_PITCH_X10))
     {
         gb_tilting = false;
     }
@@ -1128,6 +1150,50 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
 
     return (b_held);
 }   /* hump_tilt_held() */
+
+
+/*!
+ * @brief Measure whether the wheels have (nearly) stopped while driven:
+ *        both wheels' encoder edges per HUMP_STALL_WINDOW_MSEC below
+ *        HUMP_STALL_EDGES. Call every control tick.
+ *
+ * @param[in] now_msec The current time.
+ */
+static void
+stall_update (uint32_t now_msec)
+{
+    if ((now_msec - g_stall_window) >= HUMP_STALL_WINDOW_MSEC)
+    {
+        uint32_t edges   = encoder_count(PIN_ENC_LEFT_A) +
+                           encoder_count(PIN_ENC_RIGHT_A);
+        bool     b_drive = ((motor_left_speed() > 0) ||
+                            (motor_right_speed() > 0));
+        bool     b_still = (b_drive &&
+                            ((edges - g_stall_edges) < HUMP_STALL_EDGES));
+
+        if (b_still && !gb_stalled)
+        {
+            g_stall_since = g_stall_window;   // Since this window began.
+        }
+        gb_stalled     = b_still;
+        g_stall_edges  = edges;
+        g_stall_window = now_msec;
+    }
+}   /* stall_update() */
+
+
+/*!
+ * @brief Report how long the wheels have been stalled while driven.
+ *
+ * @param[in] now_msec The current time.
+ *
+ * @return ms; 0 if they are turning (or not driven).
+ */
+static uint32_t
+stall_msec (uint32_t now_msec)
+{
+    return (gb_stalled ? (now_msec - g_stall_since) : 0u);
+}   /* stall_msec() */
 
 
 /*!
@@ -1157,6 +1223,16 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
 {
     int32_t  magnitude = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
     uint32_t in_hump   = now_msec - g_entered_msec;
+    bool     b_stalled = (stall_msec(now_msec) >= HUMP_STALL_MSEC);
+
+    // Stalled again after "over the top" (a wobble looked like the
+    // crest): it is still climbing, so power back up (2026-11-20).
+    if (gb_hump_over && b_stalled)
+    {
+        gb_hump_over = false;
+        g_boost_msec = now_msec;
+        log_obstacle("Hump: stalled again -> climbing power.");
+    }
 
     // Total tilt (config.h); finish only once it is back near level.
     if (magnitude >= HUMP_ENTER_PITCH_X10)
@@ -1168,8 +1244,9 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         }
     }
 
-    // Tilt falling from its peak: over the top, so ease off (config.h).
-    if (!gb_hump_over && gb_hump_tilted &&
+    // Tilt falling from its peak while the wheels turn: over the top, so
+    // ease off (config.h).
+    if (!gb_hump_over && gb_hump_tilted && (0u == stall_msec(now_msec)) &&
         ((magnitude + HUMP_TOP_DROP_X10) <= g_hump_peak_tilt_x10))
     {
         gb_hump_over = true;
@@ -1193,7 +1270,7 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         // Still level.
     }
 
-    if (gb_hump_tilted && (in_hump > HUMP_MIN_MSEC) &&
+    if (gb_hump_tilted && !b_stalled && (in_hump > HUMP_MIN_MSEC) &&
         ((gb_level && ((now_msec - g_level_msec) > HUMP_LEVEL_MSEC)) ||
          ((hump_on_mm() >= (int32_t) HUMP_PASS_MM) &&
           (magnitude < HUMP_ENTER_PITCH_X10))))
@@ -1215,10 +1292,21 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
                                   : VEHICLE_BARCODE_TEST), now_msec);
     }
-    else if (in_hump > HUMP_MAX_MSEC)
+    else if ((in_hump > HUMP_MAX_MSEC) ||
+             ((g_hump_speed >= SPEED_HUMP_MAX) &&
+              (stall_msec(now_msec) >= HUMP_GIVE_UP_MSEC)))
     {
-        log_obstacle("Hump took too long (stalled?) -> BLOCKED.\n");
+        log_obstacle("Hump: still stuck at power %" PRId32 " after %" PRIu32
+                     " ms -> BLOCKED.\n", g_hump_speed, in_hump);
         state_enter(VEHICLE_BLOCKED, now_msec);
+    }
+    else if (b_stalled)
+    {
+        int32_t speed = hump_speed(now_msec, in_hump);
+
+        // Stuck: push with both wheels, no steering, until they turn (a
+        // hard arc left one wheel at 1% on the slope).
+        motor_set(speed, speed);
     }
     else if (gb_feat_line)
     {
@@ -1235,9 +1323,9 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
 
 /*!
  * @brief The speed on a hump: up from SPEED_CRUISE to SPEED_HUMP over
- *        HUMP_RAMP_MSEC for the climb; once over the top, back down to
- *        SPEED_CRUISE over HUMP_RAMP_MSEC (config.h). No step: a jerk
- *        reads as tilt, and the far side is downhill.
+ *        HUMP_RAMP_UP_MSEC for the climb, more while still stalled (up to
+ *        SPEED_HUMP_MAX); once over the top, back down to SPEED_CRUISE
+ *        over HUMP_RAMP_MSEC (config.h): the far side is downhill.
  *
  * @param[in] now_msec     The current time.
  * @param[in] in_hump_msec How long the car has been in HUMP.
@@ -1247,20 +1335,39 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
 static int32_t
 hump_speed (uint32_t now_msec, uint32_t in_hump_msec)
 {
-    uint32_t span = (gb_hump_over ? (now_msec - g_top_msec) : in_hump_msec);
-    uint32_t done = ((span < HUMP_RAMP_MSEC) ? span : HUMP_RAMP_MSEC);
-
     if (gb_hump_over)
     {
+        uint32_t span = now_msec - g_top_msec;
+        uint32_t done = ((span < HUMP_RAMP_MSEC) ? span : HUMP_RAMP_MSEC);
+
         g_hump_speed = g_top_speed - (((g_top_speed - SPEED_CRUISE) *
                                        (int32_t) done) /
                                       (int32_t) HUMP_RAMP_MSEC);
     }
     else
     {
+        uint32_t done = ((in_hump_msec < HUMP_RAMP_UP_MSEC) ? in_hump_msec
+                                                           : HUMP_RAMP_UP_MSEC);
+
+        // Still not moving: more power, a step at a time (config.h).
+        if ((stall_msec(now_msec) >= HUMP_STALL_MSEC) &&
+            ((now_msec - g_boost_msec) >= HUMP_STALL_MSEC) &&
+            ((SPEED_HUMP + g_hump_extra) < SPEED_HUMP_MAX))
+        {
+            g_boost_msec  = now_msec;
+            g_hump_extra += HUMP_STALL_STEP;
+            log_obstacle("Hump: still stalled -> power %" PRId32 ".",
+                         SPEED_HUMP + g_hump_extra);
+        }
+
         g_hump_speed = SPEED_CRUISE + (((SPEED_HUMP - SPEED_CRUISE) *
                                         (int32_t) done) /
-                                       (int32_t) HUMP_RAMP_MSEC);
+                                       (int32_t) HUMP_RAMP_UP_MSEC) +
+                       g_hump_extra;
+        if (g_hump_speed > SPEED_HUMP_MAX)
+        {
+            g_hump_speed = SPEED_HUMP_MAX;
+        }
     }
 
     return (g_hump_speed);
@@ -1471,6 +1578,8 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
         gb_hump_tilted = false;
         gb_hump_over   = false;
         g_hump_speed   = SPEED_CRUISE;
+        g_hump_extra   = 0;
+        g_boost_msec   = now_msec;     // First boost a stall later.
     }
 
     if (VEHICLE_LINE_CAL == state)

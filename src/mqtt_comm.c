@@ -48,6 +48,7 @@
 #define TOPIC_BYTES         64u
 #define HOST_BYTES          64u
 #define PAYLOAD_BYTES       512u
+#define LOG_PER_TASK        4u      // Log lines sent per call at most.
 #define CMD_BYTES           24u
 #define STATUS_BYTES        128u
 #define RESOLVE_MAX_MSEC    10000u  // DNS gives up after this.
@@ -80,6 +81,7 @@ static uint32_t        g_next_tele    = 0u;
 static uint32_t        g_next_hb      = 0u;
 static bool            gb_scan_done   = false;  // Last obstacle scan seen.
 static uint32_t        g_humps_seen   = 0u;     // hump_count() published.
+static uint32_t        g_log_seq      = 0u;     // Next log line to send.
 static bool            gb_cmd_topic   = false;  // Incoming is on cmd.
 static char            g_cmd_in[CMD_BYTES];
 static uint32_t        g_cmd_len      = 0u;
@@ -95,6 +97,7 @@ static char g_topic_obstacle[TOPIC_BYTES];
 static char g_topic_hump[TOPIC_BYTES];
 static char g_topic_cmd[TOPIC_BYTES];
 static char g_topic_ack[TOPIC_BYTES];
+static char g_topic_log[TOPIC_BYTES];
 
 static struct mqtt_connect_client_info_t g_client_info;
 
@@ -117,6 +120,9 @@ static void     publish(char const * p_topic, char const * p_payload,
 static void     publish_telemetry(uint32_t now_msec);
 static void     publish_heartbeat(uint32_t now_msec);
 static void     publish_events(void);
+static void     publish_log(void);
+static bool     publish_ok(char const * p_topic, char const * p_payload,
+                           u8_t qos, u8_t retain);
 static size_t   json_escape(char * p_out, size_t capacity,
                             char const * p_text);
 static void     status_update(void);
@@ -143,6 +149,7 @@ mqtt_comm_init (void)
     (void) snprintf(g_topic_cmd, TOPIC_BYTES, "%s/cmd", MQTT_TOPIC_PREFIX);
     (void) snprintf(g_topic_ack, TOPIC_BYTES, "%s/cmd/ack",
                     MQTT_TOPIC_PREFIX);
+    (void) snprintf(g_topic_log, TOPIC_BYTES, "%s/log", MQTT_TOPIC_PREFIX);
 
     (void) memset(&g_client_info, 0, sizeof(g_client_info));
     g_client_info.client_id   = MQTT_CLIENT_ID;
@@ -248,6 +255,7 @@ mqtt_comm_task (void)
             gb_ack_pending = false;
             publish(g_topic_ack, g_ack, 1u, 0u);
         }
+        publish_log();
     }
 
     publish_events();       // Watches for events even while offline.
@@ -565,6 +573,27 @@ incoming_data_cb (void * p_arg, u8_t const * p_data, u16_t len, u8_t flags)
 static void
 publish (char const * p_topic, char const * p_payload, u8_t qos, u8_t retain)
 {
+    if (!publish_ok(p_topic, p_payload, qos, retain))
+    {
+        g_dropped++;        // Not connected, or the send buffer is full.
+    }
+}   /* publish() */
+
+
+/*!
+ * @brief Queue one message, and say whether it went.
+ *
+ * @param[in] p_topic   The full topic.
+ * @param[in] p_payload The text.
+ * @param[in] qos       0 or 1.
+ * @param[in] retain    1 to have the broker keep it for new subscribers.
+ *
+ * @return True if queued; false if not connected or the buffer is full.
+ */
+static bool
+publish_ok (char const * p_topic, char const * p_payload, u8_t qos,
+            u8_t retain)
+{
     err_t err = ERR_CONN;
 
     if ((NULL != gp_client) && (MQ_CONNECTED == g_state))
@@ -573,16 +602,62 @@ publish (char const * p_topic, char const * p_payload, u8_t qos, u8_t retain)
                            (u16_t) strlen(p_payload), qos, retain, NULL,
                            NULL);
     }
-
     if (ERR_OK == err)
     {
         g_sent++;
     }
-    else
+
+    return (ERR_OK == err);
+}   /* publish_ok() */
+
+
+/*!
+ * @brief Send the car's new log lines (as the web page's serial monitor
+ *        shows them), a few per call: {"c":"state","m":"State: ..."}.
+ *        Lines logged while offline go out once connected, as far back as
+ *        the log keeps (LOG_LINES); a full send buffer just waits.
+ */
+static void
+publish_log (void)
+{
+    static char const * const k_cats[] =
     {
-        g_dropped++;        // Not connected, or the send buffer is full.
+        "system", "obstacle", "line", "state", "servo"
+    };
+    uint32_t next = log_next_seq();
+    uint32_t sent = 0u;
+
+    if ((next - g_log_seq) > LOG_LINES)
+    {
+        g_log_seq = next - LOG_LINES;   // Older ones are gone.
     }
-}   /* publish() */
+
+    while ((g_log_seq != next) && (sent < LOG_PER_TASK))
+    {
+        char         payload[PAYLOAD_BYTES];
+        char const * p_line = "";
+        log_cat_t    cat    = LOG_CAT_SYSTEM;
+        size_t       length = 0u;
+
+        if (log_get(g_log_seq, &p_line, &cat))
+        {
+            length += (size_t) snprintf(payload, PAYLOAD_BYTES,
+                                        "{\"c\":\"%s\",\"m\":\"",
+                                        k_cats[((uint32_t) cat < 5u) ?
+                                               (uint32_t) cat : 0u]);
+            length += json_escape(payload + length, PAYLOAD_BYTES - length,
+                                  p_line);
+            (void) snprintf(payload + length, PAYLOAD_BYTES - length,
+                            "\"}");
+            if (!publish_ok(g_topic_log, payload, 0u, 0u))
+            {
+                break;                  // Buffer full: try again next time.
+            }
+        }
+        g_log_seq++;
+        sent++;
+    }
+}   /* publish_log() */
 
 
 /*!

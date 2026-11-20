@@ -186,13 +186,35 @@
 // that jerk read as 7-8 deg of tilt (the hump itself is ~3.4 deg) and
 // doubled the measured height.
 #define SPEED_HUMP                  12      // Most power on a hump.
-#define HUMP_RAMP_MSEC              300u    // Cruise to SPEED_HUMP in this,
-                                            // and back down after.
+#define HUMP_RAMP_MSEC              150u    // Back down to cruise in this
+                                            // once over the top (user: at
+                                            // once; 300 before).
 // Extra power is for the climb only: once the tilt has fallen this far
 // below its peak, the car is over the top and eases back to cruise.
 // Holding 12 down the far side sped the car up, then it jerked as it
 // dropped to cruise on the flat (2026-11-19).
 #define HUMP_TOP_DROP_X10           15      // 1.5 deg below the peak.
+#define HUMP_RAMP_UP_MSEC           100u    // Cruise to SPEED_HUMP on a
+                                            // climb (300 was too late on
+                                            // the real surface).
+// Stalled on a slope (real surface, 2026-11-20): at cruise the car often
+// stopped on the ramp at 2.1-2.9 deg, wheels still, before the 3 deg
+// trigger. So wheels (nearly) stopped for HUMP_STALL_MSEC while driven
+// and tilted by HUMP_STALL_TILT_X10 also means a hump; and on the hump,
+// each further HUMP_STALL_MSEC stalled adds HUMP_STALL_STEP power, up to
+// SPEED_HUMP_MAX (power 18 also stalled once).
+#define HUMP_STALL_WINDOW_MSEC      100u    // Wheel movement measured over.
+#define HUMP_STALL_EDGES            15u     // Both wheels' edges in a
+                                            // window below this: stalled
+                                            // (cruise gives ~140).
+#define HUMP_STALL_MSEC             200u
+#define HUMP_STALL_TILT_X10         15      // 1.5 deg.
+#define HUMP_STALL_STEP             5       // Power added per stall.
+#define SPEED_HUMP_MAX              40      // Most power on a hump (28
+                                            // stalled on a steep one).
+// Stalled at SPEED_HUMP_MAX this long: give up (BLOCKED). The old rule,
+// BLOCKED after 8 s on the hump, gave up on humps it could have climbed.
+#define HUMP_GIVE_UP_MSEC           2000u
 // Line-following turns keep BOTH wheels rolling forward, so the car never
 // pauses to turn: the outer wheel speeds up and the inner wheel slows
 // (never 0, which would brake it and pivot the car on that wheel). The
@@ -481,7 +503,7 @@
                                             // reads as tilt and could keep
                                             // it "not level" for ever.
 #define HUMP_MIN_MSEC               500u    // Shortest possible hump.
-#define HUMP_MAX_MSEC               8000u   // Longer than this: stop.
+#define HUMP_MAX_MSEC               15000u  // Longer than this: stop.
 // Picked up: lifted, the three IR sensors (left, right, barcode) see no
 // floor, which reads as black on all three at once. Measured 2026-11-19:
 // all three black from the moment of lifting, in every hold (level,

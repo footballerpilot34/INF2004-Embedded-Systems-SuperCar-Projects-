@@ -22,7 +22,6 @@
 #include "log.h"
 
 
-#define LOG_LINES       32u     // Messages kept for the web UI.
 #define LOG_LINE_MAX    96u     // Longest message kept (longer is cut).
 
 

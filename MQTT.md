@@ -71,6 +71,7 @@ The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
 | `…/hump` | car → | 1, retained | Each hump, once the car is level again. |
 | `…/cmd` | → car | 1 | A command word (see section 5). |
 | `…/cmd/ack` | car → | 1 | The command word, once the car has taken it. |
+| `…/log` | car → | 0 | Each line of the car's log (what the web page's serial monitor shows): `{"c":"state","m":"State: READY -> FOLLOW_LINE"}`. `c` is `system`, `obstacle`, `line`, `state` or `servo`. Lines logged before MQTT connected (start-up, Wi-Fi) are sent once it does, as far back as the car keeps (64 lines). |
 
 ## 4. Payloads (JSON)
 
@@ -176,6 +177,9 @@ These are the same words the web page sends, as plain text, in any case:
 | `wheel` | Wheel test (car lifted). |
 | `scan` | Stationary obstacle scan test. |
 | `clear` | Clear the barcode message, history and log. |
+| `bc` + letter + `l`/`r`/`s`/`u`/`n` | Set what a barcode letter does: left, right, straight, U-turn or nothing (a message). `bcal` = A turns left. Lasts until the car restarts. |
+| `bclist` | Log the letter table, one line per command. |
+| `bcreset` | Put the letter table back to `BARCODE_LETTER_COMMANDS` in `config.h`. |
 
 ```
 mosquitto_pub -h 172.20.10.2 -t inf2004/aai14/supercar/cmd -m v
@@ -200,3 +204,18 @@ as described in `OBSTACLE_DETECTION.md`.
   within about 15 s and publishes `online` = `0`.
 - **Driving is unaffected:** if the send buffer is full, a message is
   dropped and counted in `drop`, rather than holding up the car.
+
+## 7. The laptop script (`.\mqtt`)
+
+From PowerShell in the repo folder, `.\mqtt` (tools/mqtt_car.ps1) checks the
+broker, tells the car this laptop's address, and opens three windows:
+
+- **INPUT** (the one you started it in): type commands. Besides the words
+  above, `set A left` / `set AEI right` sets barcode letters
+  (left/right/straight/uturn/none), `letters` lists them, `letters reset`
+  restores config.h, `broker` resends the laptop's address, `q` quits.
+- **OUTPUT**: what the car says: its log (state changes, Wi-Fi, barcodes,
+  obstacles, humps, ...), the barcode/obstacle/hump events, online/offline
+  and command replies. It saves everything, pings included, to
+  `%USERPROFILE%\mqtt_log.txt`.
+- **PINGS**: the constant telemetry (once a second) and heartbeat.
