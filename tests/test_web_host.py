@@ -31,6 +31,7 @@ COMMON = r'''
 #include <stdbool.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -60,6 +61,7 @@ static struct { struct netif netif[2]; } cyw43_state;
 #define ERR_OK 0
 #define ERR_MEM -1
 #define ERR_RTE -4
+#define ERR_ABRT -13
 #define CYW43_ITF_STA 0
 #define CYW43_LINK_DOWN 0
 #define CYW43_LINK_JOIN 1
@@ -270,6 +272,18 @@ int main(void) {
     profile.timed_out = false; profile.finished = false; scan_point_count = 0;
     scan_build(output, STATUS_BYTES); puts(output);
     profile.cancelled = true; scan_build(output, STATUS_BYTES); puts(output);
+    profile.cancelled = false; profile.finished = true; scan_point_count = 3;
+    profile.centre_seen = profile.left_bounded = profile.right_bounded = false;
+    profile.calibrated_width_valid = false;
+    for (unsigned i = 0; i < 3; ++i) {
+        scan_points[i].range_mm = ULTRASONIC_NO_RANGE;
+        scan_points[i].kind = OBSTACLE_RETURN_NO_ECHO;
+    }
+    scan_build(output, STATUS_BYTES); puts(output);
+    for (unsigned i = 0; i < 3; ++i) {
+        scan_points[i].range_mm = 1000; scan_points[i].kind = OBSTACLE_RETURN_RANGE;
+    }
+    scan_build(output, STATUS_BYTES); puts(output);
     for (size_t cap = 0; cap <= STATUS_BYTES; ++cap) {
         memset(output, 'X', sizeof(output));
         n = history_build(output, cap);
@@ -287,7 +301,7 @@ int main(void) {
 HTTP = r'''
 #define TCP_WRITE_FLAG_COPY 1
 #define TCP_WRITE_FLAG_MORE 2
-struct tcp_pcb { int unused; };
+struct tcp_pcb { void * callback_arg; unsigned queue; };
 static unsigned writes, outputs, fail_write;
 static err_t output_error;
 static char header[HEADER_BYTES];
@@ -306,7 +320,8 @@ static err_t tcp_output(struct tcp_pcb * pcb) { (void)pcb; ++outputs; return out
 
 HTTP_TEST = r'''
 int main(void) {
-    struct tcp_pcb pcb = {0};
+    http_client_t client = {0};
+    struct tcp_pcb pcb = {.callback_arg=&client};
     output_error = ERR_MEM;
     assert(reply_send(&pcb, "text/plain", "hello", 5, true) == ERR_OK);
     assert(writes == 2 && outputs == 1 && strstr(header, "Content-Length: 5\r\n"));
@@ -315,6 +330,78 @@ int main(void) {
     writes = outputs = 0; fail_write = 2;
     assert(reply_send(&pcb, "text/plain", "hello", 5, false) == ERR_MEM);
     assert(outputs == 0); // An incomplete response is not flushed.
+    return 0;
+}
+'''
+
+HTTP_LIFECYCLE = r'''
+static unsigned closes, aborts, requests, freed, consumed;
+struct pbuf { char const * payload; u16_t tot_len; };
+static u16_t pbuf_copy_partial(struct pbuf * b, void * out, u16_t n, u16_t offset) {
+    unsigned available=b->tot_len-offset;
+    if(n>available)n=available;memcpy(out,b->payload+offset,n);return n;
+}
+static void pbuf_free(struct pbuf * b) { (void)b; ++freed; }
+static void tcp_recved(struct tcp_pcb * pcb, u16_t n) { (void)pcb; consumed+=n; }
+static unsigned tcp_sndqueuelen(struct tcp_pcb * pcb) { return pcb->queue; }
+static err_t connection_close(struct tcp_pcb * pcb) { (void)pcb; ++closes; return ERR_OK; }
+static err_t connection_abort(struct tcp_pcb * pcb) { (void)pcb; ++aborts; return ERR_ABRT; }
+static err_t request_handle(struct tcp_pcb * pcb, char * path) {
+    assert(strncmp(path,"/status?s=",10)==0); ++requests;
+    return reply_send(pcb,"application/json","{}",2,false);
+}
+'''
+
+HTTP_LIFECYCLE_TEST = r'''
+static err_t receive_text(http_client_t * c, struct tcp_pcb * pcb, char const * text) {
+    struct pbuf b={text,(u16_t)strlen(text)};
+    return receive_callback(c,pcb,&b,ERR_OK);
+}
+int main(void) {
+    http_client_t client={0}; struct tcp_pcb pcb={.callback_arg=&client};
+    now=100;
+    assert(receive_text(&client,&pcb,"GET /status?s=0 HTTP/1.1\r\n")==ERR_OK);
+    assert(requests==0); // First line alone must not trigger an early close.
+    char headers[1100];memset(headers,'x',sizeof(headers));
+    memcpy(headers,"Host: car\r\nUser-Agent: ",23);
+    strcpy(headers+1000,"\r\n\r\n");
+    assert(receive_text(&client,&pcb,headers)==ERR_OK);
+    assert(requests==1 && client.keep_alive && client.answered);
+    assert(strstr(header,"Connection: keep-alive\r\n"));
+    // Repeated polling reuses ONE client for two minutes without exhausting
+    // the ten-PCB pool. Active transfers survive the old five-second limit.
+    for(unsigned i=0;i<600;i++) {
+        now+=200;pcb.queue=0;
+        assert(sent_callback(&client,&pcb,2)==ERR_OK);
+        assert(!client.answered && client.length==0);
+        assert(poll_callback(&client,&pcb)==ERR_OK);
+        writes=0;
+        assert(receive_text(&client,&pcb,
+            "GET /status?s=1 HTTP/1.1\r\nHost: car\r\n\r\n")==ERR_OK);
+        assert(client.answered && client.keep_alive);
+        assert(closes==0 && aborts==0);
+    }
+    assert(requests==601);
+    // Backpressure preserves a pipelined pbuf until its preceding ACK.
+    unsigned old_freed=freed,old_consumed=consumed;
+    assert(receive_text(&client,&pcb,"GET /status?s=2 HTTP/1.1\r\n\r\n")==ERR_MEM);
+    assert(freed==old_freed && consumed==old_consumed);
+    // Partial ACK progress keeps a genuinely active response alive.
+    pcb.queue=1; now+=5000;sent_callback(&client,&pcb,1);
+    now+=5000;assert(poll_callback(&client,&pcb)==ERR_OK);
+    // Browser half-close requests close AFTER all response bytes are ACKed.
+    assert(receive_callback(&client,&pcb,NULL,ERR_OK)==ERR_OK);
+    assert(!client.keep_alive && closes==0);
+    pcb.queue=0;assert(sent_callback(&client,&pcb,1)==ERR_OK);assert(closes==1);
+    memset(&client,0,sizeof(client));writes=0;
+    assert(receive_text(&client,&pcb,
+        "GET /status?s=3 HTTP/1.1\r\ncOnNeCtIoN:\tclose\r\n\r\n")==ERR_OK);
+    assert(!client.keep_alive && strstr(header,"Connection: close\r\n"));
+    sent_callback(&client,&pcb,2);assert(closes==2);
+    char legacy[]="GET /status?s=3 HTTP/1.0\r\nHost: car\r\n\r\n";
+    assert(!request_keep_alive(legacy));
+    client.last_activity_msec=UINT32_MAX-1000;now=client.last_activity_msec+HTTP_IDLE_MSEC;
+    assert(poll_callback(&client,&pcb)==ERR_ABRT && aborts==1);
     return 0;
 }
 '''
@@ -356,7 +443,16 @@ with tempfile.TemporaryDirectory() as directory:
     assert parsed[5]["can_scan"]
     assert parsed[6]["state"] == "Idle"
     assert parsed[7]["state"] == "Failed"
+    assert parsed[8]["state"] == "Complete" and not parsed[8]["identified"]
+    assert all(point[1] is None for point in parsed[8]["points"])
+    assert parsed[8]["left"] is None and parsed[8]["right"] is None and parsed[8]["width"] is None
+    assert parsed[8]["calibrated_width"] is None
+    assert parsed[9]["state"] == "Complete" and not parsed[9]["identified"]
+    assert all(point[1] == 1000 for point in parsed[9]["points"])
     run("http", HTTP + function("reply_send") + HTTP_TEST)
+    run("http_lifecycle", HTTP + function("reply_send") + HTTP_LIFECYCLE +
+        "\n".join(function(n) for n in ["request_keep_alive", "receive_callback", "sent_callback", "poll_callback"]) +
+        HTTP_LIFECYCLE_TEST)
 
     page = block("static char const g_page_html[] =", "static char const g_dashboard_js")
     html = "".join(ast.literal_eval(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', page))
@@ -366,6 +462,41 @@ with tempfile.TemporaryDirectory() as directory:
     script_code = block("static char const g_dashboard_js[] =", "\n_Static_assert")
     script.write_text("".join(ast.literal_eval(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', script_code)))
     subprocess.run(["node", "--check", str(script)], check=True, timeout=10)
+    dashboard = script.read_text()
+    # Run the complete status-rendering script, not only a syntax check.
+    # Healthy JSON replies must remain connected through repeated render
+    # failures lasting longer than the old 2.5-second red-banner threshold.
+    browser = r'''
+const assert=require('assert');const queued=[];let clock=10000,failRender=false,statusCalls=0,banner;
+const ctx=new Proxy({}, {get(t,k){return k in t?t[k]:()=>{}}});
+const elements={};
+global.document={activeElement:null,getElementById(id){return elements[id]||(elements[id]={
+ style:{},clientWidth:320,clientHeight:200,scrollTop:0,scrollHeight:0,checked:true,options:[],
+ getContext(){if(failRender)throw new Error('Canvas unavailable');return ctx}})}};
+global.window={devicePixelRatio:1};Date.now=()=>clock;
+global.setInterval=fn=>{banner=fn};global.clearTimeout=()=>{};
+global.setTimeout=(fn,ms)=>{if(ms!==4000)queued.push(fn);return 1};
+global.fetch=url=>{
+ let d=url.startsWith('/status')?STATUS:url==='/hotspots'?{n:[]}:{h:[],hq:0};
+ if(url.startsWith('/status'))statusCalls++;
+ return Promise.resolve({ok:true,json:()=>Promise.resolve(d)});
+};
+'''.replace('STATUS', json.dumps(parsed[0]))
+    script.write_text(browser + dashboard + r'''
+(async()=>{
+ await new Promise(resolve=>setImmediate(resolve));
+ banner();assert.equal(elements.cn.style.background,'#2a7');
+ for(let i=0;i<60;i++){
+  clock+=200;failRender=i>=10&&i<35;
+  assert(queued.length);queued.shift()();
+  await new Promise(resolve=>setImmediate(resolve));banner();
+  assert.notEqual(elements.cn.style.background,'#c33');
+  if(failRender)assert(elements.cn.textContent.includes('Connected; display error'));
+ }
+ assert(statusCalls>=61);assert.equal(elements.cn.style.background,'#2a7');
+})().catch(e=>{console.error(e);process.exitCode=1});
+''')
+    subprocess.run(["node", str(script)], check=True, timeout=10)
     plot = (ROOT / 'src/scan_plot.h').read_text()
     plot = "".join(ast.literal_eval(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', plot))
     script.write_text(plot)
@@ -394,6 +525,21 @@ setImmediate(()=>{assert.equal(dots,3);assert.equal(links,1);assert.equal(edges,
  assert.equal(elements.scanNow.disabled,false);});
 ''')
     subprocess.run(["node", str(script)], check=True, timeout=10)
+
+    for distance in (None, 1000):
+        empty = dict(fixture, identified=False, left=None, right=None, width=None,
+                     calibrated_width=None, points=[[a, distance, 2 if distance is None else 1]
+                                                    for a in range(60, 121, 2)])
+        empty_mock = mock.replace(json.dumps(fixture), json.dumps(empty))
+        script.write_text(empty_mock + plot + r'''
+setImmediate(()=>{
+ assert.equal(elements.usstate.textContent,'Complete');
+ assert.equal(elements.usresult.textContent,'No obstacle identified');
+ assert.equal(edges,0);assert.equal(elements.scanNow.disabled,false);
+ assert.equal(dots,EXPECTED);
+});
+'''.replace('EXPECTED', '0' if distance is None else '31'))
+        subprocess.run(["node", str(script)], check=True, timeout=10)
     # Keep the same script/page alive across completion, repeated scans,
     # cancellation/failure and vehicle state changes. Availability is always
     # derived from current firmware state, never a one-shot browser latch.

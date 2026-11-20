@@ -78,6 +78,8 @@ typedef struct {
 } obstacle_profile_t;
 
 void obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec);
+// Stationary diagnostics only: no initial-distance assumption or start gate.
+void obstacle_scan_start_manual(uint32_t now_msec);
 void obstacle_scan_task(uint32_t now_msec);
 void obstacle_scan_cancel(void);
 bool obstacle_scan_active(void);

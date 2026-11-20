@@ -484,16 +484,10 @@ stationary_scan_test_task(void)
             }
             return;
         }
-        uint32_t range = ultrasonic_range_mm();
         g_stationary_scan_starting = false;
-        if (range == 0u || range > OBSTACLE_STOP_MM)
-        {
-            g_stationary_scan_test = false;
-            web_set_scan_test_busy(false);
-            stationary_scan_test_status("REJECTED: obstacle must be within stop range.");
-            return;
-        }
-        obstacle_scan_start(range, now);
+        // A completed ping with no echo is valid diagnostic input. The manual
+        // path has no distance gate and never supplies an assumed foreground.
+        obstacle_scan_start_manual(now);
         stationary_scan_test_status("STARTED: scanning; wheels braked.");
         return;
     }

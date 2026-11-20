@@ -3,9 +3,10 @@
 Open the existing SuperCar dashboard and press **SCAN NOW** under
 **Ultrasonic Distance Scan**, below **Obstacle scan**. The same command is
 available under **More controls → STATIONARY SCAN TEST** and serial `g`.
-The car must be READY or STOPPED, with a current obstacle reading greater
-than zero and no farther than `OBSTACLE_STOP_MM`. Rejections appear above
-the graph. STOP/RESET cancels the scan and keeps the wheels braked.
+The car must be READY or STOPPED, with motors braked. Manual diagnostic scans
+have no initial-distance gate: distant readings and no echo are allowed.
+Rejections appear above the graph. STOP/RESET cancels the scan and keeps
+the wheels braked. Driving and automatic obstacle-stop thresholds are unchanged.
 
 Each scan measures the centre first, then goes outward left and right in
 `OBSTACLE_SCAN_FINE_DEG` steps (currently 2°), covering the configured
@@ -31,6 +32,14 @@ The graph polls `/scan`, updates during scanning, and retains the previous
 points after completion or cancellation until a fresh scan starts.
 Status is Idle, Scanning, Complete, or Failed (including timeout/cancellation).
 The original obstacle results and serial log remain available.
+
+An empty manual scan still completes all 31 angle samples. If there is no
+actual centre echo in the existing foreground band (`OBSTACLE_CLEAR_MM`),
+the dashboard shows **No obstacle identified**, with no edge markers or width.
+All raw readings remain visible. This deliberately avoids inferring a centre
+obstacle from a stale pre-scan distance or an isolated return at 60 degrees.
+An off-centre target may therefore be visible in the graph without identified
+geometry; centre the car/sensor on it to compare calibrated obstacle widths.
 
 Edge estimation does not authorize bypass. The existing three-ray clearance
 gate (`OBSTACLE_SCAN_EDGE_CONFIRM_RAYS`), stable-echo test
@@ -88,9 +97,9 @@ turning clearance, expected-width checks or motor decisions.
 
 To replace the provisional fit, measure the sensor's physical servo angles
 and centre first. Collect at least five scans of measured-width reference
-targets at allowed stationary start distances, such as 200, 240, 280 and
-300 mm, including modest left/right offsets. The existing 300 mm scan-start
-safety gate is unchanged; do not relax it to collect calibration data.
+targets at 200, 240, 280 and 320 mm, including modest left/right offsets.
+Only manual diagnostic scanning is unrestricted; the automatic 300 mm stop
+threshold and all driving safety gates remain unchanged.
 Use a clear background and the same mounting height and target material.
 Record the actual centre echo and the two detected edge angles. Fit beta
 with `python3 tests/calibrate_obstacle_width.py measurements.csv`, using CSV

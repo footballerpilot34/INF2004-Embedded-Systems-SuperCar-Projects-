@@ -29,7 +29,8 @@ static inline uint32_t to_ms_since_boot(uint64_t time) { return time / 1000u; }
 static uint32_t now, ready_at, sequence, range_mm, invalidations;
 static int32_t angle = 90;
 static bool measurement_ready;
-enum { BACKGROUND, NO_ECHO, WIDE, NOISY_CENTRE, OUTLIER, NOISY_EDGE, ONE_ECHO, TWO_ECHO, UNSTABLE };
+enum { BACKGROUND, NO_ECHO, WIDE, NOISY_CENTRE, OUTLIER, NOISY_EDGE, ONE_ECHO, TWO_ECHO, UNSTABLE,
+       EMPTY, FAR_SCENE, STRAY_LEFT };
 static int mode;
 static int width = 300, offset;
 static uint32_t scan_depth = OBSTACLE_CLEAR_MM - 1u;
@@ -86,12 +87,16 @@ static void sample(void) {
         else { range_mm += sequence % 3 == 1 ? -10 : 10; }
     }
     if (mode == UNSTABLE) { range_mm = 100 + 200 * (sequence % 3); }
+    if (mode == EMPTY) { range_mm = ULTRASONIC_NO_RANGE; }
+    if (mode == FAR_SCENE) { range_mm = 1000; }
+    if (mode == STRAY_LEFT) { range_mm = angle == 60 ? 200 : ULTRASONIC_NO_RANGE; }
     ++sequence;
     measurement_ready = true;
 }
 
-static void run_scan(void) {
-    obstacle_scan_start(scan_depth, now);
+static void run_scan_mode(bool manual) {
+    if (manual) { obstacle_scan_start_manual(now); }
+    else { obstacle_scan_start(scan_depth, now); }
     assert(obstacle_scan_active());
     // Reading the same completed ping on multiple control ticks must not
     // satisfy the three independent samples required at an angle.
@@ -109,6 +114,8 @@ static void run_scan(void) {
     assert(servo_angle() == 90);
     assert(obstacle_profile()->finished);
 }
+
+static void run_scan(void) { run_scan_mode(false); }
 
 
 static void width_calibration_checks(void) {
@@ -286,6 +293,38 @@ int main(void) {
     now += OBSTACLE_SCAN_TIMEOUT_MSEC; obstacle_scan_task(now);
     assert(obstacle_profile()->timed_out && !obstacle_profile()->bypass.available);
     assert(invalidations > 0);
+    // Manual diagnostics complete all 31 angles even with no centre echo,
+    // a distant background, or a stray close reading at the left limit.
+    int empty_modes[] = {EMPTY, FAR_SCENE, STRAY_LEFT};
+    for (unsigned scenario = 0; scenario < 3; ++scenario) {
+        mode = empty_modes[scenario]; run_scan_mode(true);
+        uint32_t count;
+        obstacle_point_t const * points = obstacle_scan_points(&count);
+        assert(count == 31 && !obstacle_scan_active());
+        for (unsigned i = 0; i < count; ++i) {
+            assert(points[i].angle_deg == -30 + 2 * (int)i);
+            uint32_t expected = mode == FAR_SCENE ? 1000 :
+                mode == STRAY_LEFT && i == 0 ? 200 : ULTRASONIC_NO_RANGE;
+            assert(points[i].range_mm == expected);
+        }
+        assert(!obstacle_profile()->centre_seen);
+        assert(!obstacle_profile()->left_bounded && !obstacle_profile()->right_bounded);
+        assert(obstacle_profile()->width_mm == 0 && !obstacle_profile()->calibrated_width_valid);
+        assert(!obstacle_profile()->bypass.available && servo_angle() == 90);
+    }
+    // A genuine centred obstacle retains exactly the same raw/calibrated
+    // geometry. The next automatic scan does not inherit diagnostic mode.
+    width = 180; mode = BACKGROUND; run_scan();
+    obstacle_profile_t reference = *obstacle_profile();
+    run_scan_mode(true);
+    assert(obstacle_profile()->width_mm == reference.width_mm);
+    assert(obstacle_profile()->left_angle_x10 == reference.left_angle_x10);
+    assert(obstacle_profile()->right_angle_x10 == reference.right_angle_x10);
+    assert(obstacle_profile()->calibrated_width_valid == reference.calibrated_width_valid);
+    assert(obstacle_profile()->calibrated_width_mm == reference.calibrated_width_mm);
+    assert(reference.calibrated_width_valid == OBSTACLE_WIDTH_CALIBRATION_ENABLED);
+    run_scan(); assert(obstacle_profile()->edges_confirmed == reference.edges_confirmed);
+    width = 80;
     // Exercise the real vehicle state machine with the real scanner.
 
     now = 100; ready_at = 0; mode = NO_ECHO; range_mm = OBSTACLE_STOP_MM + 1;

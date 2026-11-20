@@ -27,6 +27,7 @@
  */
 
 #include <inttypes.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
@@ -64,14 +65,14 @@
 
 #define HTTP_PORT               80u
 #define LISTEN_BACKLOG          4u
-#define HTTP_POLL_INTERVAL      10u     // x 0.5 s: a connection open 5 s is
-                                        // stuck and is freed.
+#define HTTP_POLL_INTERVAL      2u      // Check inactivity once a second.
+#define HTTP_IDLE_MSEC          8000u   // Reap idle clients, not active transfers.
 #define HTTP_RETRY_MSEC         2000u
 #define WIFI_LEAVE_MSEC         2000u
 #define MDNS_RETRY_MSEC         5000u
 #define PING_ID                 0xAF14u // Marks our pings' replies.
 #define PING_DATA_BYTES         8u
-#define REQUEST_BYTES           128u
+#define REQUEST_BYTES           2048u   // Complete Safari/desktop request headers.
 #define HEADER_BYTES            160u
 #define STATUS_BYTES            2048u   // Status fields + escaped text + logs.
 #define LINE_RESERVE            240u    // Room for one escaped log line
@@ -121,6 +122,8 @@ typedef struct
     char request[REQUEST_BYTES];
     u16_t length;
     bool answered;
+    bool keep_alive;
+    uint32_t last_activity_msec;
 } http_client_t;
 
 #define HOTSPOT_AUTO            (-1)    // Page choice: try each in turn.
@@ -315,9 +318,9 @@ static char const g_dashboard_js[] =
     // Connection banner: green while the car answers, red with the time
     // since its last answer otherwise. A request gets 4 s at most, so a
     // stalled one never stops the updates.
-    "var ok=0,up=0,rs=0;setInterval(function(){var e=$('cn'),a=Date.now()-ok;"
-    "if(ok&&a<2500){e.style.background='#2a7';"
-    "e.textContent='Connected to the car'}else{e.style.background='#c33';"
+    "var ok=0,up=0,rs=0,renderError='';setInterval(function(){var e=$('cn'),a=Date.now()-ok;"
+    "if(ok&&a<2500){e.style.background=renderError?'#a60':'#2a7';"
+    "e.textContent=renderError?'Connected; display error: '+renderError:'Connected to the car'}else{e.style.background='#c33';"
     "e.textContent=ok?'No answer from the car for '+Math.round(a/1000)+"
     "' s: retrying...':'Connecting to the car...'}},1000);"
     "function tget(x){var c=window.AbortController?new AbortController():null,t;"
@@ -328,7 +331,9 @@ static char const g_dashboard_js[] =
     "return Promise.race([timeout,response]).then(function(d){clearTimeout(t);return d},"
     "function(e){clearTimeout(t);throw e})}"
     "function u(){tget('/status?s='+q)"
-    ".then(function(d){if(d.nx<q){lg=[]}"
+    ".then(function(d){if(!d||!Array.isArray(d.log)||typeof d.st!=='string')"
+    "throw new Error('Invalid status response');ok=Date.now();renderError='';"
+    "try{if(d.nx<q){lg=[]}"
     "for(var k=0;k<d.log.length;k++){var m=d.log[k],g=+m.charAt(0);"
     "lg.push({c:g,t:m.slice(1)});"
     "if(ft&&g!=ft){nw[0]++;if(g)nw[g]++}}"
@@ -346,13 +351,13 @@ static char const g_dashboard_js[] =
     "(rs?' (restarted '+rs+'x since this page opened!)':'');"
     "$('sst').textContent=d.sst||'';"
     "$('os').textContent=d.oa?'Scanning; wheels braked.':"
-    "(!d.of?'No scan yet.':(d.ot?'Scan timed out.':"
+    "(!d.of?'No scan yet.':(d.ot?'Scan timed out.':(!d.oi?'No obstacle identified':"
     "'Left '+(d.olb?d.ol+' mm':'unknown (seen to '+d.ols+' mm)')+"
     "' ('+d.ole+')'+"
     "'; right '+(d.orb?d.orr+' mm':'unknown (seen to '+d.ors+' mm)')+"
     "' ('+d.ore+')'+"
     "'; width '+(d.ob?d.ow+' mm ['+d.omin+'..'+d.omax+']':'unknown')+"
-    "(d.ob&&!d.oc?'; tentative estimate.':'') ));"
+    "(d.ob&&!d.oc?'; tentative estimate.':'') )));"
     "mv=d.oa||['READY','STOPPED','BARCODE_STATIC'].indexOf(d.st)<0;lock();"
     "if(mv||document.activeElement!==$('sl')){"
     "$('sv').textContent=d.sa;$('sl').value=d.sa}"
@@ -378,7 +383,7 @@ static char const g_dashboard_js[] =
     "'   Peak tilt '+(d.pk/10).toFixed(1)+' deg';"
     "draw('ac',['ax','ay','az'],1.2);draw('pc',['pt','rl'],30.0);"
     "draw('mc',['mx','my','mz'],0.8);"
-    "ok=Date.now();setTimeout(u,d.more?50:200)})"
+    "}catch(e){renderError=e.message||String(e)}setTimeout(u,d.more?50:200)})"
     ".catch(function(){setTimeout(u,1000)})}u();";
 
 _Static_assert(sizeof(g_page_html) - 1u + HEADER_BYTES <= TCP_SND_BUF,
@@ -468,6 +473,7 @@ static err_t  accept_callback(void * p_arg, struct tcp_pcb * p_client,
 static err_t  receive_callback(void * p_arg, struct tcp_pcb * p_pcb,
                                struct pbuf * p_buf, err_t err);
 static err_t  request_handle(struct tcp_pcb * p_pcb, char * p_path);
+static bool   request_keep_alive(char * request);
 static void   command_parse(char const * p_name);
 static size_t status_build(char * p_out, size_t capacity, uint32_t since);
 static size_t scan_build(char * p_out, size_t capacity);
@@ -1256,6 +1262,7 @@ accept_callback (void * p_arg, struct tcp_pcb * p_client, err_t err)
         {
             return connection_abort(p_client);
         }
+        p_client_state->last_activity_msec = to_ms_since_boot(get_absolute_time());
         tcp_arg(p_client, p_client_state);
         tcp_err(p_client, client_error);
         tcp_recv(p_client, receive_callback);
@@ -1315,8 +1322,7 @@ connection_abort(struct tcp_pcb * p_pcb)
 
 
 /*!
- * @brief lwIP callback when sent data is acknowledged: once the whole
- *        reply has arrived, close the connection.
+ * @brief After reply ACKs, reuse HTTP/1.1 clients or close requested clients.
  *
  * @par
  * Closing only now (not straight after queueing the reply) means the rest
@@ -1337,11 +1343,18 @@ sent_callback (void * p_arg, struct tcp_pcb * p_pcb, u16_t len)
 
     (void) len;     // Required by lwIP's callback signature only.
 
-    http_client_t const * p_client = p_arg;
+    http_client_t * p_client = p_arg;
+    p_client->last_activity_msec = to_ms_since_boot(get_absolute_time());
     if (p_client->answered && 0u == tcp_sndqueuelen(p_pcb))
     {
-        g_http_last_reply = to_ms_since_boot(get_absolute_time());
-        result = connection_close(p_pcb);
+        g_http_last_reply = p_client->last_activity_msec;
+        if (p_client->keep_alive)
+        {
+            p_client->answered = false;
+            p_client->length = 0u;
+            p_client->request[0] = '\0';
+        }
+        else { result = connection_close(p_pcb); }
     }
 
     return (result);
@@ -1349,24 +1362,48 @@ sent_callback (void * p_arg, struct tcp_pcb * p_pcb, u16_t len)
 
 
 /*!
- * @brief lwIP callback every HTTP_POLL_INTERVAL: a connection still open
- *        then is stuck (the browser went away), so free it.
+ * @brief Free a client only after no request or ACK progress for HTTP_IDLE_MSEC.
  *
  * @param[in] p_arg Unused.
  * @param[in] p_pcb The connection.
  *
- * @return ERR_ABRT (the connection is always aborted).
+ * @return ERR_ABRT on expiry, otherwise ERR_OK.
  */
 static err_t
 poll_callback (void * p_arg, struct tcp_pcb * p_pcb)
 {
-    (void) p_arg;   // Required by lwIP's callback signature only.
-
-    return connection_abort(p_pcb);
+    http_client_t const * client = p_arg;
+    uint32_t now = to_ms_since_boot(get_absolute_time());
+    return now - client->last_activity_msec >= HTTP_IDLE_MSEC ?
+           connection_abort(p_pcb) : ERR_OK;
 }   /* poll_callback() */
 
 
-/** Accumulate the first HTTP request line across TCP packets. */
+// HTTP/1.1 connections are reusable unless the browser requests close.
+// Header case and whitespace vary between desktop browsers and iPhone Safari.
+static bool
+request_keep_alive(char * request)
+{
+    char * headers = strchr(request, '\n');
+    if (headers == NULL) { return false; }
+    bool persistent = strstr(request, " HTTP/1.1\r\n") != NULL ||
+                      strstr(request, " HTTP/1.1\n") != NULL;
+    for (char * p = headers + 1; *p; ++p) { *p = (char)tolower((unsigned char)*p); }
+    for (char * line = headers + 1; *line; ) {
+        char * end = strchr(line, '\n');
+        if (end == NULL) { break; }
+        *end = '\0';
+        bool close = strncmp(line, "connection:", 11u) == 0 &&
+                     strstr(line + 11u, "close") != NULL;
+        *end = '\n';
+        if (close) { return false; }
+        line = end + 1;
+    }
+    return persistent;
+}
+
+
+/** Wait for complete HTTP headers before responding, even across TCP packets. */
 static err_t
 receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
                   struct pbuf * p_buf, err_t err)
@@ -1383,7 +1420,14 @@ receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
     if (NULL == p_buf)
     {
         // A half-close can arrive while the response is still in flight.
+        p_client->keep_alive = false;
         return p_client->answered ? ERR_OK : connection_close(p_pcb);
+    }
+    if (p_client->answered)
+    {
+        // Do not consume a subsequent request while the previous response is
+        // still awaiting ACKs. lwIP retains and retries this pbuf afterwards.
+        return ERR_MEM;
     }
 
     u16_t length = 0u;
@@ -1402,6 +1446,15 @@ receive_callback (void * p_arg, struct tcp_pcb * p_pcb,
     }
 
     p_client->length += length;
+    p_client->last_activity_msec = to_ms_since_boot(get_absolute_time());
+    p_client->request[p_client->length] = '\0';
+    if (strstr(p_client->request, "\r\n\r\n") == NULL &&
+        strstr(p_client->request, "\n\n") == NULL)
+    {
+        return p_client->length < sizeof(p_client->request) - 1u ?
+               ERR_OK : connection_close(p_pcb);
+    }
+    p_client->keep_alive = request_keep_alive(p_client->request);
     char * p_end = memchr(p_client->request, '\n', p_client->length);
     if (NULL == p_end)
     {
@@ -1614,9 +1667,10 @@ scan_build(char * p_out, size_t capacity)
     bool active = obstacle_scan_active() || gb_scan_test_busy;
     bool can_scan = !active && (vehicle_state() == VEHICLE_READY ||
                                vehicle_state() == VEHICLE_STOPPED);
+    bool identified = p->centre_seen || p->left_bounded || p->right_bounded;
     char const * state = active ? "Scanning" :
         p->cancelled || p->timed_out ? "Failed" : count == 0u ? "Idle" :
-        p->finished && valid > 0u ? "Complete" : "Failed";
+        p->finished ? "Complete" : "Failed";
     size_t length = append_text(p_out, capacity,
         "{\"active\":%d,\"can_scan\":%d,\"state\":\"%s\",\"min\":%d,\"max\":%d,\"step\":%d,\"points\":[",
         active, can_scan, state, SERVO_CENTER_DEG - SERVO_RANGE_DEG,
@@ -1654,6 +1708,7 @@ scan_build(char * p_out, size_t capacity)
     } else { length += append_text(p_out + length, capacity - length, "null"); }
     length += append_text(p_out + length, capacity - length, ",\"calibration_enabled\":%d",
                           OBSTACLE_WIDTH_CALIBRATION_ENABLED);
+    length += append_text(p_out + length, capacity - length, ",\"identified\":%d", identified);
     length += append_text(p_out + length, capacity - length,
         ",\"estimated\":%d,\"ls\":\"%s\",\"rs\":\"%s\"}",
         !p->edges_confirmed, obstacle_edge_status_name(p->left_status),
@@ -1780,6 +1835,8 @@ status_build (char * p_out, size_t capacity, uint32_t since)
     length += append_text(p_out + length, capacity - length,
                           ",\"oa\":%d,\"sst\":", obstacle_scan_active() || gb_scan_test_busy);
     length += json_string(p_out + length, capacity - length, gp_scan_test_status);
+    length += append_text(p_out + length, capacity - length, ",\"oi\":%d",
+        profile->centre_seen || profile->left_bounded || profile->right_bounded);
 
     // Each log line goes as its category digit (log_cat_t), then its text,
     // so the page can sort it into a serial monitor tab.
@@ -1996,8 +2053,10 @@ reply_send (struct tcp_pcb * p_pcb, char const * p_type,
                                "Content-Type: %s\r\n"
                                "Content-Length: %" PRIu32 "\r\n"
                                "Cache-Control: no-store\r\n"
-                               "Connection: close\r\n\r\n",
-                               p_type, (uint32_t) body_len);
+                               "Connection: %s\r\n\r\n",
+                               p_type, (uint32_t) body_len,
+                               ((http_client_t *)p_pcb->callback_arg)->keep_alive ?
+                                   "keep-alive" : "close");
 
     u8_t header_flags = TCP_WRITE_FLAG_COPY;
     if (body_len > 0u)

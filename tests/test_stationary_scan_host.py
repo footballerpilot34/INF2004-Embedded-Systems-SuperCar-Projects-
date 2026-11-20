@@ -67,6 +67,10 @@ void obstacle_scan_start(uint32_t r, uint32_t now) {
     (void)now; assert(left==0 && right==0 && r>0 && r<=OBSTACLE_STOP_MM);
     ++starts; active=true; points=0; profile.finished=false; profile.timed_out=false;
 }
+void obstacle_scan_start_manual(uint32_t now) {
+    (void)now; assert(left==0 && right==0);
+    ++starts; active=true; points=0; profile.finished=false; profile.timed_out=false;
+}
 void obstacle_scan_cancel(void) { ++cancellations; active=false; }
 void obstacle_scan_task(uint32_t now) {
     (void)now; ++tasks; ++points;
@@ -95,12 +99,13 @@ int main(void) {
     web("stop"); assert(!active && !g_stationary_scan_test && !gb_scan_test_busy && stops==1);
     assert(strstr(gp_scan_test_status,"CANCELLED"));
     unsigned n=starts;
-    uint32_t invalid[]={0,OBSTACLE_STOP_MM+1,ULTRASONIC_NO_RANGE};
+    uint32_t diagnostics[]={0,OBSTACLE_STOP_MM+1,ULTRASONIC_NO_RANGE};
     for(unsigned i=0;i<3;i++){
-        range=invalid[i];web("scan");fresh();
-        assert(starts==n && !g_stationary_scan_test && !gb_scan_test_busy);
+        range=diagnostics[i];web("scan");fresh();
+        assert(starts==n+i+1 && g_stationary_scan_test && gb_scan_test_busy);
+        web("stop");assert(!active && !gb_scan_test_busy);
     }
-    assert(strstr(gp_scan_test_status,"stop range"));
+    n=starts;
     range=100;state=VEHICLE_FOLLOW_LINE;web("scan");assert(starts==n);
     assert(strstr(gp_scan_test_status,"stop the vehicle"));
     state=VEHICLE_STOPPED;active=true;web("scan");assert(starts==n);active=false;

@@ -37,6 +37,7 @@ static uint32_t g_queue_count, g_queue_pos;
 static uint32_t g_values[OBSTACLE_SCAN_SAMPLES], g_samples, g_valid;
 static uint32_t g_sequence, g_started;
 static bool g_active;
+static bool g_manual_scan;
 static obstacle_profile_t g_profile;
 
 static float forward_depth(obstacle_point_t const * point)
@@ -280,6 +281,26 @@ char const * obstacle_edge_status_name(obstacle_edge_status_t status)
     return "unknown";
 }
 
+static void scan_profile_build(void)
+{
+    uint32_t front = g_profile.front_mm;
+    if (g_manual_scan) {
+        // Empty diagnostics must not create a virtual centre from an old
+        // distance or a stray side echo. Plot every ray, but identify geometry
+        // only from an actual, current centre reading in the foreground band.
+        front = ULTRASONIC_NO_RANGE;
+        for (uint32_t i = 0u; i < g_count; ++i) {
+            if (g_points[i].angle_deg == 0 && has_range(&g_points[i]) &&
+                g_points[i].range_mm <= OBSTACLE_CLEAR_MM) {
+                front = g_points[i].range_mm;
+                break;
+            }
+        }
+    }
+    // Automatic scans retain their original foreground/fallback behaviour.
+    obstacle_profile_build(g_points, g_count, front, &g_profile);
+}
+
 static void queue_angle(int32_t angle)
 {
     // Skip already measured and queued angles, including the centre.
@@ -304,6 +325,7 @@ static void aim(void)
 void
 obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
 {
+    g_manual_scan = false;
     memset(&g_profile, 0, sizeof(g_profile));
     g_profile.front_mm = forward_mm;
     g_count = g_queue_count = g_queue_pos = 0u;
@@ -319,6 +341,14 @@ obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
     log_obstacle("SCAN start: front=%lu mm",
                  (unsigned long)forward_mm);
     aim();
+}
+
+void
+obstacle_scan_start_manual(uint32_t now_msec)
+{
+    obstacle_scan_start(ULTRASONIC_NO_RANGE, now_msec);
+    g_manual_scan = true;
+    log_obstacle("SCAN manual: full-range diagnostics; no initial distance gate.");
 }
 
 static void store_point(void)
@@ -367,8 +397,7 @@ static void store_point(void)
 
 static void finish(bool timeout)
 {
-    uint32_t front = g_profile.front_mm;
-    obstacle_profile_build(g_points, g_count, front, &g_profile);
+    scan_profile_build();
     g_profile.finished = true;
     g_profile.timed_out = timeout;
     g_active = false;
@@ -435,8 +464,7 @@ obstacle_scan_task(uint32_t now_msec)
     store_point();
     // Rebuild live geometry from the accumulated points; finish() marks the
     // final profile. A missing centre must not prevent the full angular scan.
-    uint32_t front = g_profile.front_mm;
-    obstacle_profile_build(g_points, g_count, front, &g_profile);
+    scan_profile_build();
     int32_t measured_angle = g_queue[g_queue_pos];
 
     bool side_finished =

@@ -19,6 +19,7 @@
 #define WIFI_SECRETS_H
 
 #define HOTSPOT_LIST \
+    { "felixxx", "frisbee123" }, \
     { "Ryan’s iPhone",      "ryan2606"          }
 
 #endif /* WIFI_SECRETS_H */
