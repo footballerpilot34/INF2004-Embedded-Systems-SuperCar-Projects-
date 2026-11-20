@@ -1,64 +1,70 @@
-"""Fit an effective ultrasonic beam half-angle from measured reference scans.
+"""Generate a small lookup table from PHYSICAL rectangular-obstacle scans.
 
-python3 tests/calibrate_obstacle_width.py --examples
-python3 tests/calibrate_obstacle_width.py measurements.csv
-CSV columns: distance_mm,left_deg,right_deg,width_mm (absolute servo angles).
-Use independently measured target widths; reserve separate scans for validation.
+CSV: nominal_distance_mm,distance_mm,left_deg,right_deg,width_mm,lst,rst
+Angles are absolute servo degrees (centre=90). lst/rst must be echo-bracketed.
+Collect >=3 usable scans per width at each nominal distance (150,200,250).
+Keep independent scans aside to validate the generated table on the car.
+No examples or synthetic calibration constants are installed by this script.
 """
 import argparse
 import csv
 import math
 
 
-def estimate(row, beta, centre):
-    left = row["left_deg"] - centre + beta
-    right = row["right_deg"] - centre - beta
-    return row["distance_mm"] * (math.tan(math.radians(right)) -
-                                  math.tan(math.radians(left)))
-
-
-def fit(rows, centre=90):
-    if not rows:
-        raise ValueError("At least one measured reference scan is required")
+def calibrate(rows, centre=90):
+    groups = {distance: {150: [], 250: []} for distance in (150, 200, 250)}
     for row in rows:
-        if not all(math.isfinite(v) for v in row.values()):
-            raise ValueError("Measurements must be finite")
-        if (row["distance_mm"] <= 0 or row["width_mm"] <= 0 or
-                not -89 < row["left_deg"] - centre < row["right_deg"] - centre < 89):
-            raise ValueError("Invalid reference dimensions or edge angles")
-    # Angular erosion must not invert the measured interval. A 0.01-degree
-    # search is much finer than the servo's 2-degree sampling resolution.
-    maximum = min((r["right_deg"] - r["left_deg"]) / 2 for r in rows)
-    candidates = (i / 100 for i in range(math.ceil(maximum * 100)))
-    beta = min(candidates, key=lambda b:
-               sum((estimate(r, b, centre) - r["width_mm"]) ** 2 for r in rows))
-    return round(beta * 10) / 10  # Same 0.1-degree precision as config.h.
+        nominal, width = float(row['nominal_distance_mm']), float(row['width_mm'])
+        if nominal not in groups or width not in groups[nominal]:
+            raise ValueError('Nominal distances must be 150/200/250; widths 150/250 mm')
+        distance, left, right = (float(row[key]) for key in
+                                 ('distance_mm', 'left_deg', 'right_deg'))
+        if not all(math.isfinite(v) for v in (distance, left, right)):
+            raise ValueError('Measurements must be finite')
+        if distance <= 0 or not centre - 30 < left < centre < right < centre + 30:
+            raise ValueError('Invalid distance or unobserved/clipped scan edges')
+        if row['lst'] != 'echo-bracketed' or row['rst'] != 'echo-bracketed':
+            continue  # Missing/weak edges cannot train a reliable classifier.
+        groups[nominal][width].append((distance, round((right - left) * 10)))
+    result = []
+    for nominal, sizes in groups.items():
+        small, large = sizes[150], sizes[250]
+        if len(small) < 3 or len(large) < 3:
+            result.append((0, 0, 0, 0, 0, 0))
+            continue
+        smin, smax = min(p[1] for p in small), max(p[1] for p in small)
+        lmin, lmax = min(p[1] for p in large), max(p[1] for p in large)
+        if smax >= lmin:
+            result.append((0, 0, 0, 0, 0, 0))  # Observed classes overlap: unknown.
+            continue
+        distances = [p[0] for p in small + large]
+        # Do not extrapolate beyond actually observed distances.
+        result.append((math.ceil(min(distances)), math.floor(max(distances)),
+                       smin, smax, lmin, lmax))
+    for i, row in enumerate(result):
+        if row[0] and any(other[0] and max(row[0], other[0]) <= min(row[1], other[1])
+                          for other in result[:i] + result[i+1:]):
+            raise ValueError('Measured distance bands overlap; inspect test placement')
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("csv", nargs="?")
-    parser.add_argument("--centre", type=float, default=90)
-    parser.add_argument("--examples", action="store_true")
+    parser.add_argument('csv')
+    parser.add_argument('--centre', type=float, default=90)
     args = parser.parse_args()
-    if args.examples:
-        print("Approximate supplied summaries: residuals below are fit errors, not validation.")
-        rows = [dict(distance_mm=300, left_deg=67, right_deg=105, width_mm=80),
-                dict(distance_mm=220, left_deg=71, right_deg=105, width_mm=80)]
-    elif args.csv:
-        with open(args.csv, newline="") as stream:
-            rows = [{key: float(row[key]) for key in
-                     ("distance_mm", "left_deg", "right_deg", "width_mm")}
-                    for row in csv.DictReader(stream)]
-    else:
-        parser.error("Supply a measurement CSV or --examples")
-    beta = fit(rows, args.centre)
-    print(f"OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 = {round(beta * 10)} ({beta:.1f} degrees)")
-    for row in rows:
-        width = estimate(row, beta, args.centre)
-        print(f"distance={row['distance_mm']:g} mm: estimate={width:.1f} mm; "
-              f"reference={row['width_mm']:g} mm; error={width-row['width_mm']:+.1f} mm")
+    try:
+        with open(args.csv, newline='') as stream:
+            rows = calibrate(list(csv.DictReader(stream)), args.centre)
+    except (ValueError, KeyError) as error:
+        parser.error(str(error))
+    print('OBSTACLE_WIDTH_CALIBRATION_ROWS (paste into src/config.h):')
+    for nominal, row in zip((150, 200, 250), rows):
+        print('{' + ', '.join(map(str, row)) + '}, /* ' + str(nominal) + ' mm */')
+        if row[0] == 0:
+            print('  /* UNKNOWN: fewer than 3 usable scans/class, or overlapping spans. */')
+    print('These are training envelopes, not demonstrated accuracy. Validate on separate scans.')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

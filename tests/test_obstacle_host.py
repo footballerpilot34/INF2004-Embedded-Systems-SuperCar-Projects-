@@ -26,6 +26,21 @@ static inline uint32_t to_ms_since_boot(uint64_t time) { return time / 1000u; }
 #include "vehicle.h"
 #include "line_sensor.h"
 
+#include "bypass.h"
+static bool mock_bypass_begin_ok;
+bool bypass_begin(obstacle_profile_t const *p, uint32_t t, bool l) { (void)p; (void)t; (void)l; return mock_bypass_begin_ok; }
+static unsigned mock_bypass_starts;
+bool bypass_test_begin(uint32_t t) { (void)t; ++mock_bypass_starts; return true; }
+void bypass_cancel(void) {}
+static bypass_result_t mock_bypass_result = BYPASS_FAILED;
+bypass_result_t bypass_step(uint32_t t, uint32_t r) { (void)t; (void)r; return mock_bypass_result; }
+void hump_task(bool f, bool h) { (void)f; (void)h; }
+void hump_finish(int32_t t) { (void)t; }
+void hump_new_run(void) {}
+int32_t hump_on_mm(void) { return 0; }
+int32_t hump_last_height_x10(void) { return 0; }
+int32_t hump_run_height_x10(void) { return 0; }
+uint32_t hump_count(void) { return 0; }
 static uint32_t now, ready_at, sequence, range_mm, invalidations;
 static int32_t angle = 90;
 static bool measurement_ready;
@@ -48,6 +63,9 @@ uint32_t barcode_scan_size(void) { return 0u; }
 bool barcode_end_scan(void) { return false; }
 char const * barcode_command_name(barcode_command_t cmd) { (void)cmd; return "test"; }
 int32_t imu_max_tilt_x10(void) { return tilt; }
+int32_t imu_total_tilt_x10(void) { return tilt; }
+int32_t imu_pitch_x10(void) { return tilt; }
+int32_t imu_roll_x10(void) { return 0; }
 line_state_t line_sensor_read(void) { return (line_state_t){true, true}; }
 line_junction_t line_junction_detect(bool black, bool enabled, uint32_t time,
                                      uint32_t * mark) {
@@ -112,70 +130,35 @@ static void run_scan(void) {
 
 
 static void width_calibration_checks(void) {
-    // The supplied summaries do not contain the individual edge echoes.
-    // Reconstruct a common edge depth that reproduces each reported raw
-    // width, and use the midpoint of the supplied centre-distance range.
-    int left[] = {-23, -19}, right[] = {15, 15};
-    uint32_t reported[] = {193, 125}, front[] = {300, 220};
-    for (unsigned example = 0; example < 2; ++example) {
-        float depth = reported[example] /
-            (tanf(right[example] * 0.017453292519943295f) -
-             tanf(left[example] * 0.017453292519943295f));
-        obstacle_point_t points[31];
-        for (unsigned i = 0; i < 31; ++i) {
-            int a = -30 + 2 * (int)i;
-            float d = a > left[example] && a < right[example] ? depth : 900;
-            points[i] = (obstacle_point_t){a,
-                (uint32_t)lroundf(d / cosf(a * 0.017453292519943295f)),
-                OBSTACLE_RETURN_RANGE};
-        }
-        points[15].range_mm = front[example];
-        obstacle_profile_t p;
-        obstacle_profile_build(points, 31, front[example], &p);
-        assert(p.left_angle_x10 == left[example] * 10);
-        assert(p.right_angle_x10 == right[example] * 10);
-        assert(abs((int)p.width_mm - (int)reported[example]) <= 1);
-        assert(p.edges_confirmed && p.bypass.available);
-        // Candidate coordinates continue to be outside the RAW scan bounds.
-        assert(p.bypass.left_x_mm < p.left_mm && p.bypass.right_x_mm > p.right_mm);
-        assert(p.bypass.turn_clearance_mm == 124);
-        if (OBSTACLE_WIDTH_CALIBRATION_ENABLED) {
-            float beta = OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 / 10.0f;
-            float expected = front[example] *
-                (tanf((right[example] - beta) * 0.017453292519943295f) -
-                 tanf((left[example] + beta) * 0.017453292519943295f));
-            assert(p.calibrated_width_valid);
-            assert(abs((int)p.calibrated_width_mm - (int)lroundf(expected)) <= 1);
-            if (OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 == 98) {
-                assert(abs((int)p.calibrated_width_mm - 80) <= 50);
-                assert(p.calibrated_width_mm == (example == 0 ? 98u : 56u));
+    // SYNTHETIC table/scan inputs exercise decisions, not physical accuracy.
+    for (uint32_t d = 150; d <= 250; d += 50) {
+        for (int edge = 10; edge <= 28; edge += 8) {
+            obstacle_point_t points[31];
+            for (unsigned i = 0; i < 31; ++i) {
+                int a = -30 + 2 * (int)i;
+                float depth = abs(a) <= edge ? d : 1000;
+                points[i] = (obstacle_point_t){a,
+                    (uint32_t)lroundf(depth / cosf(a * 0.017453292519943295f)),
+                    OBSTACLE_RETURN_RANGE};
             }
-        } else { assert(!p.calibrated_width_valid); }
-        // Sensitivity to the stated approximate distance intervals. These
-        // are model checks, not independent hardware validation scans.
-        for (uint32_t d = example == 0 ? 280u : 200u;
-             d <= (example == 0 ? 320u : 240u); d += 20u) {
-            points[15].range_mm = d;
+            obstacle_profile_t p;
             obstacle_profile_build(points, 31, d, &p);
-            assert(abs((int)p.width_mm - (int)reported[example]) <= 1);
-            if (OBSTACLE_WIDTH_CALIBRATION_ENABLED &&
-                OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 == 98) {
+            if (TEST_CALIBRATED && edge < 26 && OBSTACLE_WIDTH_CALIBRATION_ENABLED) {
                 assert(p.calibrated_width_valid);
-                assert(abs((int)p.calibrated_width_mm - 80) <= 50);
-            }
+                assert(p.calibrated_width_mm == (edge == 10 ? 150u : 250u));
+            } else { assert(!p.calibrated_width_valid); }
+            assert(p.width_mm > 0); // Raw geometry remains separate.
+            points[15].kind = OBSTACLE_RETURN_WEAK_RANGE;
+            obstacle_profile_build(points, 31, d, &p);
+            assert(!p.calibrated_width_valid);
+            points[15].kind = OBSTACLE_RETURN_NO_ECHO;
+            obstacle_profile_build(points, 31, d, &p);
+            assert(!p.calibrated_width_valid);
+            points[15].kind = OBSTACLE_RETURN_RANGE;
+            points[15].range_mm = 280;
+            obstacle_profile_build(points, 31, 280, &p);
+            assert(!p.calibrated_width_valid); // No extrapolation.
         }
-        // No calibration extrapolation beyond the configured test interval.
-        points[15].range_mm = OBSTACLE_WIDTH_CAL_MIN_MM - 1;
-        obstacle_profile_build(points, 31, points[15].range_mm, &p);
-        assert(!p.calibrated_width_valid);
-        points[15].range_mm = OBSTACLE_WIDTH_CAL_MAX_MM + 1;
-        obstacle_profile_build(points, 31, points[15].range_mm, &p);
-        assert(!p.calibrated_width_valid);
-        // An estimated centre cannot silently become a measured reference.
-        points[15].kind = OBSTACLE_RETURN_NO_ECHO;
-        points[15].range_mm = ULTRASONIC_NO_RANGE;
-        obstacle_profile_build(points, 31, front[example], &p);
-        assert(!p.calibrated_width_valid);
     }
 }
 
@@ -191,9 +174,7 @@ static void geometry_checks(void) {
     assert(p.left_angle_x10 == -30 && p.right_angle_x10 == 30);
     assert(p.left_status == OBSTACLE_EDGE_ESTIMATED && !p.edges_confirmed);
     assert(p.width_mm > 25 && p.width_mm < 40 && !p.bypass.available);
-    if (OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 >= 30) {
-        assert(!p.calibrated_width_valid); // Beam correction overlaps the edges.
-    }
+    assert(!p.calibrated_width_valid);
     // A SINGLE missing ray bounds an estimate; there is no no-echo streak gate.
     a[0] = (obstacle_point_t){-4, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
     a[4] = (obstacle_point_t){4, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
@@ -321,6 +302,11 @@ int main(void) {
     vehicle_task(); now += OBSTACLE_CLEAR_MSEC + 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
     assert(reader_enabled);
+    for (uint32_t d = 150; d <= 250; d += 50) {
+        vehicle_stop(); vehicle_start(); range_mm = d; vehicle_task();
+        assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN);
+        assert(motor_left == 0 && motor_right == 0);
+    }
     vehicle_stop(); vehicle_start(); range_mm = OBSTACLE_STOP_MM - 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Calibration protected.
     vehicle_stop();
@@ -331,14 +317,44 @@ int main(void) {
     vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Turn protected.
     vehicle_stop(); vehicle_barcode_test(); vehicle_task();
-    assert(vehicle_state() == VEHICLE_STOPPED && !obstacle_scan_active());
-    vehicle_task(); // STOP remains stopped even with the obstacle still present.
-    assert(motor_left == 0 && motor_right == 0);
+    assert(vehicle_state() == VEHICLE_BLOCKED && !obstacle_scan_active());
+    vehicle_stop(); vehicle_task();
+    assert(vehicle_state() == VEHICLE_STOPPED && motor_left == 0 && motor_right == 0);
+    vehicle_bypass_test();
+    assert(vehicle_state() == VEHICLE_BYPASS);
+    unsigned starts_before_repeat = mock_bypass_starts;
+    vehicle_bypass_test(); vehicle_bypass_test();
+    assert(vehicle_state() == VEHICLE_BYPASS && mock_bypass_starts == starts_before_repeat);
+    mock_bypass_result = BYPASS_DONE; vehicle_task();
+    assert(vehicle_state() == VEHICLE_STOPPED); // Dry run must not start driving straight.
+    mock_bypass_begin_ok = true; mock_bypass_result = BYPASS_RUNNING;
+    mode = BACKGROUND; width = 80; scan_depth = 300; range_mm = 300;
+    vehicle_start(); vehicle_task();
+    assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN);
+    uint32_t integration_start = now;
+    while (vehicle_state() == VEHICLE_OBSTACLE_SCAN) {
+        now += 10;
+        if (servo_is_settled() && now % 60 == 0) { sample(); }
+        vehicle_task();
+        assert(now - integration_start <= OBSTACLE_SCAN_TIMEOUT_MSEC + 10);
+    }
+    assert(vehicle_state() == VEHICLE_BYPASS);
+    range_mm = 80; vehicle_task();
+    assert(vehicle_state() == VEHICLE_BYPASS); // No nested detection during return.
+    mock_bypass_result = BYPASS_DONE; vehicle_task();
+    assert(vehicle_state() == VEHICLE_FOLLOW_LINE && reader_enabled);
+    vehicle_stop();
     return 0;
 }
 '''.replace("#include <math.h>", "#include <math.h>\n#include <stdlib.h>"))
-    for definitions in ([], ["-DOBSTACLE_WIDTH_CALIBRATION_ENABLED=false"],
-                        ["-DOBSTACLE_WIDTH_BEAM_HALF_DEG_X10=0"]):
+    for definitions in (["-DTEST_CALIBRATED=0"],
+                        ["-DTEST_CALIBRATED=0", "-DOBSTACLE_WIDTH_CALIBRATION_ENABLED=false"],
+                        ["-DTEST_CALIBRATED=1",
+                         "-DOBSTACLE_WIDTH_CALIBRATION_ROWS={140,160,200,240,360,400},{190,210,200,240,360,400},{240,260,200,240,360,400}"],
+                        ["-DTEST_CALIBRATED=0",
+                         "-DOBSTACLE_WIDTH_CALIBRATION_ROWS={140,260,200,240,360,400},{140,260,200,240,360,400}"],
+                        ["-DTEST_CALIBRATED=0",
+                         "-DOBSTACLE_WIDTH_CALIBRATION_ROWS={140,260,200,400,360,400}"]):
         subprocess.run(["cc", "-std=c11", "-Wall", "-Wextra", "-Werror",
                         "-fsanitize=undefined", "-fno-sanitize-recover=all",
                         *definitions, "-I", str(work),

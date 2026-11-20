@@ -21,13 +21,6 @@ _Static_assert(SERVO_RANGE_DEG % OBSTACLE_SCAN_COARSE_DEG == 0 &&
                "Scan grid must include centre, limits and fine subdivisions");
 _Static_assert(2 * SERVO_RANGE_DEG / OBSTACLE_SCAN_FINE_DEG + 1 <= SCAN_CAPACITY,
                "Scan grid exceeds storage");
-_Static_assert(OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 >= 0 &&
-               OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 < 900,
-               "Effective beam half-angle must be within [0, 90) degrees");
-_Static_assert(OBSTACLE_WIDTH_CAL_MIN_MM > 0u &&
-               OBSTACLE_WIDTH_CAL_MIN_MM <= OBSTACLE_WIDTH_CAL_MAX_MM,
-               "Width calibration requires a valid distance interval");
-
 static obstacle_point_t g_points[SCAN_CAPACITY];
 static uint32_t g_count;
 static int32_t g_queue[SCAN_CAPACITY];
@@ -158,31 +151,45 @@ static void bypass_candidate(obstacle_profile_t * p, float left_outer,
     p->bypass.available = true;
 }
 
-// Detection uses the beam axis; the actual target boundary may lie inside
-// that axis by beta. A single measured central depth avoids mixing the two
-// off-axis echoes in this planar approximation. Raw geometry stays intact.
-static void calibrated_width(obstacle_profile_t * p)
+// Compare measured angular span with physical reference envelopes at this
+// distance. No geometric beam correction; unmeasured/ambiguous scans stay unknown.
+static void calibrated_width(obstacle_profile_t * p,
+                             obstacle_point_t const * points, uint32_t count)
 {
+    static const struct {
+        uint32_t front_min, front_max;
+        int32_t small_min, small_max, large_min, large_max;
+    } calibration[] = { OBSTACLE_WIDTH_CALIBRATION_ROWS };
     if (!OBSTACLE_WIDTH_CALIBRATION_ENABLED || !p->centre_seen ||
-        !p->left_bounded || !p->right_bounded ||
-        p->front_mm < OBSTACLE_WIDTH_CAL_MIN_MM ||
-        p->front_mm > OBSTACLE_WIDTH_CAL_MAX_MM ||
-        p->left_status == OBSTACLE_EDGE_SCAN_LIMIT ||
-        p->right_status == OBSTACLE_EDGE_SCAN_LIMIT ||
-        p->left_status == OBSTACLE_EDGE_UNRELIABLE ||
-        p->right_status == OBSTACLE_EDGE_UNRELIABLE) {
-        return;
+        !p->edges_confirmed) { return; }
+    // A missing or weak foreground echo invalidates classification, even
+    // though its raw range remains available for the dashboard.
+    for (uint32_t i = 0; i < count; ++i) {
+        if (points[i].angle_deg * 10 >= p->left_angle_x10 &&
+            points[i].angle_deg * 10 <= p->right_angle_x10 &&
+            points[i].kind != OBSTACLE_RETURN_RANGE) { return; }
     }
-    float beta = OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 / 10.0f;
-    float left = p->left_angle_x10 / 10.0f + beta;
-    float right = p->right_angle_x10 / 10.0f - beta;
-    // Overlapping corrected edges are unresolved, not a zero-width object.
-    if (left >= right || left <= -90.0f || right >= 90.0f) { return; }
-    float width = lateral((float)p->front_mm, right) -
-                  lateral((float)p->front_mm, left);
-    if (!isfinite(width) || width <= 0.0f) { return; }
-    p->calibrated_width_mm = (uint32_t)lroundf(width);
-    p->calibrated_width_valid = true;
+    int32_t span = p->right_angle_x10 - p->left_angle_x10;
+    unsigned matched = 0;
+    for (unsigned i = 0; i < sizeof(calibration) / sizeof(calibration[0]); ++i) {
+        if (!calibration[i].front_min ||
+            calibration[i].front_min > calibration[i].front_max ||
+            p->front_mm < calibration[i].front_min ||
+            p->front_mm > calibration[i].front_max) { continue; }
+        // Reject overlapping distance bands as well as overlapping classes.
+        if (++matched > 1u) { p->calibrated_width_valid = false; return; }
+        if (calibration[i].small_min <= 0 || calibration[i].large_min <= 0 ||
+            calibration[i].small_min > calibration[i].small_max ||
+            calibration[i].large_min > calibration[i].large_max ||
+            calibration[i].small_max >= calibration[i].large_min) { continue; }
+        if (span >= calibration[i].small_min && span <= calibration[i].small_max) {
+            p->calibrated_width_mm = 150u;
+            p->calibrated_width_valid = true;
+        } else if (span >= calibration[i].large_min && span <= calibration[i].large_max) {
+            p->calibrated_width_mm = 250u;
+            p->calibrated_width_valid = true;
+        }
+    }
 }
 
 void
@@ -263,7 +270,7 @@ obstacle_profile_build(obstacle_point_t const * points, uint32_t count,
         if (p->edges_confirmed) {
             bypass_candidate(p, left_bound, right_bound);
         }
-        calibrated_width(p); // Separate from all conservative safety geometry.
+        calibrated_width(p, points, count);
     }
 }
 
@@ -403,6 +410,12 @@ static void finish(bool timeout)
             (unsigned long)g_profile.middle_distance_mm, (unsigned long)g_profile.front_mm);
     } else {
         log_obstacle("SCAN width UNKNOWN: one or both edges are outside reliable observations.");
+    }
+    if (g_profile.calibrated_width_valid && !timeout) {
+        log_obstacle("SCAN calibrated width=%lu mm", (unsigned long)g_profile.calibrated_width_mm);
+    } else {
+        g_profile.calibrated_width_valid = false;
+        log_obstacle("SCAN calibrated width=UNKNOWN (needs usable physical calibration).");
     }
     if (timeout) {
         g_profile.bypass.available = false;

@@ -35,6 +35,7 @@ typedef enum
 void            vehicle_init(void);
 void            vehicle_start(void);
 void            vehicle_stop(void);
+void            vehicle_bypass_test(void); // Empty-floor serial/MQTT rehearsal.
 void            vehicle_barcode_command(barcode_command_t command,
                                         bool b_test);
 barcode_command_t vehicle_pending_turn(void);

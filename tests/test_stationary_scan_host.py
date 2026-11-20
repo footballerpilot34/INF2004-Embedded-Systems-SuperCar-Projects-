@@ -1,4 +1,4 @@
-"""Exercise the real serial/web command dispatch and stationary scan lifecycle."""
+"""Exercise the real serial/web/MQTT command dispatch and stationary scan lifecycle."""
 from pathlib import Path
 import re
 import subprocess
@@ -7,6 +7,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 MAIN = (ROOT / "src/supercar_main.c").read_text()
 WEB = (ROOT / "src/web.c").read_text()
+MQTT = (ROOT / "src/mqtt_comm.c").read_text()
 
 def function(source, name):
     start = re.search(r"^(?:static )?(?:void|bool|web_command_t)\n" + name + r"\s*\(", source, re.M)
@@ -20,12 +21,15 @@ code = r'''
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "config.h"
 #include "web.h"
 #include "vehicle.h"
 #include "obstacle.h"
 #include "ultrasonic.h"
 static bool g_stationary_scan_test, g_stationary_scan_starting, g_encoder_marked, active, finish_next;
+static bool gb_feat_line, gb_feat_avoid, gb_feat_barcode, gb_feat_hump;
+void mqtt_comm_set_broker(char const *h) { (void)h; }
 static bool gb_scan_test_busy, ready = true, settled = true;
 static uint32_t g_stationary_scan_since, now = 100, points;
 static unsigned starts, cancellations, tasks, movement, stops;
@@ -56,6 +60,9 @@ bool servo_is_settled(void) { return settled; }
 bool ultrasonic_measurement_ready(void) { return ready; }
 void ultrasonic_invalidate(void) { ready = false; }
 vehicle_state_t vehicle_state(void) { return state; }
+void vehicle_feature_test(bool l, bool a, bool b, bool h) { (void)l; (void)a; (void)b; (void)h; ++movement; }
+void web_features(bool *l, bool *a, bool *b, bool *h) { *l=*a=*b=*h=true; }
+void vehicle_bypass_test(void) { ++movement; }
 void vehicle_start(void) { ++movement; }
 void vehicle_stop(void) { ++stops; state=VEHICLE_STOPPED; }
 void vehicle_barcode_test(void) { ++movement; }
@@ -80,8 +87,25 @@ for name in ['vehicle_is_idle', 'stationary_scan_test_status', 'stationary_scan_
              'stationary_scan_test_cancel', 'stationary_scan_test_task', 'command_run', 'serial_poll']:
     code += function(MAIN, name)
 code += function(WEB, 'command_parse') + function(WEB, 'web_command_take')
+code += function(WEB, 'web_command_submit')
+code += r'''
+typedef uint8_t u8_t;
+typedef uint16_t u16_t;
+typedef uint32_t u32_t;
+#define CMD_BYTES 24u
+#define MQTT_DATA_FLAG_LAST 1u
+static bool gb_cmd_topic, gb_ack_pending;
+static uint32_t g_cmd_len;
+static char g_cmd_in[CMD_BYTES], g_ack[CMD_BYTES];
+static char const *g_topic_cmd = "inf2004/aai14/supercar/cmd";
+'''
+code += function(MQTT, 'incoming_publish_cb') + function(MQTT, 'incoming_data_cb')
 code += r'''
 static void web(char const * name){command_parse(name);command_run(web_command_take());}
+static void mqtt(char const *payload) {
+    incoming_publish_cb(NULL,g_topic_cmd,(u32_t)strlen(payload));
+    incoming_data_cb(NULL,(u8_t const *)payload,(u16_t)strlen(payload),MQTT_DATA_FLAG_LAST);
+}
 static void fresh(void) { ready=true; settled=true; stationary_scan_test_task(); }
 int main(void) {
     key='g'; web_command_t c=serial_poll();
@@ -91,6 +115,9 @@ int main(void) {
     fresh(); assert(starts==1 && active && !g_stationary_scan_starting);
     stationary_scan_test_task(); assert(tasks==1 && active);
     web("scan"); assert(starts==1 && strstr(gp_scan_test_status,"already running"));
+    unsigned before_dry=movement; key='v'; command_run(serial_poll());
+    assert(movement==before_dry); // Rehearsal is rejected while scanning.
+    mqtt("v"); command_run(web_command_take()); assert(movement==before_dry);
     web("start"); assert(movement==0);
     web("stop"); assert(!active && !g_stationary_scan_test && !gb_scan_test_busy && stops==1);
     assert(strstr(gp_scan_test_status,"CANCELLED"));
@@ -130,6 +157,33 @@ int main(void) {
     assert(!active && !g_stationary_scan_test && !gb_scan_test_busy);
     command_parse("stop");command_parse("scan");assert(web_command_take()==WEB_CMD_STOP);
     assert(movement==0 && left==0 && right==0 && cancellations>=3);
+    // Actual MQTT callbacks -> shared parser -> same serial command handler.
+    key='v'; web_command_t serial_v=serial_poll();
+    assert(serial_v==WEB_CMD_BYPASS_TEST);
+    gb_ack_pending=false;
+    incoming_publish_cb(NULL,"other/topic",1);
+    incoming_data_cb(NULL,(u8_t const *)"v",1,MQTT_DATA_FLAG_LAST);
+    assert(!gb_ack_pending && web_command_take()==WEB_CMD_NONE);
+    incoming_publish_cb(NULL,g_topic_cmd,4);
+    incoming_data_cb(NULL,(u8_t const *)" V",2,0);
+    assert(!gb_ack_pending && web_command_take()==WEB_CMD_NONE);
+    incoming_data_cb(NULL,(u8_t const *)"\r\n",2,MQTT_DATA_FLAG_LAST);
+    assert(gb_ack_pending && strcmp(g_ack,"v")==0);
+    web_command_t remote_v=web_command_take(); assert(remote_v==serial_v);
+    unsigned before=movement; command_run(remote_v); assert(movement==before+1);
+    mqtt("v"); mqtt("v"); // Multiple queued copies still dispatch once.
+    command_run(web_command_take()); assert(movement==before+2);
+    assert(web_command_take()==WEB_CMD_NONE);
+    unsigned stops_before=stops;
+    mqtt("stop"); mqtt("v"); command_run(web_command_take());
+    assert(stops==stops_before+1 && movement==before+2);
+    mqtt("v"); mqtt("stop");
+    assert(strcmp(g_ack,"stop")==0); command_run(web_command_take());
+    assert(stops==stops_before+2 && movement==before+2);
+    mqtt("ft1100");
+    assert(strcmp(g_ack,"ft1100")==0);
+    assert(gb_feat_line && gb_feat_avoid && !gb_feat_barcode && !gb_feat_hump);
+    assert(web_command_take()==WEB_CMD_FEATURE_TEST);
     return 0;
 }
 '''

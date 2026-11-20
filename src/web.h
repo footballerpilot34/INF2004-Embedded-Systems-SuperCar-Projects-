@@ -28,6 +28,7 @@ typedef enum
     WEB_CMD_BARCODE_STATIC, // Stand still; barcodes are slid past by hand.
     WEB_CMD_STATIONARY_SCAN, // Motors off; test the existing obstacle scan.
     WEB_CMD_ENCODER_MARK,   // Encoder 300 mm roll: start, then finish.
+    WEB_CMD_BYPASS_TEST,    // Serial/MQTT v: empty-floor rehearsal; ends stopped.
     WEB_CMD_FEATURE_TEST    // Run with chosen features (web_features()).
 } web_command_t;
 

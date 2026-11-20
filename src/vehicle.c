@@ -124,6 +124,7 @@
                              (uint32_t) CAL_SPEED)
 
 
+static bool            gb_bypass_dry_run = false;
 static vehicle_state_t g_state        = VEHICLE_READY;
 static uint32_t        g_entered_msec = 0u;     // When g_state began.
 static uint32_t        g_level_msec   = 0u;     // Level since (in HUMP).
@@ -271,6 +272,25 @@ vehicle_init (void)
 {
     state_enter(VEHICLE_READY, now_msec_get());
 }   /* vehicle_init() */
+
+
+// Shared serial/MQTT movement rehearsal. It ends STOPPED, never in straight driving.
+void
+vehicle_bypass_test(void)
+{
+    uint32_t now = now_msec_get();
+    if (!is_parked(g_state) || obstacle_scan_active()) {
+        log_obstacle("BYPASS DRY RUN: stop the car and finish/cancel the scan first.");
+        return;
+    }
+    if (bypass_test_begin(now)) {
+        gb_feat_line = false;
+        gb_feat_barcode = false;
+        gb_feat_hump = false;
+        gb_bypass_dry_run = true;
+        state_enter(VEHICLE_BYPASS, now);
+    }
+}
 
 
 /*!
@@ -637,8 +657,8 @@ vehicle_task (void)
 
         if (BYPASS_DONE == result)
         {
-            state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
-                                      : VEHICLE_BARCODE_TEST), now_msec);
+            state_enter((gb_bypass_dry_run ? VEHICLE_STOPPED :
+                         gb_feat_line ? VEHICLE_FOLLOW_LINE : VEHICLE_BARCODE_TEST), now_msec);
         }
         else if (BYPASS_FAILED == result)
         {
@@ -1435,6 +1455,7 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
                   vehicle_state_name(state));
     }
 
+    if (state != VEHICLE_BYPASS) { gb_bypass_dry_run = false; }
     // After a barcode turn the car is already lined up: no straight start.
     gb_launch      = (VEHICLE_TURN != g_state);
     g_state        = state;

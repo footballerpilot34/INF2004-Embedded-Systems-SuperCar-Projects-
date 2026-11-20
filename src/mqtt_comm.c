@@ -669,16 +669,24 @@ publish_events (void)
 
     if (p_scan->finished && !gb_scan_done)
     {
+        char calibrated[12] = "null";
+        if (p_scan->calibrated_width_valid && !p_scan->timed_out && !p_scan->cancelled) {
+            (void)snprintf(calibrated, sizeof(calibrated), "%" PRIu32,
+                           p_scan->calibrated_width_mm);
+        }
         (void) snprintf(payload, PAYLOAD_BYTES,
                         "{\"front\":%" PRIu32 ",\"left\":%" PRId32 ","
                         "\"right\":%" PRId32 ",\"mid\":%" PRId32 ","
                         "\"width\":%" PRIu32 ",\"lst\":\"%s\","
-                        "\"rst\":\"%s\",\"t\":%" PRIu32 "}",
+                        "\"rst\":\"%s\",\"calibrated_width\":%s,"
+                        "\"left_angle_x10\":%" PRId32 ",\"right_angle_x10\":%" PRId32 ","
+                        "\"t\":%" PRIu32 "}",
                         p_scan->front_mm, p_scan->left_mm,
                         p_scan->right_mm, p_scan->middle_x_mm,
                         p_scan->width_mm,
                         obstacle_edge_status_name(p_scan->left_status),
-                        obstacle_edge_status_name(p_scan->right_status),
+                        obstacle_edge_status_name(p_scan->right_status), calibrated,
+                        p_scan->left_angle_x10, p_scan->right_angle_x10,
                         now_msec_get());
         publish(g_topic_obstacle, payload, 1u, 0u);
     }

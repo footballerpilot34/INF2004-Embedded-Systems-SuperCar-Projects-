@@ -14,6 +14,8 @@ with tempfile.TemporaryDirectory() as directory:
 #include <stddef.h>
 typedef struct { int unused; } repeating_timer_t;
 uint32_t time_us_32(void);
+uint64_t get_absolute_time(void);
+uint32_t to_ms_since_boot(uint64_t time);
 bool add_repeating_timer_us(int64_t us, bool (*cb)(repeating_timer_t *),
                             void * data, repeating_timer_t * timer);
 """)
@@ -42,6 +44,8 @@ uint16_t adc_read(void);
 static uint32_t now = 10000, position;
 static bool black;
 uint32_t time_us_32(void) { return now; }
+uint64_t get_absolute_time(void) { return now; }
+uint32_t to_ms_since_boot(uint64_t time) { return (uint32_t)(time / 1000u); }
 uint32_t encoder_position(void) { return position; }
 void gpio_init(unsigned p) { (void)p; }
 void gpio_set_dir(unsigned p, bool v) { (void)p; (void)v; }

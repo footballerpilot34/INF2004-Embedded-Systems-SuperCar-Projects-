@@ -96,6 +96,7 @@
 #define KEY_BARCODE_TEST        't'
 #define KEY_ENCODER_MARK        'e'
 #define KEY_STATIONARY_SCAN     'g'
+#define KEY_BYPASS_TEST         'v'
 #define SCAN_READY_TIMEOUT_MSEC 2000u // Nonblocking wait for a fresh forward ping.
 
 static bool g_encoder_marked;
@@ -418,7 +419,7 @@ command_run (web_command_t command)
         (command == WEB_CMD_START || command == WEB_CMD_WHEEL_TEST ||
          command == WEB_CMD_TURN_LEFT || command == WEB_CMD_TURN_RIGHT ||
          command == WEB_CMD_UTURN || command == WEB_CMD_BARCODE_TEST ||
-         command == WEB_CMD_FEATURE_TEST ||
+         command == WEB_CMD_FEATURE_TEST || command == WEB_CMD_BYPASS_TEST ||
          command == WEB_CMD_BARCODE_STATIC || command == WEB_CMD_IMU_CALIBRATE))
     {
         web_set_scan_test_status("REJECTED: scan running; STOP before driving or other tests.");
@@ -438,6 +439,10 @@ command_run (web_command_t command)
     case WEB_CMD_STOP:
         stationary_scan_test_cancel();
         vehicle_stop();
+    break;
+
+    case WEB_CMD_BYPASS_TEST:
+        if (!line_diag_is_active()) { vehicle_bypass_test(); }
     break;
 
     case WEB_CMD_STATIONARY_SCAN:
@@ -920,6 +925,10 @@ serial_poll (void)
         {
             log_printf("SERVO TEST: stop the car first.");
         }
+    }
+    else if (KEY_BYPASS_TEST == key)
+    {
+        command = WEB_CMD_BYPASS_TEST;
     }
     else if (KEY_STATIONARY_SCAN == key)
     {

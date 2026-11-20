@@ -1710,6 +1710,10 @@ command_parse (char const * p_name)
     {
         if (g_pending != WEB_CMD_STOP) { g_pending = WEB_CMD_STATIONARY_SCAN; }
     }
+    else if (0 == strcmp(p_name, "v"))
+    {
+        if (g_pending != WEB_CMD_STOP) { g_pending = WEB_CMD_BYPASS_TEST; }
+    }
     else if ((0 == strncmp(p_name, "ft", 2u)) &&
              ((5u == strlen(p_name)) || (6u == strlen(p_name))))
     {
@@ -1806,15 +1810,15 @@ scan_build(char * p_out, size_t capacity)
         length += append_text(p_out + length, capacity - length, "%lu", (unsigned long)p->width_mm);
     } else { length += append_text(p_out + length, capacity - length, "null"); }
     length += append_text(p_out + length, capacity - length, ",\"calibrated_width\":");
-    if (p->calibrated_width_valid && valid > 0u) {
+    if (p->calibrated_width_valid && !p->timed_out && !p->cancelled && valid > 0u) {
         length += append_text(p_out + length, capacity - length, "%lu",
                               (unsigned long)p->calibrated_width_mm);
     } else { length += append_text(p_out + length, capacity - length, "null"); }
     length += append_text(p_out + length, capacity - length, ",\"calibration_enabled\":%d",
                           OBSTACLE_WIDTH_CALIBRATION_ENABLED);
     length += append_text(p_out + length, capacity - length,
-        ",\"estimated\":%d,\"ls\":\"%s\",\"rs\":\"%s\"}",
-        !p->edges_confirmed, obstacle_edge_status_name(p->left_status),
+        ",\"front\":%lu,\"estimated\":%d,\"ls\":\"%s\",\"rs\":\"%s\"}",
+        (unsigned long)p->front_mm, !p->edges_confirmed, obstacle_edge_status_name(p->left_status),
         obstacle_edge_status_name(p->right_status));
     if (length >= capacity - 1u) { memcpy(p_out, "{}", 3u); return 2u; }
     return length;

@@ -1,46 +1,20 @@
 /** @file bypass.c
  *
- * @brief Drive round a scanned obstacle and back onto the same line on a
- *        smooth curve, remembering it on a stack and replaying it mirrored.
+ * @brief Bypass and line recovery using existing wheel/encoder controls.
  *
- * @par Frame
- * Everything is in one fixed frame: z along the original line (forward),
- * x sideways (+ right). The heading is in degrees from the line (+ right).
- * Every tick the wheel encoders update both (odo_update()): driving, the
- * position moves by the mean wheel travel along the heading and the
- * heading turns by (left - right) / track; pivoting, only the heading
- * turns. Both wheels always drive forward, so the counts never need a sign.
+ * Default: controlled fixed-width test. Scan normally, pivot left, travel
+ * diagonally to 220 mm lateral clearance, pivot forward, clear the assumed
+ * 100 mm depth and whole vehicle, then pivot right and reacquire the line. Empty corridor is an
+ * operator test assumption, never inferred from missing echoes. The USB/MQTT
+ * dry run rehearses the route without manufacturing a scan result.
  *
- * @par How it works
- * 1 SCAN    The full 60-120 deg scan (obstacle.c) picks the side and the
- *           sideways target: the edge plus the car's turning clearance,
- *           checked clear (side_shift()). If the obstacle runs past the
- *           sweep, the car turns that way and half-sweeps (explore).
- * 2 OUT     A curve from where the car is to the target, reached at the
- *           obstacle's front face: x grows as (z / Z) squared, so the
- *           heading starts at 0 and steepens as the car nears it. Steered
- *           by wheel speeds; every BYPASS_SEGMENT_MM the move (mean heading,
- *           mm) is pushed. An echo closer than the known face means
- *           something new: push, half-sweep towards the side, new curve.
- * 3 PASS    Straighten up (pushed while still turned) and drive on, the
- *           sensor aimed at the obstacle, until it has ended plus a car
- *           length. The straight part is along the line: not pushed.
- * 4 RETURN  Pop each move and steer it mirrored (heading -H) for its
- *           distance, without stopping between moves. The sideways shifts
- *           cancel; the return starts steep and flattens onto the line.
- *           With line following on, finding the line ends it: line up and
- *           clear the stack.
- * 5 Stack empty: turn straight; back on the original path.
+ * Coordinates: z forward along the original line, x right, heading right
+ * positive. Existing encoder calibration supplies distance and pivot angle;
+ * steering holds a heading using the existing wheel-speed correction.
+ * STOP, deadlines, close echoes and failed line acquisition brake the car.
  *
- * @par Safety
- * STOP cancels at once (bypass_cancel()). Going out, an echo within
- * OBSTACLE_HARD_STOP_MM backs up first (BYPASS_BACKUP_MAX_COUNT times at
- * most). Coming back, the sensor watches the obstacle's side and the car
- * holds straight while it is still there. A sideways echo within
- * OBSTACLE_HARD_STOP_MM coming back, too many back-ups, a full
- * stack, a target beyond BYPASS_MAX_SHIFT_MM, a heading beyond
- * BYPASS_HEADING_MAX_DEG, or any step longer than BYPASS_STEP_MAX_MSEC
- * fails it, and vehicle.c brakes.
+ * The previous scan-based curve/stack controller is retained for
+ * BYPASS_FIXED_WIDTH_TEST=false. Its route verification still applies there.
  */
 
 #include <inttypes.h>
@@ -68,10 +42,11 @@
 #define PIVOT_DONE_DEG      1.5f    // Pivot within this of the target: done.
 #define STRAIGHT_DEG        3.0f    // Within this of the line: straight.
 #define MIN_CURVE_MM        60.0f   // A curve never shorter than this.
+_Static_assert(BYPASS_DIAGONAL_DEG > 5 && BYPASS_DIAGONAL_DEG < 90,
+               "Diagonal heading must leave finite forward/lateral travel");
 #define NO_SIDE             UINT32_MAX  // side_shift(): unusable.
-// The car's side passes the obstacle on a curve; it never pivots beside
-// it, so half its width plus a margin is enough clearance.
-#define SIDE_CLEARANCE_MM   ((CAR_WIDTH_MM / 2u) + BYPASS_SIDE_MARGIN_MM)
+// Reserve the corner radius, including the length, while turning.
+#define SIDE_CLEARANCE_MM   ((uint32_t)ceilf(hypotf(CAR_LENGTH_MM / 2.0f, CAR_WIDTH_MM / 2.0f)) + BYPASS_SIDE_MARGIN_MM)
 // Tightest turn the steering makes: outer and inner wheel at base +/- the
 // largest difference (inner never below BYPASS_WHEEL_MIN).
 #define STEER_OUTER         ((float) (BYPASS_DRIVE_SPEED + BYPASS_STEER_MAX))
@@ -117,6 +92,7 @@ static float    g_hold_end_mm = 0.0f;   // Hold ends here (0: not yet).
 static bool     gb_left       = false;  // Going round on the left side.
 static bool     gb_use_line   = true;   // Come back onto a line.
 static float    g_heading     = 0.0f;   // Degrees from the line, + right.
+static int32_t  g_turn_direction = 1;   // Last pivot direction, including braking.
 static float    g_target_hdg  = 0.0f;   // Pivot target.
 static float    g_x           = 0.0f;   // Position (mm).
 static float    g_z           = 0.0f;
@@ -149,9 +125,18 @@ static uint32_t g_pass_end_mm = 0u;     // PASS ends at this distance.
 static bool     gb_side_seen  = false;  // Obstacle seen alongside.
 static uint32_t g_side_clear  = 0u;     // Far echoes in a row.
 static uint32_t g_side_next   = 0u;     // Next sideways sample (ms).
+static uint32_t g_line_ticks  = 0u;     // Consecutive line observations.
+static uint32_t g_side_sequence = 0u;   // Never count a ping twice.
+static bool     gb_fixed_test = false;
+static float    g_fixed_clear_z;       // Required forward progress before return.
 static uint32_t g_pose_next   = 0u;     // Next pose log (ms).
 
 
+static bool     fixed_begin(obstacle_profile_t const * profile,
+                             uint32_t now_msec, bool use_line);
+static bypass_result_t fixed_step(uint32_t now_msec, uint32_t range_mm);
+static bool fixed_start(uint32_t front_mm, uint32_t now_msec, bool use_line);
+static bool fixed_turn_step(uint32_t now_msec);
 static int32_t  beam_corrected_edge(obstacle_profile_t const * p_profile,
                                     bool b_left);
 static uint32_t side_shift(obstacle_profile_t const * p_profile,
@@ -197,6 +182,8 @@ bool
 bypass_begin (obstacle_profile_t const * p_profile, uint32_t now_msec,
               bool b_use_line)
 {
+    gb_fixed_test = BYPASS_FIXED_WIDTH_TEST;
+    if (gb_fixed_test) { return fixed_begin(p_profile, now_msec, b_use_line); }
     uint32_t left_shift  = side_shift(p_profile, true);
     uint32_t right_shift = side_shift(p_profile, false);
     bool     b_go_left   = (left_shift < right_shift);
@@ -211,6 +198,10 @@ bypass_begin (obstacle_profile_t const * p_profile, uint32_t now_msec,
              p_profile->cancelled)
     {
         log_obstacle("BYPASS: the scan did not finish: staying blocked.");
+    }
+    else if (SENSOR_TO_BUMPER_MM < 0 || SENSOR_TO_BUMPER_MM > (int)CAR_LENGTH_MM)
+    {
+        log_obstacle("BYPASS: measure SENSOR_TO_BUMPER_MM first; staying blocked.");
     }
     else if ((NO_SIDE == shift) && BYPASS_EXPLORE_SCAN_LIMIT &&
              ((OBSTACLE_EDGE_SCAN_LIMIT == p_profile->left_status) ||
@@ -230,6 +221,15 @@ bypass_begin (obstacle_profile_t const * p_profile, uint32_t now_msec,
         log_obstacle("BYPASS: needs a %" PRIu32 " mm side-step, over the "
                      "%u mm limit: staying blocked.", shift,
                      BYPASS_MAX_SHIFT_MM);
+    }
+    // The existing smoothstep curve has peak curvature 6*shift/length^2
+    // at departure. Reject it if the available room demands a tighter
+    // turn than the configured wheel speeds support. Reserve corners and
+    // bumper setback BEFORE the front plane; do not reverse into an unseen path.
+    else if ((float)p_profile->front_mm <= SENSOR_TO_BUMPER_MM +
+                 SIDE_CLEARANCE_MM + sqrtf(6.0f * shift * TURN_RADIUS_MM))
+    {
+        log_obstacle("BYPASS: insufficient room for existing curve; staying blocked.");
     }
     else
     {
@@ -266,6 +266,13 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     bool            b_line = (line.b_left_black || line.b_right_black);
 
     odo_update();       // Position and heading, from this tick's counts.
+    bool confirm_line = b_line;
+    if (gb_fixed_test && (g_phase == PHASE_ALIGN || g_phase == PHASE_FINISH)) {
+        confirm_line = line.b_left_black && line.b_right_black &&
+                       fabsf(g_heading) <= BYPASS_ALIGN_TOL_DEG;
+    }
+    if (confirm_line) { if (g_line_ticks < BYPASS_LINE_CONFIRM_TICKS) { ++g_line_ticks; } }
+    else { g_line_ticks = 0u; }
 
     if (((int32_t) (now_msec - g_pose_next) >= 0) &&
         ((PHASE_OUT == g_phase) || (PHASE_PASS == g_phase) ||
@@ -294,6 +301,19 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     {
         log_obstacle("BYPASS: step %s took over %u ms (stuck?): stopping.",
                      bypass_phase_name(), BYPASS_STEP_MAX_MSEC);
+        result = BYPASS_FAILED;
+    }
+    else if (gb_fixed_test)
+    {
+        result = fixed_step(now_msec, range_mm);
+    }
+    else if (!servo_is_settled() || !ultrasonic_measurement_ready())
+    {
+        motor_set(0, 0); // Wait for a fresh reading at the selected angle.
+    }
+    else if ((PHASE_OUT == g_phase || PHASE_RETURN == g_phase) &&
+             (range_mm == ULTRASONIC_NO_RANGE || range_mm == 0u))
+    {
         result = BYPASS_FAILED;
     }
     else if (PHASE_PIVOT == g_phase)
@@ -329,7 +349,8 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     {
         return_guard(now_msec, range_mm);   // Still beside it?
 
-        if (gb_use_line && b_line)
+        if (gb_use_line && !gb_ret_hold &&
+            g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS)
         {
             g_sp = 0u;                      // On the line: forget the rest.
             log_obstacle("BYPASS: line found on the way back; stack "
@@ -377,18 +398,22 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
         float size   = fabsf(g_target_hdg);
         float turned = fabsf(g_heading - g_target_hdg);
 
-        if ((fabsf(g_heading) <= STRAIGHT_DEG) ||
-            ((turned >= ALIGN_MIN_DEG) && line.b_left_black &&
-             line.b_right_black))
+        if ((g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) &&
+            ((fabsf(g_heading) <= STRAIGHT_DEG) ||
+             ((turned >= ALIGN_MIN_DEG) && line.b_left_black && line.b_right_black)))
         {
             log_obstacle("BYPASS done: back on the line.");
             result = BYPASS_DONE;
         }
-        else if (turned >= (size + ALIGN_EXTRA_DEG))
+        else if (fabsf(g_heading) <= STRAIGHT_DEG && b_line)
         {
-            log_obstacle("BYPASS done: near the line; following takes "
-                         "over.");
-            result = BYPASS_DONE;
+            motor_set(0, 0); // Wait for consecutive line confirmation.
+        }
+        else if (turned >= (size + ALIGN_EXTRA_DEG) ||
+                 fabsf(g_heading) <= STRAIGHT_DEG)
+        {
+            log_obstacle("BYPASS: line not confirmed after alignment; stopping.");
+            result = BYPASS_FAILED;
         }
         else
         {
@@ -397,10 +422,14 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     }
     else if (PHASE_FINISH == g_phase)
     {
-        log_obstacle("BYPASS done: back on the original path (x=%ld mm, "
-                     "heading %ld deg).", (long) lroundf(g_x),
-                     (long) lroundf(g_heading));
-        result = BYPASS_DONE;
+        motor_set(0, 0);
+        if (!gb_use_line || g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) {
+            log_obstacle("BYPASS done: original path confirmed.");
+            result = BYPASS_DONE;
+        } else if (!b_line) {
+            log_obstacle("BYPASS: returned path has no line; stopping.");
+            result = BYPASS_FAILED;
+        }
     }
     else
     {
@@ -416,6 +445,189 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
 
     return (result);
 }   /* bypass_step() */
+
+
+// Fixed rectangle test, using the existing pivot, steering and encoder feedback.
+// The operator, not a missing echo, establishes that the left corridor is empty.
+static bool
+fixed_begin(obstacle_profile_t const * profile, uint32_t now_msec, bool use_line)
+{
+    motor_set(0, 0);
+    uint32_t count = 0u;
+    obstacle_point_t const * points = obstacle_scan_points(&count);
+    bool centre_stable = false;
+    bool close_echo = false;
+    for (uint32_t i = 0u; i < count; ++i) {
+        if ((points[i].kind == OBSTACLE_RETURN_RANGE ||
+             points[i].kind == OBSTACLE_RETURN_WEAK_RANGE) &&
+            points[i].range_mm > 0u && points[i].range_mm <= BYPASS_FRONT_STOP_MM) {
+            close_echo = true;
+        }
+        if (points[i].angle_deg == 0 && points[i].kind == OBSTACLE_RETURN_RANGE &&
+            points[i].range_mm > 0u && points[i].range_mm != ULTRASONIC_NO_RANGE) {
+            centre_stable = true;
+        }
+    }
+    if (!BYPASS_ENABLED || !profile->finished || profile->timed_out ||
+        profile->cancelled || !profile->centre_seen || !centre_stable || close_echo ||
+        profile->front_mm == 0u || profile->front_mm > OBSTACLE_CLEAR_MM ||
+        SENSOR_TO_BUMPER_MM < 0 || SENSOR_TO_BUMPER_MM > (int)CAR_LENGTH_MM) {
+        log_obstacle("BYPASS fixed test: incomplete/implausible forward scan; blocked.");
+        return false;
+    }
+    return fixed_start(profile->front_mm, now_msec, use_line);
+}
+
+// Empty-floor serial test: no scan/profile is fabricated or published.
+bool
+bypass_test_begin(uint32_t now_msec)
+{
+    if (!BYPASS_FIXED_WIDTH_TEST) { return false; }
+    gb_fixed_test = true;
+    log_obstacle("BYPASS DRY RUN: empty floor, nominal start distance %u mm, no line search.",
+                 OBSTACLE_STOP_MM);
+    return fixed_start(OBSTACLE_STOP_MM, now_msec, false);
+}
+
+static bool
+fixed_start(uint32_t front_mm, uint32_t now_msec, bool use_line)
+{
+    if (!BYPASS_ENABLED || SENSOR_TO_BUMPER_MM < 0 ||
+        SENSOR_TO_BUMPER_MM > (int)CAR_LENGTH_MM) { return false; }
+    // Conservative pivot envelope: axle lies within the chassis on its
+    // centreline; reserve a whole car length rather than assume its position.
+    float turn_envelope = ceilf(hypotf(CAR_LENGTH_MM, CAR_WIDTH_MM / 2.0f));
+    float bumper_gap = (float)front_mm - SENSOR_TO_BUMPER_MM;
+    // A shallower departure uses more forward room. Reserve the whole
+    // corner projection until the lateral offset is reached; no shorter gap
+    // is accepted merely because the commanded turn is smaller.
+    float departure_forward = BYPASS_FIXED_OFFSET_MM /
+        tanf((BYPASS_DIAGONAL_DEG - PIVOT_DONE_DEG) / DEG_PER_RAD);
+    if (bumper_gap <= turn_envelope + OBSTACLE_BYPASS_MARGIN_MM ||
+        bumper_gap <= departure_forward + CAR_WIDTH_MM / 2u + OBSTACLE_BYPASS_MARGIN_MM) {
+        log_obstacle("BYPASS fixed test: bumper gap too small to turn; blocked.");
+        return false;
+    }
+    reset_state(true, use_line);
+    g_target_x = -(float)BYPASS_FIXED_OFFSET_MM;
+    g_front_z = bumper_gap;
+    // At heading zero, g_z is progress of the original front bumper too.
+    // Floor-tested route: trim excess forward travel, while retaining the
+    // whole-car pass and the existing minimum clearance margin.
+    float whole_car_clear_z = bumper_gap + BYPASS_ASSUMED_DEPTH_MM + CAR_LENGTH_MM;
+    g_fixed_clear_z = fmaxf(whole_car_clear_z + OBSTACLE_BYPASS_MARGIN_MM,
+        whole_car_clear_z + CAR_WIDTH_MM / 2u + BYPASS_FIXED_MARGIN_MM - BYPASS_FORWARD_TRIM_MM);
+    log_obstacle("BYPASS fixed %u mm test: LEFT offset=%u mm, clear at z=%ld mm. "
+                 "Corridor assumed empty by operator, NOT verified by scan.",
+                 BYPASS_FIXED_WIDTH_MM, BYPASS_FIXED_OFFSET_MM,
+                 (long)lroundf(g_fixed_clear_z));
+    start_pivot(-(float)BYPASS_DIAGONAL_DEG, PHASE_OUT, now_msec);
+    return true;
+}
+
+// Brake on reaching/crossing the target instead of reversing and repeatedly
+// retriggering the motor's startup boost. Pulse only near the target.
+static bool
+fixed_turn_step(uint32_t now_msec)
+{
+    float error = g_target_hdg - g_heading;
+    if (g_turn_direction * error <= PIVOT_DONE_DEG) {
+        motor_set(0, 0);
+        return true;
+    }
+    uint32_t pulse = (now_msec - g_phase_msec) %
+                     (PIVOT_PULSE_ON_MSEC + PIVOT_PULSE_OFF_MSEC);
+    if (fabsf(error) <= BYPASS_TURN_SLOW_DEG && pulse >= PIVOT_PULSE_ON_MSEC) {
+        motor_set(0, 0);
+    } else { pivot(g_turn_direction < 0); }
+    return false;
+}
+
+static bypass_result_t
+fixed_step(uint32_t now_msec, uint32_t range_mm)
+{
+    if (!servo_is_settled() || !ultrasonic_measurement_ready()) {
+        motor_set(0, 0);
+        return BYPASS_RUNNING; // Outer per-phase deadline still applies.
+    }
+    // No-echo permits travel only under the declared empty-corridor test
+    // assumption. Any actual close echo stops; zero is an invalid range.
+    if (range_mm == 0u || front_within(range_mm, BYPASS_FRONT_STOP_MM)) {
+        return BYPASS_FAILED;
+    }
+    if (g_phase == PHASE_PIVOT) {
+        if (fixed_turn_step(now_msec)) {
+            if (fabsf(g_target_hdg - g_heading) > BYPASS_ALIGN_TOL_DEG) {
+                return BYPASS_FAILED; // Excessive overshoot needs calibration.
+            }
+            phase_enter(g_after, now_msec);
+        }
+    } else if (g_phase == PHASE_OUT) {
+        if (g_z + CAR_WIDTH_MM / 2u + OBSTACLE_BYPASS_MARGIN_MM >= g_front_z) {
+            return BYPASS_FAILED; // Stay before the front plane until laterally clear.
+        } else if (g_x <= g_target_x) {
+            start_pivot(0.0f, PHASE_PASS, now_msec);
+        } else if (g_phase_mm > BYPASS_FIXED_OFFSET_MM + BYPASS_FIXED_MARGIN_MM) {
+            return BYPASS_FAILED; // Travel without enough lateral progress.
+        } else { steer(-(float)BYPASS_DIAGONAL_DEG); }
+    } else if (g_phase == PHASE_PASS) {
+        if (g_z >= g_fixed_clear_z) { start_pivot((float)BYPASS_DIAGONAL_DEG, PHASE_RETURN, now_msec); }
+        else {
+            float angle = g_heading / DEG_PER_RAD;
+            // Bound the lateral corner projection even if the axle isn't
+            // at the chassis centre. Do not spend the whole nominal gap.
+            float side_extent = CAR_WIDTH_MM / 2.0f * fabsf(cosf(angle)) +
+                                CAR_LENGTH_MM * fabsf(sinf(angle));
+            if (g_phase_mm > BYPASS_PASS_MAX_MM ||
+                -g_x < BYPASS_FIXED_WIDTH_MM / 2.0f + side_extent + OBSTACLE_BYPASS_MARGIN_MM) {
+                return BYPASS_FAILED;
+            }
+            steer(clampf(atanf((g_pass_hold_x - g_x) / BYPASS_LOOKAHEAD_MM) *
+                         DEG_PER_RAD, STRAIGHT_DEG));
+        }
+    } else if (g_phase == PHASE_RETURN) {
+        bool on_line = g_line_ticks > 0u;
+        if ((now_msec - g_phase_msec) > BYPASS_LINE_TIMEOUT_MSEC ||
+            g_phase_mm > BYPASS_FIXED_OFFSET_MM + CAR_LENGTH_MM) {
+            return BYPASS_FAILED;
+        }
+        if (gb_use_line && on_line) {
+            motor_set(0, 0); // Brake on first detection; confirm while stopped.
+            if (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) {
+                phase_enter(PHASE_ADVANCE, now_msec);
+            }
+        } else if (!gb_use_line && g_x >= 0.0f) {
+            start_pivot(0.0f, PHASE_FINISH, now_msec);
+        } else { steer((float)BYPASS_DIAGONAL_DEG); }
+    } else if (g_phase == PHASE_ADVANCE) {
+        // Existing sensor-to-axle placement correction, adjustable on the floor.
+        if (g_phase_mm >= BYPASS_LINE_ADVANCE_MM) {
+            phase_enter(PHASE_ALIGN, now_msec);
+        } else { steer((float)BYPASS_DIAGONAL_DEG); }
+    } else if (g_phase == PHASE_ALIGN) {
+        if ((now_msec - g_phase_msec) > BYPASS_LINE_TIMEOUT_MSEC) {
+            return BYPASS_FAILED;
+        }
+        if (g_line_ticks > 0u) {
+            motor_set(0, 0); // Both sensors, near forward: confirm without rotating away.
+            if (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) { return BYPASS_DONE; }
+        } else {
+            // Restore known forward heading. If the line is not under BOTH
+            // sensors by then, hold braked until timeout; don't rotate blindly.
+            (void)fixed_turn_step(now_msec);
+        }
+    } else if (g_phase == PHASE_FINISH) {
+        motor_set(0, 0);
+        if (fabsf(g_heading) > BYPASS_ALIGN_TOL_DEG) { return BYPASS_FAILED; }
+        if (!gb_use_line || g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) {
+            return BYPASS_DONE;
+        }
+        if ((now_msec - g_phase_msec) > BYPASS_LINE_TIMEOUT_MSEC) {
+            return BYPASS_FAILED;
+        }
+    } else { return BYPASS_FAILED; }
+    return BYPASS_RUNNING;
+}
 
 
 /*!
@@ -532,6 +744,9 @@ side_shift (obstacle_profile_t const * p_profile, bool b_left)
                                  : p_profile->right_edge.far_angle_deg);
     uint32_t clearance = SIDE_CLEARANCE_MM;
     int32_t  outward   = (b_left ? -edge_x : edge_x);
+    uint32_t width = p_profile->calibrated_width_valid ?
+                     p_profile->calibrated_width_mm : 250u;
+    if (outward < (int32_t)(width / 2u)) { outward = (int32_t)(width / 2u); }
     uint32_t shift     = ((outward > 0) ? (uint32_t) outward : 0u) +
                          clearance;
     float    corridor  = (float) (shift + (CAR_WIDTH_MM / 2u) +
@@ -544,20 +759,13 @@ side_shift (obstacle_profile_t const * p_profile, bool b_left)
                                  : p_profile->right_bounded);
     bool     b_clear   = true;
 
-    // NO_ECHO: past the edge nothing echoed back, which in an open space is
-    // exactly what clear looks like. A single dropped echo inside the
-    // obstacle also reads NO_ECHO, but then the obstacle's own echoes just
-    // beyond it fall in the corridor below, so that side is still refused.
-    if (!b_bounded || ((OBSTACLE_EDGE_CONFIRMED != status) &&
-                       (OBSTACLE_EDGE_ESTIMATED != status) &&
-                       (OBSTACLE_EDGE_NO_ECHO != status)))
-    {
-        log_obstacle("BYPASS: %s edge not seen (%s).",
-                     (b_left ? "left" : "right"),
-                     obstacle_edge_status_name(status));
-        return (NO_SIDE);
+    // A timeout is not evidence of a free route. Require a measured edge
+    // and an angular view reaching the outer side of the reserved corridor.
+    if (!b_bounded || status != OBSTACLE_EDGE_CONFIRMED ||
+        p_profile->front_mm * tanf(SERVO_RANGE_DEG / DEG_PER_RAD) < corridor) {
+        return NO_SIDE;
     }
-
+    uint32_t verified = 0u;
     for (uint32_t idx = 0u; (idx < count) && b_clear; idx++)
     {
         obstacle_point_t const * p_pt = &p_points[idx];
@@ -567,6 +775,11 @@ side_shift (obstacle_profile_t const * p_profile, bool b_left)
         float px       = fabsf((float) p_pt->range_mm * sinf(rad));
         float py       = (float) p_pt->range_mm * cosf(rad);
 
+        if (b_beyond) {
+            if (p_pt->kind != OBSTACLE_RETURN_RANGE || p_pt->range_mm == 0u ||
+                p_pt->range_mm == ULTRASONIC_NO_RANGE) { return NO_SIDE; }
+            ++verified;
+        }
         if (b_beyond && ((OBSTACLE_RETURN_RANGE == p_pt->kind) ||
                          (OBSTACLE_RETURN_WEAK_RANGE == p_pt->kind)) &&
             (px < corridor) && (py < reach))
@@ -586,7 +799,7 @@ side_shift (obstacle_profile_t const * p_profile, bool b_left)
                      (b_left ? "left" : "right"), shift);
     }
 
-    return (b_clear ? shift : NO_SIDE);
+    return (b_clear && verified >= OBSTACLE_SCAN_EDGE_CONFIRM_RAYS ? shift : NO_SIDE);
 }   /* side_shift() */
 
 
@@ -667,6 +880,7 @@ reset_state (bool b_left, bool b_use_line)
     g_seg_hsum   = 0.0f;
     g_seg_x0     = 0.0f;
     g_backups    = 0u;
+    g_line_ticks = 0u;
     g_clearance  = SIDE_CLEARANCE_MM;
     g_last_left  = encoder_count(PIN_ENC_LEFT_A);
     g_last_right = encoder_count(PIN_ENC_RIGHT_A);
@@ -685,9 +899,8 @@ curve_start (uint32_t now_msec)
 {
     g_cx0  = g_x;
     g_cz0  = g_z;
-    // Finish the side-step BYPASS_CURVE_END_PCT of the way to the face, so
-    // the car is straight (not angled in) where the room is tightest.
-    g_clen = ((g_front_z - g_z) * (float) BYPASS_CURVE_END_PCT) / 100.0f;
+    // Reserve the sensor setback and full corner allowance before the face.
+    g_clen = g_front_z - g_z - SENSOR_TO_BUMPER_MM - SIDE_CLEARANCE_MM;
     g_clen = ((g_clen < MIN_CURVE_MM) ? MIN_CURVE_MM : g_clen);
 
     log_obstacle("BYPASS: curve %s: %ld mm sideways over %ld mm ahead.",
@@ -739,7 +952,7 @@ out_step (uint32_t now_msec, uint32_t range_mm)
 
     u = ((u < 0.0f) ? 0.0f : u);
 
-    if (!record(false))
+    if (front_within(range_mm, BYPASS_FRONT_STOP_MM) || !record(false))
     {
         result = BYPASS_FAILED;
     }
@@ -817,6 +1030,7 @@ static void
 start_pivot (float target_deg, phase_t after, uint32_t now_msec)
 {
     g_target_hdg = target_deg;
+    g_turn_direction = (target_deg < g_heading) ? -1 : 1;
     g_after      = after;
     phase_enter(PHASE_PIVOT, now_msec);
 }   /* start_pivot() */
@@ -931,8 +1145,10 @@ static void
 return_guard (uint32_t now_msec, uint32_t range_mm)
 {
     if (servo_is_settled() && ultrasonic_measurement_ready() &&
-        ((int32_t) (now_msec - g_side_next) >= 0))
+        ((int32_t) (now_msec - g_side_next) >= 0) &&
+        ultrasonic_sample_sequence() != g_side_sequence)
     {
+        g_side_sequence = ultrasonic_sample_sequence();
         g_side_next = now_msec + SIDE_SAMPLE_MSEC;
 
         if ((ULTRASONIC_NO_RANGE != range_mm) && (range_mm > 0u) &&
@@ -946,6 +1162,10 @@ return_guard (uint32_t now_msec, uint32_t range_mm)
             gb_ret_hold   = true;
             g_hold_end_mm = 0.0f;
             g_side_clear  = 0u;
+        }
+        else if (range_mm == ULTRASONIC_NO_RANGE || range_mm == 0u) {
+            g_side_clear = 0u;
+            if (gb_ret_hold) { g_hold_end_mm = 0.0f; }
         }
         else if (gb_ret_hold && (0.0f == g_hold_end_mm))
         {
@@ -987,23 +1207,11 @@ return_guard (uint32_t now_msec, uint32_t range_mm)
 static bool
 start_backup (phase_t then, uint32_t range_mm, uint32_t now_msec)
 {
-    bool b_ok = (g_backups < BYPASS_BACKUP_MAX_COUNT);
-
-    if (b_ok)
-    {
-        g_backups++;
-        g_backup_then = then;
-        log_obstacle("BYPASS: only %" PRIu32 " mm ahead, too close to "
-                     "turn: backing up.", range_mm);
-        phase_enter(PHASE_BACKUP, now_msec);
-    }
-    else
-    {
-        log_obstacle("BYPASS: still too close after %u back-ups: "
-                     "stopping.", BYPASS_BACKUP_MAX_COUNT);
-    }
-
-    return (b_ok);
+    (void)then;
+    (void)range_mm;
+    (void)now_msec;
+    log_obstacle("BYPASS: too close; rear path unobserved, stopping instead of reversing.");
+    return false;
 }   /* start_backup() */
 
 
@@ -1292,21 +1500,28 @@ pass_step (uint32_t now_msec, uint32_t range_mm)
     }
 
     if (servo_is_settled() && ultrasonic_measurement_ready() &&
-        ((int32_t) (now_msec - g_side_next) >= 0) && (0u == g_pass_end_mm))
+        ((int32_t) (now_msec - g_side_next) >= 0) &&
+        ultrasonic_sample_sequence() != g_side_sequence)
     {
+        g_side_sequence = ultrasonic_sample_sequence();
         g_side_next = now_msec + SIDE_SAMPLE_MSEC;
 
-        if ((ULTRASONIC_NO_RANGE != range_mm) && (range_mm <= near_mm))
+        if ((ULTRASONIC_NO_RANGE != range_mm) && range_mm > 0u && (range_mm <= near_mm))
         {
             gb_side_seen = true;            // Still alongside.
             g_side_clear = 0u;
+            g_pass_end_mm = 0u;
         }
-        else if (gb_side_seen)
+        else if (range_mm == ULTRASONIC_NO_RANGE || range_mm == 0u) {
+            g_side_clear = 0u;
+            g_pass_end_mm = 0u;
+        }
+        else if (gb_side_seen && g_pass_end_mm == 0u)
         {
             g_side_clear++;
             if (g_side_clear >= BYPASS_SIDE_CLEAR_COUNT)
             {
-                g_pass_end_mm = moved + ahead_mm + CAR_LENGTH_MM;
+                g_pass_end_mm = moved + ahead_mm + CAR_LENGTH_MM + BYPASS_SIDE_MARGIN_MM;
                 log_obstacle("BYPASS: obstacle ends ~%" PRIu32 " mm on; "
                              "passing to %" PRIu32 " mm.", ahead_mm,
                              g_pass_end_mm);
@@ -1320,9 +1535,8 @@ pass_step (uint32_t now_msec, uint32_t range_mm)
 
     if ((0u == g_pass_end_mm) && !gb_side_seen && (moved >= g_pass_min_mm))
     {
-        g_pass_end_mm = moved;      // Never seen: trust the assumed depth.
-        log_obstacle("BYPASS: obstacle not seen alongside; assuming it "
-                     "has been passed.");
+        log_obstacle("BYPASS: no side observation; cannot confirm obstacle passed.");
+        return BYPASS_FAILED;
     }
 
     if ((0u != g_pass_end_mm) && (moved >= g_pass_end_mm) &&
@@ -1372,10 +1586,26 @@ phase_enter (phase_t phase, uint32_t now_msec)
     {
         motor_set(0, 0);    // From a standstill (motor.c boosts the start).
     }
+    g_line_ticks = 0u;
+    g_side_sequence = ultrasonic_sample_sequence();
     g_phase      = phase;
     g_phase_msec = now_msec;
     g_phase_mm   = 0.0f;
 
+    if (gb_fixed_test)
+    {
+        motor_set(0, 0);
+        servo_set_angle(SERVO_CENTER_DEG);
+        ultrasonic_invalidate(); // A new body heading needs a new forward ping.
+        if (phase == PHASE_PASS) { g_pass_hold_x = g_x; }
+        if (phase == PHASE_ALIGN) {
+            g_target_hdg = 0.0f;
+            g_turn_direction = (g_heading > 0.0f) ? -1 : 1;
+        }
+        log_obstacle("BYPASS fixed test: %s, heading %ld deg.",
+                     bypass_phase_name(), (long)lroundf(g_heading));
+        return;
+    }
     if (PHASE_PASS == phase)
     {
         // Aim at the obstacle's side: it is on the other side from the one
@@ -1390,7 +1620,7 @@ phase_enter (phase_t phase, uint32_t now_msec)
         g_pass_end_mm = 0u;
         g_pass_min_mm = (uint32_t) lroundf(((g_front_z > g_z) ?
                                             (g_front_z - g_z) : 0.0f)) +
-                        BYPASS_ASSUMED_DEPTH_MM + CAR_LENGTH_MM;
+                        BYPASS_ASSUMED_DEPTH_MM + CAR_LENGTH_MM + BYPASS_SIDE_MARGIN_MM;
     }
     else if (PHASE_RETURN == phase)
     {
@@ -1459,14 +1689,16 @@ odo_update (void)
         float turn = ((mean / ((float) WHEEL_TRACK_MM / 2.0f)) *
                       DEG_PER_RAD * 100.0f) / (float) BYPASS_PIVOT_SLIP_X100;
 
-        g_heading += ((g_target_hdg < g_heading) ? -turn : turn);
+        g_heading += gb_fixed_test ? g_turn_direction * turn :
+                     ((g_target_hdg < g_heading) ? -turn : turn);
     }
     else if (PHASE_ALIGN == g_phase)
     {
         float turn = ((mean / ((float) WHEEL_TRACK_MM / 2.0f)) *
                       DEG_PER_RAD * 100.0f) / (float) BYPASS_PIVOT_SLIP_X100;
 
-        g_heading += ((g_heading > 0.0f) ? -turn : turn);
+        g_heading += gb_fixed_test ? g_turn_direction * turn :
+                     ((g_heading > 0.0f) ? -turn : turn);
     }
     else if ((PHASE_OUT == g_phase) || (PHASE_PASS == g_phase) ||
              (PHASE_RETURN == g_phase) || (PHASE_ADVANCE == g_phase))

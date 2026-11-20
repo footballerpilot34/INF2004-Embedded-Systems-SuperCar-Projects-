@@ -269,20 +269,22 @@
 // hump/wall PROBE instead (creep closer, climb if the nose tips up). With
 // true the car stops in front of a hump too.
 #define OBSTACLE_STOP_AT_ONCE       true
-// TEMPORARY: stop at 25 cm (Felix's was 40 cm; 20 and 30 cm tried on
-// 2026-11-17: 30 cm made the bypass too wide). The +/-30 deg scan then
-// sees about +/-145 mm sideways. All three move together (gaps kept).
-#define OBSTACLE_SLOW_MM            350u    // Slow before the stop.
-#define OBSTACLE_STOP_MM            250u    // Brake at or below 25 cm.
+// Fixed-width controlled test: begin at 30 cm from the sensor (24 cm bumper gap).
+#define OBSTACLE_SLOW_MM            350u
+#define OBSTACLE_STOP_MM            300u
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
-#define OBSTACLE_CLEAR_MM           300u    // Clear again (hysteresis).
+#define OBSTACLE_CLEAR_MM           350u    // Clear again (hysteresis).
 #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
 #define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
 
 // Confirmed test setup; scan settings require tuning on the real sensor.
-#define CAR_LENGTH_MM              160u
-#define CAR_WIDTH_MM               130u
-#define OBSTACLE_EXPECTED_WIDTH_MM  300u    // Width only; depth is UNKNOWN.
+#define CAR_LENGTH_MM              180u
+#define CAR_WIDTH_MM               140u
+#define OBSTACLE_EXPECTED_WIDTH_MM  250u
+// Positive = sensor behind front bumper; -1 = not measured, bypass blocked.
+#ifndef SENSOR_TO_BUMPER_MM
+#define SENSOR_TO_BUMPER_MM         60      // User measured 6 cm behind bumper.
+#endif
 #define OBSTACLE_SCAN_COARSE_DEG    10
 #define OBSTACLE_SCAN_FINE_DEG      2
 #define OBSTACLE_SCAN_SAMPLES       3u
@@ -294,8 +296,9 @@
 #define OBSTACLE_SCAN_TIMEOUT_MSEC  30000u
 
 // ------------------------------------------------------------------------
-// Obstacle bypass (bypass.c): go round the obstacle and back onto the
-// same line, which runs straight on behind it. The way out is a smooth
+// Default fixed-width test uses pivot/straight legs, configured below.
+// The following curve/stack settings are retained for the previous controller
+// (BYPASS_FIXED_WIDTH_TEST=false). Its way out is a smooth
 // CURVE, steered by running the wheels at different speeds (both forward):
 // heading 0 at first, turning more and more as the car nears the obstacle,
 // reaching the side-step at its front face. The curve is recorded on a
@@ -314,6 +317,20 @@
 // once; any step that cannot finish brakes the car.
 // ------------------------------------------------------------------------
 #define BYPASS_ENABLED              true    // false: stay BLOCKED (old way).
+// Controlled experiment ONLY: the operator verifies an empty left bypass
+// corridor. The +/-30 degree sweep cannot verify that whole corridor.
+#ifndef BYPASS_FIXED_WIDTH_TEST
+#define BYPASS_FIXED_WIDTH_TEST     true
+#endif
+#define BYPASS_FIXED_WIDTH_MM       200u    // Planning ONLY, never telemetry.
+#define BYPASS_FIXED_MARGIN_MM      50u
+#define BYPASS_FORWARD_TRIM_MM      100u    // Floor feedback: return 10 cm earlier.
+#define BYPASS_FIXED_OFFSET_MM      (BYPASS_FIXED_WIDTH_MM / 2u + CAR_WIDTH_MM / 2u + BYPASS_FIXED_MARGIN_MM)
+#define BYPASS_LINE_TIMEOUT_MSEC    10000u
+#define BYPASS_DIAGONAL_DEG         60      // Departure/return; preserve 220 mm offset.
+#define BYPASS_TURN_SLOW_DEG        15      // Pace the final turn using existing pulses.
+#define BYPASS_ALIGN_TOL_DEG        5       // Both sensors AND heading required.
+
 // Wheel encoders, measured 2026-11-17 rolling 300 mm along a straight
 // edge: LEFT 3992, RIGHT 4113 edges.
 #define ENC_LEFT_EDGES_PER_M        13307u
@@ -355,7 +372,9 @@
 #define BYPASS_POSE_LOG_MSEC        500u    // Log position this often.
 #define BYPASS_LOOKAHEAD_MM         100u    // Steer back onto the curve
                                             // over about this distance.
-#define BYPASS_PIVOT_SLIP_X100      100u    // Pivot counts x this / 100:
+#define BYPASS_PIVOT_SLIP_X100      82u     // Initial 100 * 90/110 from floor feedback.
+                                            // Approximate; verify both directions.
+                                            // Pivot counts x this / 100:
                                             // turns short -> raise it.
 #define BYPASS_PIVOT_SPEED          17      // Steady pivot power (was 30:
                                             // too violent; stalls below
@@ -369,18 +388,12 @@
                                             // side and the obstacle's edge
                                             // (clearance = half the car's
                                             // width + this).
-#define BYPASS_BEAM_CORRECTION_DEG  4       // Move scanned edges inwards by
-                                            // this (the beam is ~15 deg
-                                            // wide: an 8.5 cm bottle scans
-                                            // as 19.3 cm). Fitted to round
-                                            // bottles at ~25 cm; 0 = off.
+#define BYPASS_BEAM_CORRECTION_DEG  0       // No bottle correction for rectangles.
 #define BYPASS_MIN_SHIFT_MM         50u     // Sideways shift: at least (was
                                             // 150; the turning clearance
                                             // already gives about 120),
 #define BYPASS_MAX_SHIFT_MM         300u    // and at most (was 400).
-#define BYPASS_ASSUMED_DEPTH_MM     50u     // Depth driven past before the
-                                            // sideways sensor is trusted
-                                            // (was 150).
+#define BYPASS_ASSUMED_DEPTH_MM     100u    // Controlled rectangular test obstacle.
 #define BYPASS_PASS_MAX_MM          700u    // Give up passing after this
                                             // (was 800).
 #define BYPASS_SIDE_CLEAR_COUNT     3u      // Far side echoes in a row =
@@ -400,7 +413,7 @@
 #define BYPASS_EDGE_TURN_DEG        20      // Edge past the half-sweep:
                                             // turn this much more, re-scan.
 #define BYPASS_HEADING_MAX_DEG      75      // Never turn further off line.
-#define BYPASS_EXPLORE_SCAN_LIMIT   true    // No side usable but the
+#define BYPASS_EXPLORE_SCAN_LIMIT   false   // Unobserved route: stay stopped.
                                             // obstacle runs past the sweep:
                                             // turn that way, look again.
 #define BYPASS_LINE_ADVANCE_MM      40u     // Line found: bring the axle
@@ -410,20 +423,20 @@
                                             // while driving out/in: stop.
 #define BYPASS_STEP_MAX_MSEC        15000u  // Any one step taking longer
                                             // brakes the car (stuck).
+#define BYPASS_LINE_CONFIRM_TICKS   3u      // Consecutive control readings.
 
-// DISPLAY ONLY: provisional effective-beam fit to the supplied bottle scans.
-// Re-measure on this sensor/target; never use this correction for clearance.
+// Measured scan-span envelopes for the 15/25 cm rectangles, in 0.1 degrees.
+// Each row: front min/max mm, 15 cm span min/max, 25 cm span min/max.
+// Zero rows are UNCALIBRATED. Fill only from physical scans; see
+// tests/calibrate_obstacle_width.py. Overlap or insufficient data => unknown.
 #ifndef OBSTACLE_WIDTH_CALIBRATION_ENABLED
 #define OBSTACLE_WIDTH_CALIBRATION_ENABLED true
 #endif
-#ifndef OBSTACLE_WIDTH_BEAM_HALF_DEG_X10
-#define OBSTACLE_WIDTH_BEAM_HALF_DEG_X10 98 // 9.8 degrees, effective half-angle.
-#endif
-#ifndef OBSTACLE_WIDTH_CAL_MIN_MM
-#define OBSTACLE_WIDTH_CAL_MIN_MM    200u
-#endif
-#ifndef OBSTACLE_WIDTH_CAL_MAX_MM
-#define OBSTACLE_WIDTH_CAL_MAX_MM    320u
+#ifndef OBSTACLE_WIDTH_CALIBRATION_ROWS
+#define OBSTACLE_WIDTH_CALIBRATION_ROWS \
+    {0, 0, 0, 0, 0, 0}, /* 150 mm test */ \
+    {0, 0, 0, 0, 0, 0}, /* 200 mm test */ \
+    {0, 0, 0, 0, 0, 0}  /* 250 mm test */
 #endif
 
 #define US_PING_PERIOD_USEC         60000u  // Pings at least 60 ms apart.

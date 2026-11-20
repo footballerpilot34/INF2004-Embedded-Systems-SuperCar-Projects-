@@ -69,6 +69,7 @@ static struct { struct netif netif[2]; } cyw43_state;
 #define CYW43_LINK_NONET -2
 #define CYW43_LINK_BADAUTH -3
 #define CYW43_NONE_PM 0
+#define CYW43_DEFAULT_PM 1
 #define CYW43_AUTH_WPA2_AES_PSK 1
 #define IP4_ADDR_ANY4 NULL
 #define IP4ADDR_STRLEN_MAX 16
@@ -120,6 +121,7 @@ static void ip4addr_ntoa_r(ip4_addr_t const * ip, char * out, size_t cap) {
     (void)ip; snprintf(out, cap, "192.168.1.4");
 }
 static void ping_send(uint32_t t) { (void)t; }
+static int cyw43_wifi_ap_get_stas(void *s, int *n, void *a) { (void)s; (void)a; *n=0; return 0; }
 static int cyw43_wifi_get_rssi(void * s, int32_t * rssi) { (void)s; *rssi = -50; return 0; }
 static void dhcp_server_deinit(dhcp_server_t * s) { (void)s; }
 static void cyw43_arch_disable_ap_mode(void) { ++ap_stops; }
@@ -210,6 +212,11 @@ bool imu_reading_is_valid(void) { return true; }
 bool imu_is_calibrated(void) { return true; }
 int32_t imu_pitch_x10(void) { return -1800; }
 int32_t imu_roll_x10(void) { return -1800; }
+int32_t hump_last_height_x10(void) { return 0; }
+int32_t hump_run_height_x10(void) { return 0; }
+int32_t hump_height_x10(void) { return 0; }
+uint32_t hump_count(void) { return 0; }
+char const *mqtt_comm_status_text(void) { return "test"; }
 int32_t vehicle_hump_peak_tilt_x10(void) { return -1800; }
 uint32_t encoder_count(uint32_t p) { (void)p; return UINT32_MAX; }
 char const * barcode_message(void) { return "ABCDEFGHIJKLMNOP"; }
@@ -264,7 +271,7 @@ int main(void) {
     n = scan_build(output, STATUS_BYTES); assert(n == strlen(output)); puts(output);
     scan_active = false; profile.finished = true; scan_vehicle_state = VEHICLE_READY;
     profile.left_bounded = profile.right_bounded = true;
-    profile.calibrated_width_valid = true; profile.calibrated_width_mm = 56;
+    profile.calibrated_width_valid = true; profile.calibrated_width_mm = 150;
     n = scan_build(output, STATUS_BYTES); assert(n == strlen(output)); puts(output);
     profile.timed_out = true; scan_build(output, STATUS_BYTES); puts(output);
     profile.timed_out = false; profile.finished = false; scan_point_count = 0;
@@ -350,8 +357,9 @@ with tempfile.TemporaryDirectory() as directory:
     assert parsed[4]["state"] == "Complete"
     assert parsed[4]["can_scan"]
     assert parsed[3]["calibrated_width"] is None
-    assert parsed[4]["calibrated_width"] == 56
+    assert parsed[4]["calibrated_width"] == 150
     assert parsed[4]["width"] == 4294967295  # Raw value is not overwritten.
+    assert parsed[5]["calibrated_width"] is None
     assert parsed[5]["state"] == "Failed"
     assert parsed[5]["can_scan"]
     assert parsed[6]["state"] == "Idle"
@@ -374,7 +382,7 @@ with tempfile.TemporaryDirectory() as directory:
     # sample must break the polyline, and both edges must be drawn.
     fixture = {"active":False,"can_scan":True,"state":"Complete","min":60,"max":120,"step":2,
                "points":[[60,100,3],[62,None,2],[64,200,1],[66,210,1]],
-               "left":63,"right":107,"width":249,"calibrated_width":56,"calibration_enabled":True,
+               "left":63,"right":107,"width":249,"calibrated_width":150,"calibration_enabled":True,
                "estimated":True,"ls":"estimated","rs":"missing echoes"}
     mock = r'''
 const assert=require('assert');let dots=0,links=0,edges=0;
@@ -390,7 +398,7 @@ global.fetch=()=>Promise.resolve({ok:true,json:()=>Promise.resolve(FIXTURE)});
 setImmediate(()=>{assert.equal(dots,3);assert.equal(links,1);assert.equal(edges,2);
  assert.equal(elements.usstate.textContent,'Complete');assert(elements.usresult.textContent.includes('249 mm'));
  assert(elements.usresult.textContent.includes('Raw geometric width: 249 mm'));
- assert(elements.usresult.textContent.includes('Calibrated width (provisional): 56 mm'));
+ assert(elements.usresult.textContent.includes('Calibrated obstacle width: 150 mm'));
  assert.equal(elements.scanNow.disabled,false);});
 ''')
     subprocess.run(["node", str(script)], check=True, timeout=10)

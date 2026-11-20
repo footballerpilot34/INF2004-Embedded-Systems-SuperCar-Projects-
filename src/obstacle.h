@@ -67,8 +67,8 @@ typedef struct {
     uint32_t middle_y_mm;
     uint32_t middle_distance_mm;  // Range to the midpoint of the visible edges.
     uint32_t width_mm;             // Only meaningful with BOTH bounded flags.
-    uint32_t calibrated_width_mm;  // Display-only provisional beam correction.
-    bool calibrated_width_valid;   // Never used by clearance/bypass checks.
+    uint32_t calibrated_width_mm;  // 150 or 250 mm from measured reference scans.
+    bool calibrated_width_valid;   // False means unknown; raw geometry is retained.
     uint32_t width_min_mm;         // Angular sampling interval, not accuracy.
     uint32_t width_max_mm;
     uint32_t left_ray_mm;          // Endpoint ray ranges; NOT corridor clearance.

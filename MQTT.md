@@ -123,13 +123,23 @@ from A to Z is a command. The table is `BARCODE_LETTER_COMMANDS` in
 
 ```json
 {"front":248,"left":-62,"right":31,"mid":-15,"width":93,
- "lst":"CONFIRMED","rst":"ESTIMATED","t":60110}
+ "lst":"echo-bracketed","rst":"estimated distance jump",
+ "calibrated_width":null,"left_angle_x10":-230,"right_angle_x10":150,"t":60110}
 ```
 
 All distances are in mm, measured from the car. `front` is the distance
 ahead. `left`, `right` and `mid` are the edges and middle across the car's
-path (+ is right). `width` is the obstacle's width. `lst` and `rst` say how
-sure the scan is of each edge.
+path (+ is right). `front` is measured from the ultrasonic sensor; the sensor
+is 60 mm behind the bumper. `width` is the unchanged raw geometric estimate,
+which can overestimate physical width. `calibrated_width` is 150 or 250 mm
+only with usable physical rectangular-target calibration, otherwise `null`
+(unknown). `left_angle_x10` and `right_angle_x10` are relative scan edge
+angles in tenths of a degree; these remain estimates affected by the beam.
+`lst` and `rst` describe the observation quality of each edge. Topics, QoS,
+and the previous raw fields are unchanged. See `OBSTACLE_DETECTION.md` for
+the fixed-width physical test. The current movement route assumes a 200 mm
+obstacle independently of these reported measurements; `width` is never
+forced to 200. The operator establishes an empty left test corridor.
 
 **hump**:
 
@@ -159,6 +169,7 @@ These are the same words the web page sends, as plain text, in any case:
 |---|---|
 | `start` | Start: calibrate on the line, then follow it. |
 | `stop` | Stop at once, from any state. |
+| `v` | Empty-floor bypass rehearsal, identical to USB serial `v`; ends stopped. Ignored while a rehearsal or other movement is active. |
 | `ftLABH` | Feature test. L, A, B and H are each `1`/`0` for line following, obstacle avoidance, barcodes and humps (IMU). `ft1111` turns all four on; `ft0001` drives straight and only climbs and measures humps. The older three-digit form (`ft111`) leaves humps on. |
 | `bt` | Barcode test: drive straight and read barcodes. |
 | `calibrate` | Calibrate the IMU (car still and level). |
@@ -167,11 +178,16 @@ These are the same words the web page sends, as plain text, in any case:
 | `clear` | Clear the barcode message, history and log. |
 
 ```
+mosquitto_pub -h 172.20.10.2 -t inf2004/aai14/supercar/cmd -m v
 mosquitto_pub -h 172.20.10.2 -t inf2004/aai14/supercar/cmd -m stop
 ```
 
 The car answers on `…/cmd/ack` with the word it took. A broker change
 (`mb…`) is only accepted from the web page, so MQTT can't cut itself off.
+For `v`, the acknowledgement still echoes receipt of the command; it does not
+mean an active rehearsal was restarted. A queued `stop` takes priority over `v`.
+USB serial `v` remains supported. Use an empty, physically checked test corridor
+as described in `OBSTACLE_DETECTION.md`.
 
 ## 6. Recovery
 
