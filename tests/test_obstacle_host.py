@@ -52,6 +52,9 @@ static int32_t motor_left, motor_right, tilt;
 static bool reader_enabled;
 uint64_t time_us_64(void) { return (uint64_t)now * 1000; }
 void motor_set(int32_t l, int32_t r) { motor_left = l; motor_right = r; }
+int32_t motor_left_speed(void) { return motor_left; }
+int32_t motor_right_speed(void) { return motor_right; }
+uint32_t encoder_count(uint32_t pin) { (void)pin; return 0u; }
 void log_state(char const * format, ...) { (void)format; }
 void log_line(char const * format, ...) { (void)format; }
 void log_printf(char const * format, ...) { (void)format; }

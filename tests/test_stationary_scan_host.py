@@ -8,9 +8,10 @@ ROOT = Path(__file__).resolve().parents[1]
 MAIN = (ROOT / "src/supercar_main.c").read_text()
 WEB = (ROOT / "src/web.c").read_text()
 MQTT = (ROOT / "src/mqtt_comm.c").read_text()
+BARCODE = (ROOT / "src/barcode.c").read_text()
 
 def function(source, name):
-    start = re.search(r"^(?:static )?(?:void|bool|web_command_t)\n" + name + r"\s*\(", source, re.M)
+    start = re.search(r"^(?:static )?(?:void|bool|web_command_t|char const \*)\n" + name + r"\s*\(", source, re.M)
     assert start, name
     end = re.search(r"^}", source[start.start():], re.M)
     return source[start.start():start.start() + end.end()] + "\n"
@@ -44,6 +45,8 @@ uint32_t get_absolute_time(void) { return now; }
 uint32_t to_ms_since_boot(uint32_t t) { return t; }
 int getchar_timeout_us(uint32_t timeout) { (void)timeout; int k=key; key=0; return k; }
 void log_printf(char const * fmt, ...) { (void)fmt; }
+void log_line(char const *fmt, ...) { (void)fmt; }
+static char g_letters[] = BARCODE_LETTER_COMMANDS;
 uint32_t log_next_seq(void) { return 0; }
 void barcode_clear_message(void) {}
 uint32_t encoder_watch_edges(uint32_t i) { (void)i; return 0; }
@@ -86,6 +89,9 @@ code += function(WEB, 'web_set_scan_test_status') + function(WEB, 'web_set_scan_
 for name in ['vehicle_is_idle', 'stationary_scan_test_status', 'stationary_scan_test_start',
              'stationary_scan_test_cancel', 'stationary_scan_test_task', 'command_run', 'serial_poll']:
     code += function(MAIN, name)
+for name in ['barcode_set_letter', 'barcode_reset_letters', 'barcode_letters']:
+    code += function(BARCODE, name)
+code += function(WEB, 'letter_name') + function(WEB, 'letters_log')
 code += function(WEB, 'command_parse') + function(WEB, 'web_command_take')
 code += function(WEB, 'web_command_submit')
 code += r'''
@@ -184,6 +190,9 @@ int main(void) {
     assert(strcmp(g_ack,"ft1100")==0);
     assert(gb_feat_line && gb_feat_avoid && !gb_feat_barcode && !gb_feat_hump);
     assert(web_command_take()==WEB_CMD_FEATURE_TEST);
+    mqtt("bcar"); assert(barcode_letters()[0]=='R' && strcmp(g_ack,"bcar")==0);
+    mqtt("bclist"); assert(web_command_take()==WEB_CMD_NONE);
+    mqtt("bcreset"); assert(strcmp(barcode_letters(),BARCODE_LETTER_COMMANDS)==0);
     return 0;
 }
 '''
