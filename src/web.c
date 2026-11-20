@@ -26,6 +26,7 @@
  * control tick, and all callbacks run inside it, on the main loop.
  */
 
+#include <ctype.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -79,7 +80,7 @@
 #define STATUS_BYTES            2048u   // Status fields + escaped text + logs.
 #define LINE_RESERVE            240u    // Room for one escaped log line
                                         // (under 200) and the reply's end.
-#define LOG_KEPT                32u     // Must match LOG_LINES in log.c.
+#define LOG_KEPT                LOG_LINES   // From log.h.
 #define NO_RANGE_JSON           (-1)
 
 #define GET_PREFIX              "GET "
@@ -1667,6 +1668,79 @@ request_handle (struct tcp_pcb * p_pcb, char * p_path)
  * @param[in] p_name "start", "stop", "cal", "wheel", "diag", "black",
  *                   "white", "bt" (barcode test) or "clear".
  */
+/*!
+ * @brief Name a letter-table entry.
+ *
+ * @param[in] what 'L', 'R', 'S', 'U' or 'N'.
+ *
+ * @return A constant string.
+ */
+static char const *
+letter_name (char what)
+{
+    char const * p_name = "no command (message)";
+
+    switch (what)
+    {
+    case 'L':
+        p_name = "TURN LEFT";
+    break;
+
+    case 'R':
+        p_name = "TURN RIGHT";
+    break;
+
+    case 'S':
+        p_name = "GO STRAIGHT";
+    break;
+
+    case 'U':
+        p_name = "U-TURN";
+    break;
+
+    default:
+        p_name = "no command (message)";
+    break;
+    }
+
+    return (p_name);
+}   /* letter_name() */
+
+
+/*!
+ * @brief Log the letter table, one line per command, e.g.
+ *        "Barcode L (TURN LEFT): A E I L M Q Y".
+ */
+static void
+letters_log (void)
+{
+    static char const k_kinds[] = "LRSUN";
+    char const *      p_table   = barcode_letters();
+
+    for (uint32_t kind = 0u; kind < (sizeof(k_kinds) - 1u); kind++)
+    {
+        char     list[(2u * 26u) + 1u];
+        uint32_t used = 0u;
+
+        for (uint32_t idx = 0u; idx < 26u; idx++)
+        {
+            if (k_kinds[kind] == p_table[idx])
+            {
+                list[used] = (char) ('A' + (char) idx);
+                list[used + 1u] = ' ';
+                used += 2u;
+            }
+        }
+        list[used] = '\0';
+        if (used > 0u)
+        {
+            log_line("Barcode %c (%s): %s", k_kinds[kind],
+                     letter_name(k_kinds[kind]), list);
+        }
+    }
+}   /* letters_log() */
+
+
 static void
 command_parse (char const * p_name)
 {
@@ -1701,6 +1775,30 @@ command_parse (char const * p_name)
     else if (0 == strcmp(p_name, "bt"))
     {
         g_pending = WEB_CMD_BARCODE_TEST;
+    }
+    else if ((0 == strcmp(p_name, "bclist")) ||
+             (0 == strcmp(p_name, "bcreset")))
+    {
+        if ('r' == p_name[2])
+        {
+            barcode_reset_letters();
+            log_line("Barcode letters reset to config.h.");
+        }
+        letters_log();
+    }
+    else if ((0 == strncmp(p_name, "bc", 2u)) && (4u == strlen(p_name)))
+    {
+        // "bc" + letter + L/R/S/U/N, e.g. "bcal": A turns left.
+        if (barcode_set_letter(p_name[2], p_name[3]))
+        {
+            log_line("Barcode %c -> %s.", (char) toupper((int) p_name[2]),
+                     letter_name((char) toupper((int) p_name[3])));
+        }
+        else
+        {
+            log_line("Barcode letter command \"%s\" not understood: bc + "
+                     "letter + l/r/s/u/n, e.g. bcal.", p_name);
+        }
     }
     else if (0 == strcmp(p_name, "bs"))
     {

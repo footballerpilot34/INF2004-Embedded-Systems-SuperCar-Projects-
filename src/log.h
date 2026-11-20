@@ -21,6 +21,10 @@ typedef enum
     LOG_CAT_SERVO    = 4    // Ultrasonic pan servo.
 } log_cat_t;
 
+// Messages kept (for the web page and MQTT's log topic): enough for the
+// start-up and Wi-Fi lines logged before MQTT connects.
+#define LOG_LINES       64u
+
 void     log_printf(char const * p_format, ...);
 void     log_obstacle(char const * p_format, ...);
 void     log_line(char const * p_format, ...);

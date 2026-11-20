@@ -14,9 +14,11 @@
  *    character only, so a steady speed is needed but its value is not.
  * 4. If a forward decode fails, the scan is decoded in reverse, so the
  *    car can cross the barcode in either direction.
- * 5. A single letter A-Z is a command, looked up in config.h
- *    (BARCODE_LETTER_COMMANDS: left, right, straight or U-turn at the
- *    next crossroad); anything else is a message.
+ * 5. A single letter A-Z is a command, looked up in the letter table
+ *    (left, right, straight or U-turn at the next crossroad); anything
+ *    else is a message. The table starts as BARCODE_LETTER_COMMANDS in
+ *    config.h and can be changed while running (barcode_set_letter(),
+ *    the "bc" command words, e.g. over MQTT).
  *
  * @par Long black marks
  * A scan is never dropped while still on a long first bar: when the thin
@@ -48,6 +50,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 
 #include "pico/stdlib.h"
@@ -146,6 +149,12 @@ typedef struct
 // One command letter per letter A-Z; see config.h.
 _Static_assert(sizeof(BARCODE_LETTER_COMMANDS) == 27u,
                "BARCODE_LETTER_COMMANDS needs exactly one entry per letter");
+
+#define LETTERS             26u
+
+// The letter table now: L, R, S, U or N (no command: a message) per
+// letter A-Z, plus the terminator.
+static char g_letters[LETTERS + 1u] = BARCODE_LETTER_COMMANDS;
 
 // Edge ring, filled by the ISR. The head only ever increases (it wraps
 // naturally at 2^32), so head - tail is the number of unread edges.
@@ -619,6 +628,55 @@ barcode_command_name (barcode_command_t command)
 
     return (p_name);
 }   /* barcode_command_name() */
+
+
+/*!
+ * @brief Change what one letter's barcode tells the car to do.
+ *
+ * @param[in] letter  'A' to 'Z' (either case).
+ * @param[in] command 'L' left, 'R' right, 'S' straight, 'U' U-turn, or
+ *                    'N' none (the letter is then only a message); either
+ *                    case.
+ *
+ * @return True if both were valid and the table was changed.
+ */
+bool
+barcode_set_letter (char letter, char command)
+{
+    char upper   = (char) toupper((int) letter);
+    char what    = (char) toupper((int) command);
+    bool b_valid = (('A' <= upper) && (upper <= 'Z') &&
+                    (NULL != strchr("LRSUN", (int) what)) && ('\0' != what));
+
+    if (b_valid)
+    {
+        g_letters[upper - 'A'] = what;
+    }
+
+    return (b_valid);
+}   /* barcode_set_letter() */
+
+
+/*!
+ * @brief Put the letter table back to BARCODE_LETTER_COMMANDS (config.h).
+ */
+void
+barcode_reset_letters (void)
+{
+    (void) memcpy(g_letters, BARCODE_LETTER_COMMANDS, sizeof(g_letters));
+}   /* barcode_reset_letters() */
+
+
+/*!
+ * @brief Report the letter table now.
+ *
+ * @return 26 characters, one per letter A-Z: L, R, S, U or N.
+ */
+char const *
+barcode_letters (void)
+{
+    return (g_letters);
+}   /* barcode_letters() */
 
 
 /*!
@@ -1752,7 +1810,7 @@ command_match (char const * p_message)
 
     if (('A' <= letter) && (letter <= 'Z') && ('\0' == p_message[1]))
     {
-        switch (BARCODE_LETTER_COMMANDS[letter - 'A'])
+        switch (g_letters[letter - 'A'])
         {
         case 'L':
             command = BARCODE_CMD_LEFT;
