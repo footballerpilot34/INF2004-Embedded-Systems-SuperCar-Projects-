@@ -19,78 +19,12 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 
 include(pico_sdk_import.cmake)
 
-project(robocar C CXX ASM)
+project(supercar C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 pico_sdk_init()
 
-add_executable(robocar
-    robocar.c
-    dhcpserver/dhcpserver.c
-)
-
-target_include_directories(robocar PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}             # lwipopts.h
-    ${CMAKE_CURRENT_LIST_DIR}/dhcpserver
-)
-
-target_link_libraries(robocar
-    pico_stdlib
-    hardware_pwm
-    pico_cyw43_arch_lwip_poll             # Wi-Fi chip + network stack
-)
-
-pico_enable_stdio_usb(robocar 1)          # printf() over USB cable (handy for debugging)
-pico_enable_stdio_uart(robocar 0)
-
-pico_add_extra_outputs(robocar)           # makes robocar.uf2
-
-# Bench test: line IR sensors + IMU gyroscope connection check.
-add_executable(sensor_test
-    tests/sensor_test.c
-)
-
-target_link_libraries(sensor_test
-    pico_stdlib
-    hardware_i2c
-)
-
-pico_enable_stdio_usb(sensor_test 1)
-pico_enable_stdio_uart(sensor_test 0)
-
-pico_add_extra_outputs(sensor_test)       # makes sensor_test.uf2
-
-# Bench test: gyroscope I2C bus check, scan and WHO_AM_I read.
-add_executable(i2cscanner
-    tests/i2cscanner.c
-)
-
-target_link_libraries(i2cscanner
-    pico_stdlib
-    hardware_i2c
-)
-
-pico_enable_stdio_usb(i2cscanner 1)
-pico_enable_stdio_uart(i2cscanner 0)
-
-pico_add_extra_outputs(i2cscanner)        # makes i2cscanner.uf2
-
-# Bench test: MPU-6050 gyroscope X/Y/Z rates, angles and acceleration.
-add_executable(gyro_test
-    tests/gyro_test.c
-)
-
-target_link_libraries(gyro_test
-    pico_stdlib
-    hardware_i2c
-)
-
-pico_enable_stdio_usb(gyro_test 1)
-pico_enable_stdio_uart(gyro_test 0)
-
-pico_add_extra_outputs(gyro_test)         # makes gyro_test.uf2
-
-# Final firmware: line following, Code 39 barcode, hump vs wall,
-# Teleplot telemetry and a wireless web UI.
+# The car's firmware: line following, Code 39 barcodes, humps, obstacle
+# bypass, MQTT telemetry and commands, and a wireless web UI.
 add_executable(supercar
     src/supercar_main.c
     src/barcode.c
