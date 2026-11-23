@@ -145,19 +145,23 @@
 // - one on the line: arc towards it (inner wheel slowed);
 // - neither, after one was last on the line: keep arcing that way.
 
-// START calibration (user, 2026-11-06): turn on the spot at half the
-// driving speed (LINE_CAL_SPEED_PERCENT of SPEED_CRUISE, as an average of
-// PIVOT_PULSE_SPEED bursts) until both line sensors are on black, then
-// follow. Direction, chosen every tick:
-// - one line sensor on black: turn towards it;
-// - neither: the side (barcode) sensor on black -> turn left (its side);
-//   otherwise keep turning the same way (LINE_CAL_PIVOT_LEFT at first);
-// - both on black: skip calibration (at the start) or stop turning.
-// It turns until the line is found or STOP is pressed.
-#define LINE_CAL_PIVOT_LEFT         true    // First turn: true = left.
-#define LINE_CAL_SPEED_PERCENT      50      // % of SPEED_CRUISE: 9 -> 4%.
+// START calibration (user, 2026-11-23; replaces turning on the spot). On
+// START (or a feature test with the line on), by the two line sensors:
+// - both on black: skip calibration, follow at once;
+// - one on black: drive FORWARD, arcing towards it (left sensor black ->
+//   curve left), until both are on black for LINE_CAL_ALIGN_TICKS, then
+//   follow;
+// - both on white: do not move; stay READY (put the car by the line).
+// If both go white while arcing (overshot), it keeps arcing the same way
+// for LINE_CAL_LOST_MSEC, then stops and goes back to READY.
+#define LINE_CAL_SPEED              SPEED_CRUISE  // Outer wheel.
+#define LINE_CAL_INNER_PERCENT      40      // Inner wheel, % of the outer
+                                            // (forward, never 0 = brake).
+#define LINE_CAL_LOST_MSEC          1000u
 #define LINE_CAL_ALIGN_TICKS        3u      // Both on black this long (after
-                                            // turning) to finish.
+                                            // arcing) to finish.
+#define LINE_CAL_SPEED_PERCENT      50      // Pivot pacing (pivot(), turns):
+                                            // % of SPEED_CRUISE.
 
 // ------------------------------------------------------------------------
 // Speeds, in percent of full power (-100 to +100).
