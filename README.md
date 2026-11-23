@@ -79,3 +79,147 @@ remove the object and press a drive button again; it will not restart automatica
 - ◀ turns it right instead? The motors are swapped. Swap the M1 and M2 motor connectors.
 
 Safety: the motors stop automatically if no phone is connected to the car's Wi-Fi.
+
+---
+
+# Current SuperCar firmware: features and operation
+
+> **Firmware distinction:** The sections above are retained for the original `robocar` program. The features below describe the newer, modular `supercar` target. The original RoboCar hotspot, drive controls and 15 cm stop behaviour should not be assumed to describe the newer firmware.
+
+## What the current firmware includes
+
+| Feature | Implementation and purpose |
+|---|---|
+| Autonomous black-line following | IR sensors detect the line; start-up searches for and aligns with the line before following it. |
+| Line-sensor calibration and diagnostics | Learn black/white sensor polarity, monitor sensor changes and diagnose alignment. |
+| Code 39 barcode reading | Decode barcodes, display their messages and history, and map selected letters to left/right/straight/U-turn instructions. |
+| Crossroad navigation | Queue applicable barcode turn commands for the next detected crossroad. |
+| Ultrasonic obstacle detection | HC-SR04 distance measurements provide forward obstacle detection and trigger the obstacle-handling state machine. |
+| Servo-based obstacle scanning | Sweep the ultrasonic sensor, plot distance against angle, and report measured obstacle edges/width estimates where readings support them. |
+| Obstacle bypass | Encoder-guided, multi-step manoeuvre around a detected obstacle, with attempts to recover the line and align with its original direction. |
+| Bypass rehearsal | A controlled empty-floor route can be triggered using USB serial `v` or MQTT `v` for movement calibration. |
+| Hump detection and measurement | IMU pitch/roll measurements support hump detection, climb handling and height-related reporting. |
+| Wheel encoders | Track left/right wheel edges to support movement estimates and turning/bypass calibration. |
+| Motor, servo and buzzer control | Separate modules manage wheel power, scan direction and audible signalling. |
+| Web dashboard | Browser-based controls, live sensor and motor values, connection information, barcode history, scan plot, logs and IMU visualisations. |
+| Wi-Fi hotspot selection and recovery | Try configured 2.4 GHz hotspots, then provide a fallback access point when the connection times out. |
+| MQTT telemetry and remote commands | Publish status, sensor readings, events and logs; receive and acknowledge supported control commands. |
+| USB serial and physical controls | Start, stop, calibrate, test and diagnose without relying exclusively on the browser. |
+| Monitoring and protections | Battery/VSYS readings, state reporting, command gating, timeouts, stop handling and watchdog-related diagnostics. |
+
+**Implementation versus validation:** These capabilities are present in the uploaded source. Real-world line recovery, obstacle clearance, turn smoothness, sensor accuracy and hump measurements depend on the hardware, environment and calibration. In particular, a successful bypass rehearsal does not establish reliable autonomous avoidance in every situation.
+
+## Build and flash the newer SuperCar
+
+From the repository root, with the Raspberry Pi Pico SDK and appropriate toolchain configured:
+
+```bash
+cmake --build build --target supercar -j4
+```
+
+Flash `build/supercar.uf2` to the Pico W using BOOTSEL as described above. The repository also includes a prebuilt `build/supercar.uf2` for convenience; **rebuild after changing source or configuration** because a prebuilt UF2 does not automatically reflect edits. The `prebuilt/robocar-*.uf2` files belong to the older RoboCar program.
+
+## Connect to the newer dashboard
+
+1. Configure permitted hotspot names and passwords in `src/wifi_secrets.h`, using `src/wifi_secrets_example.h` as a reference. Use a 2.4 GHz-compatible hotspot. Do not publish personal hotspot passwords to GitHub.
+2. Power the car and allow it to attempt the listed networks in order. Connect the laptop/phone to the same network.
+3. Open `http://supercar-aai14.local` if name resolution works, or use the numeric HTTP address printed in USB serial output.
+4. If no hotspot connects within approximately 60 seconds, join **SuperCar-AAI14** using the recovery credentials documented at the start of this README and open `http://192.168.4.1`.
+5. The dashboard can display available hotspot choices and allow a change using **USE**. Your computer may need to reconnect when the car changes networks.
+
+## Driving and feature tests
+
+- **START:** Begin line acquisition, alignment and autonomous following.
+- **STOP/RESET:** Stop movement. Use this before repositioning the car or changing the test setup.
+- **FEATURE TEST:** Independently enable/disable line following, collision avoidance, barcode scanning and hump/IMU handling. Disabled line following allows straight-driving tests; disabled collision avoidance changes obstacle handling, so test in a clear area.
+- **WHEEL TEST:** Check motor behaviour with the car safely lifted off the floor.
+- **CALIBRATE IMU:** Keep the car still and level while calibration runs.
+- **IR DIAG / LEARN BLACK / LEARN WHITE:** Inspect sensor readings and teach the line sensors their observed black/white levels.
+- **ENCODER MARK:** Mark two positions while rolling the car a measured 300 mm to assist encoder calibration.
+- **STATIONARY SCAN TEST / SCAN NOW:** Scan without driving, inspect the plotted readings and identify missing echoes or unreliable edges.
+- **Servo slider:** Unlock to adjust the servo while stationary; servo requests are restricted while the car moves.
+- **MQTT broker:** Enter a reachable broker address in More controls, or configure the default in `src/config.h`.
+
+The dashboard also reports vehicle state, Wi-Fi/MQTT connection, uptime/restart information, battery voltage, ultrasonic range, IR states, motor output, encoder counts, barcode messages and history, pending turns, scan results and logs.
+
+### USB serial shortcuts
+
+| Key | Action |
+|---|---|
+| `s` | Start |
+| `x` | Stop |
+| `c` | Calibrate IMU while stationary |
+| `w` | Wheel test (lift the car) |
+| `d` | Toggle IR diagnostics |
+| `b` / `n` | Learn black / learn white |
+| `t` | Barcode test |
+| `l` / `r` / `u` | Test left / right / U-turn behaviour |
+| `e` | Encoder distance mark |
+| `g` | Stationary ultrasonic scan |
+| `v` | Empty-floor obstacle bypass rehearsal |
+
+Physical controls include GP20 for start (long hold for IMU calibration) and GP21 for stop. Commands may be ignored or deferred depending on the vehicle state; stop takes priority.
+
+## MQTT integration
+
+The current firmware uses lwIP's MQTT client and the topic prefix `inf2004/aai14/supercar` (configurable in `src/config.h`). A broker must be reachable on the same network as the car. Main topic groups include:
+
+- `.../online` and `.../heartbeat`: availability and periodic health information.
+- `.../telemetry`: frequent vehicle state, motors, encoder counts, IR/ultrasonic readings, servo position, IMU values and other measurements.
+- `.../barcode`, `.../obstacle`, `.../hump`: feature-specific events.
+- `.../log`: diagnostic log messages.
+- `.../cmd` and `.../cmd/ack`: remote control requests and acknowledgements.
+
+For example, with Mosquitto installed and a broker reachable at `BROKER_IP`:
+
+```bash
+mosquitto_sub -h BROKER_IP -t 'inf2004/aai14/supercar/#' -v
+mosquitto_pub -h BROKER_IP -t 'inf2004/aai14/supercar/cmd' -m start
+mosquitto_pub -h BROKER_IP -t 'inf2004/aai14/supercar/cmd' -m stop
+mosquitto_pub -h BROKER_IP -t 'inf2004/aai14/supercar/cmd' -m v
+```
+
+Supported MQTT commands also include feature-test selections (`ft1111`), barcode test (`bt`), IMU calibration (`calibrate`), wheel test (`wheel`), stationary scan (`scan`) and barcode letter mapping commands. `v` invokes the same bypass rehearsal as USB serial and cannot restart an active rehearsal. See **[MQTT.md](MQTT.md)** for broker setup, complete topics, payload fields, command formats and recovery behaviour. Avoid publicly accessible brokers for real driving: unauthenticated users may be able to issue movement commands.
+
+## Obstacle avoidance and calibration
+
+The ultrasonic sensor detects objects ahead; a servo scan samples multiple angles to estimate obstacle boundaries. The bypass logic uses configurable geometry, wheel encoder estimates, turning stages and line reacquisition. It is not simply a fixed-duration steering command. Current development includes a controlled fixed-width test route and safeguards for invalid scans, timeouts and movement conditions.
+
+Before relying on obstacle bypass, validate forward clearance, wheel track, encoder edges per distance, pivot slip, turning angles, lateral clearance and final line alignment on the actual surface. Scan edges at the servo limit or with missing echoes should not be treated as reliable object dimensions. Refer to **[OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md)** for the fixed-width route, parameters, protections and staged physical tests, and **[ULTRASONIC_SCAN.md](ULTRASONIC_SCAN.md)** for scan interpretation and width limitations.
+
+## Main code modules
+
+| Module | Responsibility |
+|---|---|
+| `src/supercar_main.c` | Main firmware loop, USB/physical controls and module scheduling |
+| `src/config.h` | Tunable pins, thresholds, speeds, calibration and networking constants |
+| `src/vehicle.c`, `src/stage.h` | Vehicle state machine and operating stages |
+| `src/line_sensor.c`, `src/line_diag.c` | Line/crossroad sensing and diagnostics |
+| `src/barcode.c` | Barcode decoding and command interpretation |
+| `src/ultrasonic.c`, `src/servo.c`, `src/scan_plot.h` | Range sensing, servo scanning and scan representation |
+| `src/obstacle.c`, `src/bypass.c` | Obstacle assessment and bypass manoeuvres |
+| `src/imu.c`, `src/hump.c` | Inertial sensing and hump handling |
+| `src/encoder.c`, `src/motor.c`, `src/power.c` | Wheel feedback, motor control and battery monitoring |
+| `src/web.c`, `src/mqtt_comm.c` | Wireless dashboard and MQTT communications |
+| `src/telemetry.c`, `src/log.c`, `src/buzzer.c` | Telemetry, diagnostics and sound |
+| `src/gpio_isr.c` | GPIO interrupt dispatch |
+| `encoder_monitor.py`, `tools/` | Development, monitoring and test utilities |
+| `tests/` | Source-level verification and regression tests |
+
+The main control loop is organised around a nominal **10 ms** task period, with separate module update functions and periodic telemetry. This is a cooperative loop, not a claim that the project already runs a FreeRTOS scheduler.
+
+## Testing and safe operation
+
+1. Test wheel direction and encoder counts with the car raised before any floor test.
+2. Calibrate line sensors and IMU under the conditions in which they will be used.
+3. Run stationary ultrasonic scans first, then test obstacle avoidance in a clear, supervised area with room to stop.
+4. Use the `v` bypass rehearsal only with sufficient empty floor space; it deliberately moves the car.
+5. Keep the stop button or stop command accessible and do not assume the software can prevent every collision.
+6. Check the dashboard and MQTT logs for state transitions, missing sensor readings, timeouts and unexpected resets.
+7. Keep credentials out of public commits, and avoid exposing unauthenticated movement controls on untrusted networks.
+
+## Additional documentation
+
+- [MQTT.md](MQTT.md) — MQTT configuration, telemetry and commands.
+- [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) — obstacle bypass design, configuration and validation.
+- [ULTRASONIC_SCAN.md](ULTRASONIC_SCAN.md) — servo scan measurements and interpretation.
