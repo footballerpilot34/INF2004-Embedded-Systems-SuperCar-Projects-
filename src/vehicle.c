@@ -39,16 +39,12 @@
  * the spot and never stops for white; only an obstacle (PROBE/BLOCKED)
  * or STOP stops it.
  *
- * @par START calibration (LINE_CAL): turn onto the line
+ * @par START calibration (LINE_CAL): drive forward onto the line
  * Both line sensors already on black: no calibration, follow at once.
- * Otherwise the car turns on the spot at half its driving speed
- * (LINE_CAL_SPEED_PERCENT; short bursts with braked pauses, see pivot())
- * until both line sensors are on black for LINE_CAL_ALIGN_TICKS, then
- * follows. The direction is chosen every tick: towards the one line
- * sensor on black; if neither, left when the side (barcode) sensor, which
- * is on the left, is on black; otherwise the same way as before
- * (LINE_CAL_PIVOT_LEFT at first). It turns until the line is found or
- * STOP is pressed.
+ * One on black: drive forward, arcing towards it, until both are on
+ * black for LINE_CAL_ALIGN_TICKS, then follow. Both on white: START does
+ * not move the car; it stays READY. If both go white while arcing, it
+ * keeps arcing for LINE_CAL_LOST_MSEC, then stops (READY).
  *
  * @par Barcodes
  * From the first bar until the scan ends (barcode_is_capturing()),
@@ -199,7 +195,9 @@ static line_state_t    g_raw_line      = { false, false };
 // START calibration.
 static uint32_t        g_centred_ticks = 0u;    // Both on black this long.
 static bool            gb_cal_left     = true;  // Turning left (calibration).
-static bool            gb_cal_turned   = false; // Has turned at all.
+static bool            gb_cal_turned   = false; // Has arced at all.
+static uint32_t        g_cal_black_msec = 0u;   // A line sensor last on
+                                                // black (calibration).
 static bool            gb_pivoting     = false;
 static bool            gb_pivot_left   = true;
 static uint32_t        g_pivot_msec    = 0u;    // Pivot began/reversed.
@@ -266,6 +264,8 @@ static uint32_t stall_msec(uint32_t now_msec);
 static int32_t  hump_speed(uint32_t now_msec, uint32_t in_hump_msec);
 static int32_t  cruise_speed(uint32_t now_msec);
 static bool     is_parked(vehicle_state_t state);
+static bool     line_under_car(void);
+static void     cal_arc(bool b_left);
 static bool     picked_up(uint32_t now_msec);
 static void     log_tenths(char const * p_what, int32_t value_x10);
 static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
@@ -312,7 +312,11 @@ vehicle_bypass_test(void)
 void
 vehicle_start (void)
 {
-    if (is_parked(g_state))
+    if (is_parked(g_state) && !line_under_car())
+    {
+        // Both line sensors on white: stay put (line_under_car() logs).
+    }
+    else if (is_parked(g_state))
     {
         gb_feat_line    = true;     // A full run: every feature on.
         gb_feat_avoid   = true;
@@ -347,7 +351,11 @@ void
 vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode,
                       bool b_hump)
 {
-    if (is_parked(g_state))
+    if (is_parked(g_state) && b_line && !line_under_car())
+    {
+        // Both line sensors on white: stay put (line_under_car() logs).
+    }
+    else if (is_parked(g_state))
     {
         gb_feat_line    = b_line;
         gb_feat_avoid   = b_avoid;
@@ -1584,8 +1592,9 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
 
     if (VEHICLE_LINE_CAL == state)
     {
-        gb_cal_left     = LINE_CAL_PIVOT_LEFT;  // Until a sensor says else.
-        gb_cal_turned   = false;
+        gb_cal_left      = true;                // Until a sensor says.
+        gb_cal_turned    = false;
+        g_cal_black_msec = now_msec;
         gb_pivoting     = false;                // First burst starts fresh.
         g_centred_ticks = 0u;
     }
@@ -1618,20 +1627,15 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
 
 
 /*!
- * @brief LINE_CAL: turn on the spot until both line sensors are on the
- *        line, then follow it.
+ * @brief LINE_CAL: drive forward onto the line, then follow it.
  *
  * @par
- * Turns at half the driving speed (pivot(), LINE_CAL_SPEED_PERCENT). The
- * direction is decided again every tick:
- * - both line sensors on black: done (at once if the car has not turned:
- *   no calibration needed);
- * - one line sensor on black: turn towards it;
- * - neither, but the side (barcode) sensor on black: turn towards it,
- *   that is left;
- * - nothing on black: keep turning the same way (LINE_CAL_PIVOT_LEFT at
- *   first).
- * Runs until the line is found or STOP is pressed.
+ * Decided again every tick, by the two line sensors:
+ * - both on black: done (at once if the car has not moved: no
+ *   calibration needed); straight on while confirming;
+ * - one on black: forward, arcing towards it (cal_arc());
+ * - neither: before moving, stop and stay READY; after arcing (overshot),
+ *   keep arcing the same way for LINE_CAL_LOST_MSEC, then stop (READY).
  *
  * @param[in] now_msec The current time.
  */
@@ -1642,8 +1646,7 @@ line_cal_step (uint32_t now_msec)
 
     if (line.b_left_black && line.b_right_black)
     {
-        motor_set(0, 0);
-        gb_pivoting = false;
+        motor_set(LINE_CAL_SPEED, LINE_CAL_SPEED);  // Straight on.
         g_centred_ticks++;
 
         if (!gb_cal_turned || (g_centred_ticks >= LINE_CAL_ALIGN_TICKS))
@@ -1658,43 +1661,89 @@ line_cal_step (uint32_t now_msec)
             state_enter(VEHICLE_FOLLOW_LINE, now_msec);
         }
     }
-    else
+    else if (line.b_left_black || line.b_right_black)
     {
-        bool b_left = gb_cal_left;
-
-        if (line.b_left_black)
-        {
-            b_left = true;                  // Line under the left sensor.
-        }
-        else if (line.b_right_black)
-        {
-            b_left = false;                 // Line under the right sensor.
-        }
-        else if (barcode_is_black())
-        {
-            b_left = true;                  // Side sensor (left) on black.
-        }
-        else
-        {
-            // Nothing on black: keep turning the same way.
-        }
+        bool b_left = line.b_left_black;    // Towards the black sensor.
 
         if ((!gb_cal_turned) || (b_left != gb_cal_left))
         {
-            log_line("LINE_CAL: turning %s (%s).",
+            log_line("LINE_CAL: %s sensor on black -> forward, arcing %s.",
                      (b_left ? "left" : "right"),
-                     (line.b_left_black ? "left sensor on black" :
-                      (line.b_right_black ? "right sensor on black" :
-                       (barcode_is_black() ? "side sensor on black" :
-                        "no sensor on black"))));
+                     (b_left ? "left" : "right"));
         }
 
+        g_centred_ticks  = 0u;
+        g_cal_black_msec = now_msec;
+        gb_cal_left      = b_left;
+        gb_cal_turned    = true;
+        cal_arc(b_left);
+    }
+    else if (!gb_cal_turned)
+    {
+        log_line("LINE_CAL: both line sensors on white -> not moving.");
+        state_enter(VEHICLE_READY, now_msec);
+    }
+    else if ((now_msec - g_cal_black_msec) > LINE_CAL_LOST_MSEC)
+    {
+        log_line("LINE_CAL: line lost for %" PRIu32 " ms -> stopped "
+                 "(READY). Put the car by the line and START again.",
+                 (now_msec - g_cal_black_msec));
+        state_enter(VEHICLE_READY, now_msec);
+    }
+    else
+    {
         g_centred_ticks = 0u;
-        gb_cal_left     = b_left;
-        gb_cal_turned   = true;
-        pivot(b_left, now_msec);
+        cal_arc(gb_cal_left);               // Overshot: keep arcing.
     }
 }   /* line_cal_step() */
+
+
+/*!
+ * @brief LINE_CAL: drive forward in an arc, the outer wheel at
+ *        LINE_CAL_SPEED and the inner one at LINE_CAL_INNER_PERCENT of it
+ *        (forward: 0 would brake it).
+ *
+ * @param[in] b_left True to curve left (left wheel slower).
+ */
+static void
+cal_arc (bool b_left)
+{
+    int32_t inner = (LINE_CAL_SPEED * LINE_CAL_INNER_PERCENT) / PERCENT;
+
+    if (inner < 1)
+    {
+        inner = 1;
+    }
+    motor_set((b_left ? inner : LINE_CAL_SPEED),
+              (b_left ? LINE_CAL_SPEED : inner));
+}   /* cal_arc() */
+
+
+/*!
+ * @brief Check, before START or a line feature test moves the car, that a
+ *        line sensor is on black. If both are on white, log it, and park
+ *        the car in READY.
+ *
+ * @return True if at least one line sensor is on black.
+ */
+static bool
+line_under_car (void)
+{
+    line_state_t line    = line_sensor_read();
+    bool         b_found = (line.b_left_black || line.b_right_black);
+
+    if (!b_found)
+    {
+        log_line("START: both line sensors on white -> not moving. Put "
+                 "the car on the line, or with one sensor on it.");
+        if (VEHICLE_READY != g_state)
+        {
+            state_enter(VEHICLE_READY, now_msec_get());
+        }
+    }
+
+    return (b_found);
+}   /* line_under_car() */
 
 
 /*!
