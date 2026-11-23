@@ -21,7 +21,7 @@ typedef enum
 bool            bypass_begin(obstacle_profile_t const * p_profile,
                              uint32_t now_msec, bool b_use_line);
 bypass_result_t bypass_step(uint32_t now_msec, uint32_t range_mm);
-bool            bypass_test_begin(uint32_t now_msec); // Explicit empty-floor dry run.
+bool            bypass_test_begin(uint32_t now_msec); // Continuous empty-floor rehearsal; ends stopped.
 void            bypass_cancel(void);
 char const *    bypass_phase_name(void);
 

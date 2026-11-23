@@ -63,149 +63,154 @@ static void start_pass(void) {
     phase_enter(PHASE_PASS,0); gb_pass_straight=true;
 }
 
+// Advance the incremental planner while time is held at zero in isolated tests.
+static bool planned_begin(void) {
+    if (!bypass_begin(&profile,0,true)) return false;
+    for (unsigned i=0;i<150 && g_phase==PHASE_PLAN;++i) {
+        if (bypass_step(0,300)==BYPASS_FAILED) return false;
+    }
+    return g_phase==PHASE_PIVOT;
+}
 static void fixed_checks(void) {
     for (int i=0;i<31;i++) points[i]=(obstacle_point_t){-30+2*i,300,OBSTACLE_RETURN_RANGE};
     profile=(obstacle_profile_t){.finished=true,.centre_seen=true,.front_mm=300,
-        .left_status=OBSTACLE_EDGE_SCAN_LIMIT,.right_status=OBSTACLE_EDGE_NO_ECHO};
-    assert(BYPASS_FIXED_OFFSET_MM==220);
+        .left_bounded=true,.right_bounded=true,
+        .left_status=OBSTACLE_EDGE_CONFIRMED,.right_status=OBSTACLE_EDGE_CONFIRMED,
+        .left_mm=-100,.right_mm=100,
+        .left_edge={-16,-18,300,315},.right_edge={16,18,300,315}};
     if (SENSOR_TO_BUMPER_MM < 0) {
         assert(!bypass_begin(&profile,0,true)); return;
     }
-    assert(bypass_begin(&profile,0,true)); // Unknown edges/class do not veto the test.
-    assert(g_target_x==-220 && g_target_hdg==-(float)BYPASS_DIAGONAL_DEG);
-    assert(g_fixed_clear_z==300-SENSOR_TO_BUMPER_MM+100+180+20);
-    assert(g_fixed_clear_z==(300-SENSOR_TO_BUMPER_MM+100+180+70+50)-100);
-    bypass_cancel();
-    // Measured width is ignored even if it is inconsistent with the fixed test.
-    profile.width_mm=900; profile.calibrated_width_valid=true; profile.calibrated_width_mm=250;
-    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-220);
-    bypass_cancel();
-    profile.front_mm=150;
-    assert(!bypass_begin(&profile,0,true)); // Insufficient pivot envelope.
-    profile.front_mm=300; points[15].kind=OBSTACLE_RETURN_NO_ECHO;
-    assert(!bypass_begin(&profile,0,true)); // No stable forward obstacle.
-    points[15].kind=OBSTACLE_RETURN_RANGE;
-    points[0].range_mm=80; assert(!bypass_begin(&profile,0,true));
-    points[0].range_mm=300;
+    assert(planned_begin());
+    assert(g_target_x==-219 && g_geometry.departure<58);
+    assert(g_fixed_clear_z==300-SENSOR_TO_BUMPER_MM+100+170+20);
+    assert(g_geometry.return_deg>=BYPASS_RETURN_MIN_DEG && g_geometry.return_deg<=70);
+    // Fixed controlled-test geometry does not retune itself from scan width/edges.
+    profile.left_status=OBSTACLE_EDGE_NO_ECHO;
+    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-219);
+    bypass_cancel(); profile.left_status=OBSTACLE_EDGE_CONFIRMED;
+    profile.left_mm=-150; profile.right_mm=50;
+    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-219);
+    bypass_cancel(); profile.left_mm=-100; profile.right_mm=100;
+    profile.front_mm=SENSOR_TO_BUMPER_MM+20; assert(!planned_begin()); profile.front_mm=300;
+    points[15].kind=OBSTACLE_RETURN_NO_ECHO;
+    assert(!bypass_begin(&profile,0,true)); points[15].kind=OBSTACLE_RETURN_RANGE;
+    points[0].range_mm=80; assert(!bypass_begin(&profile,0,true)); points[0].range_mm=300;
     profile.timed_out=true; assert(!bypass_begin(&profile,0,true)); profile.timed_out=false;
     profile.cancelled=true; assert(!bypass_begin(&profile,0,true)); profile.cancelled=false;
 
-    // Full controller/odometry sequence with ideal synthetic wheel motion.
-    // Wheel speed here is a test input, not a physical speed calibration.
-    for (int dry=0; dry<2; ++dry) {
-    black=false; left_edges=right_edges=0;
-    assert(dry ? bypass_test_begin(0) : bypass_begin(&profile,0,true));
-    assert(profile.width_mm==900); // Rehearsal does not fabricate sensor telemetry.
-    unsigned phases=0; float left_mm=0, right_mm=0;
-    bool saw_line=false, checked_clear=false;
-    bypass_result_t result=BYPASS_RUNNING;
-    for (uint32_t t=10;t<60000 && result==BYPASS_RUNNING;t+=10) {
-        left_mm+=fabsf((float)ml)*0.06f; right_mm+=fabsf((float)mr)*0.06f;
-        left_edges=(uint32_t)lroundf(left_mm*ENC_LEFT_EDGES_PER_M/1000.0f);
-        right_edges=(uint32_t)lroundf(right_mm*ENC_RIGHT_EDGES_PER_M/1000.0f);
-        if (!dry && g_phase==PHASE_RETURN && g_x>=-(float)BYPASS_LINE_ADVANCE_MM*sinf(BYPASS_DIAGONAL_DEG/DEG_PER_RAD)) {
-            black=true; saw_line=true;
+    // Full ideal encoder routes. Sensor contact is tied to the measured forward
+    // sensor position; final success still needs BOTH sensors and forward heading.
+    for (int dry=0;dry<2;++dry) {
+        black=left_only=false; left_edges=right_edges=0;
+        assert(dry ? bypass_test_begin(0) : bypass_begin(&profile,0,true));
+        unsigned phases=0; float lm=0,rm=0;
+        bypass_result_t result=BYPASS_RUNNING;
+        for (uint32_t t=10;t<60000 && result==BYPASS_RUNNING;t+=10) {
+            lm+=fabsf((float)ml)*0.06f; rm+=fabsf((float)mr)*0.06f;
+            left_edges=(uint32_t)lroundf(lm*ENC_LEFT_EDGES_PER_M/1000.0f);
+            right_edges=(uint32_t)lroundf(rm*ENC_RIGHT_EDGES_PER_M/1000.0f);
+            float sensor_x=g_x+BYPASS_LINE_SENSOR_FORWARD_MM*sinf(g_heading/DEG_PER_RAD);
+            black=!dry && (g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE || g_phase==PHASE_ALIGN) && fabsf(sensor_x)<=9;
+            if (g_phase==PHASE_PASS) {
+                assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG);
+                assert(fabsf(g_x-g_target_x)<=BYPASS_LATERAL_TOL_MM);
+            }
+            if (g_phase==PHASE_PIVOT && g_after==PHASE_RETURN) assert(g_z>=g_fixed_clear_z);
+            if (g_phase==PHASE_OUT || g_phase==PHASE_PASS || g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE) assert(ml>=0 && mr>=0);
+            assert(fabsf(g_heading)<90);
+            phases|=1u<<g_phase;
+            result=bypass_step(t,ULTRASONIC_NO_RANGE);
         }
-        if (g_phase==PHASE_PIVOT && g_after==PHASE_RETURN) {
-            assert(g_z>=g_fixed_clear_z); checked_clear=true;
-        }
-        if (g_phase==PHASE_PASS && !(phases&(1u<<PHASE_PASS))) {
-            assert(g_x<=-(float)BYPASS_FIXED_OFFSET_MM); // Full offset before passing.
-            assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG); // Second turn cancels departure.
-        }
-        if (!dry && g_phase==PHASE_ALIGN) {
-            black=fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG;
-        }
-        phases|=1u<<g_phase;
-        result=bypass_step(t,ULTRASONIC_NO_RANGE); // Explicit controlled empty corridor.
+        if (result!=BYPASS_DONE) fprintf(stderr,"route failed result=%d x=%f y=%f h=%f phases=%x\n",result,g_x,g_z,g_heading,phases);
+        assert(result==BYPASS_DONE && ml==0 && mr==0);
+        assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG && fabsf(g_x)<12);
+        assert(phases&(1u<<PHASE_PLAN)); assert(phases&(1u<<PHASE_PASS));
+        assert(phases&(1u<<PHASE_RETURN));
+        assert(phases&(1u<<(dry ? PHASE_FINISH : PHASE_ALIGN)));
     }
-    if (result!=BYPASS_DONE) fprintf(stderr,"fixed failed: offset=%d result=%d phase=%s x=%f z=%f heading=%f distance=%f phases=%x\n", SENSOR_TO_BUMPER_MM,result,bypass_phase_name(),g_x,g_z,g_heading,g_phase_mm,phases);
-    assert(result==BYPASS_DONE && (dry || saw_line) && checked_clear && ml==0 && mr==0);
-    assert(phases&(1u<<PHASE_OUT)); assert(phases&(1u<<PHASE_PASS));
-    assert(phases&(1u<<PHASE_RETURN));
-    if (!dry) {
-        assert(phases&(1u<<PHASE_ADVANCE));
-        assert(phases&(1u<<PHASE_ALIGN));
-    } else { assert(phases&(1u<<PHASE_FINISH)); }
-    assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG);
-    }
-    // A moderate turn may not consume the front/corner clearance budget.
-    profile.front_mm=SENSOR_TO_BUMPER_MM+220;
-    assert(!bypass_begin(&profile,0,true)); profile.front_mm=300;
-    assert(bypass_begin(&profile,0,true));
-    phase_enter(PHASE_OUT,0); g_z=g_front_z-CAR_WIDTH_MM/2u-OBSTACLE_BYPASS_MARGIN_MM;
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
-
-    // Both sensors at an oblique heading are not forward alignment.
-    assert(bypass_begin(&profile,0,true)); black=true; g_heading=60;
+    black=false;
+    // Parallel motor targets are exactly zero heading; drift is bounded.
+    assert(planned_begin()); g_x=g_target_x; g_z=g_geometry.departure_y; g_heading=0;
+    phase_enter(PHASE_PASS,0); assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==mr);
+    g_heading=1.5f; assert(bypass_step(20,1000)==BYPASS_RUNNING && ml<mr);
+    g_x=g_target_x-BYPASS_LATERAL_TOL_MM-1;
+    assert(bypass_step(30,1000)==BYPASS_FAILED);
+    // Both sensors while oblique cannot finish alignment.
+    assert(planned_begin()); black=true; g_x=0; g_z=g_fixed_clear_z+200; g_heading=70;
     phase_enter(PHASE_ALIGN,0);
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING && g_line_ticks==0);
-    assert(g_phase==PHASE_ALIGN);
-    // One sensor at heading zero must not release the car to following.
-    black=false; left_only=true; g_heading=0;
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_line_ticks==0);
+    black=false; left_only=true; g_heading=0; phase_enter(PHASE_ALIGN,0);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0 && g_line_ticks==0);
+    assert(bypass_step(BYPASS_LINE_TIMEOUT_MSEC+1,1000)==BYPASS_FAILED); left_only=false;
+    assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=4; black=true;
     phase_enter(PHASE_ALIGN,0);
-    for (uint32_t t=10;t<=50;t+=10) {
-        assert(bypass_step(t,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING);
-        assert(ml==0 && mr==0 && g_line_ticks==0);
-    }
-    assert(bypass_step(BYPASS_LINE_TIMEOUT_MSEC+1,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
-    left_only=false;
-    // Stop on the first properly aligned pair, not after rotating past it.
-    assert(bypass_begin(&profile,0,true)); g_heading=4; black=true;
-    phase_enter(PHASE_ALIGN,0);
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING && ml==0 && mr==0);
-    black=false; assert(bypass_step(20,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING);
-    black=true;
-    assert(bypass_step(30,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING);
-    assert(bypass_step(40,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING);
-    assert(bypass_step(50,ULTRASONIC_NO_RANGE)==BYPASS_DONE && ml==0 && mr==0);
-    assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG);
-    assert(bypass_begin(&profile,0,true)); g_heading=60; phase_enter(PHASE_FINISH,0);
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
-
-    // Target crossing brakes instead of reversing and applying another boost.
-    assert(bypass_begin(&profile,0,true));
-    g_heading=g_target_hdg-1;
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING && g_phase==PHASE_OUT);
-    assert(ml==0 && mr==0);
-    assert(bypass_begin(&profile,0,true)); g_heading=g_target_hdg-10;
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
-    assert(bypass_begin(&profile,0,true)); g_heading=g_target_hdg+10;
-    assert(!fixed_turn_step(PIVOT_PULSE_ON_MSEC+10) && ml==0 && mr==0);
-    assert(!fixed_turn_step(10) && ml<0 && mr>0);
-    g_heading=g_target_hdg-1; motor_set(0,0);
-    left_edges+=(uint32_t)lroundf(ENC_LEFT_EDGES_PER_M/1000.0f);
-    right_edges+=(uint32_t)lroundf(ENC_RIGHT_EDGES_PER_M/1000.0f);
-    float before_coast=g_heading; odo_update();
-    assert(g_heading<before_coast); // Coast retains actual last turn direction.
-    bypass_cancel();
-    // No line cannot fall through to following based on distance alone.
-    assert(bypass_begin(&profile,0,true)); black=false;
-    phase_enter(PHASE_RETURN,0); g_heading=90;
-    assert(bypass_step(BYPASS_LINE_TIMEOUT_MSEC+1,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
-    assert(ml==0 && mr==0);
-    assert(bypass_begin(&profile,0,true)); phase_enter(PHASE_RETURN,0);
-    g_phase_mm=BYPASS_FIXED_OFFSET_MM+CAR_LENGTH_MM+1;
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
-    assert(bypass_begin(&profile,0,true));
-    assert(bypass_step(10,BYPASS_FRONT_STOP_MM)==BYPASS_FAILED);
-    assert(ml==0 && mr==0);
-    assert(bypass_begin(&profile,0,true)); ready=false; ml=mr=12;
-    assert(bypass_step(10,ULTRASONIC_NO_RANGE)==BYPASS_RUNNING && ml==0 && mr==0);
-    assert(bypass_step(BYPASS_STEP_MAX_MSEC+1,ULTRASONIC_NO_RANGE)==BYPASS_FAILED);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && ml<0 && mr>0);
+    g_heading=0; assert(bypass_step(20,1000)==BYPASS_RUNNING && ml==0 && mr==0);
+    assert(bypass_step(30,1000)==BYPASS_RUNNING);
+    assert(bypass_step(20+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_DONE);
+    // Residual turn motion, even during a sensor wait, resets quiet time.
+    assert(planned_begin()); g_heading=g_target_hdg;
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
+    ready=false; left_edges++; right_edges++;
+    assert(bypass_step(100,1000)==BYPASS_RUNNING && ml==0 && mr==0);
     ready=true;
-    phase_t interrupt_phases[]={PHASE_PIVOT,PHASE_OUT,PHASE_PASS,PHASE_RETURN,PHASE_ADVANCE,PHASE_ALIGN};
-    for (unsigned i=0;i<sizeof(interrupt_phases)/sizeof(interrupt_phases[0]);++i) {
-        assert(bypass_begin(&profile,0,true));
-        phase_enter(interrupt_phases[i],0); ml=12; mr=(g_phase==PHASE_PIVOT ? -12 : 12);
-        bypass_cancel();
-        assert(g_phase==PHASE_IDLE && ml==0 && mr==0);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
+    assert(bypass_step(100+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_OUT);
+    // Translational coast is integrated as translation before a turn,
+    // including motion observed while waiting for a sensor measurement.
+    assert(planned_begin()); g_x=g_target_x; g_z=g_geometry.departure_y; g_heading=-g_geometry.departure;
+    phase_enter(PHASE_OUT,0); start_pivot(0,PHASE_PASS,0);
+    assert(g_phase==PHASE_BRAKE);
+    float old_x=g_x, old_y=g_z, old_h=g_heading;
+    ready=false; left_edges+=100; right_edges+=103;
+    assert(bypass_step(100,1000)==BYPASS_RUNNING);
+    assert(g_x<old_x && g_z>old_y && fabsf(g_heading-old_h)<0.1f);
+    ready=true;
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_BRAKE);
+    assert(bypass_step(100+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
+    // Overshoot never triggers an opposite turn/startup boost.
+    assert(planned_begin()); g_heading=g_target_hdg-10;
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0);
+    assert(bypass_step(10+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_FAILED);
+    for (int direction=-1;direction<=1;direction+=2) {
+        assert(planned_begin()); g_turn_direction=direction; float before=g_heading;
+        left_edges+=100; right_edges+=100;
+        float mean=(100000.0f/ENC_LEFT_EDGES_PER_M+100000.0f/ENC_RIGHT_EDGES_PER_M)/2;
+        float scale=direction<0 ? BYPASS_PIVOT_LEFT_X100 : BYPASS_PIVOT_RIGHT_X100;
+        odo_update();
+        assert(fabsf(g_heading-before-direction*mean/(WHEEL_TRACK_MM/2.0f)*DEG_PER_RAD*100/scale)<0.001f);
+    }
+    // Bounded line search and sensor-position advance.
+    assert(planned_begin()); black=false; g_x=g_target_x; g_z=g_fixed_clear_z; g_heading=g_geometry.return_deg;
+    phase_enter(PHASE_RETURN,0);
+    g_phase_mm=g_geometry.offset/sinf((g_geometry.return_deg-BYPASS_ALIGN_TOL_DEG)/DEG_PER_RAD)+BYPASS_RETURN_EXTRA_MM+1;
+    assert(bypass_step(10,1000)==BYPASS_FAILED);
+    assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0;
+    phase_enter(PHASE_RETURN,0); assert(bypass_step(BYPASS_LINE_TIMEOUT_MSEC+1,1000)==BYPASS_FAILED);
+    assert(planned_begin()); g_x=-45; g_z=g_fixed_clear_z+200; g_heading=g_geometry.return_deg; black=true;
+    phase_enter(PHASE_RETURN,0);
+    for (uint32_t t=10;t<=30;t+=10) assert(bypass_step(t,1000)==BYPASS_RUNNING);
+    assert(g_phase==PHASE_ADVANCE);
+    g_phase_mm=BYPASS_LINE_SENSOR_FORWARD_MM;
+    assert(bypass_step(40,1000)==BYPASS_RUNNING && g_phase==PHASE_BRAKE);
+    assert(bypass_step(40+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
+    assert(planned_begin()); assert(bypass_step(10,BYPASS_FRONT_STOP_MM)==BYPASS_FAILED);
+    assert(planned_begin()); ready=false;
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0);
+    assert(bypass_step(BYPASS_STEP_MAX_MSEC+1,1000)==BYPASS_FAILED); ready=true;
+    // The planner is cancellable too; no pre-motion blocking search.
+    phase_t interrupted[]={PHASE_PLAN,PHASE_BRAKE,PHASE_PIVOT,PHASE_OUT,PHASE_PASS,PHASE_RETURN,PHASE_ADVANCE,PHASE_ALIGN};
+    for (unsigned i=0;i<sizeof(interrupted)/sizeof(interrupted[0]);++i) {
+        assert(planned_begin()); phase_enter(interrupted[i],0); ml=mr=12;
+        bypass_cancel(); assert(g_phase==PHASE_IDLE && ml==0 && mr==0);
     }
 }
+
 int main(void) {
     if (BYPASS_FIXED_WIDTH_TEST) { fixed_checks(); return 0; }
-    assert(CAR_LENGTH_MM==180 && CAR_WIDTH_MM==140);
-    assert(SIDE_CLEARANCE_MM==145); // ceil(hypot(90,70)) + 30.
+    assert(CAR_LENGTH_MM==170 && CAR_WIDTH_MM==140);
+    assert(SIDE_CLEARANCE_MM==141); // ceil(hypot(85,70)) + 30.
     assert(BYPASS_ASSUMED_DEPTH_MM==100);
     for (int i=0;i<31;i++) points[i]=(obstacle_point_t){-30+2*i,2000,OBSTACLE_RETURN_RANGE};
     profile=(obstacle_profile_t){.finished=true,.centre_seen=true,
@@ -221,9 +226,9 @@ int main(void) {
     // Artificial long-range setup exercises geometry decisions only. Real
     // scanner stops at 250 mm; this is not a newly supported operating mode.
     profile.front_mm=1000;
-    assert(side_shift(&profile,true)==270); // Unknown: 125 + corner radius/margin.
+    assert(side_shift(&profile,true)==266); // Unknown: 125 + corner radius/margin.
     profile.calibrated_width_valid=true; profile.calibrated_width_mm=150;
-    assert(side_shift(&profile,true)==220); // 75 + same clearance.
+    assert(side_shift(&profile,true)==216); // 75 + same clearance.
     points[0].kind=OBSTACLE_RETURN_NO_ECHO;
     assert(side_shift(&profile,true)==NO_SIDE);
     points[0].kind=OBSTACLE_RETURN_RANGE;
@@ -235,7 +240,7 @@ int main(void) {
     assert(!start_backup(PHASE_OUT,80,0)); // Unseen rear path is never used.
 
     start_pass();
-    assert(g_pass_min_mm==100+100+180+30);
+    assert(g_pass_min_mm==100+100+170+30);
     seq++; pass_step(100,200); assert(gb_side_seen);
     pass_step(200,1000); assert(g_side_clear==0); // Same ping, not another vote.
     for (int i=0;i<5;i++) { seq++; pass_step(300+100*i,ULTRASONIC_NO_RANGE); }
@@ -288,10 +293,16 @@ int main(void) {
 with tempfile.TemporaryDirectory() as directory:
     work = Path(directory)
     (work / 'test.c').write_text(code)
-    for offset, fixed in ((-1, 0), (0, 0), (60, 0), (-1, 1), (0, 1), (60, 1)):
+    for offset, fixed, left_scale, right_scale in (
+            (-1, 0, 82, 82), (0, 0, 82, 82), (60, 0, 82, 82),
+            (-1, 1, 82, 82), (0, 1, 82, 82), (60, 1, 82, 82),
+            (60, 1, 76, 90)):
+
         subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror',
                         '-fsanitize=undefined', '-fno-sanitize-recover=all',
                         f'-DSENSOR_TO_BUMPER_MM={offset}', f'-DBYPASS_FIXED_WIDTH_TEST={fixed}',
+                        f'-DBYPASS_PIVOT_LEFT_X100={left_scale}',
+                        f'-DBYPASS_PIVOT_RIGHT_X100={right_scale}',
                         '-I', str(ROOT / 'src'),
                         str(work / 'test.c'), '-lm', '-o', str(work / 'test')],
                        check=True, timeout=30)

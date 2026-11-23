@@ -3,7 +3,7 @@
  * @brief Bypass and line recovery using existing wheel/encoder controls.
  *
  * Default: controlled fixed-width test. Scan normally, pivot left, travel
- * diagonally to 220 mm lateral clearance, pivot forward, clear the assumed
+ * diagonally to the configured centre offset, pivot forward, clear the assumed
  * 100 mm depth and whole vehicle, then pivot right and reacquire the line. Empty corridor is an
  * operator test assumption, never inferred from missing echoes. The USB/MQTT
  * dry run rehearses the route without manufacturing a scan result.
@@ -24,6 +24,7 @@
 
 #include "bypass.h"
 #include "config.h"
+#include "bypass_geometry.h"
 #include "encoder.h"
 #include "line_sensor.h"
 #include "log.h"
@@ -42,8 +43,20 @@
 #define PIVOT_DONE_DEG      1.5f    // Pivot within this of the target: done.
 #define STRAIGHT_DEG        3.0f    // Within this of the line: straight.
 #define MIN_CURVE_MM        60.0f   // A curve never shorter than this.
-_Static_assert(BYPASS_DIAGONAL_DEG > 5 && BYPASS_DIAGONAL_DEG < 90,
-               "Diagonal heading must leave finite forward/lateral travel");
+_Static_assert(BYPASS_AXLE_TO_FRONT_MM <= CAR_LENGTH_MM, "Axle must lie inside chassis");
+_Static_assert(BYPASS_RETURN_MIN_DEG > BYPASS_ALIGN_TOL_DEG && BYPASS_RETURN_MAX_DEG < 90,
+               "Return must make finite forward and lateral progress");
+_Static_assert(BYPASS_RETURN_MIN_DEG <= BYPASS_RETURN_MAX_DEG &&
+               BYPASS_RETURN_MIN_DEG > BYPASS_DRIVE_HEADING_TOL_DEG,
+               "Return search and tracking corridor must be finite");
+_Static_assert(BYPASS_DEPARTURE_MIN_DEG > BYPASS_DRIVE_HEADING_TOL_DEG &&
+               BYPASS_DEPARTURE_MIN_DEG <= BYPASS_DEPARTURE_MAX_DEG &&
+               BYPASS_DEPARTURE_MAX_DEG <= BYPASS_HEADING_MAX_DEG,
+               "Departure must remain forward and within heading bounds");
+_Static_assert(BYPASS_GEOMETRY_STEP_MM > 0 && BYPASS_GEOMETRY_STEP_DEG > 0,
+               "Geometry sampling must advance");
+_Static_assert(BYPASS_PIVOT_LEFT_X100 > 0 && BYPASS_PIVOT_RIGHT_X100 > 0,
+               "Pivot calibration must be positive");
 #define NO_SIDE             UINT32_MAX  // side_shift(): unusable.
 // Reserve the corner radius, including the length, while turning.
 #define SIDE_CLEARANCE_MM   ((uint32_t)ceilf(hypotf(CAR_LENGTH_MM / 2.0f, CAR_WIDTH_MM / 2.0f)) + BYPASS_SIDE_MARGIN_MM)
@@ -70,6 +83,8 @@ typedef enum
     PHASE_ADVANCE,      // Line found: axle over it.
     PHASE_ALIGN,        // Turning straight onto the line.
     PHASE_FINISH,       // Stack empty and straight: done.
+    PHASE_BRAKE,        // Settle translation before interpreting counts as a pivot.
+    PHASE_PLAN,         // Validate the fixed route while braked.
     PHASE_BACKUP        // Reversing straight: too close to turn.
 } phase_t;
 
@@ -83,6 +98,7 @@ typedef struct
 
 
 static phase_t  g_phase       = PHASE_IDLE;
+static phase_t  g_brake_then  = PHASE_IDLE;
 static phase_t  g_after       = PHASE_IDLE;  // Phase after a pivot.
 static phase_t  g_backup_then = PHASE_IDLE;  // Phase after a back-up.
 static float    g_backup_hdg  = 0.0f;   // Heading held reversing.
@@ -129,13 +145,20 @@ static uint32_t g_line_ticks  = 0u;     // Consecutive line observations.
 static uint32_t g_side_sequence = 0u;   // Never count a ping twice.
 static bool     gb_fixed_test = false;
 static float    g_fixed_clear_z;       // Required forward progress before return.
+static bypass_geometry_t g_geometry;
+static bool     gb_odo_moved;          // Count changes, including residual brake motion.
+static bool     gb_turn_settling;
+static uint32_t g_turn_quiet_msec;
+static float    g_line_contact_x;      // Bound sideways movement after finding black.
+static float    g_line_advance_hdg;
 static uint32_t g_pose_next   = 0u;     // Next pose log (ms).
 
 
 static bool     fixed_begin(obstacle_profile_t const * profile,
                              uint32_t now_msec, bool use_line);
 static bypass_result_t fixed_step(uint32_t now_msec, uint32_t range_mm);
-static bool fixed_start(uint32_t front_mm, uint32_t now_msec, bool use_line);
+static bool fixed_start(uint32_t front_mm, float left, float right,
+                        uint32_t now_msec, bool use_line);
 static bool fixed_turn_step(uint32_t now_msec);
 static int32_t  beam_corrected_edge(obstacle_profile_t const * p_profile,
                                     bool b_left);
@@ -266,6 +289,10 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     bool            b_line = (line.b_left_black || line.b_right_black);
 
     odo_update();       // Position and heading, from this tick's counts.
+    if (gb_fixed_test && (gb_turn_settling || g_phase==PHASE_BRAKE) && gb_odo_moved) {
+        // Track quiet time even while a fresh ultrasonic sample is pending.
+        g_turn_quiet_msec = now_msec;
+    }
     bool confirm_line = b_line;
     if (gb_fixed_test && (g_phase == PHASE_ALIGN || g_phase == PHASE_FINISH)) {
         confirm_line = line.b_left_black && line.b_right_black &&
@@ -475,53 +502,42 @@ fixed_begin(obstacle_profile_t const * profile, uint32_t now_msec, bool use_line
         log_obstacle("BYPASS fixed test: incomplete/implausible forward scan; blocked.");
         return false;
     }
-    return fixed_start(profile->front_mm, now_msec, use_line);
+    // Confirmed controlled scenario: 200 mm rectangle centred on the line.
+    // Scan assessment remains required, but no unapproved edge-based planner runs.
+    return fixed_start(profile->front_mm,-(float)BYPASS_FIXED_WIDTH_MM/2.0f,
+                       BYPASS_FIXED_WIDTH_MM/2.0f,now_msec,use_line);
 }
 
 // Empty-floor serial test: no scan/profile is fabricated or published.
 bool
 bypass_test_begin(uint32_t now_msec)
 {
-    if (!BYPASS_FIXED_WIDTH_TEST) { return false; }
-    gb_fixed_test = true;
-    log_obstacle("BYPASS DRY RUN: empty floor, nominal start distance %u mm, no line search.",
-                 OBSTACLE_STOP_MM);
-    return fixed_start(OBSTACLE_STOP_MM, now_msec, false);
+    if (!BYPASS_FIXED_WIDTH_TEST) return false;
+    gb_fixed_test=true;
+    return fixed_start(OBSTACLE_STOP_MM,-(float)BYPASS_FIXED_WIDTH_MM/2.0f,
+                       BYPASS_FIXED_WIDTH_MM/2.0f,now_msec,false);
 }
 
 static bool
-fixed_start(uint32_t front_mm, uint32_t now_msec, bool use_line)
+fixed_start(uint32_t front_mm, float left, float right,
+            uint32_t now_msec, bool use_line)
 {
     if (!BYPASS_ENABLED || SENSOR_TO_BUMPER_MM < 0 ||
-        SENSOR_TO_BUMPER_MM > (int)CAR_LENGTH_MM) { return false; }
-    // Conservative pivot envelope: axle lies within the chassis on its
-    // centreline; reserve a whole car length rather than assume its position.
-    float turn_envelope = ceilf(hypotf(CAR_LENGTH_MM, CAR_WIDTH_MM / 2.0f));
-    float bumper_gap = (float)front_mm - SENSOR_TO_BUMPER_MM;
-    // A shallower departure uses more forward room. Reserve the whole
-    // corner projection until the lateral offset is reached; no shorter gap
-    // is accepted merely because the commanded turn is smaller.
-    float departure_forward = BYPASS_FIXED_OFFSET_MM /
-        tanf((BYPASS_DIAGONAL_DEG - PIVOT_DONE_DEG) / DEG_PER_RAD);
-    if (bumper_gap <= turn_envelope + OBSTACLE_BYPASS_MARGIN_MM ||
-        bumper_gap <= departure_forward + CAR_WIDTH_MM / 2u + OBSTACLE_BYPASS_MARGIN_MM) {
-        log_obstacle("BYPASS fixed test: bumper gap too small to turn; blocked.");
-        return false;
-    }
+        SENSOR_TO_BUMPER_MM > (int)CAR_LENGTH_MM || left >= right ||
+        front_mm <= (uint32_t)SENSOR_TO_BUMPER_MM) { return false; }
     reset_state(true, use_line);
-    g_target_x = -(float)BYPASS_FIXED_OFFSET_MM;
-    g_front_z = bumper_gap;
-    // At heading zero, g_z is progress of the original front bumper too.
-    // Floor-tested route: trim excess forward travel, while retaining the
-    // whole-car pass and the existing minimum clearance margin.
-    float whole_car_clear_z = bumper_gap + BYPASS_ASSUMED_DEPTH_MM + CAR_LENGTH_MM;
-    g_fixed_clear_z = fmaxf(whole_car_clear_z + OBSTACLE_BYPASS_MARGIN_MM,
-        whole_car_clear_z + CAR_WIDTH_MM / 2u + BYPASS_FIXED_MARGIN_MM - BYPASS_FORWARD_TRIM_MM);
-    log_obstacle("BYPASS fixed %u mm test: LEFT offset=%u mm, clear at z=%ld mm. "
-                 "Corridor assumed empty by operator, NOT verified by scan.",
-                 BYPASS_FIXED_WIDTH_MM, BYPASS_FIXED_OFFSET_MM,
-                 (long)lroundf(g_fixed_clear_z));
-    start_pivot(-(float)BYPASS_DIAGONAL_DEG, PHASE_OUT, now_msec);
+    log_obstacle("BYPASS controlled test: depth=%u mm; empty LEFT corridor "
+                 "assumed by operator, NOT verified by scan.", BYPASS_ASSUMED_DEPTH_MM);
+    g_front_z = (float)front_mm - SENSOR_TO_BUMPER_MM;
+    bypass_geometry_init(&g_geometry, g_front_z, left, right);
+    if (g_geometry.offset > BYPASS_MAX_PLAN_OFFSET_MM) { return false; }
+    g_geometry.offset=BYPASS_COMPACT_OFFSET_MM;
+    g_geometry.return_deg=BYPASS_COMPACT_RETURN_DEG;
+    g_geometry.return_mm=g_geometry.offset/sinf(g_geometry.return_deg/DEG_PER_RAD);
+    g_target_x = -g_geometry.offset;
+    g_fixed_clear_z = g_geometry.clear_y;
+    // Validate the hardcoded route while braked; reject unsafe starting geometry.
+    phase_enter(PHASE_PLAN, now_msec);
     return true;
 }
 
@@ -531,9 +547,15 @@ static bool
 fixed_turn_step(uint32_t now_msec)
 {
     float error = g_target_hdg - g_heading;
-    if (g_turn_direction * error <= PIVOT_DONE_DEG) {
+    if (gb_turn_settling || g_turn_direction * error <= PIVOT_DONE_DEG) {
         motor_set(0, 0);
-        return true;
+        if (!gb_turn_settling || gb_odo_moved) {
+            g_turn_quiet_msec = now_msec;
+        }
+        gb_turn_settling = true;
+        // Keep the pivot phase/direction while braking so residual encoder
+        // ticks cannot be misinterpreted as forward travel in the next leg.
+        return now_msec - g_turn_quiet_msec >= BYPASS_TURN_SETTLE_MSEC;
     }
     uint32_t pulse = (now_msec - g_phase_msec) %
                      (PIVOT_PULSE_ON_MSEC + PIVOT_PULSE_OFF_MSEC);
@@ -555,66 +577,94 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
     if (range_mm == 0u || front_within(range_mm, BYPASS_FRONT_STOP_MM)) {
         return BYPASS_FAILED;
     }
-    if (g_phase == PHASE_PIVOT) {
+    if (g_phase == PHASE_PLAN) {
+        motor_set(0, 0);
+        if (bypass_geometry_candidate(&g_geometry, BYPASS_COMPACT_DEPARTURE_DEG)) {
+            log_obstacle("BYPASS plan: offset=%ld mm, departure=%ld deg/%ld mm, "
+                         "pass=%ld mm, return=%ld deg/%ld mm, path=%ld mm.",
+                         (long)lroundf(g_geometry.offset), (long)lroundf(g_geometry.departure),
+                         (long)lroundf(g_geometry.departure_mm),
+                         (long)lroundf(g_fixed_clear_z-g_geometry.departure_y),
+                         (long)lroundf(g_geometry.return_deg), (long)lroundf(g_geometry.return_mm),
+                         (long)lroundf(g_geometry.translation_mm));
+            start_pivot(-g_geometry.departure, PHASE_OUT, now_msec);
+        } else {
+            log_obstacle("BYPASS: no collision-safe route within configured limits.");
+            return BYPASS_FAILED;
+        }
+        return BYPASS_RUNNING;
+    }
+    if (bypass_geometry_gap(&g_geometry, g_x, g_z, g_heading) < bypass_geometry_margin()) {
+        return BYPASS_FAILED;
+    }
+    if (g_phase == PHASE_BRAKE) {
+        motor_set(0, 0);
+        if (gb_odo_moved) { g_turn_quiet_msec=now_msec; }
+        if (now_msec-g_turn_quiet_msec >= BYPASS_TURN_SETTLE_MSEC) {
+            g_turn_direction=(g_target_hdg < g_heading) ? -1 : 1;
+            phase_enter(g_brake_then,now_msec);
+        }
+    } else if (g_phase == PHASE_PIVOT) {
         if (fixed_turn_step(now_msec)) {
-            if (fabsf(g_target_hdg - g_heading) > BYPASS_ALIGN_TOL_DEG) {
+            if (fabsf(g_target_hdg - g_heading) > BYPASS_DRIVE_HEADING_TOL_DEG) {
                 return BYPASS_FAILED; // Excessive overshoot needs calibration.
             }
             phase_enter(g_after, now_msec);
         }
     } else if (g_phase == PHASE_OUT) {
-        if (g_z + CAR_WIDTH_MM / 2u + OBSTACLE_BYPASS_MARGIN_MM >= g_front_z) {
-            return BYPASS_FAILED; // Stay before the front plane until laterally clear.
-        } else if (g_x <= g_target_x) {
-            start_pivot(0.0f, PHASE_PASS, now_msec);
-        } else if (g_phase_mm > BYPASS_FIXED_OFFSET_MM + BYPASS_FIXED_MARGIN_MM) {
-            return BYPASS_FAILED; // Travel without enough lateral progress.
-        } else { steer(-(float)BYPASS_DIAGONAL_DEG); }
-    } else if (g_phase == PHASE_PASS) {
-        if (g_z >= g_fixed_clear_z) { start_pivot((float)BYPASS_DIAGONAL_DEG, PHASE_RETURN, now_msec); }
-        else {
-            float angle = g_heading / DEG_PER_RAD;
-            // Bound the lateral corner projection even if the axle isn't
-            // at the chassis centre. Do not spend the whole nominal gap.
-            float side_extent = CAR_WIDTH_MM / 2.0f * fabsf(cosf(angle)) +
-                                CAR_LENGTH_MM * fabsf(sinf(angle));
-            if (g_phase_mm > BYPASS_PASS_MAX_MM ||
-                -g_x < BYPASS_FIXED_WIDTH_MM / 2.0f + side_extent + OBSTACLE_BYPASS_MARGIN_MM) {
-                return BYPASS_FAILED;
-            }
-            steer(clampf(atanf((g_pass_hold_x - g_x) / BYPASS_LOOKAHEAD_MM) *
-                         DEG_PER_RAD, STRAIGHT_DEG));
+        if (fabsf(g_heading+g_geometry.departure) > BYPASS_DRIVE_HEADING_TOL_DEG) {
+            return BYPASS_FAILED;
         }
+        if (g_x <= g_target_x) {
+            start_pivot(0.0f, PHASE_PASS, now_msec);
+        } else if (g_phase_mm > g_geometry.departure_mm + BYPASS_RETURN_EXTRA_MM) {
+            return BYPASS_FAILED;
+        } else { steer(-g_geometry.departure); }
+    } else if (g_phase == PHASE_PASS) {
+        if (fabsf(g_heading) > BYPASS_DRIVE_HEADING_TOL_DEG ||
+            fabsf(g_x-g_target_x) > BYPASS_LATERAL_TOL_MM ||
+            g_phase_mm > BYPASS_PASS_MAX_MM) { return BYPASS_FAILED; }
+        if (g_z >= g_fixed_clear_z) {
+            start_pivot(g_geometry.return_deg, PHASE_RETURN, now_msec);
+        } else { steer(0.0f); }
     } else if (g_phase == PHASE_RETURN) {
         bool on_line = g_line_ticks > 0u;
+        if (fabsf(g_heading-g_geometry.return_deg) > BYPASS_DRIVE_HEADING_TOL_DEG) {
+            return BYPASS_FAILED;
+        }
         if ((now_msec - g_phase_msec) > BYPASS_LINE_TIMEOUT_MSEC ||
-            g_phase_mm > BYPASS_FIXED_OFFSET_MM + CAR_LENGTH_MM) {
+            g_phase_mm > fabsf(g_target_x) /
+                sinf((g_geometry.return_deg - BYPASS_ALIGN_TOL_DEG) / DEG_PER_RAD) +
+                BYPASS_RETURN_EXTRA_MM) {
             return BYPASS_FAILED;
         }
         if (gb_use_line && on_line) {
             motor_set(0, 0); // Brake on first detection; confirm while stopped.
+            if (g_line_ticks == 1u) { g_line_contact_x = g_x; }
             if (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) {
+                g_line_advance_hdg = g_heading;
                 phase_enter(PHASE_ADVANCE, now_msec);
             }
         } else if (!gb_use_line && g_x >= 0.0f) {
             start_pivot(0.0f, PHASE_FINISH, now_msec);
-        } else { steer((float)BYPASS_DIAGONAL_DEG); }
+        } else { steer(g_geometry.return_deg); }
     } else if (g_phase == PHASE_ADVANCE) {
         // Existing sensor-to-axle placement correction, adjustable on the floor.
-        if (g_phase_mm >= BYPASS_LINE_ADVANCE_MM) {
+        if (g_phase_mm >= BYPASS_LINE_SENSOR_FORWARD_MM ||
+            g_x - g_line_contact_x >= BYPASS_LINE_CROSS_MAX_MM) {
             phase_enter(PHASE_ALIGN, now_msec);
-        } else { steer((float)BYPASS_DIAGONAL_DEG); }
+        } else { steer(g_line_advance_hdg); }
     } else if (g_phase == PHASE_ALIGN) {
         if ((now_msec - g_phase_msec) > BYPASS_LINE_TIMEOUT_MSEC) {
             return BYPASS_FAILED;
         }
-        if (g_line_ticks > 0u) {
-            motor_set(0, 0); // Both sensors, near forward: confirm without rotating away.
+        // Finish and settle the heading correction even if black appears
+        // during rotation. Line contact alone never completes the manoeuvre.
+        if (fixed_turn_step(now_msec)) {
+            if (fabsf(g_heading) > BYPASS_ALIGN_TOL_DEG) { return BYPASS_FAILED; }
             if (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) { return BYPASS_DONE; }
-        } else {
-            // Restore known forward heading. If the line is not under BOTH
-            // sensors by then, hold braked until timeout; don't rotate blindly.
-            (void)fixed_turn_step(now_msec);
+            // No aligned pair: remain braked until timeout, never search by
+            // rotating past forward or reverse direction to chase the line.
         }
     } else if (g_phase == PHASE_FINISH) {
         motor_set(0, 0);
@@ -657,7 +707,7 @@ bypass_phase_name (void)
     static char const * const names[] =
     {
         "idle", "pivot", "out", "re-scan", "pass", "return", "advance",
-        "align", "finish", "back-up"
+        "align", "finish", "brake", "plan", "back-up"
     };
 
     return (names[g_phase]);
@@ -1032,7 +1082,11 @@ start_pivot (float target_deg, phase_t after, uint32_t now_msec)
     g_target_hdg = target_deg;
     g_turn_direction = (target_deg < g_heading) ? -1 : 1;
     g_after      = after;
-    phase_enter(PHASE_PIVOT, now_msec);
+    if (gb_fixed_test && (g_phase==PHASE_OUT || g_phase==PHASE_PASS ||
+                          g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE)) {
+        g_brake_then=PHASE_PIVOT;
+        phase_enter(PHASE_BRAKE,now_msec);
+    } else { phase_enter(PHASE_PIVOT, now_msec); }
 }   /* start_pivot() */
 
 
@@ -1581,6 +1635,10 @@ pass_step (uint32_t now_msec, uint32_t range_mm)
 static void
 phase_enter (phase_t phase, uint32_t now_msec)
 {
+    if (gb_fixed_test && phase==PHASE_ALIGN && g_phase==PHASE_ADVANCE) {
+        g_brake_then=PHASE_ALIGN;
+        phase=PHASE_BRAKE;
+    }
     if ((PHASE_PIVOT == phase) || (PHASE_RESCAN == phase) ||
         (PHASE_BACKUP == phase))
     {
@@ -1595,9 +1653,11 @@ phase_enter (phase_t phase, uint32_t now_msec)
     if (gb_fixed_test)
     {
         motor_set(0, 0);
+        gb_turn_settling = false;
+        gb_odo_moved = false;
+        if (phase==PHASE_BRAKE) { g_turn_quiet_msec=now_msec; }
         servo_set_angle(SERVO_CENTER_DEG);
         ultrasonic_invalidate(); // A new body heading needs a new forward ping.
-        if (phase == PHASE_PASS) { g_pass_hold_x = g_x; }
         if (phase == PHASE_ALIGN) {
             g_target_hdg = 0.0f;
             g_turn_direction = (g_heading > 0.0f) ? -1 : 1;
@@ -1681,13 +1741,17 @@ odo_update (void)
                       (float) ENC_RIGHT_EDGES_PER_M;
     float    mean   = (dl + dr) / 2.0f;
 
+    gb_odo_moved = (left != g_last_left || right != g_last_right);
     g_last_left  = left;
     g_last_right = right;
+    float pivot_scale = gb_fixed_test ?
+        (float)(g_turn_direction < 0 ? BYPASS_PIVOT_LEFT_X100 : BYPASS_PIVOT_RIGHT_X100) :
+        (float)BYPASS_PIVOT_SLIP_X100;
 
     if (PHASE_PIVOT == g_phase)
     {
         float turn = ((mean / ((float) WHEEL_TRACK_MM / 2.0f)) *
-                      DEG_PER_RAD * 100.0f) / (float) BYPASS_PIVOT_SLIP_X100;
+                      DEG_PER_RAD * 100.0f) / pivot_scale;
 
         g_heading += gb_fixed_test ? g_turn_direction * turn :
                      ((g_target_hdg < g_heading) ? -turn : turn);
@@ -1695,13 +1759,14 @@ odo_update (void)
     else if (PHASE_ALIGN == g_phase)
     {
         float turn = ((mean / ((float) WHEEL_TRACK_MM / 2.0f)) *
-                      DEG_PER_RAD * 100.0f) / (float) BYPASS_PIVOT_SLIP_X100;
+                      DEG_PER_RAD * 100.0f) / pivot_scale;
 
         g_heading += gb_fixed_test ? g_turn_direction * turn :
                      ((g_heading > 0.0f) ? -turn : turn);
     }
     else if ((PHASE_OUT == g_phase) || (PHASE_PASS == g_phase) ||
-             (PHASE_RETURN == g_phase) || (PHASE_ADVANCE == g_phase))
+             (PHASE_RETURN == g_phase) || (PHASE_ADVANCE == g_phase) ||
+             (gb_fixed_test && PHASE_BRAKE == g_phase))
     {
         float turn = (((BYPASS_ODO_SWAP_LR ? (dr - dl) : (dl - dr)) /
                        (float) WHEEL_TRACK_MM) * DEG_PER_RAD);

@@ -183,7 +183,7 @@ Supported MQTT commands also include feature-test selections (`ft1111`), barcode
 
 ## Obstacle avoidance and calibration
 
-The ultrasonic sensor detects objects ahead; a servo scan samples multiple angles to estimate obstacle boundaries. The bypass logic uses configurable geometry, wheel encoder estimates, turning stages and line reacquisition. It is not simply a fixed-duration steering command. Current development includes a controlled fixed-width test route and safeguards for invalid scans, timeouts and movement conditions.
+The ultrasonic sensor detects objects ahead; a servo scan samples multiple angles to estimate obstacle boundaries. The bypass logic uses configurable geometry, wheel encoder estimates, turning stages and line reacquisition. It is not simply a fixed-duration steering command. The controlled centred 200 × 100 mm obstacle test now uses fixed 43° departure, 219 mm estimated offset and 65° return, with a full-footprint safety check before movement. USB/MQTT `v` continuously rehearses that route on empty floor and ends stopped. The checkpoint diagnostic and unapproved 270/280 mm planner are disabled. See [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) for parameters, limitations and safety checks.
 
 Before relying on obstacle bypass, validate forward clearance, wheel track, encoder edges per distance, pivot slip, turning angles, lateral clearance and final line alignment on the actual surface. Scan edges at the servo limit or with missing echoes should not be treated as reliable object dimensions. Refer to **[OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md)** for the fixed-width route, parameters, protections and staged physical tests, and **[ULTRASONIC_SCAN.md](ULTRASONIC_SCAN.md)** for scan interpretation and width limitations.
 

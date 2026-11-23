@@ -300,7 +300,7 @@
 #define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
 
 // Confirmed test setup; scan settings require tuning on the real sensor.
-#define CAR_LENGTH_MM              180u
+#define CAR_LENGTH_MM              170u
 #define CAR_WIDTH_MM               140u
 #define OBSTACLE_EXPECTED_WIDTH_MM  250u
 // Positive = sensor behind front bumper; -1 = not measured, bypass blocked.
@@ -338,6 +338,9 @@
 // Distances and heading come from the wheel encoders. STOP ends it at
 // once; any step that cannot finish brakes the car.
 // ------------------------------------------------------------------------
+#define BYPASS_COMPACT_OFFSET_MM     219u
+#define BYPASS_COMPACT_DEPARTURE_DEG 43u
+#define BYPASS_COMPACT_RETURN_DEG    65u
 #define BYPASS_ENABLED              true    // false: stay BLOCKED (old way).
 // Controlled experiment ONLY: the operator verifies an empty left bypass
 // corridor. The +/-30 degree sweep cannot verify that whole corridor.
@@ -345,11 +348,23 @@
 #define BYPASS_FIXED_WIDTH_TEST     true
 #endif
 #define BYPASS_FIXED_WIDTH_MM       200u    // Planning ONLY, never telemetry.
-#define BYPASS_FIXED_MARGIN_MM      50u
-#define BYPASS_FORWARD_TRIM_MM      100u    // Floor feedback: return 10 cm earlier.
-#define BYPASS_FIXED_OFFSET_MM      (BYPASS_FIXED_WIDTH_MM / 2u + CAR_WIDTH_MM / 2u + BYPASS_FIXED_MARGIN_MM)
+// Measured chassis/sensor geometry; axle is NOT assumed at chassis centre.
+#define BYPASS_AXLE_TO_FRONT_MM      60u
+#define BYPASS_LINE_SENSOR_FORWARD_MM 45u
+#define BYPASS_POSITION_UNCERTAINTY_MM 10u // Calibration allowance, not measured accuracy.
+#define BYPASS_DEPARTURE_MIN_DEG     20u
+#define BYPASS_DEPARTURE_MAX_DEG     75u
+#define BYPASS_RETURN_MIN_DEG        35u
+#define BYPASS_RETURN_MAX_DEG        70u   // At least 20 degrees away from perpendicular.
+#define BYPASS_GEOMETRY_STEP_MM      5u
+#define BYPASS_GEOMETRY_STEP_DEG     2u
+#define BYPASS_MAX_PLAN_OFFSET_MM   500u
+#define BYPASS_DRIVE_HEADING_TOL_DEG 2.0f  // Tracking budget included in swept-path planning.
+#define BYPASS_LATERAL_TOL_MM        10u   // Stop on sustained uncorrected PASS drift.
 #define BYPASS_LINE_TIMEOUT_MSEC    10000u
-#define BYPASS_DIAGONAL_DEG         60      // Departure/return; preserve 220 mm offset.
+#define BYPASS_TURN_SETTLE_MSEC     120u
+#define BYPASS_RETURN_EXTRA_MM      60u
+#define BYPASS_LINE_CROSS_MAX_MM    50u    // Permits measured 45 mm sensor-to-axle advance.
 #define BYPASS_TURN_SLOW_DEG        15      // Pace the final turn using existing pulses.
 #define BYPASS_ALIGN_TOL_DEG        5       // Both sensors AND heading required.
 
@@ -398,6 +413,14 @@
                                             // Approximate; verify both directions.
                                             // Pivot counts x this / 100:
                                             // turns short -> raise it.
+// Direction-specific wheel-travel multipliers. Increase a value if that
+// direction physically turns short. Keep the common value for legacy mode.
+#ifndef BYPASS_PIVOT_LEFT_X100
+#define BYPASS_PIVOT_LEFT_X100      BYPASS_PIVOT_SLIP_X100
+#endif
+#ifndef BYPASS_PIVOT_RIGHT_X100
+#define BYPASS_PIVOT_RIGHT_X100     BYPASS_PIVOT_SLIP_X100
+#endif
 #define BYPASS_PIVOT_SPEED          17      // Steady pivot power (was 30:
                                             // too violent; stalls below
                                             // about 15; 20 -> 18 -> 17).
