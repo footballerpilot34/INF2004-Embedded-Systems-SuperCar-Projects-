@@ -210,6 +210,8 @@ int32_t motor_right_speed(void) { return -100; }
 bool imu_is_ok(void) { return true; }
 bool imu_reading_is_valid(void) { return true; }
 bool imu_is_calibrated(void) { return true; }
+int32_t imu_accel_mg(void) { return 1000; }
+int32_t imu_lift_speed_mm_s(void) { return 0; }
 int32_t imu_pitch_x10(void) { return -1800; }
 int32_t imu_roll_x10(void) { return -1800; }
 int32_t hump_last_height_x10(void) { return 0; }

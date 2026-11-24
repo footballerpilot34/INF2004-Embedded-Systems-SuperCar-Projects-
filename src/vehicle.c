@@ -131,20 +131,27 @@ static bool            gb_hump_tilted       = false;
 static uint32_t        g_hump_off_msec      = 0u;    // When HUMP last ended.
 static bool            gb_floorless         = false; // No floor seen, since
 static uint32_t        g_floorless_msec     = 0u;    // this time.
-static bool            gb_hump_over         = false; // Past the top of it.
-static uint32_t        g_top_msec           = 0u;    // When it went over.
-static int32_t         g_top_speed          = 0;     // Speed then.
-static int32_t         g_hump_speed         = 0;     // Speed on it now.
-static int32_t         g_hump_extra         = 0;     // Power added for stalls.
-static uint32_t        g_boost_msec         = 0u;    // Last stall boost.
-static uint32_t        g_stall_edges        = 0u;    // Edges at window start.
-static uint32_t        g_stall_window       = 0u;    // Window start.
-static uint32_t        g_stall_since        = 0u;    // Stalled since.
-static bool            gb_stalled           = false; // Last window stalled.
-static int32_t         g_exit_speed         = 0;     // Speed as HUMP ended.
-static bool            gb_tilting           = false; // Over HUMP_ENTER, since
-static uint32_t        g_tilt_msec          = 0u;    // g_tilt_msec.
-static bool            gb_last_left         = true;  // Line last seen left.
+// IMU kick log (measuring a pick-up check, config.h).
+static bool     gb_kick        = false; // A kick is going on.
+static uint32_t g_kick_msec    = 0u;    // Began at.
+static int32_t  g_kick_up      = 0;     // Fastest up, mm/s.
+static int32_t  g_kick_down    = 0;     // Fastest down, mm/s.
+static int32_t  g_kick_max_mg  = 0;
+static int32_t  g_kick_min_mg  = 0;
+static bool     gb_hump_over   = false; // Past the top of it.
+static uint32_t g_top_msec     = 0u;    // When it went over.
+static int32_t  g_top_speed    = 0;     // Speed then.
+static int32_t  g_hump_speed   = 0;     // Speed on it now.
+static int32_t  g_hump_extra   = 0;     // Power added for stalls.
+static uint32_t g_boost_msec   = 0u;    // Last stall boost.
+static uint32_t g_stall_edges  = 0u;    // Edges at window start.
+static uint32_t g_stall_window = 0u;    // Window start.
+static uint32_t g_stall_since  = 0u;    // Stalled since.
+static bool     gb_stalled     = false; // Last window stalled.
+static int32_t  g_exit_speed   = 0;     // Speed as HUMP ended.
+static bool     gb_tilting     = false; // Over HUMP_ENTER, since
+static uint32_t g_tilt_msec    = 0u;    // g_tilt_msec.
+static bool     gb_last_left   = true;  // Line last seen left.
 
 // Which sensors last saw the line, so the car knows which limit it left by.
 typedef enum
@@ -546,6 +553,42 @@ vehicle_barcode_static(void)
  * @brief Run one step of the state machine. Call every control tick,
  *        after the sensor tasks.
  */
+static void
+lift_kick_log(uint32_t now_msec)
+{
+    int32_t speed = imu_lift_speed_mm_s();
+    int32_t accel = imu_accel_mg();
+    int32_t size  = ((speed < 0) ? -speed : speed);
+
+    if ((!gb_kick) && (size >= PICKUP_IMU_LOG_MM_S))
+    {
+        gb_kick       = true;
+        g_kick_msec   = now_msec;
+        g_kick_up     = 0;
+        g_kick_down   = 0;
+        g_kick_max_mg = accel;
+        g_kick_min_mg = accel;
+    }
+
+    if (gb_kick)
+    {
+        g_kick_up     = ((speed > g_kick_up) ? speed : g_kick_up);
+        g_kick_down   = ((speed < g_kick_down) ? speed : g_kick_down);
+        g_kick_max_mg = ((accel > g_kick_max_mg) ? accel : g_kick_max_mg);
+        g_kick_min_mg = ((accel < g_kick_min_mg) ? accel : g_kick_min_mg);
+
+        if ((2 * size) < PICKUP_IMU_LOG_MM_S)
+        {
+            gb_kick = false;
+            log_obstacle(
+                "IMU kick (%s): up %" PRId32 " mm/s, down %" PRId32
+                " mm/s, accel %" PRId32 "..%" PRId32 " mg, %" PRIu32 " ms.",
+                vehicle_state_name(g_state), g_kick_up, g_kick_down,
+                g_kick_min_mg, g_kick_max_mg, (now_msec - g_kick_msec));
+        }
+    }
+} /* lift_kick_log() */
+
 void
 vehicle_task(void)
 {
@@ -557,13 +600,15 @@ vehicle_task(void)
     uint32_t        mark_msec = 0u;
     line_junction_t junction  = LINE_JUNCTION_NONE;
 
+    lift_kick_log(now_msec);
+
     // Lifted off the floor while driving: the end of the demo.
     if ((vehicle_is_moving()) && (picked_up(now_msec)))
     {
         log_state("Picked up (no floor under any IR sensor for %" PRIu32
                   " ms) -> stopped. End of the demo.",
                   (now_msec - g_floorless_msec));
-        state_enter(VEHICLE_PICKED_UP, now_msec);
+        state_enter(VEHICLE_STOPPED, now_msec);
         motor_set(0, 0);
         return;
     }
@@ -741,7 +786,6 @@ vehicle_task(void)
         case VEHICLE_BARCODE_STATIC: // Barcodes are read by barcode_task().
         case VEHICLE_READY:
         case VEHICLE_STOPPED:
-        case VEHICLE_PICKED_UP:
         default:
             motor_set(0, 0);
             break;
@@ -815,10 +859,6 @@ vehicle_state_name(vehicle_state_t state)
 
         case VEHICLE_STOPPED:
             p_name = "STOPPED";
-            break;
-
-        case VEHICLE_PICKED_UP:
-            p_name = "PICKED_UP";
             break;
 
         case VEHICLE_LINE_CAL:
@@ -1422,7 +1462,7 @@ cruise_speed(uint32_t now_msec)
 
 /*!
  * @brief Report whether a state is a parked one: braked, waiting for
- *        START (READY, STOPPED, PICKED_UP).
+ *        START (READY or STOPPED).
  *
  * @param[in] state The state.
  *
@@ -1431,8 +1471,7 @@ cruise_speed(uint32_t now_msec)
 static bool
 is_parked(vehicle_state_t state)
 {
-    return (((VEHICLE_READY == state) || (VEHICLE_STOPPED == state)) ||
-            (VEHICLE_PICKED_UP == state));
+    return (((VEHICLE_READY == state) || (VEHICLE_STOPPED == state)));
 } /* is_parked() */
 
 /*!

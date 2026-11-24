@@ -1903,8 +1903,7 @@ scan_build(char * p_out, size_t capacity)
     }
     bool active   = (obstacle_scan_active()) || gb_scan_test_busy;
     bool can_scan = (!active) && ((((vehicle_state()) == VEHICLE_READY) ||
-                                   ((vehicle_state()) == VEHICLE_STOPPED)) ||
-                                  ((vehicle_state()) == VEHICLE_PICKED_UP));
+                                   ((vehicle_state()) == VEHICLE_STOPPED)));
     char const * state = active ? "Scanning"
                          : (p_value_p->cancelled) || (p_value_p->timed_out)
                              ? "Failed"
@@ -2106,6 +2105,10 @@ status_build(char * p_out, size_t capacity, uint32_t since)
         scan_width, scan_left, scan_right,
         obstacle_edge_status_name(profile->left_status),
         obstacle_edge_status_name(profile->right_status));
+
+    length +=
+        append_text(p_out + length, capacity - length, ",\"am\":%ld,\"vz\":%ld",
+                    (long)imu_accel_mg(), (long)imu_lift_speed_mm_s());
 
     // Pin finder: edges seen on each watched pin, as "GP4:12 GP5:0 ...".
     // NOTE: At most 10 pins of under 18 characters each: well within the

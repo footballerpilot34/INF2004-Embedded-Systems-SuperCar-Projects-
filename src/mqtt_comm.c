@@ -656,14 +656,15 @@ publish_telemetry(uint32_t now_msec)
         "\"l\":%d,\"r\":%d,\"b\":%d,\"rg\":%s,"
         "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
         "\"sv\":%" PRId32 ",\"hh\":%" PRId32 ".%" PRId32 ","
-        "\"pend\":\"%s\"}",
+        "\"am\":%" PRId32 ",\"vz\":%" PRId32 ",\"pend\":\"%s\"}",
         now_msec, vehicle_state_name(state),
         ((VEHICLE_BYPASS == state) ? bypass_phase_name() : ""),
         motor_left_speed(), motor_right_speed(), encoder_count(PIN_ENC_LEFT_A),
         encoder_count(PIN_ENC_RIGHT_A), (line.b_left_black ? 1 : 0),
         (line.b_right_black ? 1 : 0), (barcode_is_black() ? 1 : 0), range_text,
         imu_pitch_x10(), imu_roll_x10(), (int32_t)servo_angle(),
-        ((hump_height_x10()) / 10), ((hump_height_x10()) % 10),
+        ((hump_height_x10()) / 10), ((hump_height_x10()) % 10), imu_accel_mg(),
+        imu_lift_speed_mm_s(),
         ((BARCODE_CMD_NONE == pending) ? "" : barcode_command_name(pending)));
     publish(g_topic_tele, payload, 0u, 0u);
 } /* publish_telemetry() */

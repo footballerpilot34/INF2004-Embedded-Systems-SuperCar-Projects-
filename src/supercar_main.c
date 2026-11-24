@@ -1090,8 +1090,7 @@ vehicle_is_idle(void)
 {
     vehicle_state_t state = vehicle_state();
 
-    return (((VEHICLE_READY == state) || (VEHICLE_STOPPED == state)) ||
-            (VEHICLE_PICKED_UP == state));
+    return (((VEHICLE_READY == state) || (VEHICLE_STOPPED == state)));
 } /* vehicle_is_idle() */
 
 /*** end of file ***/

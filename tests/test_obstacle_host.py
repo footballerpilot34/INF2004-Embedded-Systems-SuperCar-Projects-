@@ -71,6 +71,8 @@ bool barcode_end_scan(void) { return false; }
 char const * barcode_command_name(barcode_command_t cmd) { (void)cmd; return "test"; }
 int32_t imu_max_tilt_x10(void) { return tilt; }
 int32_t imu_total_tilt_x10(void) { return tilt; }
+int32_t imu_accel_mg(void) { return 1000; }
+int32_t imu_lift_speed_mm_s(void) { return 0; }
 int32_t imu_pitch_x10(void) { return tilt; }
 int32_t imu_roll_x10(void) { return 0; }
 static bool both_line=true, left_line=true;
