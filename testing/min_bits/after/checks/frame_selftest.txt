@@ -1,0 +1,8 @@
+# Python frame reference self-test (T-S4-H02)
+# Commit 7750e18 (working tree identical for app_program/, config/, tools/, testing/host/). Run 2026-11-25 02:02 on the team laptop.
+# Command: python tools/mqtt_frame.py --selftest (SDK Python 3.9, then py -3 = 3.14)
+
+Python 3.9.13
+mqtt_frame.py self-test passed
+Python 3.14.8
+mqtt_frame.py self-test passed

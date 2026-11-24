@@ -1,0 +1,1487 @@
+# system: MQTT log events, 2026-11-24 from 15:30 (the four course runs, T-SYS-01 to T-SYS-04)
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry, heartbeat and "IMU kick" lines are left out; the hotspot name is replaced by <hotspot>.
+124588 15:34:50.818 cmd bcml
+124589 15:34:50.851 cmd/ack bcml
+124590 15:34:50.902 MQTT: command "bcml".
+124591 15:34:50.902 Barcode M -> TURN LEFT.
+124631 15:34:59.620 cmd bcns
+124632 15:34:59.667 cmd/ack bcns
+124633 15:34:59.682 MQTT: command "bcns".
+124634 15:34:59.682 Barcode N -> GO STRAIGHT.
+124651 15:35:04.251 cmd bcor
+124657 15:35:04.947 cmd/ack bcor
+124658 15:35:04.947 MQTT: command "bcor".
+124659 15:35:04.947 Barcode O -> TURN RIGHT.
+124676 15:35:08.553 cmd bcpu
+124678 15:35:08.953 cmd/ack bcpu
+124679 15:35:08.953 MQTT: command "bcpu".
+124680 15:35:08.953 Barcode P -> U-TURN.
+124989 15:36:17.670 cmd calibrate
+124991 15:36:22.819 cmd/ack calibrate
+124992 15:36:22.819 MQTT: command "calibrate".
+124995 15:36:22.868 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+125015 15:36:27.281 cmd start
+125016 15:36:27.361 cmd/ack start
+125017 15:36:27.379 MQTT: command "start".
+125019 15:36:27.381 State: STOPPED -> LINE_CAL
+125020 15:36:27.381 LINE_CAL: both sensors already on the line -> skipping calibration.
+125021 15:36:27.381 State: LINE_CAL -> FOLLOW_LINE
+125022 15:36:27.381 Barcode reader ON; IRQ edges=5794
+125125 15:36:50.269 Line lost: reversing 110 ms of path to where both sensors were on it.
+125126 15:36:50.269 Reverse done (a sensor found black).
+125240 15:37:17.192 Line lost: reversing 1070 ms of path to where both sensors were on it.
+125242 15:37:17.345 Reverse done (a sensor found black).
+125257 15:37:20.778 Obstacle at 150 mm -> stopped.
+125258 15:37:20.790 State: FOLLOW_LINE -> OBSTACLE_SCAN
+125259 15:37:20.794 Barcode reader OFF; IRQ edges=5794
+125261 15:37:20.891 Servo: 88 degrees.
+125265 15:37:21.538 Servo: 86 degrees.
+125267 15:37:21.700 Servo: 84 degrees.
+125270 15:37:22.150 Servo: 82 degrees.
+125273 15:37:22.737 Servo: 80 degrees.
+125277 15:37:23.147 Servo: 78 degrees.
+125280 15:37:23.577 Servo: 76 degrees.
+125282 15:37:23.960 Servo: 74 degrees.
+125285 15:37:24.833 Servo: 72 degrees.
+125289 15:37:24.943 Servo: 70 degrees.
+125292 15:37:25.626 Servo: 68 degrees.
+125295 15:37:25.862 Servo: 66 degrees.
+125298 15:37:26.316 Servo: 64 degrees.
+125300 15:37:26.787 Servo: 62 degrees.
+125304 15:37:28.757 Servo: 60 degrees.
+125307 15:37:28.764 Servo: 92 degrees.
+125310 15:37:28.764 Servo: 94 degrees.
+125311 15:37:28.864 Servo: 96 degrees.
+125314 15:37:29.077 Servo: 98 degrees.
+125317 15:37:29.426 Servo: 100 degrees.
+125320 15:37:29.904 Servo: 102 degrees.
+125323 15:37:30.746 Servo: 104 degrees.
+125326 15:37:30.831 Servo: 106 degrees.
+125329 15:37:31.249 Servo: 108 degrees.
+125332 15:37:31.748 Servo: 110 degrees.
+125335 15:37:32.167 Servo: 112 degrees.
+125338 15:37:32.772 Servo: 114 degrees.
+125342 15:37:33.231 Servo: 116 degrees.
+125345 15:37:33.587 Servo: 118 degrees.
+125347 15:37:33.995 Servo: 120 degrees.
+125350 15:37:35.535 Servo: 90 degrees.
+125351 15:37:35.547 SCAN obstacle distance=148 mm; estimated obstacle width=150 mm (nominal estimate).
+125352 15:37:35.549 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+125353 15:37:35.549 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+125354 15:37:35.549 obstacle {"front":148,"left":-65,"right":14,"mid":-26,"width":79,"lst":"estimated at scan limit","rst":"estimated distance jump","calibrated_width":null,"corrected_width":150,"width_fallback":true,"left_angle_x10":-300,"right_angle_x10":50,"t":964030}
+125355 15:37:35.549 BYPASS fixed test: plan, heading -10 deg.
+125356 15:37:35.549 State: OBSTACLE_SCAN -> BYPASS
+125357 15:37:35.565 BYPASS plan: offset=210 mm, departure=79 deg/214 mm, pass=355 mm, return=65 deg/232 mm, path=89
+125358 15:37:35.565 BYPASS forward-only translation; no reverse leg.
+125359 15:37:35.565 BYPASS fixed test: pivot, heading -10 deg.
+125365 15:37:36.903 BYPASS fixed test: out, heading -79 deg.
+125366 15:37:36.903 BYPASS pose (out): x=-5 z=4 mm, heading -79 deg, wheels L0 R0.
+125370 15:37:37.585 BYPASS pose (out): x=-36 z=10 mm, heading -79 deg, wheels L12 R12.
+125373 15:37:37.896 BYPASS pose (out): x=-69 z=17 mm, heading -79 deg, wheels L12 R12.
+125376 15:37:38.379 BYPASS pose (out): x=-100 z=23 mm, heading -79 deg, wheels L12 R12.
+125379 15:37:40.607 BYPASS pose (out): x=-132 z=29 mm, heading -79 deg, wheels L12 R12.
+125383 15:37:40.607 BYPASS pose (out): x=-163 z=35 mm, heading -79 deg, wheels L13 R11.
+125385 15:37:40.667 BYPASS pose (out): x=-194 z=41 mm, heading -79 deg, wheels L12 R12.
+125386 15:37:40.667 BYPASS fixed test: brake, heading -79 deg.
+125387 15:37:40.667 BYPASS fixed test: pivot, heading -79 deg.
+125393 15:37:41.881 BYPASS fixed test: pass, heading 1 deg.
+125394 15:37:41.886 BYPASS pose (pass): x=-211 z=46 mm, heading 1 deg, wheels L0 R0.
+125397 15:37:42.248 BYPASS pose (pass): x=-211 z=76 mm, heading 0 deg, wheels L12 R12.
+125400 15:37:42.731 BYPASS pose (pass): x=-211 z=109 mm, heading 0 deg, wheels L12 R12.
+125404 15:37:43.625 BYPASS pose (pass): x=-211 z=141 mm, heading 0 deg, wheels L13 R11.
+125407 15:37:43.856 BYPASS pose (pass): x=-211 z=173 mm, heading 0 deg, wheels L12 R12.
+125410 15:37:44.240 BYPASS pose (pass): x=-211 z=206 mm, heading 0 deg, wheels L12 R12.
+125413 15:37:44.774 BYPASS pose (pass): x=-211 z=239 mm, heading 0 deg, wheels L13 R11.
+125417 15:37:45.467 BYPASS pose (pass): x=-212 z=270 mm, heading 0 deg, wheels L12 R12.
+125420 15:37:45.792 BYPASS pose (pass): x=-212 z=303 mm, heading 0 deg, wheels L12 R12.
+125423 15:37:46.279 BYPASS pose (pass): x=-212 z=336 mm, heading 0 deg, wheels L12 R12.
+125426 15:37:46.756 BYPASS pose (pass): x=-212 z=369 mm, heading 0 deg, wheels L12 R12.
+125430 15:37:47.261 BYPASS fixed test: brake, heading 0 deg.
+125432 15:37:47.408 BYPASS fixed test: pivot, heading 0 deg.
+125438 15:37:48.650 BYPASS fixed test: return, heading 64 deg.
+125439 15:37:48.653 BYPASS pose (return): x=-211 z=399 mm, heading 64 deg, wheels L0 R0.
+125443 15:37:49.145 BYPASS pose (return): x=-183 z=412 mm, heading 65 deg, wheels L12 R12.
+125446 15:37:49.765 BYPASS pose (return): x=-153 z=426 mm, heading 64 deg, wheels L12 R12.
+125449 15:37:51.495 BYPASS pose (return): x=-125 z=439 mm, heading 65 deg, wheels L12 R12.
+125452 15:37:51.511 BYPASS pose (return): x=-96 z=453 mm, heading 65 deg, wheels L12 R12.
+125456 15:37:51.588 BYPASS pose (return): x=-67 z=467 mm, heading 65 deg, wheels L12 R12.
+125458 15:37:51.670 BYPASS pose (return): x=-37 z=480 mm, heading 65 deg, wheels L12 R12.
+125459 15:37:51.753 BYPASS fixed test: advance, heading 65 deg.
+125470 15:37:53.926 BYPASS fixed test: brake, heading 65 deg.
+125472 15:37:54.135 BYPASS fixed test: align, heading 65 deg.
+125479 15:37:55.451 State: BYPASS -> FOLLOW_LINE
+125480 15:37:55.467 Barcode reader ON; IRQ edges=5794
+125517 15:38:03.505 Line lost: reversing 1480 ms of path to where both sensors were on it.
+125519 15:38:03.716 Reverse done (a sensor found black).
+125542 15:38:08.709 Line lost: reversing 660 ms of path to where both sensors were on it.
+125543 15:38:08.843 Reverse done (a sensor found black).
+125591 15:38:19.569 Stalled on a slope for 410 ms -> HUMP, more power.
+125592 15:38:19.569   pitch -0.8 deg
+125593 15:38:19.569   roll -1.4 deg
+125594 15:38:19.578 State: FOLLOW_LINE -> HUMP
+125595 15:38:19.578 Barcode reader OFF; IRQ edges=5794
+125597 15:38:19.581 Hump: still stalled -> power 17.
+125598 15:38:19.662 Hump: over the top after 300 ms -> easing back to cruise.
+125599 15:38:19.669 Hump: stalled again -> climbing power.
+125601 15:38:19.770 Hump: still stalled -> power 22.
+125602 15:38:19.900 Hump: over the top after 818 ms -> easing back to cruise.
+125603 15:38:19.900 Hump cleared after 818 ms, 3 mm driven: peak height 3.1 mm, peak tilt 3.2 deg.
+125604 15:38:19.900 Highest this run: 3.1 mm (1 humps).
+125605 15:38:19.911 State: HUMP -> FOLLOW_LINE
+125606 15:38:19.911 hump {"height_mm":3.1,"peak_tilt_x10":32,"run_height_mm":3.1,"run_peak_tilt_x10":32,"n":1,"t":1009426}
+125608 15:38:19.916 Barcode reader ON; IRQ edges=5794
+125610 15:38:20.276 Barcode capture started; IRQ edges=5804
+125611 15:38:20.385 Barcode capture started; IRQ edges=5804
+125612 15:38:20.395 Barcode capture started; IRQ edges=5804
+125613 15:38:20.397 Barcode capture started; IRQ edges=5804
+125629 15:38:23.653 Obstacle at 122 mm -> stopped.
+125630 15:38:23.718 State: FOLLOW_LINE -> OBSTACLE_SCAN
+125631 15:38:23.727 Barcode reader OFF; IRQ edges=5906
+125632 15:38:23.727 Barcode: reading switched off after 18 bars+spaces -> decoding what was read.
+125633 15:38:23.727 Barcode lenient: 18 bars+spaces cannot be "*X*" with at most 8 missing.
+125634 15:38:23.727 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+125635 15:38:23.727  #1: 991 998 2923 960 3076 998 1053 3117 940 927
+125636 15:38:23.733  #11: 1080 2990 912 960 1043 1071 2951 1019
+125637 15:38:23.816 Barcode NOT decoded: 18 bars+spaces seen (valid: 10 per character - 1).
+125638 15:38:23.816 Servo: 88 degrees.
+125641 15:38:24.199 Servo: 86 degrees.
+125643 15:38:24.622 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+125644 15:38:24.622 Servo: 90 degrees.
+125645 15:38:24.622 State: OBSTACLE_SCAN -> PICKED_UP
+125732 15:38:44.390 cmd stop
+125735 15:38:44.516 cmd/ack stop
+125736 15:38:44.517 MQTT: command "stop".
+125737 15:38:44.517 State: PICKED_UP -> STOPPED
+126775 15:42:55.554 online 0
+126776 15:43:36.277 online 1
+126779 15:43:36.313 === SuperCar AAI14: line + barcode + hump/wall ===
+126780 15:43:36.316 Last restart: power-on or brown-out (supply dipped).
+126781 15:43:36.316 Servo: 90 degrees.
+126782 15:43:36.316 Checking LSM303DLHC...
+126783 15:43:36.316 LSM303DLHC ready on I2C1 GP2/GP3: accel 0x19, mag 0x1E. Live axes are shown in the UI.
+126784 15:43:36.316 HTTP: listening on port 80.
+126785 15:43:36.325 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+126786 15:43:36.325 Barcode reader OFF; IRQ edges=0
+126787 15:43:36.325 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+126788 15:43:36.325 Watchdog on: the car restarts itself if it freezes for 3000 ms.
+126789 15:43:36.325 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+126790 15:43:36.440 IMU calibration failed. Keep it still, level and try again.
+126791 15:43:36.454 Power: first VSYS reading: ADC 1179 of 4095.
+126792 15:43:36.454 Power: supply only 2.84 V: battery low or sagging; charge it.
+126793 15:43:36.454 Wi-Fi: waiting for DHCP on "<hotspot>".
+126794 15:43:36.454 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+126795 15:43:36.454 UI: open http://172.20.10.6 or http://supercar-aai14.local
+126796 15:43:36.454 Wi-Fi: mDNS registered as supercar-aai14.local.
+126797 15:43:36.454 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+126798 15:43:36.518 IMU calibration failed. Keep it still, level and try again.
+126799 15:43:36.534 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+126800 15:43:36.534 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+126825 15:43:42.144 cmd calibrate
+126827 15:43:47.223 cmd/ack calibrate
+126828 15:43:47.223 MQTT: command "calibrate".
+126831 15:43:47.246 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+126913 15:44:05.683 cmd bcml
+126915 15:44:05.733 cmd/ack bcml
+126916 15:44:05.733 MQTT: command "bcml".
+126917 15:44:05.746 Barcode M -> TURN LEFT.
+126954 15:44:13.651 cmd bcns
+126955 15:44:13.681 cmd/ack bcns
+126956 15:44:13.713 MQTT: command "bcns".
+126957 15:44:13.713 Barcode N -> GO STRAIGHT.
+126988 15:44:20.506 cmd bcor
+126989 15:44:20.555 cmd/ack bcor
+126990 15:44:20.589 MQTT: command "bcor".
+126991 15:44:20.589 Barcode O -> TURN RIGHT.
+127014 15:44:25.402 cmd bcpu
+127016 15:44:25.531 cmd/ack bcpu
+127017 15:44:25.531 MQTT: command "bcpu".
+127018 15:44:25.545 Barcode P -> U-TURN.
+127055 15:44:33.561 cmd start
+127056 15:44:33.619 cmd/ack start
+127057 15:44:35.633 MQTT: command "start".
+127058 15:44:35.633 State: READY -> LINE_CAL
+127059 15:44:35.633 LINE_CAL: right sensor on black -> forward, arcing right.
+127061 15:44:35.718 LINE_CAL OK: both sensors on the line -> following.
+127062 15:44:35.718 State: LINE_CAL -> FOLLOW_LINE
+127063 15:44:35.718 Barcode reader ON; IRQ edges=4771
+127082 15:44:39.115 Raised 1.3 mm for 304 ms -> HUMP, climbing.
+127083 15:44:39.230   pitch 0.9 deg
+127084 15:44:39.230   roll 0.0 deg
+127085 15:44:39.230 State: FOLLOW_LINE -> HUMP
+127086 15:44:39.230 Barcode reader OFF; IRQ edges=4771
+127091 15:44:39.830 Hump: over the top after 613 ms -> easing back to cruise.
+127094 15:44:40.286 Hump cleared after 1100 ms, 56 mm driven: peak height 2.7 mm, peak tilt 3.3 deg.
+127095 15:44:40.288 Highest this run: 2.7 mm (1 humps).
+127096 15:44:40.290 State: HUMP -> FOLLOW_LINE
+127097 15:44:40.291 Barcode reader ON; IRQ edges=4771
+127098 15:44:40.292 hump {"height_mm":2.7,"peak_tilt_x10":33,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":1,"t":80415}
+127100 15:44:40.488 Barcode capture started; IRQ edges=4781
+127101 15:44:40.556 Barcode capture started; IRQ edges=4781
+127102 15:44:40.556 Barcode capture started; IRQ edges=4781
+127103 15:44:40.556 Barcode capture started; IRQ edges=4781
+127137 15:44:47.802 barcode {"msg":"M","cmd":"TURN LEFT","t":88009}
+127138 15:44:47.918 Barcode COMMAND: "M" = TURN LEFT
+127139 15:44:47.928 Pending: TURN LEFT at the next crossroad.
+127143 15:44:48.519 Raised 2.0 mm for 307 ms -> HUMP, climbing.
+127144 15:44:48.519   pitch -0.4 deg
+127145 15:44:48.519   roll -0.9 deg
+127146 15:44:48.519 State: FOLLOW_LINE -> HUMP
+127147 15:44:48.591 Barcode reader OFF; IRQ edges=4998
+127150 15:44:49.049 Hump cleared after 512 ms, 27 mm driven: peak height 1.3 mm, peak tilt 0.9 deg.
+127151 15:44:49.049 Highest this run: 2.7 mm (2 humps).
+127152 15:44:49.049 State: HUMP -> FOLLOW_LINE
+127153 15:44:49.049 Barcode reader ON; IRQ edges=4998
+127154 15:44:49.061 hump {"height_mm":1.3,"peak_tilt_x10":9,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":2,"t":89225}
+127170 15:44:52.471 Raised 1.5 mm for 309 ms -> HUMP, climbing.
+127171 15:44:52.471   pitch 0.2 deg
+127172 15:44:52.471   roll 0.7 deg
+127173 15:44:52.471 State: FOLLOW_LINE -> HUMP
+127174 15:44:52.471 Barcode reader OFF; IRQ edges=4998
+127178 15:44:53.110 Hump: over the top after 660 ms -> easing back to cruise.
+127179 15:44:53.192 Hump cleared after 738 ms, 44 mm driven: peak height 1.5 mm, peak tilt 1.6 deg.
+127180 15:44:53.192 Highest this run: 2.7 mm (3 humps).
+127181 15:44:53.192 State: HUMP -> FOLLOW_LINE
+127182 15:44:53.192 Barcode reader ON; IRQ edges=4998
+127183 15:44:53.192 hump {"height_mm":1.5,"peak_tilt_x10":16,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":3,"t":93305}
+127196 15:44:55.731 Raised 2.8 mm for 307 ms -> HUMP, climbing.
+127197 15:44:55.738   pitch -0.7 deg
+127198 15:44:55.740   roll 1.3 deg
+127199 15:44:55.740 State: FOLLOW_LINE -> HUMP
+127200 15:44:55.740 Barcode reader OFF; IRQ edges=4998
+127203 15:44:56.101 Hump cleared after 502 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+127204 15:44:56.117 Highest this run: 2.7 mm (4 humps).
+127205 15:44:56.118 State: HUMP -> FOLLOW_LINE
+127206 15:44:56.120 Barcode reader ON; IRQ edges=4998
+127207 15:44:56.120 hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":4,"t":96245}
+127238 15:45:02.874 Raised 2.4 mm for 300 ms -> HUMP, climbing.
+127239 15:45:02.938   pitch -1.6 deg
+127240 15:45:02.950   roll 0.2 deg
+127241 15:45:02.950 State: FOLLOW_LINE -> HUMP
+127242 15:45:02.950 Barcode reader OFF; IRQ edges=4998
+127243 15:45:03.129 Hump: over the top after 130 ms -> easing back to cruise.
+127247 15:45:03.482 Hump cleared after 511 ms, 12 mm driven: peak height 1.3 mm, peak tilt 1.6 deg.
+127248 15:45:03.482 Highest this run: 2.7 mm (5 humps).
+127249 15:45:03.482 State: HUMP -> FOLLOW_LINE
+127250 15:45:03.482 Barcode reader ON; IRQ edges=4998
+127251 15:45:03.482 hump {"height_mm":1.3,"peak_tilt_x10":16,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":5,"t":103545}
+127257 15:45:04.666 Raised 1.3 mm for 302 ms -> HUMP, climbing.
+127258 15:45:04.756   pitch -0.8 deg
+127259 15:45:04.756   roll 0.6 deg
+127260 15:45:04.766 State: FOLLOW_LINE -> HUMP
+127261 15:45:04.766 Barcode reader OFF; IRQ edges=4998
+127264 15:45:05.173 Hump cleared after 508 ms, 15 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+127265 15:45:05.301 Highest this run: 2.7 mm (6 humps).
+127266 15:45:05.301 State: HUMP -> FOLLOW_LINE
+127267 15:45:05.312 Barcode reader ON; IRQ edges=4998
+127268 15:45:05.312 hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":6,"t":105365}
+127274 15:45:06.193 Stalled on a slope for 548 ms -> HUMP, more power.
+127275 15:45:06.290   pitch -1.0 deg
+127276 15:45:06.303   roll 1.4 deg
+127277 15:45:06.305 State: FOLLOW_LINE -> HUMP
+127278 15:45:06.307 Barcode reader OFF; IRQ edges=4998
+127287 15:45:07.911 Hump: over the top after 1762 ms -> easing back to cruise.
+127291 15:45:08.635 Hump: stalled again -> climbing power.
+127292 15:45:08.755 Hump: over the top after 2590 ms -> easing back to cruise.
+127296 15:45:09.330 Hump cleared after 3090 ms, 106 mm driven: peak height 5.5 mm, peak tilt 3.5 deg.
+127297 15:45:09.333 Highest this run: 5.5 mm (7 humps).
+127298 15:45:09.333 State: HUMP -> FOLLOW_LINE
+127299 15:45:09.333 Barcode reader ON; IRQ edges=4998
+127300 15:45:09.338 hump {"height_mm":5.5,"peak_tilt_x10":35,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":7,"t":109456}
+127316 15:45:12.755 Raised 1.3 mm for 310 ms -> HUMP, climbing.
+127317 15:45:12.755   pitch -0.1 deg
+127318 15:45:12.755   roll -0.6 deg
+127319 15:45:12.755 State: FOLLOW_LINE -> HUMP
+127320 15:45:12.755 Barcode reader OFF; IRQ edges=4998
+127323 15:45:13.116 Hump cleared after 510 ms, 29 mm driven: peak height 1.3 mm, peak tilt 0.9 deg.
+127324 15:45:13.122 Highest this run: 5.5 mm (8 humps).
+127325 15:45:13.122 State: HUMP -> FOLLOW_LINE
+127326 15:45:13.122 Barcode reader ON; IRQ edges=4998
+127327 15:45:13.122 hump {"height_mm":1.3,"peak_tilt_x10":9,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":8,"t":113285}
+127337 15:45:15.246 Raised 1.2 mm for 300 ms -> HUMP, climbing.
+127338 15:45:15.641   pitch 0.8 deg
+127339 15:45:15.641   roll 0.1 deg
+127340 15:45:15.641 State: FOLLOW_LINE -> HUMP
+127341 15:45:15.641 Barcode reader OFF; IRQ edges=4998
+127344 15:45:15.770 Hump: over the top after 262 ms -> easing back to cruise.
+127347 15:45:15.850 Hump cleared after 572 ms, 31 mm driven: peak height 1.7 mm, peak tilt 2.0 deg.
+127348 15:45:15.850 Highest this run: 5.5 mm (9 humps).
+127349 15:45:15.850 State: HUMP -> FOLLOW_LINE
+127350 15:45:15.866 Barcode reader ON; IRQ edges=4998
+127351 15:45:15.866 hump {"height_mm":1.7,"peak_tilt_x10":20,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":9,"t":116004}
+127408 15:45:28.520 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+127409 15:45:29.833   pitch -0.5 deg
+127410 15:45:29.833   roll -0.5 deg
+127411 15:45:29.833 State: FOLLOW_LINE -> HUMP
+127412 15:45:29.833 Barcode reader OFF; IRQ edges=4998
+127415 15:45:29.936 Hump cleared after 510 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+127416 15:45:29.936 Highest this run: 5.5 mm (10 humps).
+127417 15:45:29.936 State: HUMP -> FOLLOW_LINE
+127418 15:45:29.949 Barcode reader ON; IRQ edges=4998
+127419 15:45:29.949 hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":10,"t":129205}
+127429 15:45:31.711 Raised 1.1 mm for 307 ms -> HUMP, climbing.
+127430 15:45:31.724   pitch 0.3 deg
+127431 15:45:31.724   roll -0.5 deg
+127432 15:45:31.724 State: FOLLOW_LINE -> HUMP
+127433 15:45:31.724 Barcode reader OFF; IRQ edges=4998
+127437 15:45:32.205 Hump: over the top after 692 ms -> easing back to cruise.
+127441 15:45:32.957 Hump cleared after 1463 ms, 75 mm driven: peak height 2.6 mm, peak tilt 2.5 deg.
+127442 15:45:32.959 Highest this run: 5.5 mm (11 humps).
+127443 15:45:32.959 State: HUMP -> FOLLOW_LINE
+127444 15:45:32.964 Barcode reader ON; IRQ edges=4998
+127445 15:45:32.964 hump {"height_mm":2.6,"peak_tilt_x10":25,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":11,"t":133035}
+127450 15:45:33.726 Line lost: reversing 750 ms of path to where both sensors were on it.
+127451 15:45:33.823 Reverse done (a sensor found black).
+127460 15:45:35.701 Raised 1.0 mm for 310 ms -> HUMP, climbing.
+127461 15:45:35.705   pitch -0.7 deg
+127462 15:45:35.852   roll -0.3 deg
+127463 15:45:35.854 State: FOLLOW_LINE -> HUMP
+127464 15:45:35.854 Barcode reader OFF; IRQ edges=4998
+127465 15:45:35.854 Hump: over the top after 390 ms -> easing back to cruise.
+127467 15:45:36.050 Hump cleared after 710 ms, 40 mm driven: peak height 1.0 mm, peak tilt 1.7 deg.
+127468 15:45:36.126 Highest this run: 5.5 mm (12 humps).
+127469 15:45:36.126 State: HUMP -> FOLLOW_LINE
+127470 15:45:36.138 Barcode reader ON; IRQ edges=4998
+127471 15:45:36.140 hump {"height_mm":1.0,"peak_tilt_x10":17,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":12,"t":136245}
+127474 15:45:36.558 Obstacle at 145 mm -> stopped.
+127475 15:45:36.634 State: FOLLOW_LINE -> OBSTACLE_SCAN
+127476 15:45:36.634 Barcode reader OFF; IRQ edges=4998
+127478 15:45:36.763 Servo: 88 degrees.
+127481 15:45:37.524 Servo: 86 degrees.
+127485 15:45:37.717 Servo: 84 degrees.
+127488 15:45:38.174 Servo: 82 degrees.
+127491 15:45:38.689 Servo: 80 degrees.
+127493 15:45:39.096 Servo: 78 degrees.
+127497 15:45:39.516 Servo: 76 degrees.
+127500 15:45:39.945 Servo: 74 degrees.
+127503 15:45:40.509 Servo: 72 degrees.
+127506 15:45:43.539 Servo: 70 degrees.
+127509 15:45:43.545 Servo: 68 degrees.
+127512 15:45:43.545 Servo: 66 degrees.
+127513 15:45:43.671 Servo: 64 degrees.
+127514 15:45:43.671 Servo: 62 degrees.
+127515 15:45:43.671 Servo: 60 degrees.
+127516 15:45:43.671 Servo: 92 degrees.
+127519 15:45:44.018 Servo: 94 degrees.
+127522 15:45:44.629 Servo: 96 degrees.
+127525 15:45:44.950 Servo: 98 degrees.
+127529 15:45:45.483 Servo: 100 degrees.
+127532 15:45:45.918 Servo: 102 degrees.
+127534 15:45:46.338 Servo: 104 degrees.
+127537 15:45:46.773 Servo: 106 degrees.
+127540 15:45:49.616 Servo: 108 degrees.
+127544 15:45:49.626 Servo: 110 degrees.
+127548 15:45:49.712 Servo: 112 degrees.
+127549 15:45:49.721 Servo: 114 degrees.
+127550 15:45:49.723 Servo: 116 degrees.
+127551 15:45:49.724 Servo: 118 degrees.
+127553 15:45:50.015 Servo: 120 degrees.
+127556 15:45:50.762 Servo: 90 degrees.
+127557 15:45:50.762 SCAN obstacle distance=149 mm; estimated obstacle width=150 mm (nominal estimate).
+127558 15:45:50.762 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+127559 15:45:50.773 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+127560 15:45:50.775 obstacle {"front":149,"left":-69,"right":14,"mid":-28,"width":83,"lst":"estimated at scan limit","rst":"missing echoes","calibrated_width":null,"corrected_width":150,"width_fallback":true,"left_angle_x10":-300,"right_angle_x10":50,"t":150615}
+127561 15:45:50.775 BYPASS fixed test: plan, heading -10 deg.
+127562 15:45:50.775 State: OBSTACLE_SCAN -> BYPASS
+127566 15:45:52.744 BYPASS plan: offset=210 mm, departure=78 deg/215 mm, pass=352 mm, return=65 deg/232 mm, path=89
+127567 15:45:52.744 BYPASS forward-only translation; no reverse leg.
+127568 15:45:52.750 BYPASS fixed test: pivot, heading -10 deg.
+127571 15:45:53.054 BYPASS fixed test: out, heading -78 deg.
+127572 15:45:53.060 BYPASS pose (out): x=-5 z=4 mm, heading -78 deg, wheels L0 R0.
+127575 15:45:53.353 BYPASS pose (out): x=-35 z=11 mm, heading -78 deg, wheels L12 R12.
+127579 15:45:53.903 BYPASS pose (out): x=-65 z=17 mm, heading -78 deg, wheels L13 R11.
+127582 15:45:54.255 BYPASS pose (out): x=-94 z=23 mm, heading -79 deg, wheels L12 R12.
+127585 15:45:54.821 BYPASS pose (out): x=-125 z=29 mm, heading -79 deg, wheels L13 R11.
+127588 15:45:55.275 BYPASS pose (out): x=-155 z=35 mm, heading -79 deg, wheels L13 R11.
+127592 15:45:56.382 BYPASS pose (out): x=-185 z=41 mm, heading -78 deg, wheels L12 R12.
+127594 15:45:56.384 BYPASS fixed test: brake, heading -78 deg.
+127596 15:45:56.467 BYPASS fixed test: pivot, heading -78 deg.
+127604 15:45:57.851 BYPASS fixed test: pass, heading 1 deg.
+127605 15:45:57.959 BYPASS pose (pass): x=-212 z=48 mm, heading 1 deg, wheels L0 R0.
+127608 15:45:58.351 BYPASS pose (pass): x=-211 z=78 mm, heading 0 deg, wheels L12 R12.
+127611 15:45:58.857 BYPASS pose (pass): x=-211 z=111 mm, heading 0 deg, wheels L12 R12.
+127615 15:45:59.373 BYPASS pose (pass): x=-211 z=143 mm, heading 0 deg, wheels L12 R12.
+127618 15:46:01.370 BYPASS pose (pass): x=-211 z=176 mm, heading 0 deg, wheels L12 R12.
+127621 15:46:01.427 BYPASS pose (pass): x=-211 z=208 mm, heading 0 deg, wheels L12 R12.
+127624 15:46:01.431 BYPASS pose (pass): x=-211 z=241 mm, heading 0 deg, wheels L12 R12.
+127626 15:46:01.508 BYPASS pose (pass): x=-211 z=273 mm, heading 0 deg, wheels L12 R12.
+127629 15:46:01.895 BYPASS pose (pass): x=-211 z=306 mm, heading 0 deg, wheels L12 R12.
+127632 15:46:02.473 BYPASS pose (pass): x=-211 z=339 mm, heading 0 deg, wheels L12 R12.
+127635 15:46:02.921 BYPASS pose (pass): x=-211 z=371 mm, heading 0 deg, wheels L12 R12.
+127639 15:46:03.575 BYPASS fixed test: brake, heading 0 deg.
+127641 15:46:03.579 BYPASS fixed test: pivot, heading 0 deg.
+127646 15:46:04.688 BYPASS fixed test: return, heading 67 deg.
+127647 15:46:04.795 BYPASS pose (return): x=-210 z=400 mm, heading 67 deg, wheels L0 R0.
+127651 15:46:05.338 BYPASS pose (return): x=-182 z=412 mm, heading 66 deg, wheels L11 R13.
+127655 15:46:05.790 BYPASS pose (return): x=-154 z=425 mm, heading 65 deg, wheels L12 R12.
+127658 15:46:06.251 BYPASS pose (return): x=-126 z=438 mm, heading 65 deg, wheels L12 R12.
+127661 15:46:06.773 BYPASS pose (return): x=-99 z=451 mm, heading 65 deg, wheels L12 R12.
+127664 15:46:07.327 BYPASS pose (return): x=-71 z=464 mm, heading 65 deg, wheels L13 R11.
+127668 15:46:07.904 BYPASS pose (return): x=-41 z=478 mm, heading 65 deg, wheels L12 R12.
+127669 15:46:07.904 BYPASS fixed test: advance, heading 65 deg.
+127680 15:46:10.141 BYPASS fixed test: brake, heading 65 deg.
+127682 15:46:10.466 BYPASS fixed test: align, heading 65 deg.
+127689 15:46:11.677 State: BYPASS -> FOLLOW_LINE
+127690 15:46:11.791 Barcode reader ON; IRQ edges=5029
+127697 15:46:13.086 Line lost: reversing 640 ms of path to where both sensors were on it.
+127700 15:46:13.297 Reverse done (a sensor found black).
+127702 15:46:13.673 Raised 2.2 mm for 300 ms -> HUMP, climbing.
+127703 15:46:13.753   pitch 1.5 deg
+127704 15:46:13.769   roll -0.4 deg
+127705 15:46:13.769 State: FOLLOW_LINE -> HUMP
+127706 15:46:13.769 Barcode reader OFF; IRQ edges=5029
+127708 15:46:13.835 Hump: over the top after 200 ms -> easing back to cruise.
+127712 15:46:14.541 Hump cleared after 870 ms, 42 mm driven: peak height 2.2 mm, peak tilt 2.0 deg.
+127713 15:46:14.557 Highest this run: 5.5 mm (13 humps).
+127714 15:46:14.557 State: HUMP -> FOLLOW_LINE
+127715 15:46:14.557 Barcode reader ON; IRQ edges=5029
+127716 15:46:14.557 hump {"height_mm":2.2,"peak_tilt_x10":20,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":13,"t":174711}
+127733 15:46:19.208 Raised 1.5 mm for 310 ms -> HUMP, climbing.
+127734 15:46:19.305   pitch 0.0 deg
+127735 15:46:19.309   roll -0.7 deg
+127736 15:46:19.309 State: FOLLOW_LINE -> HUMP
+127737 15:46:19.313 Barcode reader OFF; IRQ edges=5029
+127742 15:46:19.852 Hump: over the top after 571 ms -> easing back to cruise.
+127746 15:46:20.777 Hump cleared after 1378 ms, 69 mm driven: peak height 2.8 mm, peak tilt 2.4 deg.
+127747 15:46:20.781 Highest this run: 5.5 mm (14 humps).
+127748 15:46:20.781 State: HUMP -> FOLLOW_LINE
+127749 15:46:20.781 Barcode reader ON; IRQ edges=5029
+127750 15:46:20.781 hump {"height_mm":2.8,"peak_tilt_x10":24,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":14,"t":180781}
+127757 15:46:21.880 Raised 2.6 mm for 301 ms -> HUMP, climbing.
+127758 15:46:21.995   pitch 0.8 deg
+127759 15:46:21.995   roll -1.2 deg
+127760 15:46:22.000 State: FOLLOW_LINE -> HUMP
+127761 15:46:22.000 Barcode reader OFF; IRQ edges=5029
+127763 15:46:22.208 Hump: over the top after 310 ms -> easing back to cruise.
+127765 15:46:22.513 Hump cleared after 630 ms, 36 mm driven: peak height 2.2 mm, peak tilt 1.6 deg.
+127766 15:46:22.616 Highest this run: 5.5 mm (15 humps).
+127767 15:46:22.619 State: HUMP -> FOLLOW_LINE
+127768 15:46:22.619 Barcode reader ON; IRQ edges=5029
+127769 15:46:22.619 hump {"height_mm":2.2,"peak_tilt_x10":16,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":15,"t":182712}
+127779 15:46:24.691 Raised 1.3 mm for 310 ms -> HUMP, climbing.
+127780 15:46:24.691   pitch 0.4 deg
+127781 15:46:24.691   roll -0.6 deg
+127782 15:46:24.691 State: FOLLOW_LINE -> HUMP
+127783 15:46:24.691 Barcode reader OFF; IRQ edges=5029
+127786 15:46:24.889 Hump: over the top after 391 ms -> easing back to cruise.
+127789 15:46:25.758 Hump cleared after 800 ms, 44 mm driven: peak height 1.6 mm, peak tilt 2.8 deg.
+127790 15:46:25.765 Highest this run: 5.5 mm (16 humps).
+127791 15:46:25.765 State: HUMP -> FOLLOW_LINE
+127792 15:46:25.765 Barcode reader ON; IRQ edges=5029
+127793 15:46:25.771 hump {"height_mm":1.6,"peak_tilt_x10":28,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":16,"t":185481}
+127799 15:46:26.482 Barcode capture started; IRQ edges=5068
+127800 15:46:26.726 Barcode capture started; IRQ edges=5068
+127801 15:46:26.742 Barcode capture started; IRQ edges=5068
+127802 15:46:26.742 Barcode capture started; IRQ edges=5068
+127803 15:46:26.742 Barcode capture started; IRQ edges=5068
+127804 15:46:26.742 Barcode capture started; IRQ edges=5068
+127805 15:46:26.742 Barcode capture started; IRQ edges=5068
+127806 15:46:26.742 Barcode capture started; IRQ edges=5068
+127807 15:46:26.838 Barcode capture started; IRQ edges=5068
+127808 15:46:26.838 Barcode capture started; IRQ edges=5068
+127809 15:46:26.838 Barcode capture started; IRQ edges=5068
+127810 15:46:26.851 Barcode capture started; IRQ edges=5068
+127811 15:46:26.854 Barcode capture started; IRQ edges=5068
+127812 15:46:26.854 Barcode capture started; IRQ edges=5068
+127814 15:46:26.982 Barcode initial mark 455 ms: treated as junction, scan dropped.
+127815 15:46:26.982 Side sensor: 460 ms black mark -> crossroad.
+127816 15:46:26.982 Crossroad: TURN LEFT now.
+127817 15:46:26.998 State: FOLLOW_LINE -> TURN
+127818 15:46:26.998 Barcode reader OFF; IRQ edges=5069
+127832 15:46:29.772 TURN LEFT done (on the line, 2762 ms).
+127833 15:46:29.772 State: TURN -> FOLLOW_LINE
+127834 15:46:29.788 Barcode reader ON; IRQ edges=5078
+127843 15:46:31.554 Raised 1.1 mm for 310 ms -> HUMP, climbing.
+127844 15:46:31.634   pitch 0.2 deg
+127845 15:46:31.639   roll 0.5 deg
+127846 15:46:31.642 State: FOLLOW_LINE -> HUMP
+127847 15:46:31.642 Barcode reader OFF; IRQ edges=5078
+127851 15:46:32.315 Hump cleared after 648 ms, 41 mm driven: peak height 2.2 mm, peak tilt 1.8 deg.
+127852 15:46:32.315 Highest this run: 5.5 mm (17 humps).
+127853 15:46:32.315 State: HUMP -> FOLLOW_LINE
+127854 15:46:32.315 Barcode reader ON; IRQ edges=5078
+127855 15:46:32.315 hump {"height_mm":2.2,"peak_tilt_x10":18,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":17,"t":192401}
+127866 15:46:34.510 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+127867 15:46:34.510   pitch 0.6 deg
+127868 15:46:34.526   roll -0.6 deg
+127869 15:46:34.526 State: FOLLOW_LINE -> HUMP
+127870 15:46:34.526 Barcode reader OFF; IRQ edges=5078
+127873 15:46:35.075 Hump cleared after 578 ms, 36 mm driven: peak height 1.5 mm, peak tilt 1.6 deg.
+127874 15:46:35.182 Highest this run: 5.5 mm (18 humps).
+127875 15:46:35.186 State: HUMP -> FOLLOW_LINE
+127876 15:46:35.188 Barcode reader ON; IRQ edges=5078
+127877 15:46:35.190 hump {"height_mm":1.5,"peak_tilt_x10":16,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":18,"t":195252}
+127889 15:46:37.465 Raised 1.1 mm for 309 ms -> HUMP, climbing.
+127890 15:46:37.465   pitch 0.5 deg
+127891 15:46:37.465   roll -0.5 deg
+127892 15:46:37.465 State: FOLLOW_LINE -> HUMP
+127893 15:46:37.474 Barcode reader OFF; IRQ edges=5078
+127896 15:46:37.876 Hump cleared after 510 ms, 32 mm driven: peak height 1.1 mm, peak tilt 1.3 deg.
+127897 15:46:37.976 Highest this run: 5.5 mm (19 humps).
+127898 15:46:37.976 State: HUMP -> FOLLOW_LINE
+127899 15:46:37.980 Barcode reader ON; IRQ edges=5078
+127900 15:46:37.980 hump {"height_mm":1.1,"peak_tilt_x10":13,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":19,"t":198032}
+127907 15:46:39.196 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+127908 15:46:39.196   pitch 0.4 deg
+127909 15:46:39.212   roll -0.5 deg
+127910 15:46:39.212 State: FOLLOW_LINE -> HUMP
+127911 15:46:39.212 Barcode reader OFF; IRQ edges=5078
+127917 15:46:40.333 Hump: over the top after 1200 ms -> easing back to cruise.
+127920 15:46:40.805 Hump cleared after 1684 ms, 101 mm driven: peak height 1.9 mm, peak tilt 2.3 deg.
+127921 15:46:40.940 Highest this run: 5.5 mm (20 humps).
+127922 15:46:40.943 State: HUMP -> FOLLOW_LINE
+127923 15:46:40.945 Barcode reader ON; IRQ edges=5078
+127924 15:46:40.948 hump {"height_mm":1.9,"peak_tilt_x10":23,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":20,"t":201022}
+127931 15:46:42.203 Barcode capture started; IRQ edges=5088
+127932 15:46:42.208 Barcode capture started; IRQ edges=5088
+127933 15:46:42.211 Barcode capture started; IRQ edges=5088
+127934 15:46:42.211 Barcode capture started; IRQ edges=5088
+127937 15:46:42.482 Barcode initial mark 464 ms: treated as junction, scan dropped.
+127959 15:46:47.780 Raised 1.6 mm for 301 ms -> HUMP, climbing.
+127960 15:46:48.012   pitch 1.1 deg
+127961 15:46:48.012   roll -0.3 deg
+127962 15:46:48.012 State: FOLLOW_LINE -> HUMP
+127963 15:46:48.012 Barcode reader OFF; IRQ edges=5090
+127964 15:46:48.012 Hump: over the top after 359 ms -> easing back to cruise.
+127974 15:46:49.744 Hump cleared after 2562 ms, 110 mm driven: peak height 2.2 mm, peak tilt 2.5 deg.
+127975 15:46:49.744 Highest this run: 5.5 mm (21 humps).
+127976 15:46:49.756 State: HUMP -> FOLLOW_LINE
+127977 15:46:49.756 Barcode reader ON; IRQ edges=5162
+127978 15:46:49.760 hump {"height_mm":2.2,"peak_tilt_x10":25,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":21,"t":209901}
+127980 15:46:50.021 Barcode capture started; IRQ edges=5173
+127981 15:46:50.092 Barcode capture started; IRQ edges=5173
+127982 15:46:50.092 Barcode capture started; IRQ edges=5173
+127983 15:46:50.092 Barcode capture started; IRQ edges=5173
+127993 15:46:51.969 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+127994 15:46:52.077   pitch 0.3 deg
+127995 15:46:52.077   roll -0.6 deg
+127996 15:46:52.077 State: FOLLOW_LINE -> HUMP
+127997 15:46:52.077 Barcode reader OFF; IRQ edges=5237
+127998 15:46:52.077 Barcode: reading switched off after 11 bars+spaces -> decoding what was read.
+127999 15:46:52.077 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+128000 15:46:52.077 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+128001 15:46:52.181  #1: 773 3325 929 1154 868 3144 850 1122 736 1358
+128002 15:46:52.183  #11: 2635
+128003 15:46:52.183 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+128007 15:46:52.697 Hump: over the top after 701 ms -> easing back to cruise.
+128009 15:46:53.069 Hump cleared after 1109 ms, 64 mm driven: peak height 3.1 mm, peak tilt 2.7 deg.
+128010 15:46:53.132 Highest this run: 5.5 mm (22 humps).
+128011 15:46:53.132 State: HUMP -> FOLLOW_LINE
+128012 15:46:53.132 Barcode reader ON; IRQ edges=5340
+128013 15:46:53.132 hump {"height_mm":3.1,"peak_tilt_x10":27,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":22,"t":213262}
+128015 15:46:53.229 Barcode capture started; IRQ edges=5347
+128016 15:46:53.341 Barcode capture started; IRQ edges=5347
+128017 15:46:53.341 Barcode capture started; IRQ edges=5347
+128021 15:46:53.776 Barcode: only 1 bars+spaces seen, ignored.
+128036 15:46:57.028 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+128037 15:46:57.033   pitch -0.1 deg
+128038 15:46:57.033   roll -0.6 deg
+128039 15:46:57.033 State: FOLLOW_LINE -> HUMP
+128040 15:46:57.033 Barcode reader OFF; IRQ edges=5348
+128044 15:46:57.460 Hump cleared after 508 ms, 32 mm driven: peak height 1.1 mm, peak tilt 1.3 deg.
+128045 15:46:57.460 Highest this run: 5.5 mm (23 humps).
+128046 15:46:57.470 State: HUMP -> FOLLOW_LINE
+128047 15:46:57.470 Barcode reader ON; IRQ edges=5348
+128048 15:46:57.470 hump {"height_mm":1.1,"peak_tilt_x10":13,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":23,"t":217611}
+128087 15:47:08.972 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+128088 15:47:08.983   pitch -0.1 deg
+128089 15:47:08.983   roll -0.5 deg
+128090 15:47:08.983 State: FOLLOW_LINE -> HUMP
+128091 15:47:09.096 Barcode reader OFF; IRQ edges=5348
+128092 15:47:09.112 Hump cleared after 510 ms, 31 mm driven: peak height 1.1 mm, peak tilt 1.0 deg.
+128093 15:47:09.112 Highest this run: 5.5 mm (24 humps).
+128094 15:47:09.112 State: HUMP -> FOLLOW_LINE
+128095 15:47:09.112 Barcode reader ON; IRQ edges=5348
+128096 15:47:09.112 Line lost: reversing 340 ms of path to where both sensors were on it.
+128097 15:47:09.112 Reverse done (a sensor found black).
+128100 15:47:09.357 Raised 4.4 mm for 301 ms -> HUMP, climbing.
+128101 15:47:09.473   pitch 0.0 deg
+128102 15:47:09.483   roll 2.0 deg
+128103 15:47:09.485 State: FOLLOW_LINE -> HUMP
+128104 15:47:09.485 Barcode reader OFF; IRQ edges=5348
+128111 15:47:10.726 Hump: over the top after 1372 ms -> easing back to cruise.
+128119 15:47:14.094 Hump cleared after 2831 ms, 130 mm driven: peak height 5.7 mm, peak tilt 3.8 deg.
+128120 15:47:14.094 Highest this run: 5.7 mm (25 humps).
+128121 15:47:14.094 State: HUMP -> FOLLOW_LINE
+128122 15:47:14.094 Barcode reader ON; IRQ edges=5348
+128123 15:47:14.094 hump {"height_mm":5.7,"peak_tilt_x10":38,"run_height_mm":5.7,"run_peak_tilt_x10":38,"n":25,"t":232391}
+128149 15:47:25.659 Line lost: reversing 1880 ms of path to where both sensors were on it.
+128151 15:47:25.661 Raised 5.3 mm for 300 ms -> HUMP, climbing.
+128152 15:47:25.661   pitch -3.6 deg
+128153 15:47:25.661   roll -0.5 deg
+128154 15:47:25.661 State: FOLLOW_LINE -> HUMP
+128155 15:47:25.661 Barcode reader OFF; IRQ edges=5348
+128157 15:47:25.715 Hump: over the top after 620 ms -> easing back to cruise.
+128158 15:47:25.715 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+128159 15:47:25.715 State: HUMP -> PICKED_UP
+128197 15:47:33.962 cmd stop
+128199 15:47:34.074 cmd/ack stop
+128200 15:47:34.074 MQTT: command "stop".
+128201 15:47:34.074 State: PICKED_UP -> STOPPED
+128219 15:47:38.349 cmd start
+128222 15:47:40.469 cmd/ack start
+128223 15:47:40.469 MQTT: command "start".
+128224 15:47:40.470 State: STOPPED -> LINE_CAL
+128225 15:47:40.473 LINE_CAL: both sensors already on the line -> skipping calibration.
+128226 15:47:40.473 State: LINE_CAL -> FOLLOW_LINE
+128227 15:47:40.473 Barcode reader ON; IRQ edges=6760
+128240 15:47:43.162 Raised 1.3 mm for 301 ms -> HUMP, climbing.
+128241 15:47:43.162   pitch 0.9 deg
+128242 15:47:43.162   roll 0.0 deg
+128243 15:47:43.162 State: FOLLOW_LINE -> HUMP
+128244 15:47:43.162 Barcode reader OFF; IRQ edges=6760
+128248 15:47:43.632 Hump cleared after 509 ms, 26 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+128249 15:47:43.632 Highest this run: 1.3 mm (1 humps).
+128250 15:47:43.632 State: HUMP -> FOLLOW_LINE
+128251 15:47:43.648 Barcode reader ON; IRQ edges=6760
+128252 15:47:43.648 hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":1.3,"run_peak_tilt_x10":12,"n":1,"t":263741}
+128261 15:47:45.457 Barcode capture started; IRQ edges=6769
+128262 15:47:45.538 Barcode capture started; IRQ edges=6769
+128263 15:47:45.538 Barcode capture started; IRQ edges=6769
+128298 15:47:53.238 barcode {"msg":"M","cmd":"TURN LEFT","t":273441}
+128299 15:47:53.271 Barcode COMMAND: "M" = TURN LEFT
+128300 15:47:53.271 Pending: TURN LEFT at the next crossroad.
+128335 15:48:00.683 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+128336 15:48:00.743   pitch -0.9 deg
+128337 15:48:00.743   roll 0.1 deg
+128338 15:48:00.743 State: FOLLOW_LINE -> HUMP
+128339 15:48:00.759 Barcode reader OFF; IRQ edges=6959
+128342 15:48:01.294 Hump cleared after 501 ms, 29 mm driven: peak height 1.0 mm, peak tilt 0.9 deg.
+128343 15:48:01.313 Highest this run: 1.3 mm (2 humps).
+128344 15:48:01.313 State: HUMP -> FOLLOW_LINE
+128345 15:48:01.313 Barcode reader ON; IRQ edges=6959
+128346 15:48:01.313 hump {"height_mm":1.0,"peak_tilt_x10":9,"run_height_mm":1.3,"run_peak_tilt_x10":12,"n":2,"t":281381}
+128362 15:48:04.730 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+128363 15:48:04.730   pitch -0.9 deg
+128364 15:48:04.737   roll 0.3 deg
+128365 15:48:04.737 State: FOLLOW_LINE -> HUMP
+128366 15:48:04.737 Barcode reader OFF; IRQ edges=6959
+128369 15:48:05.091 Hump: over the top after 484 ms -> easing back to cruise.
+128370 15:48:05.093 Hump cleared after 501 ms, 28 mm driven: peak height 1.3 mm, peak tilt 1.5 deg.
+128371 15:48:05.095 Highest this run: 1.3 mm (3 humps).
+128372 15:48:05.095 State: HUMP -> FOLLOW_LINE
+128373 15:48:05.095 Barcode reader ON; IRQ edges=6959
+128374 15:48:05.095 hump {"height_mm":1.3,"peak_tilt_x10":15,"run_height_mm":1.3,"run_peak_tilt_x10":15,"n":3,"t":285191}
+128391 15:48:08.506 Raised 1.5 mm for 308 ms -> HUMP, climbing.
+128392 15:48:08.568   pitch -1.0 deg
+128393 15:48:08.568   roll -0.3 deg
+128394 15:48:08.568 State: FOLLOW_LINE -> HUMP
+128395 15:48:08.568 Barcode reader OFF; IRQ edges=6959
+128399 15:48:09.179 Hump cleared after 683 ms, 36 mm driven: peak height 1.5 mm, peak tilt 1.6 deg.
+128400 15:48:09.244 Highest this run: 1.5 mm (4 humps).
+128401 15:48:09.244 State: HUMP -> FOLLOW_LINE
+128402 15:48:09.244 Barcode reader ON; IRQ edges=6959
+128403 15:48:09.244 hump {"height_mm":1.5,"peak_tilt_x10":16,"run_height_mm":1.5,"run_peak_tilt_x10":16,"n":4,"t":289392}
+128410 15:48:10.748 Stalled on a slope for 810 ms -> HUMP, more power.
+128411 15:48:10.748   pitch -0.9 deg
+128412 15:48:10.756   roll 1.2 deg
+128413 15:48:10.756 State: FOLLOW_LINE -> HUMP
+128414 15:48:10.756 Barcode reader OFF; IRQ edges=6959
+128417 15:48:10.977 Hump cleared after 508 ms, 16 mm driven: peak height 2.2 mm, peak tilt 1.6 deg.
+128418 15:48:10.977 Highest this run: 2.2 mm (5 humps).
+128419 15:48:10.990 State: HUMP -> FOLLOW_LINE
+128420 15:48:10.990 Barcode reader ON; IRQ edges=6959
+128421 15:48:10.992 hump {"height_mm":2.2,"peak_tilt_x10":16,"run_height_mm":2.2,"run_peak_tilt_x10":16,"n":5,"t":291121}
+128427 15:48:11.945 Stalled on a slope for 627 ms -> HUMP, more power.
+128428 15:48:12.041   pitch -0.7 deg
+128429 15:48:12.041   roll 1.8 deg
+128430 15:48:12.048 State: FOLLOW_LINE -> HUMP
+128431 15:48:12.049 Barcode reader OFF; IRQ edges=6959
+128441 15:48:13.937 Hump: over the top after 1912 ms -> easing back to cruise.
+128446 15:48:14.903 Hump cleared after 2932 ms, 121 mm driven: peak height 5.7 mm, peak tilt 3.2 deg.
+128447 15:48:14.903 Highest this run: 5.7 mm (6 humps).
+128448 15:48:14.903 State: HUMP -> FOLLOW_LINE
+128449 15:48:14.903 Barcode reader ON; IRQ edges=6959
+128450 15:48:14.903 hump {"height_mm":5.7,"peak_tilt_x10":32,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":6,"t":295057}
+128488 15:48:23.211 Raised 1.3 mm for 310 ms -> HUMP, climbing.
+128489 15:48:23.211   pitch 0.9 deg
+128490 15:48:23.211   roll 0.3 deg
+128491 15:48:23.211 State: FOLLOW_LINE -> HUMP
+128492 15:48:23.211 Barcode reader OFF; IRQ edges=6959
+128497 15:48:24.087 Hump: over the top after 950 ms -> easing back to cruise.
+128499 15:48:24.167 Hump cleared after 988 ms, 60 mm driven: peak height 1.3 mm, peak tilt 1.6 deg.
+128500 15:48:24.169 Highest this run: 5.7 mm (7 humps).
+128501 15:48:24.173 State: HUMP -> FOLLOW_LINE
+128502 15:48:24.177 Barcode reader ON; IRQ edges=6959
+128503 15:48:24.177 hump {"height_mm":1.3,"peak_tilt_x10":16,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":7,"t":304311}
+128528 15:48:29.815 Raised 1.8 mm for 300 ms -> HUMP, climbing.
+128529 15:48:29.925   pitch 1.2 deg
+128530 15:48:29.925   roll 0.4 deg
+128531 15:48:29.925 State: FOLLOW_LINE -> HUMP
+128532 15:48:29.925 Barcode reader OFF; IRQ edges=6959
+128535 15:48:30.316 Hump cleared after 508 ms, 27 mm driven: peak height 1.2 mm, peak tilt 1.3 deg.
+128536 15:48:30.377 Highest this run: 5.7 mm (8 humps).
+128537 15:48:30.387 State: HUMP -> FOLLOW_LINE
+128538 15:48:30.387 Barcode reader ON; IRQ edges=6959
+128539 15:48:30.387 hump {"height_mm":1.2,"peak_tilt_x10":13,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":8,"t":310522}
+128585 15:48:40.220 Raised 2.4 mm for 300 ms -> HUMP, climbing.
+128586 15:48:40.220   pitch -0.2 deg
+128587 15:48:40.220   roll -1.1 deg
+128588 15:48:40.220 State: FOLLOW_LINE -> HUMP
+128589 15:48:40.220 Barcode reader OFF; IRQ edges=6959
+128592 15:48:40.682 Hump cleared after 501 ms, 29 mm driven: peak height 2.0 mm, peak tilt 0.9 deg.
+128593 15:48:40.682 Highest this run: 5.7 mm (9 humps).
+128594 15:48:40.689 State: HUMP -> FOLLOW_LINE
+128595 15:48:40.689 Barcode reader ON; IRQ edges=6959
+128596 15:48:40.689 hump {"height_mm":2.0,"peak_tilt_x10":9,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":9,"t":320832}
+128623 15:48:47.957 Raised 2.7 mm for 308 ms -> HUMP, climbing.
+128624 15:48:47.961   pitch -1.8 deg
+128625 15:48:47.963   roll 0.0 deg
+128626 15:48:47.963 State: FOLLOW_LINE -> HUMP
+128627 15:48:48.019 Barcode reader OFF; IRQ edges=6959
+128628 15:48:48.019 Hump cleared after 552 ms, 30 mm driven: peak height 2.1 mm, peak tilt 1.7 deg.
+128629 15:48:48.031 Highest this run: 5.7 mm (10 humps).
+128630 15:48:48.031 State: HUMP -> FOLLOW_LINE
+128631 15:48:48.035 Barcode reader ON; IRQ edges=6959
+128661 15:48:54.639 Raised 2.6 mm for 310 ms -> HUMP, climbing.
+128662 15:48:54.718   pitch 0.0 deg
+128663 15:48:54.718   roll -1.2 deg
+128664 15:48:54.722 State: FOLLOW_LINE -> HUMP
+128665 15:48:54.722 Barcode reader OFF; IRQ edges=6959
+128668 15:48:55.108 Hump: over the top after 320 ms -> easing back to cruise.
+128670 15:48:55.367 Hump cleared after 680 ms, 34 mm driven: peak height 1.7 mm, peak tilt 2.4 deg.
+128671 15:48:55.369 Highest this run: 5.7 mm (11 humps).
+128672 15:48:55.373 State: HUMP -> FOLLOW_LINE
+128673 15:48:55.375 Barcode reader ON; IRQ edges=6959
+128674 15:48:55.377 hump {"height_mm":1.7,"peak_tilt_x10":24,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":11,"t":335471}
+128684 15:48:57.247 Barcode capture started; IRQ edges=6972
+128685 15:48:57.247 Barcode capture started; IRQ edges=6972
+128686 15:48:57.247 Barcode capture started; IRQ edges=6972
+128687 15:48:57.247 Barcode capture started; IRQ edges=6972
+128691 15:48:57.764 Barcode initial mark 543 ms: treated as junction, scan dropped.
+128692 15:48:57.856 Side sensor: 540 ms black mark -> crossroad.
+128693 15:48:57.859 Crossroad: TURN LEFT now.
+128694 15:48:57.859 State: FOLLOW_LINE -> TURN
+128695 15:48:57.859 Barcode reader OFF; IRQ edges=6974
+128702 15:48:59.526 TURN LEFT done (line found, 1416 ms).
+128703 15:48:59.528 State: TURN -> FOLLOW_LINE
+128704 15:48:59.532 Barcode reader ON; IRQ edges=6974
+128732 15:49:05.435 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+128733 15:49:05.437   pitch -0.8 deg
+128734 15:49:05.437   roll 0.6 deg
+128735 15:49:05.442 State: FOLLOW_LINE -> HUMP
+128736 15:49:05.442 Barcode reader OFF; IRQ edges=6974
+128740 15:49:05.807 Hump cleared after 501 ms, 30 mm driven: peak height 1.2 mm, peak tilt 1.2 deg.
+128741 15:49:05.807 Highest this run: 5.7 mm (12 humps).
+128742 15:49:05.812 State: HUMP -> FOLLOW_LINE
+128743 15:49:05.814 Barcode reader ON; IRQ edges=6974
+128744 15:49:05.814 hump {"height_mm":1.2,"peak_tilt_x10":12,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":12,"t":345902}
+128751 15:49:07.612 Raised 2.6 mm for 308 ms -> HUMP, climbing.
+128752 15:49:07.612   pitch 0.5 deg
+128753 15:49:07.620   roll -1.2 deg
+128754 15:49:07.622 State: FOLLOW_LINE -> HUMP
+128755 15:49:07.622 Barcode reader OFF; IRQ edges=6974
+128759 15:49:07.782 Hump cleared after 505 ms, 29 mm driven: peak height 2.0 mm, peak tilt 1.6 deg.
+128760 15:49:07.792 Highest this run: 5.7 mm (13 humps).
+128761 15:49:07.792 State: HUMP -> FOLLOW_LINE
+128762 15:49:07.796 Barcode reader ON; IRQ edges=6974
+128763 15:49:07.796 hump {"height_mm":2.0,"peak_tilt_x10":16,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":13,"t":347912}
+128769 15:49:09.059 Raised 2.6 mm for 301 ms -> HUMP, climbing.
+128770 15:49:09.062   pitch 0.2 deg
+128771 15:49:09.062   roll -1.2 deg
+128772 15:49:09.062 State: FOLLOW_LINE -> HUMP
+128773 15:49:09.067 Barcode reader OFF; IRQ edges=6974
+128777 15:49:09.636 Hump cleared after 508 ms, 29 mm driven: peak height 1.5 mm, peak tilt 1.5 deg.
+128778 15:49:09.636 Highest this run: 5.7 mm (14 humps).
+128779 15:49:09.636 State: HUMP -> FOLLOW_LINE
+128780 15:49:09.642 Barcode reader ON; IRQ edges=6974
+128781 15:49:09.642 hump {"height_mm":1.5,"peak_tilt_x10":15,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":14,"t":349731}
+128799 15:49:13.482 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+128800 15:49:13.482   pitch 0.2 deg
+128801 15:49:13.491   roll -0.6 deg
+128802 15:49:13.492 State: FOLLOW_LINE -> HUMP
+128803 15:49:13.492 Barcode reader OFF; IRQ edges=6974
+128805 15:49:13.693 Hump: over the top after 240 ms -> easing back to cruise.
+128808 15:49:14.056 Hump cleared after 598 ms, 26 mm driven: peak height 1.3 mm, peak tilt 2.4 deg.
+128809 15:49:14.056 Highest this run: 5.7 mm (15 humps).
+128810 15:49:14.056 State: HUMP -> FOLLOW_LINE
+128811 15:49:14.062 Barcode reader ON; IRQ edges=6974
+128812 15:49:14.062 hump {"height_mm":1.3,"peak_tilt_x10":24,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":15,"t":354251}
+128820 15:49:15.733 Barcode capture started; IRQ edges=6986
+128821 15:49:15.736 Barcode capture started; IRQ edges=6986
+128822 15:49:15.739 Barcode capture started; IRQ edges=6986
+128823 15:49:15.742 Barcode capture started; IRQ edges=6986
+128826 15:49:16.142 Barcode initial mark 467 ms: treated as junction, scan dropped.
+128838 15:49:18.917 Raised 1.5 mm for 302 ms -> HUMP, climbing.
+128839 15:49:19.014   pitch 0.0 deg
+128840 15:49:19.014   roll 0.7 deg
+128841 15:49:19.014 State: FOLLOW_LINE -> HUMP
+128842 15:49:19.018 Barcode reader OFF; IRQ edges=6987
+128844 15:49:19.182 Hump cleared after 506 ms, 27 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+128845 15:49:19.187 Highest this run: 5.7 mm (16 humps).
+128846 15:49:19.187 State: HUMP -> FOLLOW_LINE
+128847 15:49:19.192 Barcode reader ON; IRQ edges=6987
+128848 15:49:19.192 hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":16,"t":359361}
+128855 15:49:20.482 Raised 2.2 mm for 309 ms -> HUMP, climbing.
+128856 15:49:20.582   pitch 1.5 deg
+128857 15:49:20.589   roll 0.3 deg
+128858 15:49:20.594 State: FOLLOW_LINE -> HUMP
+128859 15:49:20.594 Barcode reader OFF; IRQ edges=6987
+128865 15:49:21.475 Hump cleared after 938 ms, 56 mm driven: peak height 1.6 mm, peak tilt 1.9 deg.
+128866 15:49:21.482 Highest this run: 5.7 mm (17 humps).
+128867 15:49:21.484 State: HUMP -> FOLLOW_LINE
+128868 15:49:21.486 Barcode reader ON; IRQ edges=6987
+128869 15:49:21.486 hump {"height_mm":1.6,"peak_tilt_x10":19,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":17,"t":361611}
+128875 15:49:22.594 Barcode capture started; IRQ edges=6994
+128876 15:49:22.662 Barcode capture started; IRQ edges=6994
+128877 15:49:22.666 Barcode capture started; IRQ edges=6994
+128901 15:49:27.640 Raised 1.6 mm for 300 ms -> HUMP, climbing.
+128902 15:49:27.744   pitch 1.1 deg
+128903 15:49:27.746   roll -0.2 deg
+128904 15:49:27.748 State: FOLLOW_LINE -> HUMP
+128905 15:49:27.748 Barcode reader OFF; IRQ edges=7127
+128906 15:49:27.748 Barcode: reading switched off after 24 bars+spaces -> decoding what was read.
+128907 15:49:27.752 Barcode lenient: 24 bars+spaces cannot be "*X*" with at most 8 missing.
+128908 15:49:27.752 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+128909 15:49:27.822  #1: 610 1216 2891 1061 3108 1065 1039 3234 937 974
+128910 15:49:27.822  #11: 959 2981 1003 997 996 1089 2801 1088 2926 1065
+128911 15:49:27.822  #21: 911 1087 3022 1034
+128912 15:49:27.822 Barcode NOT decoded: 24 bars+spaces seen (valid: 10 per character - 1).
+128915 15:49:28.235 Hump: over the top after 580 ms -> easing back to cruise.
+128917 15:49:28.442 Hump cleared after 809 ms, 40 mm driven: peak height 1.8 mm, peak tilt 2.0 deg.
+128918 15:49:28.505 Highest this run: 5.7 mm (18 humps).
+128919 15:49:28.505 State: HUMP -> FOLLOW_LINE
+128920 15:49:28.505 Barcode reader ON; IRQ edges=7139
+128921 15:49:28.510 hump {"height_mm":1.8,"peak_tilt_x10":20,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":18,"t":368642}
+128978 15:49:40.948 Raised 1.2 mm for 311 ms -> HUMP, climbing.
+128979 15:49:40.959   pitch -0.8 deg
+128980 15:49:40.962   roll -0.4 deg
+128981 15:49:40.964 State: FOLLOW_LINE -> HUMP
+128982 15:49:40.964 Barcode reader OFF; IRQ edges=7139
+128986 15:49:41.345 Hump cleared after 510 ms, 30 mm driven: peak height 1.0 mm, peak tilt 1.2 deg.
+128987 15:49:41.345 Highest this run: 5.7 mm (19 humps).
+128988 15:49:41.345 State: HUMP -> FOLLOW_LINE
+128989 15:49:41.345 Barcode reader ON; IRQ edges=7139
+128990 15:49:41.345 hump {"height_mm":1.0,"peak_tilt_x10":12,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":19,"t":381521}
+129007 15:49:45.251 Stalled on a slope for 221 ms -> HUMP, more power.
+129008 15:49:45.406   pitch -1.4 deg
+129009 15:49:45.409   roll 0.4 deg
+129010 15:49:45.413 State: FOLLOW_LINE -> HUMP
+129011 15:49:45.415 Barcode reader OFF; IRQ edges=7139
+129014 15:49:45.466 Hump: still stalled -> power 17.
+129015 15:49:45.466 Hump: over the top after 220 ms -> easing back to cruise.
+129017 15:49:45.765 Hump cleared after 509 ms, 14 mm driven: peak height 1.2 mm, peak tilt 1.5 deg.
+129018 15:49:45.850 Highest this run: 5.7 mm (20 humps).
+129019 15:49:45.850 State: HUMP -> FOLLOW_LINE
+129020 15:49:45.850 Barcode reader ON; IRQ edges=7139
+129021 15:49:45.850 hump {"height_mm":1.2,"peak_tilt_x10":15,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":20,"t":385964}
+129028 15:49:48.536 Raised 2.4 mm for 311 ms -> HUMP, climbing.
+129029 15:49:48.536   pitch -0.7 deg
+129030 15:49:48.536   roll 1.1 deg
+129031 15:49:48.550 State: FOLLOW_LINE -> HUMP
+129032 15:49:48.552 Barcode reader OFF; IRQ edges=7139
+129033 15:49:48.552 Hump: still stalled -> power 17.
+129036 15:49:48.616 Hump: over the top after 1520 ms -> easing back to cruise.
+129041 15:49:49.733 Hump cleared after 2250 ms, 152 mm driven: peak height 6.3 mm, peak tilt 3.7 deg.
+129042 15:49:49.736 Highest this run: 6.3 mm (21 humps).
+129043 15:49:49.736 State: HUMP -> FOLLOW_LINE
+129044 15:49:49.736 Barcode reader ON; IRQ edges=7139
+129045 15:49:49.736 hump {"height_mm":6.3,"peak_tilt_x10":37,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":21,"t":389521}
+129077 15:49:56.868 Raised 2.0 mm for 300 ms -> HUMP, climbing.
+129078 15:49:56.973   pitch 0.0 deg
+129079 15:49:56.977   roll 0.9 deg
+129080 15:49:56.979 State: FOLLOW_LINE -> HUMP
+129081 15:49:56.979 Barcode reader OFF; IRQ edges=7139
+129085 15:49:58.775 Hump: over the top after 530 ms -> easing back to cruise.
+129088 15:49:58.775 Hump cleared after 888 ms, 50 mm driven: peak height 2.0 mm, peak tilt 1.9 deg.
+129089 15:49:58.775 Highest this run: 6.3 mm (22 humps).
+129090 15:49:58.775 State: HUMP -> FOLLOW_LINE
+129091 15:49:58.775 Barcode reader ON; IRQ edges=7139
+129146 15:50:12.064 Raised 1.5 mm for 308 ms -> HUMP, climbing.
+129147 15:50:12.160   pitch 1.0 deg
+129148 15:50:12.167   roll 0.0 deg
+129149 15:50:12.167 State: FOLLOW_LINE -> HUMP
+129150 15:50:12.171 Barcode reader OFF; IRQ edges=7139
+129154 15:50:12.337 Hump cleared after 512 ms, 29 mm driven: peak height 1.5 mm, peak tilt 1.3 deg.
+129155 15:50:12.355 Highest this run: 6.3 mm (23 humps).
+129156 15:50:12.355 State: HUMP -> FOLLOW_LINE
+129157 15:50:12.358 Barcode reader ON; IRQ edges=7139
+129189 15:50:19.286 Raised 1.1 mm for 305 ms -> HUMP, climbing.
+129190 15:50:19.370   pitch 0.0 deg
+129191 15:50:19.374   roll 0.5 deg
+129192 15:50:19.376 State: FOLLOW_LINE -> HUMP
+129193 15:50:19.378 Barcode reader OFF; IRQ edges=7139
+129197 15:50:19.799 Hump cleared after 502 ms, 29 mm driven: peak height 1.1 mm, peak tilt 1.4 deg.
+129198 15:50:19.896 Highest this run: 6.3 mm (24 humps).
+129199 15:50:19.896 State: HUMP -> FOLLOW_LINE
+129200 15:50:19.896 Barcode reader ON; IRQ edges=7139
+129201 15:50:19.896 hump {"height_mm":1.1,"peak_tilt_x10":14,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":24,"t":419963}
+129218 15:50:26.773 Raised 2.6 mm for 311 ms -> HUMP, climbing.
+129219 15:50:26.914   pitch 0.3 deg
+129220 15:50:26.917   roll -1.2 deg
+129221 15:50:26.917 State: FOLLOW_LINE -> HUMP
+129222 15:50:26.917 Barcode reader OFF; IRQ edges=7139
+129223 15:50:26.917 Hump: over the top after 719 ms -> easing back to cruise.
+129224 15:50:26.917 Hump cleared after 919 ms, 53 mm driven: peak height 1.5 mm, peak tilt 1.9 deg.
+129225 15:50:26.917 Highest this run: 6.3 mm (25 humps).
+129226 15:50:26.917 State: HUMP -> FOLLOW_LINE
+129227 15:50:27.001 Barcode reader ON; IRQ edges=7139
+129240 15:50:29.503 Raised 1.5 mm for 309 ms -> HUMP, climbing.
+129241 15:50:29.507   pitch 0.0 deg
+129242 15:50:29.507   roll -0.7 deg
+129243 15:50:29.507 State: FOLLOW_LINE -> HUMP
+129244 15:50:29.507 Barcode reader OFF; IRQ edges=7139
+129247 15:50:30.037 Hump: over the top after 581 ms -> easing back to cruise.
+129249 15:50:30.347 Hump cleared after 810 ms, 47 mm driven: peak height 1.5 mm, peak tilt 1.9 deg.
+129250 15:50:30.357 Highest this run: 6.3 mm (26 humps).
+129251 15:50:30.357 State: HUMP -> FOLLOW_LINE
+129252 15:50:30.357 Barcode reader ON; IRQ edges=7145
+129253 15:50:30.363 hump {"height_mm":1.5,"peak_tilt_x10":19,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":26,"t":430451}
+129289 15:50:38.015 Raised 1.9 mm for 312 ms -> HUMP, climbing.
+129290 15:50:38.028   pitch -1.3 deg
+129291 15:50:38.029   roll -0.1 deg
+129292 15:50:38.029 State: FOLLOW_LINE -> HUMP
+129293 15:50:38.029 Barcode reader OFF; IRQ edges=7146
+129296 15:50:38.692 Hump cleared after 506 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.5 deg.
+129297 15:50:38.692 Highest this run: 6.3 mm (27 humps).
+129298 15:50:38.703 State: HUMP -> FOLLOW_LINE
+129299 15:50:38.703 Barcode reader ON; IRQ edges=7146
+129300 15:50:38.703 hump {"height_mm":1.3,"peak_tilt_x10":15,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":27,"t":438691}
+129309 15:50:40.266 Raised 1.5 mm for 310 ms -> HUMP, climbing.
+129310 15:50:40.282   pitch -0.6 deg
+129311 15:50:40.282   roll -0.7 deg
+129312 15:50:40.284 State: FOLLOW_LINE -> HUMP
+129313 15:50:40.286 Barcode reader OFF; IRQ edges=7146
+129316 15:50:40.784 Hump cleared after 510 ms, 28 mm driven: peak height 1.5 mm, peak tilt 1.5 deg.
+129317 15:50:40.791 Highest this run: 6.3 mm (28 humps).
+129318 15:50:40.791 State: HUMP -> FOLLOW_LINE
+129319 15:50:40.791 Barcode reader ON; IRQ edges=7146
+129320 15:50:40.791 hump {"height_mm":1.5,"peak_tilt_x10":15,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":28,"t":440887}
+129332 15:50:43.298 Raised 2.0 mm for 309 ms -> HUMP, climbing.
+129333 15:50:43.298   pitch 0.1 deg
+129334 15:50:43.298   roll -0.9 deg
+129335 15:50:43.298 State: FOLLOW_LINE -> HUMP
+129336 15:50:43.305 Barcode reader OFF; IRQ edges=7146
+129340 15:50:43.789 Hump cleared after 510 ms, 30 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+129341 15:50:43.789 Highest this run: 6.3 mm (29 humps).
+129342 15:50:43.789 State: HUMP -> FOLLOW_LINE
+129343 15:50:43.789 Barcode reader ON; IRQ edges=7146
+129344 15:50:43.789 hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":29,"t":443961}
+129353 15:50:45.543 Raised 2.4 mm for 301 ms -> HUMP, climbing.
+129354 15:50:45.543   pitch 0.2 deg
+129355 15:50:45.543   roll -1.1 deg
+129356 15:50:45.543 State: FOLLOW_LINE -> HUMP
+129357 15:50:45.543 Barcode reader OFF; IRQ edges=7146
+129359 15:50:45.938 Hump: over the top after 479 ms -> easing back to cruise.
+129362 15:50:46.259 Hump cleared after 750 ms, 39 mm driven: peak height 1.6 mm, peak tilt 2.1 deg.
+129363 15:50:46.259 Highest this run: 6.3 mm (30 humps).
+129364 15:50:46.259 State: HUMP -> FOLLOW_LINE
+129365 15:50:46.259 Barcode reader ON; IRQ edges=7146
+129366 15:50:46.259 hump {"height_mm":1.6,"peak_tilt_x10":21,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":30,"t":446401}
+129374 15:50:47.837 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+129375 15:50:47.936   pitch 0.3 deg
+129376 15:50:47.942   roll 0.6 deg
+129377 15:50:47.942 State: FOLLOW_LINE -> HUMP
+129378 15:50:47.942 Barcode reader OFF; IRQ edges=7146
+129381 15:50:48.369 Hump: over the top after 371 ms -> easing back to cruise.
+129384 15:50:48.817 Hump cleared after 863 ms, 41 mm driven: peak height 1.2 mm, peak tilt 2.2 deg.
+129385 15:50:48.817 Highest this run: 6.3 mm (31 humps).
+129386 15:50:48.817 State: HUMP -> FOLLOW_LINE
+129387 15:50:48.817 Barcode reader ON; IRQ edges=7273
+129388 15:50:48.817 hump {"height_mm":1.2,"peak_tilt_x10":22,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":31,"t":448904}
+129415 15:50:54.620 Raised 1.0 mm for 308 ms -> HUMP, climbing.
+129416 15:50:54.720   pitch 0.7 deg
+129417 15:50:54.728   roll -0.3 deg
+129418 15:50:54.732 State: FOLLOW_LINE -> HUMP
+129419 15:50:54.733 Barcode reader OFF; IRQ edges=7273
+129422 15:50:55.125 Hump cleared after 501 ms, 26 mm driven: peak height 1.0 mm, peak tilt 1.6 deg.
+129423 15:50:55.301 Highest this run: 6.3 mm (32 humps).
+129424 15:50:55.303 State: HUMP -> FOLLOW_LINE
+129425 15:50:55.303 Barcode reader ON; IRQ edges=7273
+129426 15:50:55.303 hump {"height_mm":1.0,"peak_tilt_x10":16,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":32,"t":455302}
+129431 15:50:55.818 Barcode capture started; IRQ edges=7276
+129448 15:50:59.429 Raised 2.4 mm for 310 ms -> HUMP, climbing.
+129449 15:50:59.541   pitch 1.6 deg
+129450 15:50:59.541   roll 0.0 deg
+129451 15:50:59.541 State: FOLLOW_LINE -> HUMP
+129452 15:50:59.541 Barcode reader OFF; IRQ edges=7391
+129453 15:50:59.541 Barcode: reading switched off after 17 bars+spaces -> decoding what was read.
+129454 15:50:59.541 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+129455 15:50:59.541 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129456 15:50:59.608  #1: 536 1337 2855 1155 3101 1006 1070 3164 902 901
+129457 15:50:59.616  #11: 944 2997 1012 998 1004 1024 2916
+129458 15:50:59.616 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+129460 15:50:59.775 Hump: over the top after 321 ms -> easing back to cruise.
+129462 15:51:00.109 Hump cleared after 610 ms, 30 mm driven: peak height 2.4 mm, peak tilt 2.0 deg.
+129463 15:51:00.109 Highest this run: 6.3 mm (33 humps).
+129464 15:51:00.123 State: HUMP -> FOLLOW_LINE
+129465 15:51:00.123 Barcode reader ON; IRQ edges=7412
+129466 15:51:00.125 hump {"height_mm":2.4,"peak_tilt_x10":20,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":33,"t":460232}
+129468 15:51:00.318 Barcode capture started; IRQ edges=7423
+129469 15:51:00.318 Barcode capture started; IRQ edges=7423
+129470 15:51:00.318 Barcode capture started; IRQ edges=7423
+129471 15:51:00.318 Barcode capture started; IRQ edges=7423
+129480 15:51:02.144 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+129481 15:51:02.144 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129482 15:51:02.149  #1: 2803 922 878 2833 1022
+129483 15:51:02.149 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+129493 15:51:04.240 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+129494 15:51:04.320   pitch 0.8 deg
+129495 15:51:04.322   roll -0.6 deg
+129496 15:51:04.322 State: FOLLOW_LINE -> HUMP
+129497 15:51:04.322 Barcode reader OFF; IRQ edges=7452
+129502 15:51:05.162 Hump: over the top after 991 ms -> easing back to cruise.
+129506 15:51:05.579 Hump cleared after 1399 ms, 79 mm driven: peak height 2.5 mm, peak tilt 2.4 deg.
+129507 15:51:05.590 Highest this run: 6.3 mm (34 humps).
+129508 15:51:05.592 State: HUMP -> FOLLOW_LINE
+129509 15:51:05.592 Barcode reader ON; IRQ edges=7452
+129510 15:51:05.594 hump {"height_mm":2.5,"peak_tilt_x10":24,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":34,"t":465781}
+129537 15:51:11.589 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+129538 15:51:11.597   pitch 0.9 deg
+129539 15:51:11.597   roll 0.5 deg
+129540 15:51:11.603 State: FOLLOW_LINE -> HUMP
+129541 15:51:11.605 Barcode reader OFF; IRQ edges=7452
+129545 15:51:12.244 Hump: over the top after 782 ms -> easing back to cruise.
+129548 15:51:12.599 Hump cleared after 1133 ms, 65 mm driven: peak height 1.3 mm, peak tilt 2.2 deg.
+129549 15:51:12.599 Highest this run: 6.3 mm (35 humps).
+129550 15:51:12.618 State: HUMP -> FOLLOW_LINE
+129551 15:51:12.618 Barcode reader ON; IRQ edges=7452
+129552 15:51:12.622 hump {"height_mm":1.3,"peak_tilt_x10":22,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":35,"t":472731}
+129560 15:51:15.066 Raised 6.3 mm for 310 ms -> HUMP, climbing.
+129561 15:51:15.066   pitch -1.8 deg
+129562 15:51:15.082   roll -2.9 deg
+129563 15:51:15.199 State: FOLLOW_LINE -> HUMP
+129564 15:51:15.199 Barcode reader OFF; IRQ edges=7452
+129565 15:51:15.199 Hump: over the top after 140 ms -> easing back to cruise.
+129566 15:51:15.199 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+129567 15:51:15.206 State: HUMP -> PICKED_UP
+129678 15:51:39.547 cmd stop
+129679 15:51:39.615 cmd/ack stop
+129680 15:51:39.637 MQTT: command "stop".
+129681 15:51:39.648 State: PICKED_UP -> STOPPED
+129712 15:51:48.411 cmd start
+129721 15:51:51.062 MQTT: command "start".
+129722 15:51:51.072 State: STOPPED -> LINE_CAL
+129723 15:51:51.072 LINE_CAL: both sensors already on the line -> skipping calibration.
+129724 15:51:51.072 State: LINE_CAL -> FOLLOW_LINE
+129725 15:51:51.078 Barcode reader ON; IRQ edges=7748
+129735 15:51:53.332 Raised 1.1 mm for 310 ms -> HUMP, climbing.
+129736 15:51:53.332   pitch 0.1 deg
+129737 15:51:53.335   roll 0.5 deg
+129739 15:51:53.405 State: FOLLOW_LINE -> HUMP
+129740 15:51:53.405 Barcode reader OFF; IRQ edges=7748
+129741 15:51:53.405 Hump cleared after 509 ms, 25 mm driven: peak height 1.1 mm, peak tilt 1.5 deg.
+129742 15:51:53.405 Highest this run: 1.1 mm (1 humps).
+129743 15:51:53.412 hump {"height_mm":1.1,"peak_tilt_x10":15,"run_height_mm":1.1,"run_peak_tilt_x10":15,"n":1,"t":513513}
+129744 15:51:53.412 State: HUMP -> FOLLOW_LINE
+129745 15:51:53.412 Barcode reader ON; IRQ edges=7748
+129752 15:51:55.066 Raised 1.1 mm for 307 ms -> HUMP, climbing.
+129753 15:51:55.292   pitch 0.4 deg
+129754 15:51:55.292   roll -0.5 deg
+129755 15:51:55.292 State: FOLLOW_LINE -> HUMP
+129756 15:51:55.292 Barcode reader OFF; IRQ edges=7748
+129760 15:51:56.876 Hump cleared after 502 ms, 26 mm driven: peak height 1.2 mm, peak tilt 1.4 deg.
+129761 15:51:56.956 Highest this run: 1.2 mm (2 humps).
+129762 15:51:56.960 State: HUMP -> FOLLOW_LINE
+129763 15:51:56.960 Barcode reader ON; IRQ edges=7763
+129764 15:51:56.960 hump {"height_mm":1.2,"peak_tilt_x10":14,"run_height_mm":1.2,"run_peak_tilt_x10":15,"n":2,"t":515772}
+129765 15:51:56.960 Barcode capture started; IRQ edges=7765
+129769 15:51:57.267 Raised 2.0 mm for 300 ms -> HUMP, climbing.
+129770 15:51:57.271   pitch -0.4 deg
+129771 15:51:57.271   roll -0.9 deg
+129772 15:51:57.273 State: FOLLOW_LINE -> HUMP
+129773 15:51:57.275 Barcode reader OFF; IRQ edges=7804
+129774 15:51:57.277 Barcode: reading switched off after 7 bars+spaces -> decoding what was read.
+129775 15:51:57.280 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+129776 15:51:57.333 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129777 15:51:57.333  #1: 2644 1218 801 3133 859 1060 978
+129778 15:51:57.333 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+129782 15:51:57.764 Hump cleared after 510 ms, 25 mm driven: peak height 1.7 mm, peak tilt 1.1 deg.
+129783 15:51:57.764 Highest this run: 1.7 mm (3 humps).
+129784 15:51:57.764 State: HUMP -> FOLLOW_LINE
+129785 15:51:57.764 Barcode reader ON; IRQ edges=7828
+129786 15:51:57.764 hump {"height_mm":1.7,"peak_tilt_x10":11,"run_height_mm":1.7,"run_peak_tilt_x10":15,"n":3,"t":517851}
+129788 15:51:58.039 Barcode capture started; IRQ edges=7841
+129789 15:51:58.055 Barcode capture started; IRQ edges=7841
+129790 15:51:58.055 Barcode capture started; IRQ edges=7841
+129791 15:51:58.055 Barcode capture started; IRQ edges=7841
+129792 15:51:58.202 Barcode capture started; IRQ edges=7841
+129804 15:52:00.510 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+129805 15:52:00.566   pitch 0.2 deg
+129806 15:52:00.574   roll -0.6 deg
+129807 15:52:00.576 State: FOLLOW_LINE -> HUMP
+129808 15:52:00.576 Barcode reader OFF; IRQ edges=7915
+129809 15:52:00.576 Barcode: reading switched off after 10 bars+spaces -> decoding what was read.
+129810 15:52:00.576 Barcode lenient: 10 bars+spaces cannot be "*X*" with at most 8 missing.
+129811 15:52:00.576 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129812 15:52:00.645  #1: 2561 1104 806 1112 2923 1112 3034 967 981 2900
+129813 15:52:00.647 Barcode NOT decoded: 10 bars+spaces seen (valid: 10 per character - 1).
+129816 15:52:01.015 Hump cleared after 511 ms, 25 mm driven: peak height 1.1 mm, peak tilt 1.1 deg.
+129817 15:52:01.077 Highest this run: 1.7 mm (4 humps).
+129818 15:52:01.077 State: HUMP -> FOLLOW_LINE
+129819 15:52:01.077 Barcode reader ON; IRQ edges=7916
+129820 15:52:01.077 hump {"height_mm":1.1,"peak_tilt_x10":11,"run_height_mm":1.7,"run_peak_tilt_x10":15,"n":4,"t":521222}
+129837 15:52:04.634 Raised 1.3 mm for 302 ms -> HUMP, climbing.
+129838 15:52:04.704   pitch -0.2 deg
+129839 15:52:04.704   roll -0.6 deg
+129840 15:52:04.704 State: FOLLOW_LINE -> HUMP
+129841 15:52:04.715 Barcode reader OFF; IRQ edges=7916
+129844 15:52:05.148 Hump: over the top after 488 ms -> easing back to cruise.
+129848 15:52:05.574 Hump cleared after 876 ms, 45 mm driven: peak height 1.3 mm, peak tilt 1.7 deg.
+129849 15:52:05.574 Highest this run: 1.7 mm (5 humps).
+129850 15:52:05.574 State: HUMP -> FOLLOW_LINE
+129851 15:52:05.574 Barcode reader ON; IRQ edges=7916
+129852 15:52:05.574 hump {"height_mm":1.3,"peak_tilt_x10":17,"run_height_mm":1.7,"run_peak_tilt_x10":17,"n":5,"t":525721}
+129883 15:52:13.978 Raised 1.0 mm for 308 ms -> HUMP, climbing.
+129884 15:52:13.978   pitch -0.7 deg
+129885 15:52:13.978   roll 0.4 deg
+129886 15:52:13.994 State: FOLLOW_LINE -> HUMP
+129887 15:52:13.994 Barcode reader OFF; IRQ edges=7916
+129890 15:52:14.144 Hump cleared after 509 ms, 28 mm driven: peak height 1.0 mm, peak tilt 1.1 deg.
+129891 15:52:14.144 Highest this run: 1.7 mm (6 humps).
+129892 15:52:14.144 State: HUMP -> FOLLOW_LINE
+129893 15:52:14.155 Barcode reader ON; IRQ edges=7916
+129909 15:52:17.397 Raised 1.6 mm for 309 ms -> HUMP, climbing.
+129910 15:52:17.408   pitch -1.1 deg
+129911 15:52:17.409   roll 0.0 deg
+129912 15:52:17.409 State: FOLLOW_LINE -> HUMP
+129913 15:52:17.409 Barcode reader OFF; IRQ edges=7916
+129916 15:52:17.894 Hump cleared after 512 ms, 20 mm driven: peak height 1.3 mm, peak tilt 1.4 deg.
+129917 15:52:18.005 Highest this run: 1.7 mm (7 humps).
+129918 15:52:18.005 State: HUMP -> FOLLOW_LINE
+129919 15:52:18.023 Barcode reader ON; IRQ edges=7916
+129920 15:52:18.023 hump {"height_mm":1.3,"peak_tilt_x10":14,"run_height_mm":1.7,"run_peak_tilt_x10":17,"n":7,"t":538092}
+129926 15:52:19.098 Stalled on a slope for 690 ms -> HUMP, more power.
+129927 15:52:19.196   pitch -0.9 deg
+129928 15:52:19.196   roll 1.2 deg
+129929 15:52:19.196 State: FOLLOW_LINE -> HUMP
+129930 15:52:19.196 Barcode reader OFF; IRQ edges=7916
+129932 15:52:19.338 Hump: still stalled -> power 17.
+129938 15:52:20.322 Hump: over the top after 1210 ms -> easing back to cruise.
+129945 15:52:21.572 Hump cleared after 2401 ms, 131 mm driven: peak height 7.2 mm, peak tilt 3.9 deg.
+129946 15:52:21.572 Highest this run: 7.2 mm (8 humps).
+129947 15:52:21.575 State: HUMP -> FOLLOW_LINE
+129948 15:52:21.575 Barcode reader ON; IRQ edges=7916
+129949 15:52:21.577 hump {"height_mm":7.2,"peak_tilt_x10":39,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":8,"t":541691}
+130013 15:52:36.617 Raised 1.6 mm for 300 ms -> HUMP, climbing.
+130014 15:52:36.617   pitch 1.1 deg
+130015 15:52:36.617   roll 0.3 deg
+130016 15:52:36.621 State: FOLLOW_LINE -> HUMP
+130017 15:52:36.621 Barcode reader OFF; IRQ edges=7916
+130020 15:52:37.124 Hump cleared after 508 ms, 26 mm driven: peak height 1.5 mm, peak tilt 1.4 deg.
+130021 15:52:37.128 Highest this run: 7.2 mm (9 humps).
+130022 15:52:37.128 State: HUMP -> FOLLOW_LINE
+130023 15:52:37.130 Barcode reader ON; IRQ edges=7916
+130024 15:52:37.130 hump {"height_mm":1.5,"peak_tilt_x10":14,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":9,"t":557252}
+130051 15:52:42.916 Raised 1.6 mm for 310 ms -> HUMP, climbing.
+130052 15:52:43.031   pitch -1.1 deg
+130053 15:52:43.031   roll 0.5 deg
+130054 15:52:43.031 State: FOLLOW_LINE -> HUMP
+130055 15:52:43.031 Barcode reader OFF; IRQ edges=7916
+130057 15:52:43.258 Hump: over the top after 330 ms -> easing back to cruise.
+130061 15:52:43.676 Hump cleared after 709 ms, 36 mm driven: peak height 2.2 mm, peak tilt 2.9 deg.
+130062 15:52:43.676 Highest this run: 7.2 mm (10 humps).
+130063 15:52:43.676 State: HUMP -> FOLLOW_LINE
+130064 15:52:43.692 Barcode reader ON; IRQ edges=7916
+130065 15:52:43.692 hump {"height_mm":2.2,"peak_tilt_x10":29,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":10,"t":563841}
+130077 15:52:46.302 Raised 1.5 mm for 307 ms -> HUMP, climbing.
+130078 15:52:46.370   pitch 1.0 deg
+130079 15:52:46.383   roll -0.1 deg
+130080 15:52:46.383 State: FOLLOW_LINE -> HUMP
+130081 15:52:46.383 Barcode reader OFF; IRQ edges=7916
+130083 15:52:46.545 Hump: over the top after 292 ms -> easing back to cruise.
+130086 15:52:46.937 Hump cleared after 651 ms, 31 mm driven: peak height 1.8 mm, peak tilt 2.0 deg.
+130087 15:52:46.937 Highest this run: 7.2 mm (11 humps).
+130088 15:52:46.937 State: HUMP -> FOLLOW_LINE
+130089 15:52:46.954 Barcode reader ON; IRQ edges=7916
+130090 15:52:46.955 hump {"height_mm":1.8,"peak_tilt_x10":20,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":11,"t":567111}
+130131 15:52:55.754 Raised 1.7 mm for 300 ms -> HUMP, climbing.
+130132 15:52:55.832   pitch -0.1 deg
+130133 15:52:55.832   roll 0.8 deg
+130134 15:52:55.841 State: FOLLOW_LINE -> HUMP
+130135 15:52:55.841 Barcode reader OFF; IRQ edges=7916
+130138 15:52:56.266 Hump cleared after 501 ms, 26 mm driven: peak height 2.0 mm, peak tilt 1.5 deg.
+130139 15:52:56.366 Highest this run: 7.2 mm (12 humps).
+130140 15:52:56.369 State: HUMP -> FOLLOW_LINE
+130141 15:52:56.369 Barcode reader ON; IRQ edges=7916
+130142 15:52:56.371 hump {"height_mm":2.0,"peak_tilt_x10":15,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":12,"t":576462}
+130189 15:53:06.482 Barcode capture started; IRQ edges=7934
+130190 15:53:06.547 Barcode capture started; IRQ edges=7934
+130191 15:53:06.558 Barcode capture started; IRQ edges=7934
+130192 15:53:06.558 Barcode capture started; IRQ edges=7934
+130193 15:53:06.558 Barcode capture started; IRQ edges=7934
+130194 15:53:06.563 Barcode capture started; IRQ edges=7934
+130195 15:53:06.563 Barcode capture started; IRQ edges=7934
+130196 15:53:06.628 Raised 1.6 mm for 300 ms -> HUMP, climbing.
+130197 15:53:06.644   pitch -1.1 deg
+130198 15:53:06.644   roll 0.4 deg
+130199 15:53:06.644 State: FOLLOW_LINE -> HUMP
+130200 15:53:06.774 Barcode reader OFF; IRQ edges=7934
+130201 15:53:06.774 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+130202 15:53:06.774 Barcode: only 0 bars+spaces seen, ignored.
+130205 15:53:07.117 Hump cleared after 508 ms, 26 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+130206 15:53:07.298 Highest this run: 7.2 mm (13 humps).
+130207 15:53:07.304 State: HUMP -> FOLLOW_LINE
+130208 15:53:07.304 Barcode reader ON; IRQ edges=7936
+130209 15:53:07.304 hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":13,"t":587332}
+130222 15:53:09.646 Line lost: reversing 600 ms of path to where both sensors were on it.
+130223 15:53:09.727 Reverse done (a sensor found black).
+130244 15:53:14.031 Raised 1.5 mm for 306 ms -> HUMP, climbing.
+130245 15:53:14.033   pitch -1.0 deg
+130246 15:53:14.035   roll 0.6 deg
+130247 15:53:14.037 State: FOLLOW_LINE -> HUMP
+130248 15:53:14.037 Barcode reader OFF; IRQ edges=7936
+130253 15:53:15.009 Hump: over the top after 990 ms -> easing back to cruise.
+130256 15:53:15.467 Hump cleared after 1398 ms, 79 mm driven: peak height 3.1 mm, peak tilt 2.2 deg.
+130257 15:53:15.467 Highest this run: 7.2 mm (14 humps).
+130258 15:53:15.483 State: HUMP -> FOLLOW_LINE
+130259 15:53:15.483 Barcode reader ON; IRQ edges=7936
+130260 15:53:15.483 hump {"height_mm":3.1,"peak_tilt_x10":22,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":14,"t":595611}
+130276 15:53:18.864 Line lost: reversing 1400 ms of path to where both sensors were on it.
+130278 15:53:21.651 Reverse done (a sensor found black).
+130280 15:53:21.669 Raised 3.3 mm for 309 ms -> HUMP, climbing.
+130281 15:53:21.671   pitch -2.2 deg
+130282 15:53:21.671   roll -0.6 deg
+130283 15:53:21.671 State: FOLLOW_LINE -> HUMP
+130284 15:53:21.671 Barcode reader OFF; IRQ edges=7936
+130286 15:53:21.762 Hump: over the top after 949 ms -> easing back to cruise.
+130287 15:53:21.770 Hump cleared after 1138 ms, 69 mm driven: peak height 2.4 mm, peak tilt 1.7 deg.
+130288 15:53:21.770 Highest this run: 7.2 mm (15 humps).
+130289 15:53:21.770 State: HUMP -> FOLLOW_LINE
+130290 15:53:21.776 Barcode reader ON; IRQ edges=7936
+130291 15:53:21.776 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+130292 15:53:21.778   pitch 0.7 deg
+130293 15:53:21.780   roll -0.6 deg
+130294 15:53:21.874 State: FOLLOW_LINE -> HUMP
+130295 15:53:21.874 Barcode reader OFF; IRQ edges=7936
+130299 15:53:22.526 Hump: over the top after 892 ms -> easing back to cruise.
+130300 15:53:22.619 Hump cleared after 892 ms, 50 mm driven: peak height 2.0 mm, peak tilt 1.7 deg.
+130301 15:53:22.627 Highest this run: 7.2 mm (16 humps).
+130302 15:53:22.627 State: HUMP -> FOLLOW_LINE
+130303 15:53:22.627 hump {"height_mm":2.0,"peak_tilt_x10":17,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":16,"t":602742}
+130304 15:53:22.627 Barcode reader ON; IRQ edges=7936
+130310 15:53:23.693 Barcode capture started; IRQ edges=7966
+130311 15:53:23.811 Barcode capture started; IRQ edges=7966
+130312 15:53:23.811 Barcode capture started; IRQ edges=7966
+130313 15:53:23.811 Barcode capture started; IRQ edges=7966
+130314 15:53:23.811 Barcode capture started; IRQ edges=7966
+130315 15:53:23.811 Barcode capture started; IRQ edges=7966
+130316 15:53:23.811 Barcode capture started; IRQ edges=7966
+130317 15:53:23.811 Barcode capture started; IRQ edges=7966
+130318 15:53:23.892 Barcode capture started; IRQ edges=7966
+130319 15:53:23.893 Barcode capture started; IRQ edges=7966
+130321 15:53:24.197 Barcode initial mark 509 ms: treated as junction, scan dropped.
+130333 15:53:26.777 Raised 2.4 mm for 310 ms -> HUMP, climbing.
+130334 15:53:26.858   pitch 0.9 deg
+130335 15:53:26.858   roll -1.1 deg
+130336 15:53:26.858 State: FOLLOW_LINE -> HUMP
+130337 15:53:26.858 Barcode reader OFF; IRQ edges=7967
+130340 15:53:27.085 Hump: over the top after 370 ms -> easing back to cruise.
+130344 15:53:27.584 Hump cleared after 858 ms, 42 mm driven: peak height 2.2 mm, peak tilt 2.3 deg.
+130345 15:53:27.598 Highest this run: 7.2 mm (17 humps).
+130346 15:53:27.600 State: HUMP -> FOLLOW_LINE
+130347 15:53:27.600 Barcode reader ON; IRQ edges=7967
+130348 15:53:27.600 hump {"height_mm":2.2,"peak_tilt_x10":23,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":17,"t":607731}
+130363 15:53:30.835 Raised 1.8 mm for 300 ms -> HUMP, climbing.
+130364 15:53:30.948   pitch 1.2 deg
+130365 15:53:30.958   roll -0.2 deg
+130366 15:53:30.960 State: FOLLOW_LINE -> HUMP
+130367 15:53:30.960 Barcode reader OFF; IRQ edges=7967
+130369 15:53:31.184 Hump: over the top after 340 ms -> easing back to cruise.
+130373 15:53:31.670 Hump cleared after 818 ms, 40 mm driven: peak height 1.9 mm, peak tilt 2.3 deg.
+130374 15:53:31.769 Highest this run: 7.2 mm (18 humps).
+130375 15:53:31.769 State: HUMP -> FOLLOW_LINE
+130376 15:53:31.774 Barcode reader ON; IRQ edges=8028
+130377 15:53:31.774 hump {"height_mm":1.9,"peak_tilt_x10":23,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":18,"t":611862}
+130379 15:53:31.805 Barcode capture started; IRQ edges=8040
+130380 15:53:31.805 Barcode capture started; IRQ edges=8040
+130381 15:53:31.805 Barcode capture started; IRQ edges=8040
+130382 15:53:31.805 Barcode capture started; IRQ edges=8040
+130410 15:53:38.008 barcode {"msg":"M","cmd":"TURN LEFT","t":618213}
+130412 15:53:38.046 Barcode: read leniently (21 of 29 bars+spaces, 0+8 missing, 4 stray left out).
+130413 15:53:38.046 Barcode COMMAND: "M" = TURN LEFT
+130414 15:53:38.046 Pending: TURN LEFT at the next crossroad.
+130466 15:53:49.665 Raised 1.2 mm for 300 ms -> HUMP, climbing.
+130467 15:53:49.681   pitch -0.8 deg
+130468 15:53:49.683   roll 0.2 deg
+130469 15:53:49.685 State: FOLLOW_LINE -> HUMP
+130470 15:53:49.687 Barcode reader OFF; IRQ edges=8240
+130473 15:53:49.986 Hump cleared after 508 ms, 28 mm driven: peak height 1.0 mm, peak tilt 0.9 deg.
+130474 15:53:50.067 Highest this run: 7.2 mm (19 humps).
+130475 15:53:50.067 State: HUMP -> FOLLOW_LINE
+130476 15:53:50.067 Barcode reader ON; IRQ edges=8240
+130477 15:53:50.067 hump {"height_mm":1.0,"peak_tilt_x10":9,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":19,"t":630182}
+130494 15:53:53.456 Raised 2.2 mm for 301 ms -> HUMP, climbing.
+130495 15:53:53.456   pitch -1.5 deg
+130496 15:53:53.463   roll -0.7 deg
+130497 15:53:53.464 State: FOLLOW_LINE -> HUMP
+130498 15:53:53.464 Barcode reader OFF; IRQ edges=8240
+130500 15:53:53.657 Hump: over the top after 280 ms -> easing back to cruise.
+130502 15:53:53.909 Hump cleared after 509 ms, 26 mm driven: peak height 2.2 mm, peak tilt 1.7 deg.
+130503 15:53:53.917 Highest this run: 7.2 mm (20 humps).
+130504 15:53:53.917 State: HUMP -> FOLLOW_LINE
+130505 15:53:53.917 Barcode reader ON; IRQ edges=8240
+130506 15:53:53.917 hump {"height_mm":2.2,"peak_tilt_x10":17,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":20,"t":634071}
+130509 15:53:54.509 Line lost: reversing 280 ms of path to where both sensors were on it.
+130510 15:53:54.511 Reverse done (a sensor found black).
+130514 15:53:55.496 Raised 3.7 mm for 308 ms -> HUMP, climbing.
+130515 15:53:55.497   pitch 0.8 deg
+130516 15:53:55.497   roll 1.7 deg
+130517 15:53:55.497 State: FOLLOW_LINE -> HUMP
+130518 15:53:55.497 Barcode reader OFF; IRQ edges=8240
+130527 15:53:57.034 Hump: over the top after 1832 ms -> easing back to cruise.
+130534 15:53:58.126 Hump cleared after 2922 ms, 140 mm driven: peak height 6.8 mm, peak tilt 3.4 deg.
+130535 15:53:58.128 Highest this run: 7.2 mm (21 humps).
+130536 15:53:58.128 State: HUMP -> FOLLOW_LINE
+130537 15:53:58.132 Barcode reader ON; IRQ edges=8240
+130538 15:53:58.132 hump {"height_mm":6.8,"peak_tilt_x10":34,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":21,"t":638311}
+130559 15:54:02.755 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+130560 15:54:02.861   pitch -0.5 deg
+130561 15:54:02.869   roll -0.5 deg
+130562 15:54:02.869 State: FOLLOW_LINE -> HUMP
+130563 15:54:02.869 Barcode reader OFF; IRQ edges=8240
+130566 15:54:03.313 Hump cleared after 508 ms, 29 mm driven: peak height 1.0 mm, peak tilt 0.9 deg.
+130567 15:54:03.425 Highest this run: 7.2 mm (22 humps).
+130568 15:54:03.441 State: HUMP -> FOLLOW_LINE
+130569 15:54:03.443 Barcode reader ON; IRQ edges=8240
+130570 15:54:03.443 hump {"height_mm":1.0,"peak_tilt_x10":9,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":22,"t":643482}
+130579 15:54:06.484 Raised 1.3 mm for 304 ms -> HUMP, climbing.
+130580 15:54:06.614   pitch 0.2 deg
+130581 15:54:06.620   roll 0.6 deg
+130582 15:54:06.622 State: FOLLOW_LINE -> HUMP
+130583 15:54:06.625 Barcode reader OFF; IRQ edges=8240
+130587 15:54:06.675 Hump: over the top after 502 ms -> easing back to cruise.
+130588 15:54:06.677 Hump cleared after 831 ms, 45 mm driven: peak height 2.4 mm, peak tilt 2.4 deg.
+130589 15:54:06.677 Highest this run: 7.2 mm (23 humps).
+130590 15:54:06.677 State: HUMP -> FOLLOW_LINE
+130591 15:54:06.677 Barcode reader ON; IRQ edges=8240
+130631 15:54:15.286 Raised 1.5 mm for 310 ms -> HUMP, climbing.
+130632 15:54:16.652   pitch 0.6 deg
+130633 15:54:16.654   roll -0.7 deg
+130634 15:54:16.658 State: FOLLOW_LINE -> HUMP
+130635 15:54:16.658 Barcode reader OFF; IRQ edges=8240
+130639 15:54:16.756 Hump cleared after 508 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+130640 15:54:16.756 Highest this run: 7.2 mm (24 humps).
+130641 15:54:16.766 State: HUMP -> FOLLOW_LINE
+130642 15:54:16.766 Barcode reader ON; IRQ edges=8240
+130643 15:54:16.769 hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":24,"t":655981}
+130664 15:54:21.699 Raised 1.1 mm for 308 ms -> HUMP, climbing.
+130665 15:54:21.699   pitch 0.2 deg
+130666 15:54:21.704   roll -0.5 deg
+130667 15:54:21.705 State: FOLLOW_LINE -> HUMP
+130668 15:54:21.705 Barcode reader OFF; IRQ edges=8240
+130672 15:54:21.846 Hump: over the top after 462 ms -> easing back to cruise.
+130674 15:54:21.944 Hump cleared after 790 ms, 44 mm driven: peak height 1.6 mm, peak tilt 1.6 deg.
+130675 15:54:21.946 Highest this run: 7.2 mm (25 humps).
+130676 15:54:21.946 State: HUMP -> FOLLOW_LINE
+130677 15:54:21.946 Barcode reader ON; IRQ edges=8240
+130678 15:54:21.946 hump {"height_mm":1.6,"peak_tilt_x10":16,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":25,"t":662021}
+130690 15:54:24.405 Raised 1.6 mm for 308 ms -> HUMP, climbing.
+130691 15:54:24.500   pitch -1.1 deg
+130692 15:54:24.500   roll -0.3 deg
+130693 15:54:24.510 State: FOLLOW_LINE -> HUMP
+130694 15:54:24.510 Barcode reader OFF; IRQ edges=8240
+130697 15:54:24.955 Hump cleared after 502 ms, 29 mm driven: peak height 1.5 mm, peak tilt 0.8 deg.
+130698 15:54:25.008 Highest this run: 7.2 mm (26 humps).
+130699 15:54:25.008 State: HUMP -> FOLLOW_LINE
+130700 15:54:25.011 Barcode reader ON; IRQ edges=8240
+130701 15:54:25.011 hump {"height_mm":1.5,"peak_tilt_x10":8,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":26,"t":665112}
+130717 15:54:28.058 Raised 1.9 mm for 306 ms -> HUMP, climbing.
+130718 15:54:28.058   pitch -1.3 deg
+130719 15:54:28.058   roll -0.4 deg
+130720 15:54:28.058 State: FOLLOW_LINE -> HUMP
+130721 15:54:28.072 Barcode reader OFF; IRQ edges=8240
+130724 15:54:31.198 Hump cleared after 512 ms, 29 mm driven: peak height 1.9 mm, peak tilt 1.2 deg.
+130725 15:54:31.274 Highest this run: 7.2 mm (27 humps).
+130726 15:54:31.292 State: HUMP -> FOLLOW_LINE
+130727 15:54:31.294 Barcode reader ON; IRQ edges=8240
+130728 15:54:31.296 hump {"height_mm":1.9,"peak_tilt_x10":12,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":27,"t":668762}
+130766 15:54:39.974 Barcode capture started; IRQ edges=8264
+130767 15:54:39.978 Barcode capture started; IRQ edges=8264
+130768 15:54:39.981 Barcode capture started; IRQ edges=8264
+130769 15:54:39.983 Barcode capture started; IRQ edges=8264
+130770 15:54:39.985 Barcode capture started; IRQ edges=8264
+130771 15:54:39.985 Barcode capture started; IRQ edges=8264
+130772 15:54:39.986 Barcode capture started; IRQ edges=8264
+130773 15:54:40.088 Barcode capture started; IRQ edges=8264
+130774 15:54:40.101 Barcode capture started; IRQ edges=8264
+130775 15:54:40.101 Barcode initial mark 454 ms: treated as junction, scan dropped.
+130776 15:54:40.105 Side sensor: 462 ms black mark -> crossroad.
+130777 15:54:40.106 Crossroad: TURN LEFT now.
+130778 15:54:40.107 State: FOLLOW_LINE -> TURN
+130779 15:54:40.107 Barcode reader OFF; IRQ edges=8266
+130788 15:54:42.090 TURN LEFT done (on the line, 2579 ms).
+130789 15:54:42.368 State: TURN -> FOLLOW_LINE
+130790 15:54:42.370 Barcode reader ON; IRQ edges=8285
+130804 15:54:46.145 Raised 2.5 mm for 300 ms -> HUMP, climbing.
+130805 15:54:46.147   pitch -1.7 deg
+130806 15:54:46.149   roll -0.5 deg
+130807 15:54:46.149 State: FOLLOW_LINE -> HUMP
+130808 15:54:46.149 Barcode reader OFF; IRQ edges=8285
+130810 15:54:46.225 Hump cleared after 509 ms, 29 mm driven: peak height 1.5 mm, peak tilt 1.8 deg.
+130811 15:54:46.241 Highest this run: 7.2 mm (28 humps).
+130812 15:54:46.241 State: HUMP -> FOLLOW_LINE
+130813 15:54:46.241 Barcode reader ON; IRQ edges=8285
+130822 15:54:47.946 Raised 2.2 mm for 309 ms -> HUMP, climbing.
+130823 15:54:48.065   pitch -0.3 deg
+130824 15:54:48.065   roll -1.0 deg
+130825 15:54:48.065 State: FOLLOW_LINE -> HUMP
+130826 15:54:48.065 Barcode reader OFF; IRQ edges=8285
+130829 15:54:48.382 Hump cleared after 508 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.1 deg.
+130830 15:54:48.464 Highest this run: 7.2 mm (29 humps).
+130831 15:54:48.476 State: HUMP -> FOLLOW_LINE
+130832 15:54:48.478 Barcode reader ON; IRQ edges=8285
+130833 15:54:48.478 hump {"height_mm":1.3,"peak_tilt_x10":11,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":29,"t":688592}
+130867 15:54:56.049 Raised 1.3 mm for 314 ms -> HUMP, climbing.
+130868 15:54:56.143   pitch 0.9 deg
+130869 15:54:56.151   roll -0.1 deg
+130870 15:54:56.151 State: FOLLOW_LINE -> HUMP
+130871 15:54:56.154 Barcode reader OFF; IRQ edges=8285
+130872 15:54:56.472 Hump: over the top after 537 ms -> easing back to cruise.
+130874 15:54:56.569 Hump cleared after 726 ms, 41 mm driven: peak height 1.7 mm, peak tilt 1.9 deg.
+130875 15:54:56.569 Highest this run: 7.2 mm (30 humps).
+130876 15:54:56.569 State: HUMP -> FOLLOW_LINE
+130877 15:54:56.569 Barcode reader ON; IRQ edges=8285
+130878 15:54:56.578 hump {"height_mm":1.7,"peak_tilt_x10":19,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":30,"t":696631}
+130887 15:54:58.170 Raised 3.1 mm for 306 ms -> HUMP, climbing.
+130888 15:54:58.239   pitch 0.0 deg
+130889 15:54:58.239   roll -1.4 deg
+130890 15:54:58.239 State: FOLLOW_LINE -> HUMP
+130891 15:54:58.245 Barcode reader OFF; IRQ edges=8285
+130894 15:54:58.705 Hump cleared after 501 ms, 27 mm driven: peak height 1.5 mm, peak tilt 1.4 deg.
+130895 15:54:58.842 Highest this run: 7.2 mm (31 humps).
+130896 15:54:58.843 State: HUMP -> FOLLOW_LINE
+130897 15:54:58.843 Barcode reader ON; IRQ edges=8297
+130898 15:54:58.843 hump {"height_mm":1.5,"peak_tilt_x10":14,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":31,"t":698852}
+130910 15:55:01.168 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+130911 15:55:01.171   pitch 0.3 deg
+130912 15:55:01.173   roll -0.6 deg
+130913 15:55:01.173 State: FOLLOW_LINE -> HUMP
+130914 15:55:01.175 Barcode reader OFF; IRQ edges=8299
+130918 15:55:01.699 Hump: over the top after 490 ms -> easing back to cruise.
+130921 15:55:02.254 Hump cleared after 1180 ms, 58 mm driven: peak height 1.5 mm, peak tilt 1.9 deg.
+130922 15:55:02.366 Highest this run: 7.2 mm (32 humps).
+130923 15:55:02.369 State: HUMP -> FOLLOW_LINE
+130924 15:55:02.372 Barcode reader ON; IRQ edges=8299
+130925 15:55:02.374 hump {"height_mm":1.5,"peak_tilt_x10":19,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":32,"t":702472}
+130933 15:55:03.648 Raised 2.6 mm for 308 ms -> HUMP, climbing.
+130934 15:55:03.648   pitch 0.0 deg
+130935 15:55:03.648   roll -1.2 deg
+130936 15:55:03.648 State: FOLLOW_LINE -> HUMP
+130937 15:55:03.648 Barcode reader OFF; IRQ edges=8299
+130940 15:55:04.151 Hump: over the top after 502 ms -> easing back to cruise.
+130941 15:55:04.151 Hump cleared after 530 ms, 30 mm driven: peak height 2.6 mm, peak tilt 1.6 deg.
+130942 15:55:04.164 Highest this run: 7.2 mm (33 humps).
+130943 15:55:04.164 State: HUMP -> FOLLOW_LINE
+130944 15:55:04.164 Barcode reader ON; IRQ edges=8299
+130945 15:55:04.164 hump {"height_mm":2.6,"peak_tilt_x10":16,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":33,"t":704321}
+130958 15:55:06.934 Raised 2.0 mm for 310 ms -> HUMP, climbing.
+130959 15:55:06.934   pitch 0.0 deg
+130960 15:55:06.934   roll -0.9 deg
+130961 15:55:06.934 State: FOLLOW_LINE -> HUMP
+130962 15:55:06.934 Barcode reader OFF; IRQ edges=8299
+130964 15:55:07.285 Hump: over the top after 440 ms -> easing back to cruise.
+130967 15:55:07.541 Hump cleared after 650 ms, 37 mm driven: peak height 1.7 mm, peak tilt 2.1 deg.
+130968 15:55:07.541 Highest this run: 7.2 mm (34 humps).
+130969 15:55:07.541 State: HUMP -> FOLLOW_LINE
+130970 15:55:07.541 Barcode reader ON; IRQ edges=8299
+130971 15:55:07.541 hump {"height_mm":1.7,"peak_tilt_x10":21,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":34,"t":707701}
+131003 15:55:14.408 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+131004 15:55:14.417   pitch 0.0 deg
+131005 15:55:14.417   roll -0.6 deg
+131006 15:55:14.417 State: FOLLOW_LINE -> HUMP
+131007 15:55:14.417 Barcode reader OFF; IRQ edges=8299
+131010 15:55:14.915 Hump: over the top after 550 ms -> easing back to cruise.
+131021 15:55:17.239 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+131022 15:55:17.239 State: HUMP -> PICKED_UP
+131282 15:56:30.595 online 0

@@ -1,0 +1,7 @@
+# BARR-C style check (T-CR1-02)
+# Commit 7750e18 (working tree identical for app_program/, config/, tools/, testing/host/). Run 2026-11-25 02:02 on the team laptop.
+# Command: python tools/check_barr.py
+
+52 project-owned files reviewed; 0 findings.
+{}
+exit code: 0

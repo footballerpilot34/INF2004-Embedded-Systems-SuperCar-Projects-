@@ -1,0 +1,35 @@
+# Build (T-CR1-01): clean rebuild
+# Commit 7750e18 (app_program/ and config/ identical to it). Run 2026-11-25 02:06 on the team laptop.
+# Command: ninja -C build -t clean; ninja -C build   (Debug, Pico SDK 2.3.1, GNU Arm 10.3-2021.10)
+
+steps run: 228
+[3/228] Linking ASM executable pico-sdk\src\rp2040\boot_stage2\bs2_default.elf
+52 project-owned files reviewed; 0 findings.
+[7/228] Building C object app_program/imu_hump/hump.c.obj
+[8/228] Building C object app_program/motion/encoder.c.obj
+[9/228] Building C object app_program/buzzer.c.obj
+[10/228] Building C object app_program/gpio_isr.c.obj
+[11/228] Building C object app_program/obstacle/bypass.c.obj
+[12/228] Building C object app_program/line_barcode/line_sensor.c.obj
+[13/228] Building C object app_program/line_barcode/line_diag.c.obj
+[14/228] Building C object app_program/obstacle/ultrasonic.c.obj
+[15/228] Building C object app_program/obstacle/servo.c.obj
+[16/228] Building C object app_program/motion/motor.c.obj
+[17/228] Building C object app_program/comms/telemetry.c.obj
+[18/228] Building C object app_program/comms/log.c.obj
+[19/228] Building C object app_program/obstacle/obstacle.c.obj
+[20/228] Building C object app_program/imu_hump/imu.c.obj
+[21/228] Building C object app_program/app_main.c.obj
+[22/228] Building C object app_program/bitpack.c.obj
+[23/228] Building C object app_program/line_barcode/barcode.c.obj
+[25/228] Building C object app_program/comms/mqtt_frame.c.obj
+[27/228] Building C object app_program/fault.c.obj
+[35/228] Building C object app_program/comms/mqtt_comm.c.obj
+[39/228] Building C object app_program/power.c.obj
+[40/228] Building C object app_program/vehicle.c.obj
+[69/228] Building C object app_program/comms/web.c.obj
+[228/228] Linking CXX executable supercar.elf
+exit code: 0
+   text	   data	    bss	    dec	    hex	filename
+ 455120	      0	  66432	 521552	  7f550	build/supercar.elf
+2e87979a2edc44e626a7370d74aa1dbb build/supercar.bin

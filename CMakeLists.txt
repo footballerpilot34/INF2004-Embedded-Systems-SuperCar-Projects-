@@ -14,7 +14,9 @@ endif()
 # ====================================================================================
 cmake_minimum_required(VERSION 3.13)
 
-# Which Pico is on your Robo Pico?  Pico W -> pico_w   |   Pico 2 W -> pico2_w
+# The board: Pico W (pico_w). Pico 2 W (pico2_w) is NOT supported: the
+# firmware reads RP2040-only reset registers (vreg_and_chip_reset in
+# app_main.c), and it has never been built or run on a Pico 2 W.
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 
 include(pico_sdk_import.cmake)

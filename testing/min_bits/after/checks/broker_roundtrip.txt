@@ -1,0 +1,17 @@
+﻿# Binary payloads through a real broker (T-S4-H05)
+# Commit 7750e18. Run 2026-11-25 02:03 on the team laptop: local Mosquitto, test topic test/supercar-frame-check (not the car's).
+# Sent with mosquitto_pub -f (file bytes as they are); received with mosquitto_sub -F '%t %x'.
+
+sent cmd       : a70f04  (bcal)
+sent telemetry : a1fa8c06004b9c64916090647d2d7c3c385a00fe7f006429  (from the Python reference; contains 0x00 bytes)
+sent online    : 31  ('1')
+
+received:
+test/supercar-frame-check/cmd a70f04
+test/supercar-frame-check/telemetry a1fa8c06004b9c64916090647d2d7c3c385a00fe7f006429
+test/supercar-frame-check/online 31
+decoded cmd -> bcal
+decoded telemetry -> BYPASS/pass   motors -100  100  IR 101  range  1455  pitch -180.0  roll 179.9  height -102.4 mm  servo 180  next GO STRAIGHT  FAULTS: motor stall, IMU, MQTT down, loop overrun
+decoded online    -> 1
+
+bytes unchanged: True

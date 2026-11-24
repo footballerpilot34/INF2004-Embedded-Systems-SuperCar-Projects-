@@ -1,0 +1,22 @@
+# Host test C sources type-checked, not run (T-CR1-04, T-S4-H03)
+# Commit 7750e18. Run 2026-11-25 02:03 on the team laptop (no desktop cc available).
+# Each test's C is generated exactly as the test would, then compiled with -fsyntax-only.
+
+arm-none-eabi-gcc -std=c11 -Wall -Wextra -Werror -fsyntax-only
+OK  test_ultrasonic_host.py: test.c
+OK  test_ultrasonic_host.py: ultrasonic.c
+OK  test_barcode_host.py: test.c
+OK  test_barcode_host.py: barcode.c
+OK  test_obstacle_host.py: test.c
+OK  test_obstacle_host.py: obstacle.c
+OK  test_obstacle_host.py: vehicle.c
+OK  test_bypass_geometry_host.py: geometry.c
+OK  test_stationary_scan_host.py: generated test.c
+OK  test_mqtt_frame_host.py: generated test.c
+OK  test_bypass_host.py: generated test.c
+OK  test_mqtt_frame_host.py: bitpack.c
+OK  test_mqtt_frame_host.py: mqtt_frame.c
+OK  test_web_host.py: network program
+OK  test_web_host.py: status program
+OK  test_web_host.py: http program
+16 sources, 0 errors

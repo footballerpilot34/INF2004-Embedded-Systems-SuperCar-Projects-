@@ -21,6 +21,17 @@ test, `T-INT-<nn>` for integration and `T-SYS-<nn>` for system tests, and
 firmware (`min_bits/TEST_LOG.md`). Keep IDs stable: add rows, never
 renumber or delete old results.
 
+Failed and partial results stay as they are:
+
+- A Fail or Partial row is never edited to a better result, overwritten
+  or deleted.
+- A re-run after a fix is a **new row** with a new ID. Its Setup/firmware
+  cell names the commit that contains the fix, and its Result cell names
+  the row it re-tests (for example "re-test of T-S3-02 after `abc1234`").
+- Every row names who ran it (Tester), the date, the firmware commit (or
+  "commit not recorded" when it cannot be recovered; never a guess) and
+  its raw evidence file.
+
 ## Test logs
 
 Each test folder has a `TEST_LOG.md` (one row per run) and a `logs/` folder

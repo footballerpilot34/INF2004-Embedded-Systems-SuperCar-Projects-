@@ -156,7 +156,7 @@ After editing, build again and copy the new `.uf2`.
 
 | Option | Where | Values | What it does |
 |---|---|---|---|
-| `PICO_BOARD` | `CMakeLists.txt` / `-DPICO_BOARD=` | **`pico_w`**, `pico2_w` | Which Pico is on the Robo Pico |
+| `PICO_BOARD` | `CMakeLists.txt` / `-DPICO_BOARD=` | **`pico_w`** only | The Pico W on the Robo Pico. `pico2_w` (Pico 2 W) is **not supported**: the firmware uses RP2040-only reset registers and has never been built or run on one |
 | `CMAKE_BUILD_TYPE` | `-DCMAKE_BUILD_TYPE=` | `Debug`, `Release` | Debug is what the VS Code extension uses. With no build type given, the Pico SDK defaults to Release, which is optimised for speed and was about 30 KB *larger* here (478,452 vs 447,408 bytes for `supercar.bin`, measured once with GNU Arm 10.3-2021.10; other toolchains may differ) |
 | `MQTT_ENABLED` | `config/config.h` | **`true`**, `false` | MQTT telemetry and commands |
 | `MQTT_BROKER_HOST` | `config/config.h` | `"172.20.10.3"` | Default broker (the laptop on the phone hotspot); can be changed at run time |
@@ -305,6 +305,22 @@ review records are in `testing/review/`.
    supervised area. Use `v` only with enough empty floor.
 4. Keep STOP within reach; the software cannot prevent every collision.
 5. Record each test in `testing/` (IDs and evidence: `testing/README.md`).
+
+**Facts taken from Raspberry Pi documentation, not verified in this
+repository.** Check them against the official Pico W datasheet and Pico
+SDK release notes before relying on them:
+
+- The Pico W radio is 2.4 GHz only (no 5 GHz). Section 2.1 and
+  `config/wifi_secrets.example.h` rely on this.
+- GP23, GP24 and GP25 are wired to the radio, and GP29 is shared between
+  the radio and ADC3 (VSYS / 3). See section 2.5 and `TEAM.md` §2.
+- In BOOTSEL mode the Pico W appears as a drive called `RPI-RP2`
+  (section 2.3).
+- Pico SDK tag `2.3.1` has the submodules `lib/tinyusb`,
+  `lib/cyw43-driver` and `lib/lwip` (section 1).
+
+The car joined 2.4 GHz phone hotspots and was flashed this way, which is
+consistent with them, but the facts themselves are Raspberry Pi's.
 
 ---
 

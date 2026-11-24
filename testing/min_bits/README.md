@@ -7,8 +7,9 @@ This folder holds the Week 13 evidence for the change requirement:
 3. the message size comparison;
 4. correctness and performance.
 
-"Before" is commit `94ebfcc`, the last commit without the change. Both
-versions were built the same way (Debug, Pico SDK 2.3.1, GNU Arm
+"Before" is commit `94ebfcc`, the last commit without the change;
+"after" is commit `7750e18`, the change itself. Both versions were built
+the same way (Debug, Pico SDK 2.3.1, GNU Arm
 10.3-2021.10).
 
 **Limitation: the car could not be tested.** It had already been
@@ -135,6 +136,9 @@ to 8.1 MB.
 ## 4. Correctness and performance
 
 ### Checked here
+
+The raw output of each check is in `after/checks/` (test IDs in
+`TEST_LOG.md` and `testing/comms/TEST_LOG.md`).
 
 | Check | Result |
 |---|---|

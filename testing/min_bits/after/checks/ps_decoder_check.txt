@@ -1,0 +1,41 @@
+﻿# Laptop decoder tools/mqtt_frames.ps1 vs Python reference tools/mqtt_frame.py (T-S4-H04)
+# Commit 7750e18. Run 2026-11-25 02:03 on the team laptop, Windows PowerShell 5.1.26100.9818.
+# Frames and command bytes built by the Python reference; every field compared.
+
+telemetry  a1fa8c06004b9c64916090647d2d7c3c385a00fe7f006429         fields differing: none
+           -> BYPASS/pass   motors -100  100  IR 101  range  1455  pitch -180.0  roll 179.9  height -102.4 mm  servo 180  next GO STRAIGHT  FAULTS: motor stall, IMU, MQTT down, loop overrun
+heartbeat  a2ffffad01007bb3268002204061a55030d0ed4100400b04cbc00000 fields differing: none
+           -> heartbeat #65535  up 429 s  battery 4987 mV  sent 309  dropped 20  connections 1  Wi-Fi joined #2 172.20.10.6 -70 dBm ping 30 ms  loop max 812 us (3 overruns)  faults: Wi-Fi loss  last restart: watchdog (froze) in buttons
+obstacle   a4010000002ca1f601200000000b                             fields differing: none
+           -> OBSTACLE 300 mm ahead, - mm wide (edges -150 / - mm, echo-bracketed / missing echoes)
+hump       a5e1f5040064480332a44100                                 fields differing: none
+           -> HUMP peak 10.0 mm, tilt 10.5 deg (highest this run 10.0 mm, 1 humps)
+barcode    a30700000039915355181900                                 fields differing: none
+           -> BARCODE 'HELLO-1' -> TURN LEFT
+log        a60353746174653a2041202d3e2042                           fields differing: none
+           -> State: A -> B
+command stop       python a700     powershell a700     same
+command start      python a701     powershell a701     same
+command calibrate  python a702     powershell a702     same
+command wheel      python a703     powershell a703     same
+command diag       python a704     powershell a704     same
+command black      python a705     powershell a705     same
+command white      python a706     powershell a706     same
+command bt         python a707     powershell a707     same
+command bs         python a708     powershell a708     same
+command scan       python a709     powershell a709     same
+command v          python a70a     powershell a70a     same
+command mark       python a70b     powershell a70b     same
+command clear      python a70c     powershell a70c     same
+command bclist     python a70d     powershell a70d     same
+command bcreset    python a70e     powershell a70e     same
+command bcal       python a70f04   powershell a70f04   same
+command bczn       python a72f03   powershell a72f03   same
+command ft1011     python a7b001   powershell a7b001   same
+command ft0000     python a71000   powershell a71000   same
+command ft110      python a77001   powershell a77001   same
+command set        python null     powershell null     same
+command mb1.2.3.4  python null     powershell null     same
+JSON text {"t":1}: rejected (not a frame)
+
+differences: 0

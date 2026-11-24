@@ -1,0 +1,31 @@
+# Packing is mechanical (T-CR1-09): token diff of each packed module against 94ebfcc
+# Commit 7750e18 vs 94ebfcc. Run 2026-11-25 02:04 on the team laptop.
+# Method: undo the renames (STRUCT.b_x -> gb_x, STRUCT.y -> g_y), remove the packed struct and the old
+# declarations, drop comments and whitespace, compare the remaining C tokens. 0 = only the packing changed.
+# Non-zero modules also carry the deliberate type/feature changes listed in testing/min_bits/README.md.
+
+app_program/vehicle.c token diffs: 0
+app_program/line_barcode/line_sensor.c token diffs: 0
+app_program/line_barcode/line_diag.c token diffs: 0
+app_program/power.c token diffs: 0
+app_program/obstacle/servo.c token diffs: 2
+app_program/imu_hump/imu.c token diffs: 14
+app_program/obstacle/obstacle.c token diffs: 28
+app_program/imu_hump/hump.c token diffs: 123
+app_program/obstacle/bypass.c token diffs: 191
+app_program/line_barcode/barcode.c token diffs: 136
+app_program/app_main.c token diffs: 161
+app_program/comms/web.c token diffs: 182
+app_program/comms/mqtt_comm.c token diffs: 3948
+
+Deliberate changes behind the non-zero counts:
+  servo.c   g_angle int32_t -> int16_t
+  imu.c     7 angle/acceleration variables int32_t -> int16_t
+  obstacle.c g_queue int8_t; scan point no-echo marker; range held at 8190 mm
+  hump.c    recent heights float -> int16_t (0.1 mm), height_x10() helper
+  bypass.c  move_t packed to 8 bytes; no-echo marker; bypass_phase_id()
+  barcode.c edge colours as a bitmask, edge_is_black()
+  app_main.c fault_init/fault_task/fault_loop_record, restart code byte
+  web.c     restart code, web_link_get(); two 'http:' string hunks are a tool artifact
+            (the comment stripper cuts '//' inside strings): git diff shows no change there
+  mqtt_comm.c rewritten for binary frames
