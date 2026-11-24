@@ -56,6 +56,7 @@
 
 #include "barcode.h"
 #include "encoder.h"
+#include "fault.h"
 #include "buzzer.h"
 #include "config.h"
 #include "gpio_isr.h"
@@ -98,16 +99,23 @@
 #define SCAN_READY_TIMEOUT_MSEC                                                \
     2000u // Nonblocking wait for a fresh forward ping.
 
-static bool g_encoder_marked;
-
 static void          usb_wait(void);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
-static bool          g_stationary_scan_test = false;
-static bool          gb_imu_cal_due = true;  // Calibrate at power-up, and
-static bool          gb_was_online  = false; // on joining a hotspot.
-static bool          g_stationary_scan_starting = false;
-static uint32_t      g_stationary_scan_since    = 0u;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_encoder_marked : 1;
+    bool b_stationary_scan_test : 1;
+    bool b_imu_cal_due : 1; // Calibrate at power-up, and
+    bool b_was_online : 1;  // on joining a hotspot.
+    bool b_stationary_scan_starting : 1;
+} g_app = {.b_imu_cal_due = true};
+
+static uint32_t g_stationary_scan_since = 0u;
 
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
@@ -115,7 +123,7 @@ static void          imu_calibrate_run(void);
 static void          imu_auto_calibrate(void);
 static void          wheel_test(void);
 static bool          vehicle_is_idle(void);
-static char const *  restart_reason(void);
+static char const *  restart_reason(uint32_t * p_code);
 void                 lwip_assert_record(char const * p_message);
 void                 isr_hardfault(void);
 static void          barcode_report(barcode_result_t result);
@@ -143,9 +151,10 @@ main(void)
     usb_wait();
     log_printf("=== SuperCar AAI14: line + barcode + hump/wall ===");
     {
-        char const * p_reason = restart_reason(); // Reads it once.
+        uint32_t     code     = 0u;
+        char const * p_reason = restart_reason(&code); // Reads it once.
 
-        web_set_restart_reason(p_reason);
+        web_set_restart_reason(p_reason, code);
         log_printf("Last restart: %s.", p_reason);
     }
 
@@ -166,6 +175,7 @@ main(void)
     power_init();     // After Wi-Fi: shares GP29 with the Wi-Fi chip.
 
     vehicle_init();
+    fault_init();
     log_printf("READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. "
                "Hold GP20 2 s for IMU calibration.");
 
@@ -180,7 +190,8 @@ main(void)
 
     for (;;)
     {
-        int32_t servo_deg = 0;
+        int32_t  servo_deg = 0;
+        uint32_t pass_usec = time_us_32(); // This pass began.
 
         watchdog_update();
         watchdog_hw->scratch[STAGE_TIME_SCRATCH] =
@@ -201,7 +212,7 @@ main(void)
         stage_set(STAGE_SERVO);
         if (web_servo_take(&servo_deg))
         {
-            if ((vehicle_is_moving()) || g_stationary_scan_test)
+            if ((vehicle_is_moving()) || g_app.b_stationary_scan_test)
             {
                 log_servo("Servo: locked while moving or scanning.");
             }
@@ -244,11 +255,13 @@ main(void)
         stage_set(STAGE_SCAN_TEST);
         stationary_scan_test_task();
         servo_idle_release(((IDLE_POWER_SAVING && (vehicle_is_idle())) &&
-                            (!g_stationary_scan_test)) &&
+                            (!g_app.b_stationary_scan_test)) &&
                            (!obstacle_scan_active()));
 
         stage_set(STAGE_LINE_DIAG);
         line_diag_task();
+        stage_set(STAGE_FAULT);
+        fault_task(to_ms_since_boot(get_absolute_time()));
         stage_set(STAGE_BUZZER);
         buzzer_task();
 
@@ -258,6 +271,9 @@ main(void)
         {
             telemetry_task();
         }
+
+        // Pass time without the wait (heartbeat: worst case per beat).
+        fault_loop_record((time_us_32()) - pass_usec);
 
         // Wait for the next 10 ms tick.
         stage_set(STAGE_TICK_WAIT);
@@ -320,10 +336,14 @@ isr_hardfault(void)
  * stayed switched on, it means the battery sagged: the web page's uptime
  * going back to zero shows the same.
  *
+ * @param[out] p_code The same as one byte, for the binary MQTT heartbeat:
+ *                    bits 0-2 the kind (WEB_RESTART_...), bits 3-7 the
+ *                    loop stage it froze or crashed in (stage_t).
+ *
  * @return A short description.
  */
 static char const *
-restart_reason(void)
+restart_reason(uint32_t * p_code)
 {
     static char const * const stage_names[STAGE_COUNT] = {
         "unknown",
@@ -344,12 +364,14 @@ restart_reason(void)
         "buzzer",
         "telemetry",
         "MQTT",
-        "waiting for the next tick"};
+        "waiting for the next tick",
+        "fault check"};
     static char  text[RESTART_TEXT_BYTES];
     uint32_t     flags    = vreg_and_chip_reset_hw->chip_reset;
     uint32_t     marker   = watchdog_hw->scratch[STAGE_SCRATCH];
     uint32_t     stage    = (marker & (~STAGE_MAGIC_MASK));
     char const * p_reason = "unknown";
+    uint32_t     code     = WEB_RESTART_UNKNOWN;
 
     uint32_t kind    = watchdog_hw->scratch[STAGE_KIND_SCRATCH];
     uint32_t message = watchdog_hw->scratch[STAGE_FAULT_SCRATCH];
@@ -370,6 +392,7 @@ restart_reason(void)
                        "failed: %.60s",
                        (char const *)message);
         p_reason = text;
+        code     = WEB_RESTART_NET_CHECK;
     }
     else if ((watchdog_enable_caused_reboot()) &&
              (STAGE_KIND_HARDFAULT == kind))
@@ -380,6 +403,7 @@ restart_reason(void)
                             ? stage_names[stage]
                             : "unknown"));
         p_reason = text;
+        code     = WEB_RESTART_HARDFAULT;
     }
     else if (watchdog_enable_caused_reboot())
     {
@@ -393,28 +417,43 @@ restart_reason(void)
                             : "unknown"),
                        ((watchdog_hw->scratch[STAGE_TIME_SCRATCH]) / 1000u));
         p_reason = text;
+        code     = WEB_RESTART_WATCHDOG;
     }
     else if (watchdog_caused_reboot())
     {
         p_reason = "software reset (e.g. after flashing)";
+        code     = WEB_RESTART_SOFTWARE;
     }
     else if (0u != (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_RUN_BITS))
     {
         p_reason = "reset button (RUN pin)";
+        code     = WEB_RESTART_RUN_PIN;
     }
     else if (0u !=
              (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_PSM_RESTART_BITS))
     {
         p_reason = "debugger restart";
+        code     = WEB_RESTART_DEBUGGER;
     }
     else if (0u != (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_POR_BITS))
     {
         p_reason = "power-on or brown-out (supply dipped)";
+        code     = WEB_RESTART_POWER_ON;
     }
     else
     {
         // No flag set: leave "unknown".
     }
+
+    if ((WEB_RESTART_WATCHDOG == code) || (WEB_RESTART_HARDFAULT == code))
+    {
+        if (((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
+            (stage < ((uint32_t)STAGE_COUNT)))
+        {
+            code |= (stage << WEB_RESTART_STAGE_SHIFT);
+        }
+    }
+    *p_code = code;
 
     return (p_reason);
 } /* restart_reason() */
@@ -427,16 +466,17 @@ restart_reason(void)
 static void
 command_run(web_command_t command)
 {
-    if (g_stationary_scan_test && ((((((((((command == WEB_CMD_START) ||
-                                           (command == WEB_CMD_WHEEL_TEST)) ||
-                                          (command == WEB_CMD_TURN_LEFT)) ||
-                                         (command == WEB_CMD_TURN_RIGHT)) ||
-                                        (command == WEB_CMD_UTURN)) ||
-                                       (command == WEB_CMD_BARCODE_TEST)) ||
-                                      (command == WEB_CMD_FEATURE_TEST)) ||
-                                     (command == WEB_CMD_BYPASS_TEST)) ||
-                                    (command == WEB_CMD_BARCODE_STATIC)) ||
-                                   (command == WEB_CMD_IMU_CALIBRATE)))
+    if (g_app.b_stationary_scan_test &&
+        ((((((((((command == WEB_CMD_START) ||
+                 (command == WEB_CMD_WHEEL_TEST)) ||
+                (command == WEB_CMD_TURN_LEFT)) ||
+               (command == WEB_CMD_TURN_RIGHT)) ||
+              (command == WEB_CMD_UTURN)) ||
+             (command == WEB_CMD_BARCODE_TEST)) ||
+            (command == WEB_CMD_FEATURE_TEST)) ||
+           (command == WEB_CMD_BYPASS_TEST)) ||
+          (command == WEB_CMD_BARCODE_STATIC)) ||
+         (command == WEB_CMD_IMU_CALIBRATE)))
     {
         web_set_scan_test_status(
             "REJECTED: scan running; STOP before driving or other tests.");
@@ -445,9 +485,9 @@ command_run(web_command_t command)
     // Any other command cancels an unfinished roll measurement; the mark
     // command itself (the second press) must not, or it never finishes.
     if (((WEB_CMD_NONE != command) && (WEB_CMD_ENCODER_MARK != command)) &&
-        g_encoder_marked)
+        g_app.b_encoder_marked)
     {
-        g_encoder_marked = false;
+        g_app.b_encoder_marked = false;
         log_printf("Encoder roll mark cancelled by a vehicle command; "
                    "press 'e' to restart.");
     }
@@ -603,7 +643,7 @@ stationary_scan_test_status(char const * p_status)
 static void
 stationary_scan_test_start(void)
 {
-    if (g_stationary_scan_test || (obstacle_scan_active()))
+    if (g_app.b_stationary_scan_test || (obstacle_scan_active()))
     {
         stationary_scan_test_status("REJECTED: scan already running.");
     }
@@ -614,9 +654,9 @@ stationary_scan_test_start(void)
     else
     {
         motor_set(0, 0);
-        g_stationary_scan_test     = true;
-        g_stationary_scan_starting = true;
-        g_stationary_scan_since    = to_ms_since_boot(get_absolute_time());
+        g_app.b_stationary_scan_test     = true;
+        g_app.b_stationary_scan_starting = true;
+        g_stationary_scan_since = to_ms_since_boot(get_absolute_time());
         web_set_scan_test_busy(true);
         // Completion recentres the servo and invalidates the previous ray.
         // Never reject a repeat click just because that fresh ping is pending,
@@ -632,11 +672,11 @@ stationary_scan_test_start(void)
 static void
 stationary_scan_test_cancel(void)
 {
-    if (g_stationary_scan_test)
+    if (g_app.b_stationary_scan_test)
     {
         obstacle_scan_cancel();
-        g_stationary_scan_test     = false;
-        g_stationary_scan_starting = false;
+        g_app.b_stationary_scan_test     = false;
+        g_app.b_stationary_scan_starting = false;
         web_set_scan_test_busy(false);
         motor_set(0, 0);
         stationary_scan_test_status("CANCELLED: wheels braked.");
@@ -647,7 +687,7 @@ stationary_scan_test_cancel(void)
 static void
 stationary_scan_test_task(void)
 {
-    if (!g_stationary_scan_test)
+    if (!g_app.b_stationary_scan_test)
     {
         return;
     }
@@ -657,25 +697,26 @@ stationary_scan_test_task(void)
         return;
     }
     motor_set(0, 0);
-    if (g_stationary_scan_starting)
+    if (g_app.b_stationary_scan_starting)
     {
         uint32_t now = to_ms_since_boot(get_absolute_time());
         if ((!servo_is_settled()) || (!ultrasonic_measurement_ready()))
         {
             if ((now - g_stationary_scan_since) >= SCAN_READY_TIMEOUT_MSEC)
             {
-                g_stationary_scan_test = g_stationary_scan_starting = false;
+                g_app.b_stationary_scan_test =
+                    g_app.b_stationary_scan_starting = false;
                 web_set_scan_test_busy(false);
                 stationary_scan_test_status(
                     "FAILED: no fresh forward reading; wheels braked.");
             }
             return;
         }
-        uint32_t range             = ultrasonic_range_mm();
-        g_stationary_scan_starting = false;
+        uint32_t range                   = ultrasonic_range_mm();
+        g_app.b_stationary_scan_starting = false;
         if ((range == 0u) || (range > OBSTACLE_STOP_MM))
         {
-            g_stationary_scan_test = false;
+            g_app.b_stationary_scan_test = false;
             web_set_scan_test_busy(false);
             stationary_scan_test_status(
                 "REJECTED: obstacle must be within stop range.");
@@ -688,7 +729,7 @@ stationary_scan_test_task(void)
     obstacle_scan_task(to_ms_since_boot(get_absolute_time()));
     if (!obstacle_scan_active())
     {
-        g_stationary_scan_test = false;
+        g_app.b_stationary_scan_test = false;
         web_set_scan_test_busy(false);
         stationary_scan_test_status(
             obstacle_profile()->timed_out
@@ -728,23 +769,24 @@ imu_auto_calibrate(void)
 {
     bool b_online = web_is_online();
 
-    if (b_online && (!gb_was_online))
+    if (b_online && (!g_app.b_was_online))
     {
-        gb_imu_cal_due = true; // Just joined a hotspot.
+        g_app.b_imu_cal_due = true; // Just joined a hotspot.
     }
-    gb_was_online = b_online;
+    g_app.b_was_online = b_online;
 
-    if ((gb_imu_cal_due && (vehicle_is_idle())) && (!line_diag_is_active()))
+    if ((g_app.b_imu_cal_due && (vehicle_is_idle())) &&
+        (!line_diag_is_active()))
     {
-        gb_imu_cal_due = false;
+        g_app.b_imu_cal_due = false;
         log_printf("IMU: calibrating by itself (%s). Keep the car still "
                    "and level for 5 s...",
                    (b_online ? "on the hotspot" : "power-up"));
         imu_calibrate_run();
     }
-    else if (gb_imu_cal_due && (vehicle_is_moving()))
+    else if (g_app.b_imu_cal_due && (vehicle_is_moving()))
     {
-        gb_imu_cal_due = false; // Joined mid-run: keep the old one.
+        g_app.b_imu_cal_due = false; // Joined mid-run: keep the old one.
         log_printf("IMU: joined the hotspot while driving; calibration "
                    "skipped.");
     }
@@ -1020,15 +1062,15 @@ encoder_calibration_mark(void)
     static uint32_t right_start;
     if (!vehicle_is_idle())
     {
-        g_encoder_marked = false;
+        g_app.b_encoder_marked = false;
         log_printf("Encoder mark: STOP first, then press 'e' / ENCODER MARK.");
         return;
     }
-    if (!g_encoder_marked)
+    if (!g_app.b_encoder_marked)
     {
-        left_start       = encoder_count(PIN_ENC_LEFT_A);
-        right_start      = encoder_count(PIN_ENC_RIGHT_A);
-        g_encoder_marked = true;
+        left_start             = encoder_count(PIN_ENC_LEFT_A);
+        right_start            = encoder_count(PIN_ENC_RIGHT_A);
+        g_app.b_encoder_marked = true;
         // Two lines: a log line holds at most 96 characters.
         log_printf("Encoder mark set. Roll straight exactly 300 mm, then "
                    "press 'e' / ENCODER MARK again.");
@@ -1037,9 +1079,9 @@ encoder_calibration_mark(void)
     }
     else
     {
-        uint32_t left    = (encoder_count(PIN_ENC_LEFT_A)) - left_start;
-        uint32_t right   = (encoder_count(PIN_ENC_RIGHT_A)) - right_start;
-        g_encoder_marked = false;
+        uint32_t left          = (encoder_count(PIN_ENC_LEFT_A)) - left_start;
+        uint32_t right         = (encoder_count(PIN_ENC_RIGHT_A)) - right_start;
+        g_app.b_encoder_marked = false;
         log_printf(
             "Encoder 300 mm roll: LEFT=%lu RIGHT=%lu edges. "
             "Repeat 3 times and record results; calibration not applied.",

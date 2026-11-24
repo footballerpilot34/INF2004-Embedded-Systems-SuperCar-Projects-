@@ -1,0 +1,33 @@
+Stack use per function (-fstack-usage), compiled with the build's own flags.
+Before: commit 94ebfcc. After: this change. Functions whose frame is 64 B or more and changed.
+
+app_main.c       deepest frame    32 ->    40 B
+barcode.c        deepest frame   120 ->   120 B
+bypass.c         deepest frame   232 ->   232 B
+encoder.c        deepest frame    16 ->    16 B
+buzzer.c         deepest frame    16 ->    16 B
+gpio_isr.c       deepest frame     8 ->     8 B
+hump.c           deepest frame    24 ->    24 B
+imu.c            deepest frame    72 ->    72 B
+line_diag.c      deepest frame    48 ->    48 B
+line_sensor.c    deepest frame    24 ->    24 B
+log.c            deepest frame    24 ->    24 B
+motor.c          deepest frame    24 ->    24 B
+mqtt_comm.c      deepest frame   696 ->   288 B
+    mqtt_comm_barcode               544 ->     56
+    publish_events                  672 ->     88
+    publish_heartbeat               552 ->    120
+    publish_log                     544 ->    288
+    publish_telemetry               696 ->    112
+power.c          deepest frame    16 ->    16 B
+servo.c          deepest frame    16 ->    16 B
+obstacle.c       deepest frame    72 ->    80 B
+    obstacle_profile_build           72 ->     80
+telemetry.c      deepest frame    32 ->    32 B
+ultrasonic.c     deepest frame    16 ->    16 B
+vehicle.c        deepest frame    48 ->    48 B
+web.c            deepest frame   328 ->   320 B
+    status_build                    328 ->    320
+bitpack.c        deepest frame     0 ->    24 B
+fault.c          deepest frame     0 ->    32 B
+mqtt_frame.c     deepest frame     0 ->    48 B

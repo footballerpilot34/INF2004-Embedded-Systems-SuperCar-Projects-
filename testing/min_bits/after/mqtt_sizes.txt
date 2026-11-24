@@ -1,0 +1,33 @@
+Source: the same MQTT log as before/mqtt_sizes.txt. Every logged JSON message is
+rebuilt as the binary frame the new firmware sends for it (tools/mqtt_frame.py),
+so old and new sizes are for exactly the same messages.
+
+python tools/mqtt_size_report.py --convert <log>
+topic          count  JSON mean  binary mean  payload saved  wire saved
+barcode           55       39.4          7.0          82.2%       43.0%
+cmd              509        4.9          2.2          54.5%        7.2%
+cmd/ack          486        4.9          2.2          54.4%        6.5%
+heartbeat      13075      204.4         28.0          86.3%       73.5%
+hump             145       97.1         12.0          87.6%       65.6%
+log            13155       63.7         44.9          29.5%       20.1%
+obstacle          40      206.6         14.0          93.2%       79.2%
+online            85        1.0          1.0           0.0%        0.0%
+telemetry     103709      142.8         24.0          83.2%       66.6%
+all           131259                                  81.2%       65.0%
+payload bytes: 18349948 JSON -> 3450925 binary; on the wire: 23111147 -> 8094803
+not convertible (barcode): 1
+not convertible (cmd): 9
+not convertible (cmd/ack): 9
+not convertible (heartbeat): 1
+not convertible (hump): 1
+not convertible (obstacle): 1
+not convertible (telemetry): 1
+
+python tools/mqtt_size_report.py --frames
+telemetry   24 bytes
+heartbeat   28 bytes
+obstacle    14 bytes
+hump        12 bytes
+barcode    6 bytes + 6 bits per character (e.g. 5 chars: 10 bytes)
+log        2 + the line's text
+command    2 bytes (3 for set-letter and features)

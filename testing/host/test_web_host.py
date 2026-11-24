@@ -96,7 +96,7 @@ void log_printf(char const * fmt, ...) { (void)fmt; }
 DEFINITIONS = block("#define HTTP_PORT", "    \"<!DOCTYPE html>")
 # Omit the HTML declaration; tested separately below.
 DEFINITIONS = DEFINITIONS[:DEFINITIONS.index("static char const g_page_html")]
-STATE = SOURCE[SOURCE.index("static web_command_t g_pending"):re.search(r"static void\s+server_check", SOURCE).start()]
+STATE = SOURCE[re.search(r"static uint32_t\s+g_http_retry", SOURCE).start():re.search(r"static void\s+server_check", SOURCE).start()]
 
 NETWORK = r'''
 static unsigned joins, leaves, resets, recovery, ap_stops, mdns_removes;
@@ -139,7 +139,7 @@ static int cyw43_wifi_ap_get_stas(void *s, int *n, void *a) { (void)s; (void)a; 
 static int cyw43_wifi_get_rssi(void * s, int32_t * rssi) { (void)s; *rssi = -50; return 0; }
 static void dhcp_server_deinit(dhcp_server_t * s) { (void)s; }
 static void cyw43_arch_disable_ap_mode(void) { ++ap_stops; }
-static void own_network_start(void) { ++recovery; g_wifi_mode = WIFI_OWN_NETWORK; }
+static void own_network_start(void) { ++recovery; g_w.wifi_mode = WIFI_OWN_NETWORK; }
 static void hotspot_try(uint32_t);
 static void hotspot_next(uint32_t, char const *, int);
 static bool hotspot_first_round(void);
@@ -156,9 +156,9 @@ int main(void) {
     cyw43_state.netif[0].link = true; cyw43_state.netif[0].ip = 42;
     tick(2350); assert(g_hot_phase == HOTSPOT_WAITING_DHCP);
     cyw43_state.netif[0].lease = true; tick(2600);
-    assert(g_hot_phase == HOTSPOT_ONLINE && g_wifi_mode == WIFI_JOINED);
+    assert(g_hot_phase == HOTSPOT_ONLINE && g_w.wifi_mode == WIFI_JOINED);
     // Sleeping/filtered ICMP must not disconnect a healthy link.
-    gb_ping_answers = true; g_ping_reply = 0; g_http_last_reply = 0;
+    g_w.b_ping_answers = true; g_ping_reply = 0; g_http_last_reply = 0;
     unsigned before = leaves; tick(20000);
     assert(leaves == before && g_hot_phase == HOTSPOT_ONLINE);
     // DHCP renewal/address changes remain online.
@@ -166,27 +166,27 @@ int main(void) {
     cyw43_state.netif[0].lease = false; tick(20500);
     assert(g_hot_phase == HOTSPOT_WAITING_DHCP && g_offline_since == 20500);
     tick(20500 + WIFI_RECOVERY_MSEC);
-    assert(recovery == 1 && g_wifi_mode == WIFI_OWN_NETWORK);
+    assert(recovery == 1 && g_w.wifi_mode == WIFI_OWN_NETWORK);
     before = joins; tick(20500 + 2 * WIFI_RECOVERY_MSEC);
     assert(joins == before && recovery == 1); // Recovery UI stays reachable.
     // Retry from the recovery UI shuts down AP before enabling station.
     g_hot_request = HOTSPOT_AUTO; tick(150000);
-    assert(ap_stops == 1 && g_wifi_mode == WIFI_JOINING);
+    assert(ap_stops == 1 && g_w.wifi_mode == WIFI_JOINING);
     tick(150250); assert(g_hot_phase == HOTSPOT_ASSOCIATING);
     // Explicit bad credentials advance to the next saved network.
     driver_status = CYW43_LINK_BADAUTH; tick(152000);
     assert(g_hot_idx == 1 && g_hot_phase == HOTSPOT_LEAVING);
     tick(152250); assert(g_hot_phase == HOTSPOT_ASSOCIATING);
     // A stuck disconnect recycles the station and unregisters mDNS first.
-    cyw43_state.netif[0].link = true; gb_mdns_registered = true;
+    cyw43_state.netif[0].link = true; g_wh.b_mdns_registered = true;
     hotspot_try(153000); before = resets; tick(155000);
-    assert(resets == before + 1 && !gb_mdns_registered && mdns_removes >= 1);
+    assert(resets == before + 1 && !g_wh.b_mdns_registered && mdns_removes >= 1);
     tick(155250); assert(g_hot_phase == HOTSPOT_ASSOCIATING);
     // Timeout must cover the WHOLE sequence of attempts, including wrap.
     memset(&cyw43_state, 0, sizeof(cyw43_state)); driver_status = 0;
     hotspot_start(UINT32_MAX - 30000u); before = recovery;
     tick((UINT32_MAX - 30000u) + WIFI_RECOVERY_MSEC);
-    assert(recovery == before + 1 && g_wifi_mode == WIFI_OWN_NETWORK);
+    assert(recovery == before + 1 && g_w.wifi_mode == WIFI_OWN_NETWORK);
     return 0;
 }
 '''
@@ -198,7 +198,7 @@ static vehicle_state_t scan_vehicle_state = VEHICLE_OBSTACLE_SCAN;
 static uint32_t scan_point_count = 3;
 static obstacle_point_t scan_points[] = {
     {-30, 510, OBSTACLE_RETURN_WEAK_RANGE},
-    {-28, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO},
+    {-28, OBSTACLE_POINT_NO_RANGE, OBSTACLE_RETURN_NO_ECHO},
     {0, 298, OBSTACLE_RETURN_RANGE}
 };
 bool obstacle_scan_active(void) { return scan_active; }
@@ -215,7 +215,8 @@ bool log_get(uint32_t seq, char const ** line, log_cat_t * cat) {
 barcode_command_t vehicle_pending_turn(void) { return BARCODE_CMD_LEFT; }
 obstacle_profile_t const * obstacle_profile(void) { return &profile; }
 void imu_get_axes(imu_axes_t * axes) {
-    *axes = (imu_axes_t){INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN};
+    // Axes are 16 bits (change requirement 1): the most negative value.
+    *axes = (imu_axes_t){INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN};
 }
 vehicle_state_t vehicle_state(void) { return scan_vehicle_state; }
 char const * vehicle_state_name(vehicle_state_t s) { (void)s; return "OBSTACLE_SCAN"; }

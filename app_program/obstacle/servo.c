@@ -13,9 +13,16 @@
 #include "servo.h"
 #include "ultrasonic.h"
 
-static int32_t  g_angle = -1;
+static int16_t  g_angle = -1; // 0..180 deg; -1 = not set yet.
 static uint64_t g_ready_usec;
-static bool     gb_released = false; // Pulse off: idle, not holding.
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_released : 1; // Pulse off: idle, not holding.
+} g_sv;
 
 /** @brief Convert a clamped servo angle to its calibrated PWM pulse width. */
 static uint16_t
@@ -47,18 +54,18 @@ servo_set_angle(int32_t degrees)
     degrees      = degrees < low ? low : (degrees > high ? high : degrees);
     if (degrees == g_angle)
     {
-        if (gb_released)
+        if (g_sv.b_released)
         {
             // Hold again where it was left: it has not moved, so no
             // settling wait and no new ultrasonic reading are needed.
             pwm_set_gpio_level(PIN_SERVO, angle_level(degrees));
-            gb_released = false;
+            g_sv.b_released = false;
         }
         return;
     }
-    g_angle      = degrees;
-    gb_released  = false;
-    g_ready_usec = (time_us_64()) + (((uint64_t)SERVO_SETTLE_MSEC) * 1000u);
+    g_angle         = degrees;
+    g_sv.b_released = false;
+    g_ready_usec    = (time_us_64()) + (((uint64_t)SERVO_SETTLE_MSEC) * 1000u);
     ultrasonic_invalidate();
     pwm_set_gpio_level(PIN_SERVO, angle_level(degrees));
     log_servo("Servo: %ld degrees.", (long)degrees);
@@ -81,10 +88,10 @@ servo_idle_release(bool b_allow)
     uint64_t release_usec =
         g_ready_usec + (((uint64_t)SERVO_RELEASE_MSEC) * 1000u);
 
-    if ((b_allow && (!gb_released)) && ((time_us_64()) >= release_usec))
+    if ((b_allow && (!g_sv.b_released)) && ((time_us_64()) >= release_usec))
     {
         pwm_set_gpio_level(PIN_SERVO, 0u);
-        gb_released = true;
+        g_sv.b_released = true;
         log_servo("Servo: released while idle (saves power).");
     }
 }

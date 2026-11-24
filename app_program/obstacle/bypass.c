@@ -84,7 +84,7 @@ _Static_assert((BYPASS_PIVOT_LEFT_X100 > 0) && (BYPASS_PIVOT_RIGHT_X100 > 0),
 typedef enum
 {
     PHASE_IDLE,
-    PHASE_PIVOT,   // Turning on the spot to g_target_hdg, then g_after.
+    PHASE_PIVOT,   // Turning on the spot to g_target_hdg, then g_bp.after.
     PHASE_OUT,     // Curving out (pushed).
     PHASE_RESCAN,  // Braked, half-sweep towards the side.
     PHASE_PASS,    // Straightening (pushed), then straight past it.
@@ -98,25 +98,22 @@ typedef enum
     PHASE_BACKUP      // Reversing straight: too close to turn.
 } phase_t;
 
+// One recorded move in 8 bytes, not 16 (change requirement 1): the
+// heading to 0.1 deg (+/-180.0 in 16 bits), the length and the sideways
+// positions to 1 mm (16 bits: moves are about 20 mm and the car stays
+// within a metre of the line). Explore mode only (not the fixed route).
 typedef struct
 {
-    float    heading_deg; // Mean direction of the move (from the line).
-    uint32_t dist_mm;     // How far.
-    float    x_from_mm;   // Sideways position at its start,
-    float    x_to_mm;     // and at its end.
+    int16_t  heading_x10; // Mean direction of the move (from the line).
+    uint16_t dist_mm;     // How far.
+    int16_t  x_from_mm;   // Sideways position at its start,
+    int16_t  x_to_mm;     // and at its end.
 } move_t;
 
-static phase_t  g_phase         = PHASE_IDLE;
-static phase_t  g_brake_then    = PHASE_IDLE;
-static phase_t  g_after         = PHASE_IDLE; // Phase after a pivot.
-static phase_t  g_backup_then   = PHASE_IDLE; // Phase after a back-up.
-static float    g_backup_hdg    = 0.0f;       // Heading held reversing.
-static uint32_t g_backups       = 0u;         // Back-ups so far.
-static bool     gb_ret_hold     = false;      // Return paused: still beside it.
-static float    g_hold_end_mm   = 0.0f;       // Hold ends here (0: not yet).
-static bool     gb_left         = false;      // Going round on the left side.
-static bool     gb_use_line     = true;       // Come back onto a line.
-static float    g_heading       = 0.0f;       // Degrees from the line, + right.
+static float    g_backup_hdg    = 0.0f; // Heading held reversing.
+static uint32_t g_backups       = 0u;   // Back-ups so far.
+static float    g_hold_end_mm   = 0.0f; // Hold ends here (0: not yet).
+static float    g_heading       = 0.0f; // Degrees from the line, + right.
 static int32_t g_turn_direction = 1; // Last pivot direction, including braking.
 static float   g_target_hdg     = 0.0f; // Pivot target.
 static float   g_x              = 0.0f; // Position (mm).
@@ -128,46 +125,65 @@ static float    g_cx0           = 0.0f; // Current curve: start x, z,
 static float    g_cz0           = 0.0f;
 static float    g_clen          = 0.0f; // and length along z.
 static move_t   g_stack[BYPASS_STACK_MAX];
-static uint32_t g_sp = 0u;                // Moves on the stack.
-static move_t   g_ret;                    // The move being driven back.
-static float    g_ret_done       = 0.0f;  // mm of it driven so far.
-static float    g_seg_mm         = 0.0f;  // Move being recorded: mm,
-static float    g_seg_hsum       = 0.0f;  // and heading x mm (for the mean),
-static float    g_seg_x0         = 0.0f;  // and x where it started.
-static float    g_phase_mm       = 0.0f;  // Driven in this phase.
-static float    g_pass_hold_x    = 0.0f;  // PASS keeps to this x.
-static bool     gb_pass_straight = false; // PASS: straightened up yet.
-static uint32_t g_phase_msec     = 0u;
-static uint32_t g_last_left      = 0u; // Encoder counts last tick.
-static uint32_t g_last_right     = 0u;
-static int32_t  g_scan_rel       = 0; // Re-scan: servo angle (relative).
-static int32_t  g_near_rel       = 0; // Last ray that still saw it.
-static uint32_t g_near_mm        = 0u;
-static uint32_t g_ahead_mm       = ULTRASONIC_NO_RANGE; // Re-scan, ahead.
-static bool     gb_near_seen     = false;
-static uint32_t g_pass_min_mm    = 0u;    // Pass at least this far.
-static uint32_t g_pass_end_mm    = 0u;    // PASS ends at this distance.
-static bool     gb_side_seen     = false; // Obstacle seen alongside.
-static uint32_t g_side_clear     = 0u;    // Far echoes in a row.
-static uint32_t g_side_next      = 0u;    // Next sideways sample (ms).
-static uint32_t g_line_ticks     = 0u;    // Consecutive line observations.
-static uint32_t g_side_sequence  = 0u;    // Never count a ping twice.
-static bool     gb_fixed_test    = false;
+static uint32_t g_sp = 0u;              // Moves on the stack.
+static move_t   g_ret;                  // The move being driven back.
+static float    g_ret_done      = 0.0f; // mm of it driven so far.
+static float    g_seg_mm        = 0.0f; // Move being recorded: mm,
+static float    g_seg_hsum      = 0.0f; // and heading x mm (for the mean),
+static float    g_seg_x0        = 0.0f; // and x where it started.
+static float    g_phase_mm      = 0.0f; // Driven in this phase.
+static float    g_pass_hold_x   = 0.0f; // PASS keeps to this x.
+static uint32_t g_phase_msec    = 0u;
+static uint32_t g_last_left     = 0u; // Encoder counts last tick.
+static uint32_t g_last_right    = 0u;
+static int32_t  g_scan_rel      = 0; // Re-scan: servo angle (relative).
+static int32_t  g_near_rel      = 0; // Last ray that still saw it.
+static uint32_t g_near_mm       = 0u;
+static uint32_t g_ahead_mm      = ULTRASONIC_NO_RANGE; // Re-scan, ahead.
+static uint32_t g_pass_min_mm   = 0u; // Pass at least this far.
+static uint32_t g_pass_end_mm   = 0u; // PASS ends at this distance.
+static uint32_t g_side_clear    = 0u; // Far echoes in a row.
+static uint32_t g_side_next     = 0u; // Next sideways sample (ms).
+static uint32_t g_line_ticks    = 0u; // Consecutive line observations.
+static uint32_t g_side_sequence = 0u; // Never count a ping twice.
 static float    g_fixed_clear_z; // Required forward progress before return.
 static bypass_geometry_t g_geometry;
 static uint32_t          g_plan_angle;
-static bool              gb_plan_reverse;
 static float             g_steer_residual;
-static bool              gb_brake_reverse;
-static bool     gb_odo_moved; // Count changes, including residual brake motion.
-static bool     gb_turn_settling;
-static uint32_t g_turn_quiet_msec;
+static uint32_t          g_turn_quiet_msec;
 static float g_line_contact_x; // Bound sideways movement after finding black.
-static bool  gb_nudge_used;
-static bool  gb_nudge_seen_black;
-static bool  gb_nudge_reversed;
-static float g_nudge_heading;
-static float g_line_advance_hdg;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    phase_t phase : 4;
+    phase_t brake_then : 4;
+    phase_t after : 4;           // Phase after a pivot.
+    phase_t backup_then : 4;     // Phase after a back-up.
+    bool    b_ret_hold : 1;      // Return paused: still beside it.
+    bool    b_left : 1;          // Going round on the left side.
+    bool    b_use_line : 1;      // Come back onto a line.
+    bool    b_pass_straight : 1; // PASS: straightened up yet.
+    bool    b_near_seen : 1;
+    bool    b_side_seen : 1; // Obstacle seen alongside.
+    bool    b_fixed_test : 1;
+    bool    b_plan_reverse : 1;
+    bool    b_brake_reverse : 1;
+    bool    b_odo_moved : 1; // Count changes, including residual brake motion.
+    bool    b_turn_settling : 1;
+    bool    b_nudge_used : 1;
+    bool    b_nudge_seen_black : 1;
+    bool    b_nudge_reversed : 1;
+} g_bp = {.phase       = PHASE_IDLE,
+          .brake_then  = PHASE_IDLE,
+          .after       = PHASE_IDLE,
+          .backup_then = PHASE_IDLE,
+          .b_use_line  = true};
+
+static float    g_nudge_heading;
+static float    g_line_advance_hdg;
 static uint32_t g_pose_next = 0u; // Next pose log (ms).
 
 static bool fixed_begin(obstacle_profile_t const * profile, uint32_t now_msec,
@@ -218,8 +234,8 @@ bool
 bypass_begin(obstacle_profile_t const * p_profile, uint32_t now_msec,
              bool b_use_line)
 {
-    gb_fixed_test = BYPASS_FIXED_WIDTH_TEST;
-    if (gb_fixed_test)
+    g_bp.b_fixed_test = BYPASS_FIXED_WIDTH_TEST;
+    if (g_bp.b_fixed_test)
     {
         return fixed_begin(p_profile, now_msec, b_use_line);
     }
@@ -279,11 +295,11 @@ bypass_begin(obstacle_profile_t const * p_profile, uint32_t now_msec,
     {
         reset_state(b_go_left, b_use_line);
         shift = ((shift < BYPASS_MIN_SHIFT_MM) ? BYPASS_MIN_SHIFT_MM : shift);
-        g_target_x = (gb_left ? -(float)shift : (float)shift);
+        g_target_x = (g_bp.b_left ? -(float)shift : (float)shift);
         g_front_z  = (float)p_profile->front_mm;
 
         log_obstacle("BYPASS: going round on the %s, side-step %" PRIu32 " mm.",
-                     (gb_left ? "LEFT" : "RIGHT"), shift);
+                     (g_bp.b_left ? "LEFT" : "RIGHT"), shift);
         servo_set_angle(SERVO_CENTER_DEG);
         curve_start(now_msec);
         b_ok = true;
@@ -308,16 +324,17 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
     bool            b_line = ((line.b_left_black) || (line.b_right_black));
 
     odo_update(); // Position and heading, from this tick's counts.
-    if ((gb_fixed_test && (gb_turn_settling || (g_phase == PHASE_BRAKE))) &&
-        gb_odo_moved)
+    if ((g_bp.b_fixed_test &&
+         (g_bp.b_turn_settling || (g_bp.phase == PHASE_BRAKE))) &&
+        g_bp.b_odo_moved)
     {
         // Track quiet time even while a fresh ultrasonic sample is pending.
         g_turn_quiet_msec = now_msec;
     }
     bool confirm_line = b_line;
-    if (gb_fixed_test &&
-        (((g_phase == PHASE_ALIGN) || (g_phase == PHASE_FINISH)) ||
-         (g_phase == PHASE_LINE_NUDGE)))
+    if (g_bp.b_fixed_test &&
+        (((g_bp.phase == PHASE_ALIGN) || (g_bp.phase == PHASE_FINISH)) ||
+         (g_bp.phase == PHASE_LINE_NUDGE)))
     {
         confirm_line = b_line && ((fabsf(g_heading)) <= BYPASS_ALIGN_TOL_DEG);
     }
@@ -334,9 +351,9 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
     }
 
     if ((((int32_t)(now_msec - g_pose_next)) >= 0) &&
-        ((((PHASE_OUT == g_phase) || (PHASE_PASS == g_phase)) ||
-          (PHASE_RETURN == g_phase)) ||
-         (PHASE_BACKUP == g_phase)))
+        ((((PHASE_OUT == g_bp.phase) || (PHASE_PASS == g_bp.phase)) ||
+          (PHASE_RETURN == g_bp.phase)) ||
+         (PHASE_BACKUP == g_bp.phase)))
     {
         g_pose_next = now_msec + BYPASS_POSE_LOG_MSEC;
         log_obstacle("BYPASS pose (%s): x=%ld z=%ld mm, heading %ld deg, "
@@ -347,7 +364,7 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
     }
 
     float heading_limit =
-        gb_fixed_test ? BYPASS_DEPARTURE_MAX_DEG : BYPASS_HEADING_MAX_DEG;
+        g_bp.b_fixed_test ? BYPASS_DEPARTURE_MAX_DEG : BYPASS_HEADING_MAX_DEG;
     if ((fabsf(g_heading)) > (heading_limit + HEADING_RUNAWAY_DEG))
     {
         // Steering one way but turning the other: the left/right sense
@@ -357,14 +374,14 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
                      (long)lroundf(g_heading));
         result = BYPASS_FAILED;
     }
-    else if ((PHASE_RESCAN != g_phase) &&
+    else if ((PHASE_RESCAN != g_bp.phase) &&
              ((now_msec - g_phase_msec) > BYPASS_STEP_MAX_MSEC))
     {
         log_obstacle("BYPASS: step %s took over %u ms (stuck?): stopping.",
                      bypass_phase_name(), BYPASS_STEP_MAX_MSEC);
         result = BYPASS_FAILED;
     }
-    else if (gb_fixed_test)
+    else if (g_bp.b_fixed_test)
     {
         result = fixed_step(now_msec, range_mm);
     }
@@ -372,45 +389,45 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
     {
         motor_set(0, 0); // Wait for a fresh reading at the selected angle.
     }
-    else if (((PHASE_OUT == g_phase) || (PHASE_RETURN == g_phase)) &&
+    else if (((PHASE_OUT == g_bp.phase) || (PHASE_RETURN == g_bp.phase)) &&
              ((range_mm == ULTRASONIC_NO_RANGE) || (range_mm == 0u)))
     {
         result = BYPASS_FAILED;
     }
-    else if (PHASE_PIVOT == g_phase)
+    else if (PHASE_PIVOT == g_bp.phase)
     {
         float error = g_target_hdg - g_heading;
 
         if ((fabsf(error)) <= PIVOT_DONE_DEG)
         {
-            phase_enter(g_after, now_msec);
+            phase_enter(g_bp.after, now_msec);
         }
         else
         {
             pivot(error < 0.0f);
         }
     }
-    else if (PHASE_OUT == g_phase)
+    else if (PHASE_OUT == g_bp.phase)
     {
         result = out_step(now_msec, range_mm);
     }
-    else if (PHASE_RESCAN == g_phase)
+    else if (PHASE_RESCAN == g_bp.phase)
     {
         result = rescan_step(now_msec, range_mm);
     }
-    else if (PHASE_BACKUP == g_phase)
+    else if (PHASE_BACKUP == g_bp.phase)
     {
         backup_step(now_msec, range_mm);
     }
-    else if (PHASE_PASS == g_phase)
+    else if (PHASE_PASS == g_bp.phase)
     {
         result = pass_step(now_msec, range_mm);
     }
-    else if (PHASE_RETURN == g_phase)
+    else if (PHASE_RETURN == g_bp.phase)
     {
         return_guard(now_msec, range_mm); // Still beside it?
 
-        if ((gb_use_line && (!gb_ret_hold)) &&
+        if ((g_bp.b_use_line && (!g_bp.b_ret_hold)) &&
             (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS))
         {
             g_sp = 0u; // On the line: forget the rest.
@@ -425,7 +442,7 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
                          range_mm);
             result = BYPASS_FAILED;
         }
-        else if (gb_ret_hold)
+        else if (g_bp.b_ret_hold)
         {
             steer(0.0f); // Still beside it: straight.
         }
@@ -446,7 +463,7 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
             return_steer();
         }
     }
-    else if (PHASE_ADVANCE == g_phase)
+    else if (PHASE_ADVANCE == g_bp.phase)
     {
         steer(g_heading); // Keep the heading.
         if (g_phase_mm >= ((float)BYPASS_LINE_ADVANCE_MM))
@@ -455,7 +472,7 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
             phase_enter(PHASE_ALIGN, now_msec);
         }
     }
-    else if (PHASE_ALIGN == g_phase)
+    else if (PHASE_ALIGN == g_bp.phase)
     {
         float size   = fabsf(g_target_hdg);
         float turned = fabsf(g_heading - g_target_hdg);
@@ -484,10 +501,10 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
             pivot(g_heading > 0.0f); // Back towards straight.
         }
     }
-    else if (PHASE_FINISH == g_phase)
+    else if (PHASE_FINISH == g_bp.phase)
     {
         motor_set(0, 0);
-        if ((!gb_use_line) || (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS))
+        if ((!g_bp.b_use_line) || (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS))
         {
             log_obstacle("BYPASS done: original path confirmed.");
             result = BYPASS_DONE;
@@ -503,7 +520,7 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
         result = BYPASS_FAILED; // Not started.
     }
 
-    if (((result == BYPASS_DONE) && gb_use_line) &&
+    if (((result == BYPASS_DONE) && g_bp.b_use_line) &&
         (((fabsf(g_heading)) > BYPASS_ALIGN_TOL_DEG) ||
          (!((line.b_left_black) || (line.b_right_black)))))
     {
@@ -529,7 +546,7 @@ bypass_step(uint32_t now_msec, uint32_t range_mm)
         }
         motor_set(0, 0);
         servo_set_angle(SERVO_CENTER_DEG);
-        g_phase = PHASE_IDLE;
+        g_bp.phase = PHASE_IDLE;
     }
 
     return (result);
@@ -560,7 +577,7 @@ fixed_begin(obstacle_profile_t const * profile, uint32_t now_msec,
         if (((((points[index_i].angle_deg) == 0) &&
               ((points[index_i].kind) == OBSTACLE_RETURN_RANGE)) &&
              ((points[index_i].range_mm) > 0u)) &&
-            ((points[index_i].range_mm) != ULTRASONIC_NO_RANGE))
+            ((points[index_i].range_mm) != OBSTACLE_POINT_NO_RANGE))
         {
             centre_stable = true;
         }
@@ -599,7 +616,7 @@ bypass_test_begin(uint32_t now_msec)
     {
         return false;
     }
-    gb_fixed_test = true;
+    g_bp.b_fixed_test = true;
     // v is always a continuous dry run, even if parked on a black mark.
     bool use_line = false;
     log_obstacle("BYPASS rehearsal: continuous dry run; end STOPPED");
@@ -611,7 +628,7 @@ bypass_test_begin(uint32_t now_msec)
 bool
 bypass_test_uses_line(void)
 {
-    return gb_use_line;
+    return g_bp.b_use_line;
 }
 
 /** @brief Initialize the existing footprint planner from measured front range.
@@ -628,8 +645,8 @@ fixed_start(uint32_t front_mm, float left, float right, uint32_t now_msec,
         return false;
     }
     reset_state(true, use_line);
-    g_heading     = BYPASS_INITIAL_HEADING_DEG;
-    gb_nudge_used = false;
+    g_heading         = BYPASS_INITIAL_HEADING_DEG;
+    g_bp.b_nudge_used = false;
     log_obstacle("BYPASS: encoder heading; track zero assumes initial -10 deg. "
                  "No calibrated IMU yaw.");
     log_obstacle("BYPASS controlled test: depth=%u mm; empty LEFT corridor "
@@ -650,8 +667,8 @@ fixed_start(uint32_t front_mm, float left, float right, uint32_t now_msec,
     g_target_x      = -g_geometry.offset;
     g_fixed_clear_z = g_geometry.clear_y;
     // Prefer the first safe forward-only angle before considering reverse.
-    g_plan_angle    = BYPASS_DEPARTURE_MIN_DEG;
-    gb_plan_reverse = false;
+    g_plan_angle        = BYPASS_DEPARTURE_MIN_DEG;
+    g_bp.b_plan_reverse = false;
     phase_enter(PHASE_PLAN, now_msec);
     return true;
 }
@@ -663,14 +680,14 @@ static bool
 fixed_turn_step(uint32_t now_msec)
 {
     float error = g_target_hdg - g_heading;
-    if (gb_turn_settling || ((g_turn_direction * error) <= PIVOT_DONE_DEG))
+    if (g_bp.b_turn_settling || ((g_turn_direction * error) <= PIVOT_DONE_DEG))
     {
         motor_set(0, 0);
-        if ((!gb_turn_settling) || gb_odo_moved)
+        if ((!g_bp.b_turn_settling) || g_bp.b_odo_moved)
         {
             g_turn_quiet_msec = now_msec;
         }
-        gb_turn_settling = true;
+        g_bp.b_turn_settling = true;
         // Keep the pivot phase/direction while braking so residual encoder
         // ticks cannot be misinterpreted as forward travel in the next leg.
         return (now_msec - g_turn_quiet_msec) >= BYPASS_TURN_SETTLE_MSEC;
@@ -693,7 +710,7 @@ fixed_turn_step(uint32_t now_msec)
 static bypass_result_t
 fixed_step(uint32_t now_msec, uint32_t range_mm)
 {
-    if ((g_phase == PHASE_LINE_NUDGE) &&
+    if ((g_bp.phase == PHASE_LINE_NUDGE) &&
         (((now_msec - g_phase_msec) > BYPASS_NUDGE_MAX_MSEC) ||
          (g_phase_mm > BYPASS_NUDGE_MAX_MM)))
     {
@@ -707,13 +724,13 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
     // No-echo permits travel only under the declared empty-corridor test
     // assumption. Any actual close echo stops; zero is an invalid range.
     if ((range_mm == 0u) ||
-        (front_within(range_mm, g_phase == PHASE_LINE_NUDGE
+        (front_within(range_mm, g_bp.phase == PHASE_LINE_NUDGE
                                     ? BYPASS_NUDGE_FRONT_STOP_MM
                                     : BYPASS_FRONT_STOP_MM)))
     {
         return BYPASS_FAILED;
     }
-    if (g_phase == PHASE_PLAN)
+    if (g_bp.phase == PHASE_PLAN)
     {
         motor_set(0, 0);
         if (bypass_geometry_candidate(&g_geometry, (float)g_plan_angle))
@@ -728,9 +745,10 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
                 (long)lroundf(g_geometry.return_deg),
                 (long)lroundf(g_geometry.return_mm),
                 (long)lroundf((g_geometry.translation_mm) +
-                              (gb_use_line ? BYPASS_REACQUIRE_ADVANCE_MM -
-                                                 BYPASS_LINE_SENSOR_FORWARD_MM
-                                           : 0)));
+                              (g_bp.b_use_line
+                                   ? BYPASS_REACQUIRE_ADVANCE_MM -
+                                         BYPASS_LINE_SENSOR_FORWARD_MM
+                                   : 0)));
             if ((g_geometry.reverse_mm) > 0)
             {
                 log_obstacle(
@@ -746,7 +764,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
                 start_pivot(-g_geometry.departure, PHASE_OUT, now_msec);
             }
         }
-        else if (!gb_plan_reverse)
+        else if (!g_bp.b_plan_reverse)
         {
             if (g_plan_angle < BYPASS_DEPARTURE_MAX_DEG)
             {
@@ -755,7 +773,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             else
             {
                 // Every supported forward candidate failed the footprint check.
-                gb_plan_reverse       = true;
+                g_bp.b_plan_reverse   = true;
                 g_plan_angle          = BYPASS_COMPACT_DEPARTURE_DEG;
                 g_geometry.reverse_mm = BYPASS_REVERSE_PLAN_STEP_MM;
             }
@@ -778,7 +796,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
     {
         return BYPASS_FAILED;
     }
-    if (g_phase == PHASE_BACKUP)
+    if (g_bp.phase == PHASE_BACKUP)
     {
         if ((fabsf(g_heading - g_backup_hdg)) > BYPASS_DRIVE_HEADING_TOL_DEG)
         {
@@ -793,20 +811,20 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             reverse(g_backup_hdg);
         }
     }
-    else if (g_phase == PHASE_BRAKE)
+    else if (g_bp.phase == PHASE_BRAKE)
     {
         motor_set(0, 0);
-        if (gb_odo_moved)
+        if (g_bp.b_odo_moved)
         {
             g_turn_quiet_msec = now_msec;
         }
         if ((now_msec - g_turn_quiet_msec) >= BYPASS_TURN_SETTLE_MSEC)
         {
             g_turn_direction = (g_target_hdg < g_heading) ? -1 : 1;
-            phase_enter(g_brake_then, now_msec);
+            phase_enter(g_bp.brake_then, now_msec);
         }
     }
-    else if (g_phase == PHASE_PIVOT)
+    else if (g_bp.phase == PHASE_PIVOT)
     {
         if (fixed_turn_step(now_msec))
         {
@@ -815,10 +833,10 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             {
                 return BYPASS_FAILED; // Excessive overshoot needs calibration.
             }
-            phase_enter(g_after, now_msec);
+            phase_enter(g_bp.after, now_msec);
         }
     }
-    else if (g_phase == PHASE_OUT)
+    else if (g_bp.phase == PHASE_OUT)
     {
         if ((fabsf(g_heading + (g_geometry.departure))) >
             BYPASS_DRIVE_HEADING_TOL_DEG)
@@ -839,7 +857,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             steer(-g_geometry.departure);
         }
     }
-    else if (g_phase == PHASE_PASS)
+    else if (g_bp.phase == PHASE_PASS)
     {
         float low      = (g_heading - BYPASS_ALIGN_TOL_DEG) / DEG_PER_RAD;
         float high     = (g_heading + BYPASS_ALIGN_TOL_DEG) / DEG_PER_RAD;
@@ -868,7 +886,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             steer(0.0f);
         }
     }
-    else if (g_phase == PHASE_RETURN)
+    else if (g_bp.phase == PHASE_RETURN)
     {
         bool on_line = g_line_ticks > 0u;
         if ((fabsf(g_heading - (g_geometry.return_deg))) >
@@ -885,7 +903,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
         {
             return BYPASS_FAILED;
         }
-        if (gb_use_line && on_line)
+        if (g_bp.b_use_line && on_line)
         {
             motor_set(0, 0); // Brake on first detection; confirm while stopped.
             if (g_line_ticks == 1u)
@@ -898,7 +916,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
                 phase_enter(PHASE_ADVANCE, now_msec);
             }
         }
-        else if ((!gb_use_line) && (g_x >= 0.0f))
+        else if ((!g_bp.b_use_line) && (g_x >= 0.0f))
         {
             start_pivot(0.0f, PHASE_FINISH, now_msec);
         }
@@ -907,7 +925,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             steer(g_geometry.return_deg);
         }
     }
-    else if (g_phase == PHASE_ADVANCE)
+    else if (g_bp.phase == PHASE_ADVANCE)
     {
         // Existing sensor-to-axle placement correction, adjustable on the
         // floor.
@@ -921,7 +939,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             steer(g_line_advance_hdg);
         }
     }
-    else if (g_phase == PHASE_ALIGN)
+    else if (g_bp.phase == PHASE_ALIGN)
     {
         if ((now_msec - g_phase_msec) > BYPASS_LINE_TIMEOUT_MSEC)
         {
@@ -944,7 +962,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
                 return BYPASS_RUNNING; // Confirm the aligned line reading while
                                        // braked.
             }
-            if (gb_nudge_used)
+            if (g_bp.b_nudge_used)
             {
                 return BYPASS_FAILED;
             }
@@ -960,7 +978,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
                 return BYPASS_FAILED;
             }
             line_state_t contact   = line_sensor_read();
-            float        direction = gb_left ? -1.0f : 1.0f;
+            float        direction = g_bp.b_left ? -1.0f : 1.0f;
             if ((fabsf(g_x)) > BYPASS_POSITION_UNCERTAINTY_MM)
             {
                 direction = g_x > 0 ? -1.0f : 1.0f;
@@ -973,17 +991,17 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             {
                 direction = 1.0f;
             }
-            g_nudge_heading = direction * BYPASS_NUDGE_HEADING_DEG;
-            gb_nudge_used   = true;
-            gb_nudge_seen_black =
+            g_nudge_heading   = direction * BYPASS_NUDGE_HEADING_DEG;
+            g_bp.b_nudge_used = true;
+            g_bp.b_nudge_seen_black =
                 (contact.b_left_black) || (contact.b_right_black);
-            gb_nudge_reversed = false;
+            g_bp.b_nudge_reversed = false;
             log_obstacle(
                 "BYPASS: aligned but no line confirmed; bounded line search.");
             phase_enter(PHASE_LINE_NUDGE, now_msec);
         }
     }
-    else if (g_phase == PHASE_LINE_NUDGE)
+    else if (g_bp.phase == PHASE_LINE_NUDGE)
     {
         line_state_t contact = line_sensor_read();
         if ((fabsf(g_heading)) >
@@ -998,7 +1016,7 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             {
                 return BYPASS_DONE;
             }
-            gb_nudge_seen_black = true;
+            g_bp.b_nudge_seen_black = true;
             if ((contact.b_left_black) && (!contact.b_right_black))
             {
                 g_nudge_heading = -BYPASS_NUDGE_TRACK_DEG;
@@ -1015,24 +1033,24 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             {
                 return BYPASS_FAILED;
             }
-            if (((!gb_nudge_seen_black) && (!gb_nudge_reversed)) &&
+            if (((!g_bp.b_nudge_seen_black) && (!g_bp.b_nudge_reversed)) &&
                 (g_phase_mm >= (BYPASS_NUDGE_MAX_MM * 0.75f)))
             {
                 // One bounded change of search side, never a repeating sweep.
-                g_nudge_heading   = -g_nudge_heading;
-                gb_nudge_reversed = true;
+                g_nudge_heading       = -g_nudge_heading;
+                g_bp.b_nudge_reversed = true;
             }
             steer_at_speed(g_nudge_heading, BYPASS_NUDGE_SPEED);
         }
     }
-    else if (g_phase == PHASE_FINISH)
+    else if (g_bp.phase == PHASE_FINISH)
     {
         motor_set(0, 0);
         if ((fabsf(g_heading)) > BYPASS_ALIGN_TOL_DEG)
         {
             return BYPASS_FAILED;
         }
-        if ((!gb_use_line) || (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS))
+        if ((!g_bp.b_use_line) || (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS))
         {
             return BYPASS_DONE;
         }
@@ -1054,12 +1072,12 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
 void
 bypass_cancel(void)
 {
-    if (PHASE_IDLE != g_phase)
+    if (PHASE_IDLE != g_bp.phase)
     {
         motor_set(0, 0);
         servo_set_angle(SERVO_CENTER_DEG);
         log_obstacle("BYPASS cancelled in %s.", bypass_phase_name());
-        g_phase = PHASE_IDLE;
+        g_bp.phase = PHASE_IDLE;
     }
 } /* bypass_cancel() */
 
@@ -1076,8 +1094,20 @@ bypass_phase_name(void)
         "return", "advance",    "align",  "finish",  "brake",
         "plan",   "line-nudge", "back-up"};
 
-    return (names[g_phase]);
+    return (names[g_bp.phase]);
 } /* bypass_phase_name() */
+
+/*!
+ * @brief Number the current step, for the binary MQTT telemetry (the same
+ *        order as bypass_phase_name()'s names).
+ *
+ * @return 0 (idle) to 12 (back-up): 4 bits.
+ */
+uint32_t
+bypass_phase_id(void)
+{
+    return ((uint32_t)g_bp.phase);
+} /* bypass_phase_id() */
 
 /*!
  * @brief The obstacle's edge on one side, corrected for the ultrasonic
@@ -1199,7 +1229,7 @@ side_shift(obstacle_profile_t const * p_profile, bool b_left)
         {
             if ((((p_pt->kind) != OBSTACLE_RETURN_RANGE) ||
                  ((p_pt->range_mm) == 0u)) ||
-                ((p_pt->range_mm) == ULTRASONIC_NO_RANGE))
+                ((p_pt->range_mm) == OBSTACLE_POINT_NO_RANGE))
             {
                 return NO_SIDE;
             }
@@ -1260,23 +1290,23 @@ explore_start(obstacle_profile_t const * p_profile, uint32_t now_msec,
     bool b_ok = false;
 
     reset_state(b_left, b_use_line);
-    g_target_x =
-        ((float)seen_x) + (gb_left ? -(float)g_clearance : (float)g_clearance);
-    g_front_z = (float)p_profile->front_mm;
+    g_target_x = ((float)seen_x) +
+                 (g_bp.b_left ? -(float)g_clearance : (float)g_clearance);
+    g_front_z  = (float)p_profile->front_mm;
 
     if ((fabsf(g_target_x)) > ((float)BYPASS_MAX_SHIFT_MM))
     {
         log_obstacle("BYPASS: the %s side runs past %ld mm already: staying "
                      "blocked.",
-                     (gb_left ? "left" : "right"), (long)seen_x);
+                     (g_bp.b_left ? "left" : "right"), (long)seen_x);
     }
     else
     {
         log_obstacle("BYPASS: the obstacle runs past the %s end of the "
                      "sweep; turning %d deg that way to look again.",
-                     (gb_left ? "left" : "right"), BYPASS_EDGE_TURN_DEG);
+                     (g_bp.b_left ? "left" : "right"), BYPASS_EDGE_TURN_DEG);
         start_pivot(
-            (float)(gb_left ? -BYPASS_EDGE_TURN_DEG : BYPASS_EDGE_TURN_DEG),
+            (float)(g_bp.b_left ? -BYPASS_EDGE_TURN_DEG : BYPASS_EDGE_TURN_DEG),
             PHASE_RESCAN, now_msec);
         b_ok = true;
     }
@@ -1293,20 +1323,20 @@ explore_start(obstacle_profile_t const * p_profile, uint32_t now_msec,
 static void
 reset_state(bool b_left, bool b_use_line)
 {
-    gb_left      = b_left;
-    gb_use_line  = b_use_line;
-    g_heading    = 0.0f;
-    g_x          = 0.0f;
-    g_z          = 0.0f;
-    g_sp         = 0u;
-    g_seg_mm     = 0.0f;
-    g_seg_hsum   = 0.0f;
-    g_seg_x0     = 0.0f;
-    g_backups    = 0u;
-    g_line_ticks = 0u;
-    g_clearance  = SIDE_CLEARANCE_MM;
-    g_last_left  = encoder_count(PIN_ENC_LEFT_A);
-    g_last_right = encoder_count(PIN_ENC_RIGHT_A);
+    g_bp.b_left     = b_left;
+    g_bp.b_use_line = b_use_line;
+    g_heading       = 0.0f;
+    g_x             = 0.0f;
+    g_z             = 0.0f;
+    g_sp            = 0u;
+    g_seg_mm        = 0.0f;
+    g_seg_hsum      = 0.0f;
+    g_seg_x0        = 0.0f;
+    g_backups       = 0u;
+    g_line_ticks    = 0u;
+    g_clearance     = SIDE_CLEARANCE_MM;
+    g_last_left     = encoder_count(PIN_ENC_LEFT_A);
+    g_last_right    = encoder_count(PIN_ENC_RIGHT_A);
 } /* reset_state() */
 
 /*!
@@ -1326,7 +1356,7 @@ curve_start(uint32_t now_msec)
     g_clen = ((g_clen < MIN_CURVE_MM) ? MIN_CURVE_MM : g_clen);
 
     log_obstacle("BYPASS: curve %s: %ld mm sideways over %ld mm ahead.",
-                 (gb_left ? "left" : "right"),
+                 (g_bp.b_left ? "left" : "right"),
                  (long)lroundf(fabsf(g_target_x - g_x)), (long)lroundf(g_clen));
     servo_set_angle(SERVO_CENTER_DEG);
     phase_enter(PHASE_OUT, now_msec);
@@ -1368,8 +1398,8 @@ out_step(uint32_t now_msec, uint32_t range_mm)
     // out by about R (1 - cos heading): count that in, so it lands on the
     // side-step instead of overshooting it.
     float drift   = TURN_RADIUS_MM * (1.0f - (cosf(g_heading / DEG_PER_RAD)));
-    bool  b_there = (gb_left ? ((g_x - drift) <= g_target_x)
-                             : ((g_x + drift) >= g_target_x));
+    bool  b_there = (g_bp.b_left ? ((g_x - drift) <= g_target_x)
+                                 : ((g_x + drift) >= g_target_x));
 
     value_u = ((value_u < 0.0f) ? 0.0f : value_u);
 
@@ -1411,7 +1441,7 @@ out_step(uint32_t now_msec, uint32_t range_mm)
         log_obstacle("BYPASS: %" PRIu32 " mm ahead, nearer than the face "
                      "(%ld mm): re-scanning towards the %s.",
                      range_mm, (long)lroundf(face),
-                     (gb_left ? "left" : "right"));
+                     (g_bp.b_left ? "left" : "right"));
         if (!record(true))
         {
             result = BYPASS_FAILED;
@@ -1451,14 +1481,14 @@ start_pivot(float target_deg, phase_t after, uint32_t now_msec)
 {
     g_target_hdg     = target_deg;
     g_turn_direction = (target_deg < g_heading) ? -1 : 1;
-    g_after          = after;
-    if (gb_fixed_test &&
-        (((((g_phase == PHASE_OUT) || (g_phase == PHASE_PASS)) ||
-           (g_phase == PHASE_RETURN)) ||
-          (g_phase == PHASE_ADVANCE)) ||
-         (g_phase == PHASE_BACKUP)))
+    g_bp.after       = after;
+    if (g_bp.b_fixed_test &&
+        (((((g_bp.phase == PHASE_OUT) || (g_bp.phase == PHASE_PASS)) ||
+           (g_bp.phase == PHASE_RETURN)) ||
+          (g_bp.phase == PHASE_ADVANCE)) ||
+         (g_bp.phase == PHASE_BACKUP)))
     {
-        g_brake_then = PHASE_PIVOT;
+        g_bp.brake_then = PHASE_PIVOT;
         phase_enter(PHASE_BRAKE, now_msec);
     }
     else
@@ -1491,10 +1521,11 @@ record(bool b_flush)
         }
         else
         {
-            g_stack[g_sp].heading_deg = g_seg_hsum / g_seg_mm;
-            g_stack[g_sp].dist_mm     = (uint32_t)lroundf(g_seg_mm);
-            g_stack[g_sp].x_from_mm   = g_seg_x0;
-            g_stack[g_sp].x_to_mm     = g_x;
+            g_stack[g_sp].heading_x10 =
+                (int16_t)lroundf((g_seg_hsum / g_seg_mm) * 10.0f);
+            g_stack[g_sp].dist_mm   = (uint16_t)lroundf(g_seg_mm);
+            g_stack[g_sp].x_from_mm = (int16_t)lroundf(g_seg_x0);
+            g_stack[g_sp].x_to_mm   = (int16_t)lroundf(g_x);
             g_sp++;
         }
         g_seg_mm   = 0.0f;
@@ -1529,15 +1560,16 @@ return_next(void)
 static void
 return_steer(void)
 {
-    float frac = (((g_ret.dist_mm) > 0u)
-                      ? clampf(g_ret_done / ((float)g_ret.dist_mm), 1.0f)
-                      : 1.0f);
-    float want_x =
-        (g_ret.x_to_mm) + (((g_ret.x_from_mm) - (g_ret.x_to_mm)) * frac);
+    float frac   = (((g_ret.dist_mm) > 0u)
+                        ? clampf(g_ret_done / ((float)g_ret.dist_mm), 1.0f)
+                        : 1.0f);
+    float x_to   = (float)g_ret.x_to_mm;
+    float want_x = x_to + ((((float)g_ret.x_from_mm) - x_to) * frac);
     float pull =
         (atanf((want_x - g_x) / ((float)BYPASS_LOOKAHEAD_MM))) * DEG_PER_RAD;
 
-    steer(clampf((-g_ret.heading_deg) + pull, (float)BYPASS_HEADING_MAX_DEG));
+    steer(clampf((-(((float)g_ret.heading_x10) / 10.0f)) + pull,
+                 (float)BYPASS_HEADING_MAX_DEG));
 } /* return_steer() */
 
 /*!
@@ -1562,7 +1594,7 @@ side_near_mm(void)
  * @par
  * An echo within side_near_mm() means the obstacle is still beside or
  * ahead of the car on that side: turning in would hit it, so the return
- * pauses (gb_ret_hold) and the car drives straight on. Once
+ * pauses (g_bp.b_ret_hold) and the car drives straight on. Once
  * BYPASS_SIDE_CLEAR_COUNT far (or no) echoes come in a row, it drives
  * BYPASS_RETURN_GUARD_EXTRA_MM more, then the return carries on where
  * it paused.
@@ -1583,25 +1615,25 @@ return_guard(uint32_t now_msec, uint32_t range_mm)
         if (((ULTRASONIC_NO_RANGE != range_mm) && (range_mm > 0u)) &&
             (range_mm <= (side_near_mm())))
         {
-            if (!gb_ret_hold)
+            if (!g_bp.b_ret_hold)
             {
                 log_obstacle("BYPASS: obstacle still beside (%" PRIu32
                              " mm): holding straight.",
                              range_mm);
             }
-            gb_ret_hold   = true;
-            g_hold_end_mm = 0.0f;
-            g_side_clear  = 0u;
+            g_bp.b_ret_hold = true;
+            g_hold_end_mm   = 0.0f;
+            g_side_clear    = 0u;
         }
         else if ((range_mm == ULTRASONIC_NO_RANGE) || (range_mm == 0u))
         {
             g_side_clear = 0u;
-            if (gb_ret_hold)
+            if (g_bp.b_ret_hold)
             {
                 g_hold_end_mm = 0.0f;
             }
         }
-        else if (gb_ret_hold && (0.0f == g_hold_end_mm))
+        else if (g_bp.b_ret_hold && (0.0f == g_hold_end_mm))
         {
             g_side_clear++;
             if (g_side_clear >= BYPASS_SIDE_CLEAR_COUNT)
@@ -1616,10 +1648,10 @@ return_guard(uint32_t now_msec, uint32_t range_mm)
         }
     }
 
-    if ((gb_ret_hold && (g_hold_end_mm > 0.0f)) &&
+    if ((g_bp.b_ret_hold && (g_hold_end_mm > 0.0f)) &&
         (g_phase_mm >= g_hold_end_mm))
     {
-        gb_ret_hold = false;
+        g_bp.b_ret_hold = false;
         log_obstacle("BYPASS: clear of it at x=%ld z=%ld mm; turning "
                      "back again.",
                      (long)lroundf(g_x), (long)lroundf(g_z));
@@ -1673,13 +1705,13 @@ backup_step(uint32_t now_msec, uint32_t range_mm)
         log_obstacle("BYPASS: backed up %ld mm, to x=%ld z=%ld mm.",
                      (long)lroundf(g_phase_mm), (long)lroundf(g_x),
                      (long)lroundf(g_z));
-        if (PHASE_OUT == g_backup_then)
+        if (PHASE_OUT == g_bp.backup_then)
         {
             curve_start(now_msec);
         }
         else
         {
-            phase_enter(g_backup_then, now_msec);
+            phase_enter(g_bp.backup_then, now_msec);
         }
     }
     else
@@ -1715,9 +1747,11 @@ trim_stack(float back_mm)
         }
         else
         {
-            p_top->x_to_mm -=
-                ((p_top->x_to_mm) - (p_top->x_from_mm)) * (left / dist);
-            p_top->dist_mm = (uint32_t)lroundf(dist - left);
+            float x_to = (float)p_top->x_to_mm;
+
+            p_top->x_to_mm = (int16_t)lroundf(
+                x_to - ((x_to - ((float)p_top->x_from_mm)) * (left / dist)));
+            p_top->dist_mm = (uint16_t)lroundf(dist - left);
             left           = 0.0f;
         }
     }
@@ -1750,10 +1784,11 @@ static bypass_result_t
 rescan_step(uint32_t now_msec, uint32_t range_mm)
 {
     bypass_result_t result = BYPASS_RUNNING;
-    int32_t step = (gb_left ? -BYPASS_RESCAN_STEP_DEG : BYPASS_RESCAN_STEP_DEG);
-    bool    b_near = (((ULTRASONIC_NO_RANGE != range_mm) && (range_mm > 0u)) &&
-                      (range_mm <= BYPASS_RESCAN_NEAR_MM));
-    bool    b_edge = false;
+    int32_t         step =
+        (g_bp.b_left ? -BYPASS_RESCAN_STEP_DEG : BYPASS_RESCAN_STEP_DEG);
+    bool b_near = (((ULTRASONIC_NO_RANGE != range_mm) && (range_mm > 0u)) &&
+                   (range_mm <= BYPASS_RESCAN_NEAR_MM));
+    bool b_edge = false;
 
     motor_set(0, 0);
 
@@ -1775,26 +1810,26 @@ rescan_step(uint32_t now_msec, uint32_t range_mm)
     }
 
     if (b_near &&
-        ((!gb_near_seen) || (range_mm < (g_near_mm + BYPASS_EDGE_JUMP_MM))))
+        ((!g_bp.b_near_seen) || (range_mm < (g_near_mm + BYPASS_EDGE_JUMP_MM))))
     {
-        gb_near_seen = true; // Still the obstacle.
-        g_near_rel   = g_scan_rel;
-        g_near_mm    = range_mm;
+        g_bp.b_near_seen = true; // Still the obstacle.
+        g_near_rel       = g_scan_rel;
+        g_near_mm        = range_mm;
     }
     else
     {
         b_edge = true; // Far or none: past the edge.
     }
 
-    if (b_edge && gb_near_seen)
+    if (b_edge && g_bp.b_near_seen)
     {
         // The last ray that saw it touched the corner with the edge of its
         // beam, not its centre: move it inwards by the beam correction
         // (never past straight ahead).
         float rel = ((float)g_near_rel) +
-                    (gb_left ? (float)BYPASS_BEAM_CORRECTION_DEG
-                             : -(float)BYPASS_BEAM_CORRECTION_DEG);
-        float rad = ((gb_left ? (rel > 0.0f) : (rel < 0.0f)) ? 0.0f : rel) /
+                    (g_bp.b_left ? (float)BYPASS_BEAM_CORRECTION_DEG
+                                 : -(float)BYPASS_BEAM_CORRECTION_DEG);
+        float rad = ((g_bp.b_left ? (rel > 0.0f) : (rel < 0.0f)) ? 0.0f : rel) /
                     DEG_PER_RAD;
         float value_ex = ((float)g_near_mm) * (sinf(rad));
         float value_ey = ((float)g_near_mm) * (cosf(rad));
@@ -1804,13 +1839,13 @@ rescan_step(uint32_t now_msec, uint32_t range_mm)
         float value_cz =
             (g_z - (value_ex * (sinf(hrad)))) + (value_ey * (cosf(hrad)));
         float want =
-            value_cx + (gb_left ? -(float)g_clearance : (float)g_clearance);
+            value_cx + (g_bp.b_left ? -(float)g_clearance : (float)g_clearance);
 
         log_obstacle("BYPASS re-scan: edge at %ld deg, %" PRIu32 " mm "
                      "(corner x=%ld z=%ld mm).",
                      (long)g_near_rel, g_near_mm, (long)lroundf(value_cx),
                      (long)lroundf(value_cz));
-        if (gb_left ? (want < g_target_x) : (want > g_target_x))
+        if (g_bp.b_left ? (want < g_target_x) : (want > g_target_x))
         {
             g_target_x = want; // Further out than planned.
         }
@@ -1843,12 +1878,12 @@ rescan_step(uint32_t now_msec, uint32_t range_mm)
         log_obstacle("BYPASS re-scan: clear straight ahead; carrying on.");
         curve_start(now_msec);
     }
-    else if ((gb_left ? -g_scan_rel : g_scan_rel) >= SERVO_RANGE_DEG)
+    else if ((g_bp.b_left ? -g_scan_rel : g_scan_rel) >= SERVO_RANGE_DEG)
     {
         // The obstacle fills the whole half-sweep: turn further that way
         // and sweep again.
-        float next = g_heading + ((float)(gb_left ? -BYPASS_EDGE_TURN_DEG
-                                                  : BYPASS_EDGE_TURN_DEG));
+        float next = g_heading + ((float)(g_bp.b_left ? -BYPASS_EDGE_TURN_DEG
+                                                      : BYPASS_EDGE_TURN_DEG));
 
         if ((fabsf(next)) > ((float)BYPASS_HEADING_MAX_DEG))
         {
@@ -1899,9 +1934,9 @@ pass_step(uint32_t now_msec, uint32_t range_mm)
     float           beam    = ((float)SERVO_RANGE_DEG) / DEG_PER_RAD;
     uint32_t        near_mm = side_near_mm();
     uint32_t ahead_mm = (uint32_t)lroundf(((float)g_clearance) / (tanf(beam)));
-    bool     b_turned = !gb_pass_straight;
+    bool     b_turned = !g_bp.b_pass_straight;
 
-    if (!gb_pass_straight)
+    if (!g_bp.b_pass_straight)
     {
         // Straightening up: steer to heading 0 (wherever that leaves the
         // car sideways) and keep recording, so this drift is undone too.
@@ -1915,9 +1950,9 @@ pass_step(uint32_t now_msec, uint32_t range_mm)
             {
                 return (BYPASS_FAILED);
             }
-            gb_pass_straight = true;
-            g_pass_hold_x    = g_x; // Hold THIS line from now on.
-            b_turned         = false;
+            g_bp.b_pass_straight = true;
+            g_pass_hold_x        = g_x; // Hold THIS line from now on.
+            b_turned             = false;
         }
         steer(0.0f);
     }
@@ -1942,16 +1977,16 @@ pass_step(uint32_t now_msec, uint32_t range_mm)
         if (((ULTRASONIC_NO_RANGE != range_mm) && (range_mm > 0u)) &&
             (range_mm <= near_mm))
         {
-            gb_side_seen  = true; // Still alongside.
-            g_side_clear  = 0u;
-            g_pass_end_mm = 0u;
+            g_bp.b_side_seen = true; // Still alongside.
+            g_side_clear     = 0u;
+            g_pass_end_mm    = 0u;
         }
         else if ((range_mm == ULTRASONIC_NO_RANGE) || (range_mm == 0u))
         {
             g_side_clear  = 0u;
             g_pass_end_mm = 0u;
         }
-        else if (gb_side_seen && (g_pass_end_mm == 0u))
+        else if (g_bp.b_side_seen && (g_pass_end_mm == 0u))
         {
             g_side_clear++;
             if (g_side_clear >= BYPASS_SIDE_CLEAR_COUNT)
@@ -1969,7 +2004,8 @@ pass_step(uint32_t now_msec, uint32_t range_mm)
         }
     }
 
-    if (((0u == g_pass_end_mm) && (!gb_side_seen)) && (moved >= g_pass_min_mm))
+    if (((0u == g_pass_end_mm) && (!g_bp.b_side_seen)) &&
+        (moved >= g_pass_min_mm))
     {
         log_obstacle(
             "BYPASS: no side observation; cannot confirm obstacle passed.");
@@ -2018,14 +2054,15 @@ pass_step(uint32_t now_msec, uint32_t range_mm)
 static void
 phase_enter(phase_t phase, uint32_t now_msec)
 {
-    if (gb_fixed_test && (phase == PHASE_BRAKE))
+    if (g_bp.b_fixed_test && (phase == PHASE_BRAKE))
     {
-        gb_brake_reverse = (g_phase == PHASE_BACKUP);
+        g_bp.b_brake_reverse = (g_bp.phase == PHASE_BACKUP);
     }
-    if ((gb_fixed_test && (phase == PHASE_ALIGN)) && (g_phase == PHASE_ADVANCE))
+    if ((g_bp.b_fixed_test && (phase == PHASE_ALIGN)) &&
+        (g_bp.phase == PHASE_ADVANCE))
     {
-        g_brake_then = PHASE_ALIGN;
-        phase        = PHASE_BRAKE;
+        g_bp.brake_then = PHASE_ALIGN;
+        phase           = PHASE_BRAKE;
     }
     if (((PHASE_PIVOT == phase) || (PHASE_RESCAN == phase)) ||
         (PHASE_BACKUP == phase))
@@ -2034,16 +2071,16 @@ phase_enter(phase_t phase, uint32_t now_msec)
     }
     g_line_ticks    = 0u;
     g_side_sequence = ultrasonic_sample_sequence();
-    g_phase         = phase;
+    g_bp.phase      = phase;
     g_phase_msec    = now_msec;
     g_phase_mm      = 0.0f;
 
-    if (gb_fixed_test)
+    if (g_bp.b_fixed_test)
     {
         motor_set(0, 0);
-        gb_turn_settling = false;
-        g_steer_residual = 0;
-        gb_odo_moved     = false;
+        g_bp.b_turn_settling = false;
+        g_steer_residual     = 0;
+        g_bp.b_odo_moved     = false;
         if (phase == PHASE_BRAKE)
         {
             g_turn_quiet_msec = now_msec;
@@ -2063,14 +2100,14 @@ phase_enter(phase_t phase, uint32_t now_msec)
     {
         // Aim at the obstacle's side: it is on the other side from the one
         // being passed on (+ angle faces right).
-        servo_set_angle(gb_left ? (SERVO_CENTER_DEG + SERVO_RANGE_DEG)
-                                : (SERVO_CENTER_DEG - SERVO_RANGE_DEG));
-        g_pass_hold_x    = g_x;
-        gb_pass_straight = false;
-        gb_side_seen     = false;
-        g_side_clear     = 0u;
-        g_side_next      = now_msec;
-        g_pass_end_mm    = 0u;
+        servo_set_angle(g_bp.b_left ? (SERVO_CENTER_DEG + SERVO_RANGE_DEG)
+                                    : (SERVO_CENTER_DEG - SERVO_RANGE_DEG));
+        g_pass_hold_x        = g_x;
+        g_bp.b_pass_straight = false;
+        g_bp.b_side_seen     = false;
+        g_side_clear         = 0u;
+        g_side_next          = now_msec;
+        g_pass_end_mm        = 0u;
         g_pass_min_mm = ((((uint32_t)lroundf(
                               ((g_front_z > g_z) ? (g_front_z - g_z) : 0.0f))) +
                           BYPASS_ASSUMED_DEPTH_MM) +
@@ -2079,12 +2116,12 @@ phase_enter(phase_t phase, uint32_t now_msec)
     }
     else if (PHASE_RETURN == phase)
     {
-        servo_set_angle(gb_left ? (SERVO_CENTER_DEG + SERVO_RANGE_DEG)
-                                : (SERVO_CENTER_DEG - SERVO_RANGE_DEG));
-        gb_ret_hold   = false;
-        g_hold_end_mm = 0.0f;
-        g_side_clear  = 0u;
-        g_side_next   = now_msec;
+        servo_set_angle(g_bp.b_left ? (SERVO_CENTER_DEG + SERVO_RANGE_DEG)
+                                    : (SERVO_CENTER_DEG - SERVO_RANGE_DEG));
+        g_bp.b_ret_hold = false;
+        g_hold_end_mm   = 0.0f;
+        g_side_clear    = 0u;
+        g_side_next     = now_msec;
     }
     else if (PHASE_ADVANCE == phase)
     {
@@ -2098,9 +2135,9 @@ phase_enter(phase_t phase, uint32_t now_msec)
     }
     else if (PHASE_RESCAN == phase)
     {
-        g_scan_rel   = 0;
-        g_ahead_mm   = ULTRASONIC_NO_RANGE;
-        gb_near_seen = false;
+        g_scan_rel       = 0;
+        g_ahead_mm       = ULTRASONIC_NO_RANGE;
+        g_bp.b_near_seen = false;
         servo_set_angle(SERVO_CENTER_DEG);
         ultrasonic_invalidate(); // A fresh echo, straight on.
     }
@@ -2135,22 +2172,23 @@ odo_update(void)
                         ((float)ENC_RIGHT_EDGES_PER_M);
     float    mean     = (value_dl + value_dr) / 2.0f;
 
-    gb_odo_moved = ((left != g_last_left) || (right != g_last_right));
-    g_last_left  = left;
-    g_last_right = right;
+    g_bp.b_odo_moved = ((left != g_last_left) || (right != g_last_right));
+    g_last_left      = left;
+    g_last_right     = right;
     float pivot_scale =
-        gb_fixed_test ? (float)(g_turn_direction < 0 ? BYPASS_PIVOT_LEFT_X100
-                                                     : BYPASS_PIVOT_RIGHT_X100)
-                      : (float)BYPASS_PIVOT_SLIP_X100;
+        g_bp.b_fixed_test
+            ? (float)(g_turn_direction < 0 ? BYPASS_PIVOT_LEFT_X100
+                                           : BYPASS_PIVOT_RIGHT_X100)
+            : (float)BYPASS_PIVOT_SLIP_X100;
 
-    if (PHASE_PIVOT == g_phase)
+    if (PHASE_PIVOT == g_bp.phase)
     {
         float turn =
             (((mean / (((float)WHEEL_TRACK_MM) / 2.0f)) * DEG_PER_RAD) *
              100.0f) /
             pivot_scale;
 
-        if (gb_fixed_test)
+        if (g_bp.b_fixed_test)
         {
             float signed_mean = (g_turn_direction * (value_dl - value_dr)) / 2;
             float mid =
@@ -2158,18 +2196,18 @@ odo_update(void)
             g_x += signed_mean * (sinf(mid));
             g_z += signed_mean * (cosf(mid));
         }
-        g_heading += gb_fixed_test
+        g_heading += g_bp.b_fixed_test
                          ? g_turn_direction * turn
                          : ((g_target_hdg < g_heading) ? -turn : turn);
     }
-    else if (PHASE_ALIGN == g_phase)
+    else if (PHASE_ALIGN == g_bp.phase)
     {
         float turn =
             (((mean / (((float)WHEEL_TRACK_MM) / 2.0f)) * DEG_PER_RAD) *
              100.0f) /
             pivot_scale;
 
-        if (gb_fixed_test)
+        if (g_bp.b_fixed_test)
         {
             float signed_mean = (g_turn_direction * (value_dl - value_dr)) / 2;
             float mid =
@@ -2177,15 +2215,15 @@ odo_update(void)
             g_x += signed_mean * (sinf(mid));
             g_z += signed_mean * (cosf(mid));
         }
-        g_heading += gb_fixed_test ? g_turn_direction * turn
-                                   : ((g_heading > 0.0f) ? -turn : turn);
+        g_heading += g_bp.b_fixed_test ? g_turn_direction * turn
+                                       : ((g_heading > 0.0f) ? -turn : turn);
     }
-    else if ((((((PHASE_OUT == g_phase) || (PHASE_PASS == g_phase)) ||
-                (PHASE_RETURN == g_phase)) ||
-               (PHASE_ADVANCE == g_phase)) ||
-              ((gb_fixed_test && (PHASE_BRAKE == g_phase)) &&
-               (!gb_brake_reverse))) ||
-             (gb_fixed_test && (PHASE_LINE_NUDGE == g_phase)))
+    else if ((((((PHASE_OUT == g_bp.phase) || (PHASE_PASS == g_bp.phase)) ||
+                (PHASE_RETURN == g_bp.phase)) ||
+               (PHASE_ADVANCE == g_bp.phase)) ||
+              ((g_bp.b_fixed_test && (PHASE_BRAKE == g_bp.phase)) &&
+               (!g_bp.b_brake_reverse))) ||
+             (g_bp.b_fixed_test && (PHASE_LINE_NUDGE == g_bp.phase)))
     {
         float turn = (((BYPASS_ODO_SWAP_LR ? (value_dr - value_dl)
                                            : (value_dl - value_dr)) /
@@ -2199,13 +2237,14 @@ odo_update(void)
         g_phase_mm += mean;
         g_seg_mm += mean;
         g_seg_hsum += mean * (mid * DEG_PER_RAD);
-        if ((PHASE_RETURN == g_phase) && (!gb_ret_hold))
+        if ((PHASE_RETURN == g_bp.phase) && (!g_bp.b_ret_hold))
         {
             g_ret_done += mean;
         }
     }
-    else if ((PHASE_BACKUP == g_phase) ||
-             ((gb_fixed_test && (PHASE_BRAKE == g_phase)) && gb_brake_reverse))
+    else if ((PHASE_BACKUP == g_bp.phase) ||
+             ((g_bp.b_fixed_test && (PHASE_BRAKE == g_bp.phase)) &&
+              g_bp.b_brake_reverse))
     {
         // Reversing (the encoders count it as forward): position goes
         // back along the heading, and the turn's sense flips.
@@ -2245,9 +2284,9 @@ steer_at_speed(float heading_deg, int32_t speed)
     float   error      = heading_deg - g_heading;
     float   diff       = clampf((error * ((float)BYPASS_STEER_KP_X10)) / 10.0f,
                                 (float)BYPASS_STEER_MAX);
-    float   command    = diff + (gb_fixed_test ? g_steer_residual : 0);
+    float   command    = diff + (g_bp.b_fixed_test ? g_steer_residual : 0);
     int32_t adjustment = (int32_t)lroundf(clampf(command, BYPASS_STEER_MAX));
-    if (gb_fixed_test)
+    if (g_bp.b_fixed_test)
     {
         g_steer_residual = command - adjustment;
     }

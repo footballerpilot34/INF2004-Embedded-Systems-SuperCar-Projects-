@@ -11,12 +11,12 @@
 
 typedef struct
 {
-    int32_t ax_mg;
-    int32_t ay_mg;
-    int32_t az_mg;
-    int32_t mx_mgauss;
-    int32_t my_mgauss;
-    int32_t mz_mgauss;
+    int16_t ax_mg;
+    int16_t ay_mg;
+    int16_t az_mg;
+    int16_t mx_mgauss;
+    int16_t my_mgauss;
+    int16_t mz_mgauss;
 } imu_axes_t;
 
 bool    imu_init(void);

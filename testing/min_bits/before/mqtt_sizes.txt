@@ -1,0 +1,16 @@
+Source: the team's MQTT log (tools/mqtt_car.ps1 output), sessions 2026-11-19 to 2026-11-24, firmware before change requirement 1.
+
+topic          count   min    mean   max  wire mean
+barcode           56    25    39.2    42       75.2
+cmd              518     2     4.8     9       36.8
+cmd/ack          495     2     4.8     9       40.8
+heartbeat      13076    57   204.4   210      241.4
+hump             146    81    97.0   101      130.7
+log            13155    28    63.7   118       93.8
+obstacle          41    78   203.5   243      241.5
+online            85     1     1.0     1       36.0
+telemetry     103710    95   142.8   168      179.8
+
+Telemetry from the latest firmware only (has the am/vz fields):
+topic          count   min    mean   max  wire mean
+telemetry       8290   143   154.8   168      191.8

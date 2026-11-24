@@ -193,8 +193,8 @@ static void geometry_checks(void) {
     assert(p.width_mm > 25 && p.width_mm < 40 && !p.bypass.available);
     assert(!p.calibrated_width_valid);
     // A SINGLE missing ray bounds an estimate; there is no no-echo streak gate.
-    a[0] = (obstacle_point_t){-4, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
-    a[4] = (obstacle_point_t){4, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
+    a[0] = (obstacle_point_t){-4, OBSTACLE_POINT_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
+    a[4] = (obstacle_point_t){4, OBSTACLE_POINT_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
     obstacle_profile_build(a, 5, 298, &p);
     assert(p.left_bounded && p.right_bounded && !p.bypass.available);
     assert(p.left_status == OBSTACLE_EDGE_NO_ECHO && p.right_status == OBSTACLE_EDGE_NO_ECHO);
@@ -204,7 +204,7 @@ static void geometry_checks(void) {
     obstacle_profile_build(a, 5, 298, &p);
     assert(p.left_bounded && p.width_mm > 0 && !p.edges_confirmed);
     // Missing centre uses the pre-scan range for estimation, never clearance.
-    a[2] = (obstacle_point_t){0, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
+    a[2] = (obstacle_point_t){0, OBSTACLE_POINT_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
     obstacle_profile_build(a, 5, 298, &p);
     assert(!p.centre_seen && !p.left_bounded && !p.right_bounded && !p.bypass.available);
     // Every edge is discovered from the scan, including asymmetric observations.
@@ -213,7 +213,7 @@ static void geometry_checks(void) {
         {-26,316,OBSTACLE_RETURN_RANGE}, {-24,332,OBSTACLE_RETURN_RANGE},
         {0,298,OBSTACLE_RETURN_RANGE}, {14,355,OBSTACLE_RETURN_RANGE},
         {16,354,OBSTACLE_RETURN_RANGE},
-        {18,ULTRASONIC_NO_RANGE,OBSTACLE_RETURN_NO_ECHO}
+        {18,OBSTACLE_POINT_NO_RANGE,OBSTACLE_RETURN_NO_ECHO}
     };
     obstacle_profile_build(actual, 8, 298, &p);
     assert(p.left_angle_x10 == -270 && p.right_angle_x10 == 170);

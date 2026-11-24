@@ -46,6 +46,9 @@ add_executable(supercar
     app_program/obstacle/ultrasonic.c
     app_program/vehicle.c
     app_program/comms/web.c
+    app_program/bitpack.c
+    app_program/fault.c
+    app_program/comms/mqtt_frame.c
     lib/libwifi/dhcpserver/dhcpserver.c
 )
 

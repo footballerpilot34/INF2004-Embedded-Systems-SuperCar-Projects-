@@ -42,6 +42,13 @@ void gpio_set_dir(unsigned pin, bool out);
 void gpio_put(unsigned pin, bool value);
 void gpio_pull_down(unsigned pin);
 """)
+    # The flag byte is written with interrupts off (change requirement 1);
+    # here there are no interrupts, so the lock does nothing.
+    (work / "hardware/sync.h").write_text("""
+#include <stdint.h>
+static inline uint32_t save_and_disable_interrupts(void) { return 0u; }
+static inline void restore_interrupts(uint32_t saved) { (void)saved; }
+""")
     (work / "test.c").write_text("""
 #include <assert.h>
 #include <stdbool.h>
@@ -73,6 +80,7 @@ int main(void) {
     echo(400);
     assert(ultrasonic_measurement_ready());
     assert(ultrasonic_range_mm() == 400);
+    assert(!ultrasonic_last_no_echo());
     ultrasonic_invalidate();
     assert(!ultrasonic_measurement_ready());
     assert(ultrasonic_range_mm() == ULTRASONIC_NO_RANGE);
@@ -95,6 +103,11 @@ int main(void) {
     ultrasonic_task();
     assert(ultrasonic_measurement_ready());
     assert(ultrasonic_range_mm() == ULTRASONIC_NO_RANGE);
+    assert(ultrasonic_last_no_echo()); // FAULT_NO_ECHO's source.
+    now += US_PING_PERIOD_USEC;
+    ultrasonic_task();
+    echo(300); // An echo clears it again.
+    assert(ultrasonic_range_mm() == 300 && !ultrasonic_last_no_echo());
     return 0;
 }
 """)

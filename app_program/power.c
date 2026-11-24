@@ -39,12 +39,19 @@
 #define SAMPLES 8u           // Averaged per reading.
 #define SAMPLES_SKIPPED 3u   // The first readings come out low.
 
-static bool     gb_measured = false;
 static uint32_t g_vsys_mv   = 0u;
 static uint32_t g_min_mv    = UINT32_MAX;
 static uint32_t g_next_msec = 0u;
-static bool     gb_low_said = false; // "Battery low" logged already.
-static bool     gb_bad_said = false; // "Cannot be right" logged.
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_measured : 1;
+    bool b_low_said : 1; // "Battery low" logged already.
+    bool b_bad_said : 1; // "Cannot be right" logged.
+} g_pw;
 
 static uint32_t vsys_read_mv(void);
 
@@ -80,36 +87,36 @@ power_task(void)
             // The Pico could not be running on this: the pin was not read
             // properly (GP29 is shared with the Wi-Fi chip). Show nothing
             // rather than a false alarm.
-            if (!gb_bad_said)
+            if (!g_pw.b_bad_said)
             {
                 log_printf("Power: VSYS read as %" PRIu32 " mV, which "
                            "cannot be right; battery voltage unavailable.",
                            value_mv);
-                gb_bad_said = true;
+                g_pw.b_bad_said = true;
             }
             g_vsys_mv = 0u;
         }
         else
         {
-            g_vsys_mv   = value_mv;
-            gb_measured = true;
-            g_min_mv    = ((value_mv < g_min_mv) ? value_mv : g_min_mv);
+            g_vsys_mv       = value_mv;
+            g_pw.b_measured = true;
+            g_min_mv        = ((value_mv < g_min_mv) ? value_mv : g_min_mv);
         }
 
-        if ((0u == g_vsys_mv) || (!gb_measured))
+        if ((0u == g_vsys_mv) || (!g_pw.b_measured))
         {
             // Nothing valid to judge.
         }
-        else if ((g_vsys_mv < POWER_LOW_MV) && (!gb_low_said))
+        else if ((g_vsys_mv < POWER_LOW_MV) && (!g_pw.b_low_said))
         {
             log_printf("Power: supply only %" PRIu32 ".%02" PRIu32 " V: "
                        "battery low or sagging; charge it.",
                        (g_vsys_mv / 1000u), ((g_vsys_mv % 1000u) / 10u));
-            gb_low_said = true;
+            g_pw.b_low_said = true;
         }
         else if (g_vsys_mv >= (POWER_LOW_MV + POWER_LOW_HYST_MV))
         {
-            gb_low_said = false; // Recovered: warn again later.
+            g_pw.b_low_said = false; // Recovered: warn again later.
         }
         else
         {
@@ -126,7 +133,7 @@ power_task(void)
 bool
 power_is_measured(void)
 {
-    return (gb_measured);
+    return (g_pw.b_measured);
 } /* power_is_measured() */
 
 /*!
@@ -148,7 +155,7 @@ power_vsys_mv(void)
 uint32_t
 power_vsys_min_mv(void)
 {
-    return (gb_measured ? g_min_mv : 0u);
+    return (g_pw.b_measured ? g_min_mv : 0u);
 } /* power_vsys_min_mv() */
 
 /*!

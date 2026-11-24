@@ -64,6 +64,8 @@
 
 #define EDGE_RING_SIZE 256u // Power of two.
 #define EDGE_RING_MASK (EDGE_RING_SIZE - 1u)
+#define EDGE_WORD_BITS 32u // Edge colours: one bit per edge.
+#define EDGE_COLOUR_WORDS (EDGE_RING_SIZE / EDGE_WORD_BITS)
 #define MAX_ELEMENTS 200u // 20 characters.
 #define ELEMENTS_PER_CHAR 9u
 #define ELEMENTS_WITH_GAP 10u // 9 elements + inter-character gap.
@@ -160,33 +162,30 @@ static char g_letters[LETTERS + 1u] = BARCODE_LETTER_COMMANDS;
 // naturally at 2^32), so head - tail is the number of unread edges.
 static volatile uint32_t g_edge_usec[EDGE_RING_SIZE];
 static volatile uint32_t g_edge_pos[EDGE_RING_SIZE]; // encoder_position().
-static volatile bool     g_edge_black[EDGE_RING_SIZE];
+// Colour after each edge, one bit per edge (1 = black) instead of one
+// bool (a byte) each. Only the edge interrupt writes it (the GPIO edge
+// interrupt, or the analog timer when BARCODE_USE_ANALOG is on: never
+// both), and barcode_task() only reads it, so the interrupt's
+// read-modify-write of a word cannot lose another writer's bit.
+static volatile uint32_t g_edge_black[EDGE_COLOUR_WORDS];
 static volatile uint32_t g_edge_head = 0u;
 static uint32_t          g_edge_tail = 0u;
 
 // Scan in progress. Widths are kept both in time and in distance; the
 // decoder uses g_elements, which scan_finish() fills from the better one.
-static uint32_t         g_elements[MAX_ELEMENTS];
-static uint32_t         g_elem_usec[MAX_ELEMENTS];
-static uint32_t         g_elem_dist[MAX_ELEMENTS];
-static uint32_t         g_num_elements   = 0u;
-static uint32_t         g_view_first     = 0u; // The decoders see elements
-static uint32_t         g_view_len       = 0u; // [first, first + len).
-static uint32_t         g_widest_usec    = 0u;
-static uint32_t         g_widest_dist    = 0u;
-static uint32_t         g_narrow_usec    = UINT32_MAX; // Narrowest after the
-static uint32_t         g_narrow_dist    = UINT32_MAX; // first (maybe cut) one.
-static uint32_t         g_last_edge_usec = 0u;
-static uint32_t         g_last_edge_pos  = 0u;
-static uint32_t         g_scan_start_pos = 0u;
-static bool             gb_widths_dist   = false; // g_elements is in distance.
-static barcode_result_t g_pending_result = BARCODE_NONE; // Cut-off scan.
-static barcode_result_t g_last_result    = BARCODE_NONE;
-static bool             gb_last_black    = false;
-static bool             gb_capturing     = false;
-static bool             gb_overflow      = false;
-static bool             gb_enabled       = true;
-static bool             gb_hand          = false; // Slid past by hand.
+static uint32_t g_elements[MAX_ELEMENTS];
+static uint32_t g_elem_usec[MAX_ELEMENTS];
+static uint32_t g_elem_dist[MAX_ELEMENTS];
+static uint32_t g_num_elements   = 0u;
+static uint32_t g_view_first     = 0u; // The decoders see elements
+static uint32_t g_view_len       = 0u; // [first, first + len).
+static uint32_t g_widest_usec    = 0u;
+static uint32_t g_widest_dist    = 0u;
+static uint32_t g_narrow_usec    = UINT32_MAX; // Narrowest after the
+static uint32_t g_narrow_dist    = UINT32_MAX; // first (maybe cut) one.
+static uint32_t g_last_edge_usec = 0u;
+static uint32_t g_last_edge_pos  = 0u;
+static uint32_t g_scan_start_pos = 0u;
 
 // Analog reader state. Written by the sampling timer only.
 static repeating_timer_t g_ao_timer;
@@ -196,14 +195,33 @@ static int32_t           g_ao_white   = 0;     // Paper white, tracked.
 static int32_t           g_ao_extreme = 0;     // Last dip (on white) or
                                                // peak (on black).
 
-static char              g_message[BARCODE_MESSAGE_MAX + 1u];
-static barcode_command_t g_command = BARCODE_CMD_NONE;
+static char g_message[BARCODE_MESSAGE_MAX + 1u];
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool              b_widths_dist : 1;  // g_elements is in distance.
+    barcode_result_t  pending_result : 2; // Cut-off scan.
+    barcode_result_t  last_result : 2;
+    bool              b_last_black : 1;
+    bool              b_capturing : 1;
+    bool              b_overflow : 1;
+    bool              b_enabled : 1;
+    bool              b_hand : 1; // Slid past by hand.
+    barcode_command_t command : 3;
+} g_bc = {.pending_result = BARCODE_NONE,
+          .last_result    = BARCODE_NONE,
+          .b_enabled      = true,
+          .command        = BARCODE_CMD_NONE};
 
 // Why the last lenient line-up failed, for the log.
 static char const * gp_lenient_why = "";
 static uint32_t     g_lenient_pos  = 0u; // Scan position (1-based).
 
 static void     edge_push(uint32_t edge_usec, bool b_black);
+static bool     edge_is_black(uint32_t idx);
 static bool     ao_sample_isr(repeating_timer_t * p_timer);
 static int32_t  ao_darkness(void);
 static void     edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black);
@@ -323,26 +341,26 @@ barcode_scan_size(void)
 barcode_result_t
 barcode_task(void)
 {
-    barcode_result_t result  = g_pending_result;
+    barcode_result_t result  = g_bc.pending_result;
     uint32_t         head    = g_edge_head;
     uint32_t         end_gap = 0u;
 
-    g_pending_result = BARCODE_NONE; // A scan cut off: reported now.
+    g_bc.pending_result = BARCODE_NONE; // A scan cut off: reported now.
 
     if ((head - g_edge_tail) > EDGE_RING_SIZE)
     {
         // The task fell too far behind; the scan has lost edges.
-        g_edge_tail = head;
-        gb_overflow = true;
+        g_edge_tail     = head;
+        g_bc.b_overflow = true;
     }
 
     while (g_edge_tail != head)
     {
         uint32_t idx = g_edge_tail & EDGE_RING_MASK;
 
-        if (gb_enabled)
+        if (g_bc.b_enabled)
         {
-            edge_add(g_edge_usec[idx], g_edge_pos[idx], g_edge_black[idx]);
+            edge_add(g_edge_usec[idx], g_edge_pos[idx], edge_is_black(idx));
         }
         g_edge_tail++;
     }
@@ -350,12 +368,13 @@ barcode_task(void)
     end_gap = g_widest_usec * (end_gap_factor(g_widest_usec, g_narrow_usec));
     end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ? end_gap
                                                     : BARCODE_END_GAP_MIN_USEC);
-    if (gb_hand && (end_gap < BARCODE_HAND_END_GAP_USEC))
+    if (g_bc.b_hand && (end_gap < BARCODE_HAND_END_GAP_USEC))
     {
         end_gap = BARCODE_HAND_END_GAP_USEC; // A hand pauses mid-code.
     }
 
-    if (((BARCODE_NONE == result) && gb_capturing) && (scan_has_ended(end_gap)))
+    if (((BARCODE_NONE == result) && g_bc.b_capturing) &&
+        (scan_has_ended(end_gap)))
     {
         result = scan_finish();
     }
@@ -366,7 +385,7 @@ barcode_task(void)
 
     if (BARCODE_NONE != result)
     {
-        g_last_result = result;
+        g_bc.last_result = result;
     }
 
     if (BARCODE_DEBUG_LOG)
@@ -469,7 +488,7 @@ debug_log_colour(uint32_t edges)
 bool
 barcode_is_enabled(void)
 {
-    return gb_enabled;
+    return g_bc.b_enabled;
 }
 /** @brief Return the count of captured barcode edges. */
 uint32_t
@@ -481,7 +500,7 @@ barcode_edge_count(void)
 barcode_result_t
 barcode_last_result(void)
 {
-    return g_last_result;
+    return g_bc.last_result;
 }
 
 /*!
@@ -499,20 +518,20 @@ barcode_last_result(void)
 void
 barcode_set_enabled(bool b_enabled)
 {
-    if (b_enabled != gb_enabled)
+    if (b_enabled != g_bc.b_enabled)
     {
         log_line("Barcode reader %s; IRQ edges=%lu", b_enabled ? "ON" : "OFF",
                  (unsigned long)g_edge_head);
     }
-    if ((!b_enabled) && gb_capturing)
+    if ((!b_enabled) && g_bc.b_capturing)
     {
         log_line("Barcode: reading switched off after %" PRIu32
                  " bars+spaces -> decoding what was read.",
                  g_num_elements);
-        g_pending_result = scan_finish();
+        g_bc.pending_result = scan_finish();
     }
 
-    gb_enabled = b_enabled;
+    g_bc.b_enabled = b_enabled;
 } /* barcode_set_enabled() */
 
 /*!
@@ -528,7 +547,7 @@ barcode_set_enabled(bool b_enabled)
 void
 barcode_set_hand_mode(bool b_hand)
 {
-    gb_hand = b_hand;
+    g_bc.b_hand = b_hand;
 } /* barcode_set_hand_mode() */
 
 /*!
@@ -545,14 +564,14 @@ barcode_set_hand_mode(bool b_hand)
 bool
 barcode_end_scan(void)
 {
-    bool b_was = gb_capturing;
+    bool b_was = g_bc.b_capturing;
 
     if (b_was)
     {
         log_line("Barcode: crossroad reached after %" PRIu32
                  " bars+spaces -> decoding now.",
                  g_num_elements);
-        g_pending_result = scan_finish();
+        g_bc.pending_result = scan_finish();
     }
 
     return (b_was);
@@ -579,7 +598,7 @@ void
 barcode_clear_message(void)
 {
     g_message[0] = '\0';
-    g_command    = BARCODE_CMD_NONE;
+    g_bc.command = BARCODE_CMD_NONE;
 } /* barcode_clear_message() */
 
 /*!
@@ -590,7 +609,7 @@ barcode_clear_message(void)
 barcode_command_t
 barcode_command(void)
 {
-    return (g_command);
+    return (g_bc.command);
 } /* barcode_command() */
 
 /*!
@@ -691,7 +710,7 @@ barcode_letters(void)
 bool
 barcode_is_capturing(void)
 {
-    return (gb_capturing);
+    return (g_bc.b_capturing);
 } /* barcode_is_capturing() */
 
 /*!
@@ -726,12 +745,36 @@ static void
 edge_push(uint32_t edge_usec, bool b_black)
 {
     uint32_t head = g_edge_head;
+    uint32_t idx  = head & EDGE_RING_MASK;
+    uint32_t bit  = 1u << (idx % EDGE_WORD_BITS);
 
-    g_edge_usec[head & EDGE_RING_MASK]  = edge_usec;
-    g_edge_pos[head & EDGE_RING_MASK]   = encoder_position();
-    g_edge_black[head & EDGE_RING_MASK] = b_black;
-    g_edge_head                         = head + 1u;
+    g_edge_usec[idx] = edge_usec;
+    g_edge_pos[idx]  = encoder_position();
+    if (b_black)
+    {
+        g_edge_black[idx / EDGE_WORD_BITS] |= bit;
+    }
+    else
+    {
+        g_edge_black[idx / EDGE_WORD_BITS] &= ~bit;
+    }
+    g_edge_head = head + 1u; // Last: the edge is complete before it counts.
 } /* edge_push() */
+
+/*!
+ * @brief Read the colour after one edge in the ring.
+ *
+ * @param[in] idx Ring index, 0 to EDGE_RING_SIZE - 1.
+ *
+ * @return True if the sensor saw black after that edge.
+ */
+static bool
+edge_is_black(uint32_t idx)
+{
+    uint32_t word = g_edge_black[idx / EDGE_WORD_BITS]; // Atomic load.
+
+    return (0u != (word & (1u << (idx % EDGE_WORD_BITS))));
+} /* edge_is_black() */
 
 /*!
  * @brief Sample the analog output and turn peaks and dips into edges.
@@ -835,27 +878,27 @@ ao_darkness(void)
 static void
 edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black)
 {
-    if (!gb_capturing)
+    if (!g_bc.b_capturing)
     {
         // A scan starts at the leading edge of the first bar.
         if (b_black)
         {
-            gb_capturing     = true;
-            gb_overflow      = false;
-            gb_last_black    = true;
-            g_num_elements   = 0u;
-            g_widest_usec    = 0u;
-            g_widest_dist    = 0u;
-            g_narrow_usec    = UINT32_MAX;
-            g_narrow_dist    = UINT32_MAX;
-            g_last_edge_usec = edge_usec;
-            g_last_edge_pos  = edge_pos;
-            g_scan_start_pos = edge_pos;
+            g_bc.b_capturing  = true;
+            g_bc.b_overflow   = false;
+            g_bc.b_last_black = true;
+            g_num_elements    = 0u;
+            g_widest_usec     = 0u;
+            g_widest_dist     = 0u;
+            g_narrow_usec     = UINT32_MAX;
+            g_narrow_dist     = UINT32_MAX;
+            g_last_edge_usec  = edge_usec;
+            g_last_edge_pos   = edge_pos;
+            g_scan_start_pos  = edge_pos;
             log_line("Barcode capture started; IRQ edges=%lu",
                      (unsigned long)g_edge_head);
         }
     }
-    else if (b_black == gb_last_black)
+    else if (b_black == g_bc.b_last_black)
     {
         // Same colour twice: a glitch too short to measure. Ignore it.
     }
@@ -865,14 +908,14 @@ edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         // space: undo it, so the element before it simply continues.
         if (0u == g_num_elements)
         {
-            gb_capturing = false; // The "first bar" was only a flicker.
+            g_bc.b_capturing = false; // The "first bar" was only a flicker.
         }
         else
         {
             g_num_elements--;
             g_last_edge_usec -= g_elem_usec[g_num_elements];
             g_last_edge_pos -= g_elem_dist[g_num_elements];
-            gb_last_black = b_black;
+            g_bc.b_last_black = b_black;
         }
     }
     else if ((0u == g_num_elements) &&
@@ -881,7 +924,7 @@ edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         // The first mark just ended and was as long as a crossroad branch
         // (line_sensor.c has reported it): not a barcode. Drop it, so a
         // barcode soon after it is read on its own.
-        gb_capturing = false;
+        g_bc.b_capturing = false;
         log_line(
             "Barcode initial mark %lu ms: treated as junction, scan dropped.",
             (unsigned long)((edge_usec - g_last_edge_usec) / 1000u));
@@ -899,7 +942,7 @@ edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         }
         else
         {
-            gb_overflow = true;
+            g_bc.b_overflow = true;
         }
 
         g_widest_usec = ((width > g_widest_usec) ? width : g_widest_usec);
@@ -909,9 +952,9 @@ edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black)
             g_narrow_usec = ((width < g_narrow_usec) ? width : g_narrow_usec);
             g_narrow_dist = ((dist < g_narrow_dist) ? dist : g_narrow_dist);
         }
-        g_last_edge_usec = edge_usec;
-        g_last_edge_pos  = edge_pos;
-        gb_last_black    = b_black;
+        g_last_edge_usec  = edge_usec;
+        g_last_edge_pos   = edge_pos;
+        g_bc.b_last_black = b_black;
     }
 } /* edge_add() */
 
@@ -944,7 +987,7 @@ scan_has_ended(uint32_t end_gap_usec)
     {
         b_end = true; // Nothing for a long time: stop waiting.
     }
-    else if (gb_last_black)
+    else if (g_bc.b_last_black)
     {
         b_end = ((quiet_usec > BARCODE_BLACK_MAX_USEC) &&
                  ((!b_enc) || (moved >= ENCODER_POS_SCALE)));
@@ -998,16 +1041,16 @@ widths_select(void)
 {
     uint32_t ticks = (g_last_edge_pos - g_scan_start_pos) / ENCODER_POS_SCALE;
 
-    gb_widths_dist =
+    g_bc.b_widths_dist =
         (BARCODE_USE_ENCODERS && (ticks >= BARCODE_MIN_SCAN_TICKS));
 
     for (uint32_t value_el = 0u; value_el < g_num_elements; value_el++)
     {
-        g_elements[value_el] =
-            (gb_widths_dist ? g_elem_dist[value_el] : g_elem_usec[value_el]);
+        g_elements[value_el] = (g_bc.b_widths_dist ? g_elem_dist[value_el]
+                                                   : g_elem_usec[value_el]);
     }
 
-    if (BARCODE_USE_ENCODERS && (!gb_widths_dist))
+    if (BARCODE_USE_ENCODERS && (!g_bc.b_widths_dist))
     {
         log_line("Barcode: encoders moved only %" PRIu32 " ticks over the "
                  "scan -> widths measured in time.",
@@ -1027,11 +1070,11 @@ scan_finish(void)
 {
     barcode_result_t result = BARCODE_NONE;
 
-    gb_capturing = false;
-    g_view_first = 0u; // Decode the whole scan.
-    g_view_len   = g_num_elements;
+    g_bc.b_capturing = false;
+    g_view_first     = 0u; // Decode the whole scan.
+    g_view_len       = g_num_elements;
 
-    if (gb_overflow)
+    if (g_bc.b_overflow)
     {
         result = BARCODE_INVALID;
     }
@@ -1044,7 +1087,7 @@ scan_finish(void)
         // Too short to decode; reported below.
     }
 
-    if (gb_overflow)
+    if (g_bc.b_overflow)
     {
         // Already invalid.
     }
@@ -1075,7 +1118,7 @@ scan_finish(void)
         // even when total travel passes the distance-mode threshold. Only
         // accept a COMPLETE, strict *letter* timing decode as fallback.
         // Never add a second lenient attempt with another set of widths.
-        if (((!gb_overflow) && gb_widths_dist) &&
+        if (((!g_bc.b_overflow) && g_bc.b_widths_dist) &&
             (g_num_elements == MIN_ELEMENTS))
         {
             for (uint32_t value_el = 0; value_el < g_num_elements; ++value_el)
@@ -1084,8 +1127,8 @@ scan_finish(void)
             }
             if ((scan_decode(false)) || (scan_decode(true)))
             {
-                result         = BARCODE_DECODED;
-                gb_widths_dist = false;
+                result             = BARCODE_DECODED;
+                g_bc.b_widths_dist = false;
                 log_line("Barcode: distance decode failed; complete Code 39 "
                          "timing decode succeeded.");
             }
@@ -1124,7 +1167,7 @@ scan_dump(void)
     size_t length                = 0u;
 
     log_line("Barcode widths in %s (#1 is a bar, then space, bar, ...):",
-             (gb_widths_dist ? "0.1 encoder ticks" : "ms"));
+             (g_bc.b_widths_dist ? "0.1 encoder ticks" : "ms"));
 
     // NOTE: A line holds a 6-character prefix plus DUMP_PER_LINE widths of
     // at most 8 characters each (86 bytes), so snprintf never truncates.
@@ -1138,7 +1181,7 @@ scan_dump(void)
 
         length += (size_t)snprintf(
             text + length, (sizeof(text)) - length, " %" PRIu32,
-            (gb_widths_dist
+            (g_bc.b_widths_dist
                  ? (((g_elements[value_el]) * DUMP_TENTHS) / ENCODER_POS_SCALE)
                  : ((g_elements[value_el]) / USEC_PER_MSEC)));
 
@@ -1203,7 +1246,7 @@ scan_decode(bool b_reverse)
     {
         decoded[out_len] = '\0';
         (void)strcpy(g_message, decoded); // Lengths match; result unused.
-        g_command = command_match(g_message);
+        g_bc.command = command_match(g_message);
     }
 
     return (b_ok);
@@ -1286,7 +1329,7 @@ scan_decode_lenient(void)
     {
         g_message[0] = found;
         g_message[1] = '\0';
-        g_command    = command_match(g_message);
+        g_bc.command = command_match(g_message);
         log_line("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
                  "%" PRIu32 "+%" PRIu32 " missing, %" PRIu32 " stray "
                  "left out).",

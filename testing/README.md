@@ -11,12 +11,15 @@
 | `system/` | — | Full demo runs on the course |
 | `host/` | — | Host-side unit tests of the C modules (Python + desktop `cc`) |
 | `review/` | — | Recorded build, static-analysis and BARR-C review outputs |
+| `min_bits/` | all | Change requirement 1 (minimum-bit data): data table, RAM and message size before/after, evidence |
 
 ## Test IDs
 
 `T-S<n>-<nn>` for an on-car test of subsystem *n*, `T-S<n>-H<nn>` for a host
-test, `T-INT-<nn>` for integration and `T-SYS-<nn>` for system tests. Keep IDs
-stable: add rows, never renumber or delete old results.
+test, `T-INT-<nn>` for integration and `T-SYS-<nn>` for system tests, and
+`T-CR1-<nn>` for checks of change requirement 1 that cover the whole
+firmware (`min_bits/TEST_LOG.md`). Keep IDs stable: add rows, never
+renumber or delete old results.
 
 ## Test logs
 
@@ -41,7 +44,15 @@ python testing/host/test_stationary_scan_host.py
 python testing/host/test_web_host.py
 python testing/host/test_bypass_host.py
 python testing/host/test_bypass_geometry_host.py
+python testing/host/test_mqtt_frame_host.py
 ```
 
+`test_mqtt_frame_host.py` (change requirement 1) checks the bit packer and
+the binary MQTT frames byte for byte against the Python reference
+(`tools/mqtt_frame.py`). That reference also has its own check, which
+needs only Python: `python tools/mqtt_frame.py --selftest`.
+
 The last recorded run (all passed) is in `review/final-tests.txt`, from
-commit `59e95d3`, before the files moved to this layout.
+commit `59e95d3`, before the files moved to this layout. The host tests
+have not been run since change requirement 1 (no `cc` on the machine used);
+see `min_bits/README.md`.

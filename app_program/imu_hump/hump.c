@@ -46,18 +46,31 @@
 // Readings kept for the steady height: one per control tick.
 #define STEADY_TICKS ((HUMP_STEADY_MSEC * 1000u) / TICK_USEC)
 
-static float    g_recent[STEADY_TICKS]; // The last readings.
-static uint32_t g_recent_next = 0u;
-static uint32_t g_last_pos    = 0u;
-static bool     gb_pos_valid  = false;
-static float    g_now_mm      = 0.0f; // Height the car is on now.
-static float    g_peak_mm     = 0.0f; // Highest of it on this hump.
-static float    g_on_mm       = 0.0f; // Driven since HUMP began.
-static int32_t  g_last_x10    = 0;    // The last hump cleared.
-static int32_t  g_last_tilt   = 0;
-static int32_t  g_run_x10     = 0; // The highest hump this run.
-static int32_t  g_run_tilt    = 0;
-static uint32_t g_count       = 0u; // Humps cleared this run.
+// The last readings, in 0.1 mm (16 bits: +/-3276.7 mm), not floats: the
+// height is reported in 0.1 mm steps anyway (change requirement 1).
+static int16_t g_recent_x10[STEADY_TICKS];
+static uint8_t g_recent_next = 0u; // 0..STEADY_TICKS - 1.
+_Static_assert(STEADY_TICKS <= 255u, "g_recent_next is 8 bits");
+static uint32_t g_last_pos = 0u;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_pos_valid : 1;
+} g_hp;
+
+static int16_t height_x10(float height_mm);
+
+static float    g_now_mm    = 0.0f; // Height the car is on now.
+static float    g_peak_mm   = 0.0f; // Highest of it on this hump.
+static float    g_on_mm     = 0.0f; // Driven since HUMP began.
+static int32_t  g_last_x10  = 0;    // The last hump cleared.
+static int32_t  g_last_tilt = 0;
+static int32_t  g_run_x10   = 0; // The highest hump this run.
+static int32_t  g_run_tilt  = 0;
+static uint32_t g_count     = 0u; // Humps cleared this run.
 
 /*!
  * @brief Lifted by this much at this tilt.
@@ -93,25 +106,29 @@ hump_task(bool b_forward, bool b_on_hump)
 
     (void)b_forward;
 
-    if (gb_pos_valid)
+    if (g_hp.b_pos_valid)
     {
         value_mm = ((float)(pos - g_last_pos)) / POS_PER_MM; // Wraps correctly.
     }
-    g_last_pos   = pos;
-    gb_pos_valid = true;
+    g_last_pos       = pos;
+    g_hp.b_pos_valid = true;
 
     g_now_mm = ((caster > wheel) ? caster : wheel);
 
     // Held for HUMP_STEADY_MSEC: the lowest of the recent readings.
-    g_recent[g_recent_next] = g_now_mm;
-    g_recent_next           = ((g_recent_next + 1u) % STEADY_TICKS);
-    steady                  = g_recent[0];
-    for (uint32_t idx = 1u; idx < STEADY_TICKS; idx++)
+    g_recent_x10[g_recent_next] = height_x10(g_now_mm);
+    g_recent_next = (uint8_t)((g_recent_next + 1u) % STEADY_TICKS);
     {
-        if ((g_recent[idx]) < steady)
+        int16_t lowest = g_recent_x10[0];
+
+        for (uint32_t idx = 1u; idx < STEADY_TICKS; idx++)
         {
-            steady = g_recent[idx];
+            if ((g_recent_x10[idx]) < lowest)
+            {
+                lowest = g_recent_x10[idx];
+            }
         }
+        steady = ((float)lowest) / 10.0f;
     }
 
     if (b_on_hump)
@@ -240,5 +257,33 @@ hump_count(void)
 {
     return (g_count);
 } /* hump_count() */
+
+/*!
+ * @brief Round a height to 0.1 mm for the 16-bit history.
+ *
+ * @param[in] height_mm The height.
+ *
+ * @return Tenths of a mm, held within -32768..32767.
+ */
+static int16_t
+height_x10(float height_mm)
+{
+    float tenths = height_mm * 10.0f;
+
+    if (tenths > 32767.0f)
+    {
+        tenths = 32767.0f;
+    }
+    else if (tenths < -32768.0f)
+    {
+        tenths = -32768.0f;
+    }
+    else
+    {
+        // In range.
+    }
+
+    return ((int16_t)lroundf(tenths));
+} /* height_x10() */
 
 /*** end of file ***/

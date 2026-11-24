@@ -424,35 +424,49 @@ _Static_assert((((sizeof(g_dashboard_js)) - 1u) + HEADER_BYTES) <= TCP_SND_BUF,
 _Static_assert((((sizeof(g_scan_script)) - 1u) + HEADER_BYTES) <= TCP_SND_BUF,
                "Scan script must fit in one TCP send queue");
 
-static web_command_t g_pending           = WEB_CMD_NONE;
-static bool          gb_feat_line        = true; // FEATURE TEST choices.
-static bool          gb_feat_avoid       = true;
-static bool          gb_feat_barcode     = true;
-static bool          gb_feat_hump        = true;
-static bool          gb_wifi_initialized = false;
-static bool          gb_http_listening   = false;
-static uint32_t      g_http_retry        = 0u;
-static uint32_t      g_http_last_reply   = 0u;
-static char const *  gp_restart_reason   = "unknown"; // Why the Pico started.
-static char const *  gp_scan_test_status = "";   // Persistent test feedback.
-static bool          gb_scan_test_busy  = false; // Includes fresh-reading wait.
-static struct raw_pcb * gp_ping         = NULL;  // Pings to the hotspot.
-static uint16_t         g_ping_seq      = 0u;
-static uint32_t         g_ping_next     = 0u;    // Next ping due (ms).
-static uint32_t         g_ping_reply    = 0u;    // Last reply (ms).
-static uint32_t         g_ping_rtt      = 0u;    // Its round trip (ms).
-static uint32_t         g_ping_sent     = 0u;    // When the last was sent.
-static bool             gb_ping_answers = false; // Hotspot answers pings.
-static bool             gb_ping_pending = false;
+static uint32_t         g_http_retry      = 0u;
+static uint32_t         g_http_last_reply = 0u;
+static char const *     gp_restart_reason = "unknown"; // Why the Pico started.
+static uint8_t          g_restart_code    = 0u;        // The same, as one byte.
+static char const *     gp_scan_test_status = "";   // Persistent test feedback.
+static struct raw_pcb * gp_ping             = NULL; // Pings to the hotspot.
+static uint16_t         g_ping_seq          = 0u;
+static uint32_t         g_ping_next         = 0u; // Next ping due (ms).
+static uint32_t         g_ping_reply        = 0u; // Last reply (ms).
+static uint32_t         g_ping_rtt          = 0u; // Its round trip (ms).
+static uint32_t         g_ping_sent         = 0u; // When the last was sent.
 static ip_addr_t        g_ping_gateway;
-static int32_t          g_rssi           = 0;  // Signal (dBm), 0 = unknown.
-static uint32_t         g_drops          = 0u; // Hotspot links lost.
-static bool             gb_servo_pending = false;
-static uint32_t         g_log_floor      = 0u; // CLEAR OUTPUT: first log
-                                               // line still sent.
-static int32_t          g_servo_deg      = 0;
-static wifi_mode_t      g_wifi_mode      = WIFI_OFF;
-static dhcp_server_t    g_dhcp_server; // Own network only.
+static int32_t          g_rssi      = 0;  // Signal (dBm), 0 = unknown.
+static uint32_t         g_drops     = 0u; // Hotspot links lost.
+static uint32_t         g_log_floor = 0u; // CLEAR OUTPUT: first log
+                                          // line still sent.
+static int32_t          g_servo_deg = 0;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    web_command_t pending : 5;
+    bool          b_feat_line : 1; // FEATURE TEST choices.
+    bool          b_feat_avoid : 1;
+    bool          b_feat_barcode : 1;
+    bool          b_feat_hump : 1;
+    bool          b_wifi_initialized : 1;
+    bool          b_http_listening : 1;
+    bool          b_scan_test_busy : 1; // Includes fresh-reading wait.
+    bool          b_ping_answers : 1;   // Hotspot answers pings.
+    bool          b_ping_pending : 1;
+    bool          b_servo_pending : 1;
+    wifi_mode_t   wifi_mode : 3;
+} g_w = {.pending        = WEB_CMD_NONE,
+         .b_feat_line    = true,
+         .b_feat_avoid   = true,
+         .b_feat_barcode = true,
+         .b_feat_hump    = true,
+         .wifi_mode      = WIFI_OFF};
+
+static dhcp_server_t g_dhcp_server; // Own network only.
 #ifdef HOTSPOT_LIST
 typedef enum
 {
@@ -473,12 +487,16 @@ static uint32_t        g_hot_tries      = 0u; // Attempts that failed.
 static uint32_t        g_join_since     = 0u; // Last "still looking" log.
 static uint32_t        g_offline_since  = 0u; // Deadline spans all join phases.
 static uint32_t        g_recovery_since = 0u; // Recovery AP up / last check.
-static bool            gb_pm_saving     = false; // Wi-Fi power saving on.
-static bool            gb_mdns_started  = false;
-static bool            gb_mdns_registered = false;
-static uint32_t        g_mdns_retry       = 0u;
-static ip4_addr_t      g_hot_ip;
-static uint32_t        g_wifi_check = 0u;
+// Hotspot flags, one bit each (change requirement 1). Main loop only.
+static struct
+{
+    bool b_pm_saving : 1; // Wi-Fi power saving on.
+    bool b_mdns_started : 1;
+    bool b_mdns_registered : 1;
+} g_wh;
+static uint32_t   g_mdns_retry = 0u;
+static ip4_addr_t g_hot_ip;
+static uint32_t   g_wifi_check = 0u;
 #endif
 static char            g_wifi_text[WIFI_TEXT_BYTES] = "Starting";
 static history_entry_t g_history[HISTORY_MAX]; // Ring, oldest overwritten.
@@ -533,7 +551,7 @@ static err_t  reply_send(struct tcp_pcb * p_pcb, char const * p_type,
 bool
 web_init(void)
 {
-    g_wifi_mode = WIFI_OFF;
+    g_w.wifi_mode = WIFI_OFF;
 
     if (0 != (cyw43_arch_init()))
     {
@@ -542,9 +560,9 @@ web_init(void)
     }
     else
     {
-        uint32_t now_msec   = to_ms_since_boot(get_absolute_time());
-        gb_wifi_initialized = true;
-        g_http_retry        = now_msec;
+        uint32_t now_msec      = to_ms_since_boot(get_absolute_time());
+        g_w.b_wifi_initialized = true;
+        g_http_retry           = now_msec;
         server_check(now_msec);
 #ifdef HOTSPOT_LIST
         hotspot_start(now_msec);
@@ -552,7 +570,7 @@ web_init(void)
         own_network_start();
 #endif
     }
-    return gb_wifi_initialized;
+    return g_w.b_wifi_initialized;
 } /* web_init() */
 
 /*!
@@ -561,7 +579,7 @@ web_init(void)
 void
 web_task(void)
 {
-    if (gb_wifi_initialized)
+    if (g_w.b_wifi_initialized)
     {
         stage_set(STAGE_WEB_POLL);
         cyw43_arch_poll();
@@ -586,12 +604,12 @@ web_wifi_text(void)
     static char text[WIFI_TEXT_BYTES * 2u];
     uint32_t    now_msec = to_ms_since_boot(get_absolute_time());
 
-    if (WIFI_JOINED != g_wifi_mode)
+    if (WIFI_JOINED != g_w.wifi_mode)
     {
         (void)snprintf(text, sizeof(text), "%s (%" PRIu32 " drops)",
                        g_wifi_text, g_drops);
     }
-    else if (!gb_ping_answers)
+    else if (!g_w.b_ping_answers)
     {
         (void)snprintf(text, sizeof(text),
                        "%s, signal %" PRId32 " dBm, "
@@ -615,12 +633,54 @@ web_wifi_text(void)
  * @brief Record why the Pico last started, for the page.
  *
  * @param[in] p_reason A description that stays valid (a string literal).
+ * @param[in] code     The same as one byte (WEB_RESTART_... in web.h).
  */
 void
-web_set_restart_reason(char const * p_reason)
+web_set_restart_reason(char const * p_reason, uint32_t code)
 {
     gp_restart_reason = p_reason;
+    g_restart_code    = (uint8_t)(code & 0xFFu);
 } /* web_set_restart_reason() */
+
+/*!
+ * @brief Report why the Pico last started, as one byte (binary MQTT
+ *        heartbeat).
+ *
+ * @return Bits 0-2 the kind, bits 3-7 the loop stage (see web.h).
+ */
+uint32_t
+web_restart_code(void)
+{
+    return (g_restart_code);
+} /* web_restart_code() */
+
+/*!
+ * @brief Report the Wi-Fi link as numbers, for the binary MQTT heartbeat
+ *        (web_wifi_text() gives the same as text for the page).
+ *
+ * @param[out] p_link Filled in.
+ */
+void
+web_link_get(web_link_t * p_link)
+{
+    uint32_t now_msec = to_ms_since_boot(get_absolute_time());
+
+    p_link->mode       = (uint8_t)g_w.wifi_mode;
+    p_link->hotspot    = 0u;
+    p_link->ip         = 0u;
+    p_link->rssi_dbm   = (int16_t)g_rssi;
+    p_link->b_ping_ok  = g_w.b_ping_answers;
+    p_link->ping_msec  = g_ping_rtt;
+    p_link->ping_age_s = (now_msec - g_ping_reply) / MSEC_PER_SEC;
+    p_link->drops      = g_drops;
+#ifdef HOTSPOT_LIST
+    if (WIFI_JOINED == g_w.wifi_mode)
+    {
+        p_link->hotspot = (uint8_t)g_hot_idx;
+        p_link->ip      = ip4_addr_get_u32(&g_hot_ip);
+    }
+#endif
+} /* web_link_get() */
 
 /*!
  * @brief Report why the Pico last started (for MQTT's heartbeat).
@@ -641,7 +701,7 @@ web_restart_reason(void)
 bool
 web_is_online(void)
 {
-    return (WIFI_JOINED == g_wifi_mode);
+    return (WIFI_JOINED == g_w.wifi_mode);
 } /* web_is_online() */
 
 /*!
@@ -668,7 +728,7 @@ web_set_scan_test_status(char const * p_status)
 void
 web_set_scan_test_busy(bool busy)
 {
-    gb_scan_test_busy = busy;
+    g_w.b_scan_test_busy = busy;
 }
 
 /*!
@@ -683,7 +743,7 @@ ping_send(uint32_t now_msec)
     size_t         size    = (sizeof(struct icmp_echo_hdr)) + PING_DATA_BYTES;
     struct pbuf *  p_buf   = NULL;
 
-    gb_ping_pending = false;
+    g_w.b_ping_pending = false;
     if (ip4_addr_isany_val(*netif_ip4_gw(p_netif)))
     {
         return;
@@ -717,7 +777,7 @@ ping_send(uint32_t now_msec)
         p_echo->chksum = inet_chksum(p_echo, (u16_t)size);
 
         g_ping_sent = now_msec;
-        gb_ping_pending =
+        g_w.b_ping_pending =
             (ERR_OK == (raw_sendto(gp_ping, p_buf, &g_ping_gateway)));
     }
 
@@ -745,7 +805,7 @@ ping_recv(void * p_arg, struct raw_pcb * p_pcb, struct pbuf * p_buf,
 
     (void)p_arg; // All required by lwIP's callback signature only.
     (void)p_pcb;
-    if ((((WIFI_JOINED != g_wifi_mode) || (!gb_ping_pending)) ||
+    if ((((WIFI_JOINED != g_w.wifi_mode) || (!g_w.b_ping_pending)) ||
          (!ip_addr_cmp(p_addr, &g_ping_gateway))) ||
         ((p_buf->len) < PBUF_IP_HLEN))
     {
@@ -765,10 +825,10 @@ ping_recv(void * p_arg, struct raw_pcb * p_pcb, struct pbuf * p_buf,
         {
             uint32_t now_msec = to_ms_since_boot(get_absolute_time());
 
-            g_ping_reply    = now_msec;
-            g_ping_rtt      = now_msec - g_ping_sent;
-            gb_ping_answers = true;
-            gb_ping_pending = false;
+            g_ping_reply       = now_msec;
+            g_ping_rtt         = now_msec - g_ping_sent;
+            g_w.b_ping_answers = true;
+            g_w.b_ping_pending = false;
             (void)pbuf_free(p_buf);
             b_eaten = 1u;
         }
@@ -803,7 +863,7 @@ web_barcode_record(char const * p_message, barcode_command_t command)
 static void
 server_check(uint32_t now_msec)
 {
-    if (gb_http_listening || (((int32_t)(now_msec - g_http_retry)) < 0))
+    if (g_w.b_http_listening || (((int32_t)(now_msec - g_http_retry)) < 0))
     {
         return;
     }
@@ -825,7 +885,7 @@ server_check(uint32_t now_msec)
     if ((NULL) != p_listener)
     {
         tcp_accept(p_listener, accept_callback);
-        gb_http_listening = true;
+        g_w.b_http_listening = true;
         log_printf("HTTP: listening on port %u.", HTTP_PORT);
         return;
     }
@@ -856,7 +916,7 @@ own_network_start(void)
     dhcp_server_init(&g_dhcp_server, &cyw43_state.netif[CYW43_ITF_AP], &gateway,
                      &netmask);
 
-    g_wifi_mode = WIFI_OWN_NETWORK;
+    g_w.wifi_mode = WIFI_OWN_NETWORK;
     (void)snprintf(g_wifi_text, sizeof(g_wifi_text),
                    "Own network \"%s\" at 192.168.4.1", WIFI_NAME);
     log_printf("Wi-Fi: join \"%s\" (password \"%s\"), then open "
@@ -882,9 +942,9 @@ hotspot_start(uint32_t now_msec)
 
     // No Wi-Fi power saving: the page polls every 0.2 s and must not lag.
     (void)cyw43_wifi_pm(&cyw43_state, CYW43_NONE_PM);
-    gb_pm_saving = false;
+    g_wh.b_pm_saving = false;
 
-    g_wifi_mode     = WIFI_JOINING;
+    g_w.wifi_mode   = WIFI_JOINING;
     g_hot_tries     = 0u;
     g_join_since    = now_msec;
     g_offline_since = now_msec;
@@ -905,10 +965,10 @@ hotspot_try(uint32_t now_msec)
     struct netif * p_netif = &cyw43_state.netif[CYW43_ITF_STA];
     int status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
 
-    g_hot_phase     = HOTSPOT_LEAVING;
-    g_hot_since     = now_msec;
-    g_wifi_check    = now_msec + WIFI_CHECK_MSEC;
-    gb_ping_pending = false;
+    g_hot_phase        = HOTSPOT_LEAVING;
+    g_hot_since        = now_msec;
+    g_wifi_check       = now_msec + WIFI_CHECK_MSEC;
+    g_w.b_ping_pending = false;
     if ((status > CYW43_LINK_DOWN) || (netif_is_link_up(p_netif)))
     {
         int err = cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
@@ -918,9 +978,10 @@ hotspot_try(uint32_t now_msec)
         }
     }
 
-    (void)snprintf(g_wifi_text, sizeof(g_wifi_text), "%s \"%s\"",
-                   ((WIFI_REJOINING == g_wifi_mode) ? "Rejoining" : "Joining"),
-                   p_hot->p_ssid);
+    (void)snprintf(
+        g_wifi_text, sizeof(g_wifi_text), "%s \"%s\"",
+        ((WIFI_REJOINING == g_w.wifi_mode) ? "Rejoining" : "Joining"),
+        p_hot->p_ssid);
     if (hotspot_first_round())
     {
         log_printf("Wi-Fi: trying hotspot %" PRIu32 " of %" PRIu32
@@ -1027,19 +1088,19 @@ hotspot_join(uint32_t now_msec, struct netif * p_netif)
 static void
 hotspot_mdns_check(uint32_t now_msec, struct netif * p_netif)
 {
-    if (gb_mdns_registered || (((int32_t)(now_msec - g_mdns_retry)) < 0))
+    if (g_wh.b_mdns_registered || (((int32_t)(now_msec - g_mdns_retry)) < 0))
     {
         return;
     }
-    if (!gb_mdns_started)
+    if (!g_wh.b_mdns_started)
     {
         mdns_resp_init();
-        gb_mdns_started = true;
+        g_wh.b_mdns_started = true;
     }
     err_t err = mdns_resp_add_netif(p_netif, WIFI_HOST_NAME);
     if (ERR_OK == err)
     {
-        gb_mdns_registered = true;
+        g_wh.b_mdns_registered = true;
         log_printf("Wi-Fi: mDNS registered as %s.local.", WIFI_HOST_NAME);
     }
     else
@@ -1061,15 +1122,15 @@ hotspot_online(uint32_t now_msec, struct netif * p_netif)
         g_hot_ip = *netif_ip4_addr(p_netif);
         char value_ip[IP4ADDR_STRLEN_MAX];
         ip4addr_ntoa_r(&g_hot_ip, value_ip, sizeof(value_ip));
-        g_hot_phase       = HOTSPOT_ONLINE;
-        g_wifi_mode       = WIFI_JOINED;
-        gb_ping_answers   = false;
-        gb_ping_pending   = false;
-        g_ping_reply      = now_msec;
-        g_ping_next       = now_msec;
-        g_http_last_reply = now_msec;
-        g_rssi            = 0;
-        g_mdns_retry      = now_msec;
+        g_hot_phase        = HOTSPOT_ONLINE;
+        g_w.wifi_mode      = WIFI_JOINED;
+        g_w.b_ping_answers = false;
+        g_w.b_ping_pending = false;
+        g_ping_reply       = now_msec;
+        g_ping_next        = now_msec;
+        g_http_last_reply  = now_msec;
+        g_rssi             = 0;
+        g_mdns_retry       = now_msec;
         (void)snprintf(g_wifi_text, sizeof(g_wifi_text), "Hotspot \"%s\" at %s",
                        g_hotspots[g_hot_idx].p_ssid, value_ip);
         log_printf("Wi-Fi: DHCP %s on \"%s\". IPv4 %s.",
@@ -1086,7 +1147,7 @@ static void
 hotspot_rejoin(uint32_t now_msec)
 {
     g_drops++;
-    g_wifi_mode     = WIFI_REJOINING;
+    g_w.wifi_mode   = WIFI_REJOINING;
     g_hot_tries     = 0u;
     g_join_since    = now_msec;
     g_offline_since = now_msec;
@@ -1097,9 +1158,9 @@ hotspot_rejoin(uint32_t now_msec)
 static void
 hotspot_wait_for_dhcp(uint32_t now_msec)
 {
-    g_hot_phase     = HOTSPOT_WAITING_DHCP;
-    g_hot_since     = now_msec;
-    gb_ping_pending = false;
+    g_hot_phase        = HOTSPOT_WAITING_DHCP;
+    g_hot_since        = now_msec;
+    g_w.b_ping_pending = false;
     (void)snprintf(g_wifi_text, sizeof(g_wifi_text),
                    "Waiting for DHCP on \"%s\"", g_hotspots[g_hot_idx].p_ssid);
     log_printf("Wi-Fi: waiting for DHCP on \"%s\".",
@@ -1122,7 +1183,7 @@ hotspot_check(uint32_t now_msec)
         log_printf("Wi-Fi: hotspot choice: %s.",
                    HOTSPOT_AUTO == g_hot_only ? "try each in turn"
                                               : g_hotspots[g_hot_only].p_ssid);
-        if (WIFI_OWN_NETWORK == g_wifi_mode)
+        if (WIFI_OWN_NETWORK == g_w.wifi_mode)
         {
             dhcp_server_deinit(&g_dhcp_server);
             cyw43_arch_disable_ap_mode();
@@ -1135,7 +1196,7 @@ hotspot_check(uint32_t now_msec)
     // device has joined it, go back to the hotspot (the phone's hotspot may
     // only have been hidden for a while). A device on it keeps it up, so a
     // user on the recovery page is never cut off.
-    if (WIFI_OWN_NETWORK == g_wifi_mode)
+    if (WIFI_OWN_NETWORK == g_w.wifi_mode)
     {
         int stations = 0;
 
@@ -1155,14 +1216,14 @@ hotspot_check(uint32_t now_msec)
         return;
     }
 
-    if ((WIFI_JOINED != g_wifi_mode) &&
+    if ((WIFI_JOINED != g_w.wifi_mode) &&
         ((now_msec - g_offline_since) >= WIFI_RECOVERY_MSEC))
     {
         struct netif * station = &cyw43_state.netif[CYW43_ITF_STA];
-        if (gb_mdns_registered)
+        if (g_wh.b_mdns_registered)
         {
             mdns_resp_remove_netif(station);
-            gb_mdns_registered = false;
+            g_wh.b_mdns_registered = false;
         }
         cyw43_arch_disable_sta_mode();
         own_network_start();
@@ -1198,16 +1259,16 @@ hotspot_check(uint32_t now_msec)
             {
                 log_printf("Wi-Fi: disconnect timed out; recycling station "
                            "interface.");
-                if (gb_mdns_registered)
+                if (g_wh.b_mdns_registered)
                 {
                     mdns_resp_remove_netif(p_netif);
-                    gb_mdns_registered = false;
+                    g_wh.b_mdns_registered = false;
                 }
                 cyw43_arch_disable_sta_mode();
                 cyw43_arch_enable_sta_mode();
                 (void)cyw43_wifi_pm(&cyw43_state, CYW43_NONE_PM);
-                gb_pm_saving = false;
-                g_hot_phase  = HOTSPOT_RESETTING;
+                g_wh.b_pm_saving = false;
+                g_hot_phase      = HOTSPOT_RESETTING;
             }
             break;
 
@@ -1284,7 +1345,7 @@ hotspot_check(uint32_t now_msec)
             }
             else if (!lease_ready)
             {
-                g_wifi_mode     = WIFI_REJOINING;
+                g_w.wifi_mode   = WIFI_REJOINING;
                 g_offline_since = now_msec;
                 hotspot_wait_for_dhcp(now_msec);
             }
@@ -1301,12 +1362,12 @@ hotspot_check(uint32_t now_msec)
                         (IDLE_POWER_SAVING &&
                          ((now_msec - g_http_last_reply) >= WIFI_PM_IDLE_MSEC));
 
-                    if (b_idle != gb_pm_saving)
+                    if (b_idle != g_wh.b_pm_saving)
                     {
                         (void)cyw43_wifi_pm(
                             &cyw43_state,
                             (b_idle ? CYW43_DEFAULT_PM : CYW43_NONE_PM));
-                        gb_pm_saving = b_idle;
+                        g_wh.b_pm_saving = b_idle;
                         log_printf(
                             "Wi-Fi: power saving %s.",
                             (b_idle ? "on (no page open)" : "off (page open)"));
@@ -1344,10 +1405,10 @@ hotspot_check(uint32_t now_msec)
 void
 web_features(bool * p_line, bool * p_avoid, bool * p_barcode, bool * p_hump)
 {
-    *p_line    = gb_feat_line;
-    *p_avoid   = gb_feat_avoid;
-    *p_barcode = gb_feat_barcode;
-    *p_hump    = gb_feat_hump;
+    *p_line    = g_w.b_feat_line;
+    *p_avoid   = g_w.b_feat_avoid;
+    *p_barcode = g_w.b_feat_barcode;
+    *p_hump    = g_w.b_feat_hump;
 } /* web_features() */
 
 /*!
@@ -1358,9 +1419,9 @@ web_features(bool * p_line, bool * p_avoid, bool * p_barcode, bool * p_hump)
 web_command_t
 web_command_take(void)
 {
-    web_command_t command = g_pending;
+    web_command_t command = g_w.pending;
 
-    g_pending = WEB_CMD_NONE;
+    g_w.pending = WEB_CMD_NONE;
 
     return (command);
 } /* web_command_take() */
@@ -1375,12 +1436,12 @@ web_command_take(void)
 bool
 web_servo_take(int32_t * p_degrees)
 {
-    bool b_new = gb_servo_pending;
+    bool b_new = g_w.b_servo_pending;
 
     if (b_new)
     {
-        *p_degrees       = g_servo_deg;
-        gb_servo_pending = false;
+        *p_degrees          = g_servo_deg;
+        g_w.b_servo_pending = false;
     }
 
     return (b_new);
@@ -1663,8 +1724,8 @@ request_handle(struct tcp_pcb * p_pcb, char * p_path)
     else if (0 == (strncmp(p_path, SERVO_PREFIX, SERVO_PREFIX_LEN)))
     {
         // main() limits the angle when it turns the servo.
-        g_servo_deg      = (int32_t)atoi(p_path + SERVO_PREFIX_LEN);
-        gb_servo_pending = true;
+        g_servo_deg         = (int32_t)atoi(p_path + SERVO_PREFIX_LEN);
+        g_w.b_servo_pending = true;
         return reply_send(p_pcb, "text/plain", "OK", 2u, true);
     }
     else
@@ -1761,35 +1822,35 @@ command_parse(char const * p_name)
 {
     if (0 == (strcmp(p_name, "stop")))
     {
-        g_pending = WEB_CMD_STOP;
+        g_w.pending = WEB_CMD_STOP;
     }
     else if (0 == (strcmp(p_name, "start")))
     {
-        g_pending = WEB_CMD_START;
+        g_w.pending = WEB_CMD_START;
     }
     else if (0 == (strcmp(p_name, "calibrate")))
     {
-        g_pending = WEB_CMD_IMU_CALIBRATE;
+        g_w.pending = WEB_CMD_IMU_CALIBRATE;
     }
     else if (0 == (strcmp(p_name, "wheel")))
     {
-        g_pending = WEB_CMD_WHEEL_TEST;
+        g_w.pending = WEB_CMD_WHEEL_TEST;
     }
     else if (0 == (strcmp(p_name, "diag")))
     {
-        g_pending = WEB_CMD_DIAG;
+        g_w.pending = WEB_CMD_DIAG;
     }
     else if (0 == (strcmp(p_name, "black")))
     {
-        g_pending = WEB_CMD_LEARN_BLACK;
+        g_w.pending = WEB_CMD_LEARN_BLACK;
     }
     else if (0 == (strcmp(p_name, "white")))
     {
-        g_pending = WEB_CMD_LEARN_WHITE;
+        g_w.pending = WEB_CMD_LEARN_WHITE;
     }
     else if (0 == (strcmp(p_name, "bt")))
     {
-        g_pending = WEB_CMD_BARCODE_TEST;
+        g_w.pending = WEB_CMD_BARCODE_TEST;
     }
     else if ((0 == (strcmp(p_name, "bclist"))) ||
              (0 == (strcmp(p_name, "bcreset"))))
@@ -1818,20 +1879,20 @@ command_parse(char const * p_name)
     }
     else if (0 == (strcmp(p_name, "bs")))
     {
-        g_pending = WEB_CMD_BARCODE_STATIC;
+        g_w.pending = WEB_CMD_BARCODE_STATIC;
     }
     else if (0 == (strcmp(p_name, "scan")))
     {
-        if (g_pending != WEB_CMD_STOP)
+        if (g_w.pending != WEB_CMD_STOP)
         {
-            g_pending = WEB_CMD_STATIONARY_SCAN;
+            g_w.pending = WEB_CMD_STATIONARY_SCAN;
         }
     }
     else if (0 == (strcmp(p_name, "v")))
     {
-        if (g_pending != WEB_CMD_STOP)
+        if (g_w.pending != WEB_CMD_STOP)
         {
-            g_pending = WEB_CMD_BYPASS_TEST;
+            g_w.pending = WEB_CMD_BYPASS_TEST;
         }
     }
     else if ((0 == (strncmp(p_name, "ft", 2u))) &&
@@ -1839,15 +1900,15 @@ command_parse(char const * p_name)
     {
         // "ft" + 0/1 digits: line, obstacle avoidance, barcode, hump.
         // Without the fourth (older "ft111"), humps are on.
-        gb_feat_line    = ('1' == (p_name[2]));
-        gb_feat_avoid   = ('1' == (p_name[3]));
-        gb_feat_barcode = ('1' == (p_name[4]));
-        gb_feat_hump    = (('\0' == (p_name[5])) || ('1' == (p_name[5])));
-        g_pending       = WEB_CMD_FEATURE_TEST;
+        g_w.b_feat_line    = ('1' == (p_name[2]));
+        g_w.b_feat_avoid   = ('1' == (p_name[3]));
+        g_w.b_feat_barcode = ('1' == (p_name[4]));
+        g_w.b_feat_hump    = (('\0' == (p_name[5])) || ('1' == (p_name[5])));
+        g_w.pending        = WEB_CMD_FEATURE_TEST;
     }
     else if (0 == (strcmp(p_name, "mark")))
     {
-        g_pending = WEB_CMD_ENCODER_MARK; // Same as serial 'e'.
+        g_w.pending = WEB_CMD_ENCODER_MARK; // Same as serial 'e'.
     }
     else if (0 == (strncmp(p_name, "mb", 2u)))
     {
@@ -1896,12 +1957,12 @@ scan_build(char * p_out, size_t capacity)
     for (uint32_t index_i = 0u; index_i < count; ++index_i)
     {
         if (((points[index_i].range_mm) > 0u) &&
-            ((points[index_i].range_mm) != ULTRASONIC_NO_RANGE))
+            ((points[index_i].range_mm) != OBSTACLE_POINT_NO_RANGE))
         {
             ++valid;
         }
     }
-    bool active   = (obstacle_scan_active()) || gb_scan_test_busy;
+    bool active   = (obstacle_scan_active()) || g_w.b_scan_test_busy;
     bool can_scan = (!active) && ((((vehicle_state()) == VEHICLE_READY) ||
                                    ((vehicle_state()) == VEHICLE_STOPPED)));
     char const * state = active ? "Scanning"
@@ -1922,7 +1983,7 @@ scan_build(char * p_out, size_t capacity)
             p_out + length, capacity - length, "%s[%ld,", index_i ? "," : "",
             (long)(SERVO_CENTER_DEG + (points[index_i].angle_deg)));
         if (((points[index_i].range_mm) > 0u) &&
-            ((points[index_i].range_mm) != ULTRASONIC_NO_RANGE))
+            ((points[index_i].range_mm) != OBSTACLE_POINT_NO_RANGE))
         {
             length += append_text(p_out + length, capacity - length, "%lu",
                                   (unsigned long)points[index_i].range_mm);
@@ -2066,8 +2127,9 @@ status_build(char * p_out, size_t capacity, uint32_t since)
         hump_last_height_x10(), hump_run_height_x10(), hump_count(),
         hump_height_x10(), (raw.b_left_high ? 1 : 0),
         (raw.b_right_high ? 1 : 0), encoder_count(PIN_ENC_LEFT_A),
-        encoder_count(PIN_ENC_RIGHT_A), axes.ax_mg, axes.ay_mg, axes.az_mg,
-        axes.mx_mgauss, axes.my_mgauss, axes.mz_mgauss);
+        encoder_count(PIN_ENC_RIGHT_A), (int32_t)axes.ax_mg,
+        (int32_t)axes.ay_mg, (int32_t)axes.az_mg, (int32_t)axes.mx_mgauss,
+        (int32_t)axes.my_mgauss, (int32_t)axes.mz_mgauss);
     length += json_string(p_out + length, capacity - length, barcode_message());
     length +=
         append_text(p_out + length, capacity - length,
@@ -2133,9 +2195,9 @@ status_build(char * p_out, size_t capacity, uint32_t since)
     length += append_text(p_out + length, capacity - length, ",\"mq\":");
     length +=
         json_string(p_out + length, capacity - length, mqtt_comm_status_text());
-    length += append_text(
-        p_out + length, capacity - length,
-        ",\"oa\":%d,\"sst\":", (obstacle_scan_active()) || gb_scan_test_busy);
+    length +=
+        append_text(p_out + length, capacity - length, ",\"oa\":%d,\"sst\":",
+                    (obstacle_scan_active()) || g_w.b_scan_test_busy);
     length +=
         json_string(p_out + length, capacity - length, gp_scan_test_status);
 

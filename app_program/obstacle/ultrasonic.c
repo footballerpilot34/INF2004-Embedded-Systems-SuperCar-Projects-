@@ -14,6 +14,7 @@
 
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
+#include "hardware/sync.h"
 
 #include "config.h"
 #include "ultrasonic.h"
@@ -27,16 +28,30 @@
 static volatile uint32_t g_rise_usec = 0u;
 static volatile uint32_t g_fall_usec = 0u;
 
-// False while TRIG is pulsed, so crosstalk from TRIG onto ECHO is ignored.
-static volatile bool gb_armed = false;
+// Flags, one bit each in one byte (change requirement 1):
+//   US_ARMED   - false while TRIG is pulsed, so crosstalk from TRIG onto
+//                ECHO is ignored. Read by the echo ISR.
+//   US_WAITING - a ping is out, waiting for its echo.
+//   US_READY   - a fresh range is available for the current direction.
+//   US_NO_ECHO - the last ping timed out with no echo.
+// Only the main loop writes the byte, and it does so with interrupts off
+// (flags_write()), so the ISR never sees a half-written update. The ISR
+// only reads it: a byte load is atomic on the RP2040.
+#define US_ARMED (1u << 0)
+#define US_WAITING (1u << 1)
+#define US_READY (1u << 2)
+#define US_NO_ECHO (1u << 3)
 
-static bool     gb_waiting           = false;
-static uint64_t g_next_ping_usec     = 0u;
-static uint64_t g_deadline_usec      = 0u;
-static uint32_t g_range_mm           = ULTRASONIC_NO_RANGE;
-static uint64_t g_range_usec         = 0u;
-static bool     gb_measurement_ready = false;
+static volatile uint8_t g_us_flags = 0u;
+
+static uint64_t g_next_ping_usec = 0u;
+static uint64_t g_deadline_usec  = 0u;
+static uint32_t g_range_mm       = ULTRASONIC_NO_RANGE;
+static uint64_t g_range_usec     = 0u;
 static uint32_t g_sample_sequence;
+
+static void flags_write(uint32_t set, uint32_t clear);
+static bool flag_is(uint32_t mask);
 
 /** @brief Return the sequence number used to reject repeated echo samples. */
 uint32_t
@@ -49,10 +64,8 @@ ultrasonic_sample_sequence(void)
 void
 ultrasonic_invalidate(void)
 {
-    gb_armed             = false;
-    gb_waiting           = false;
-    g_range_mm           = ULTRASONIC_NO_RANGE;
-    gb_measurement_ready = false;
+    flags_write(0u, (US_ARMED | US_WAITING) | US_READY);
+    g_range_mm = ULTRASONIC_NO_RANGE;
     // Preserve the minimum interval even when abandoning an active ping.
     g_next_ping_usec = (time_us_64()) + US_PING_PERIOD_USEC;
 }
@@ -62,7 +75,7 @@ ultrasonic_invalidate(void)
 bool
 ultrasonic_measurement_ready(void)
 {
-    return (gb_measurement_ready);
+    return (flag_is(US_READY));
 }
 
 /*!
@@ -93,7 +106,7 @@ ultrasonic_echo_isr(uint32_t events)
 {
     uint32_t now_usec = time_us_32();
 
-    if (!gb_armed)
+    if (!flag_is(US_ARMED))
     {
         // Edge during the trigger pulse: crosstalk, not an echo.
     }
@@ -133,22 +146,22 @@ ultrasonic_task(void)
 {
     uint64_t now_usec = time_us_64();
 
-    if (!gb_waiting)
+    if (!flag_is(US_WAITING))
     {
         if (now_usec >= g_next_ping_usec)
         {
-            gb_armed    = false;
+            flags_write(0u, US_ARMED);
             g_rise_usec = 0u;
             g_fall_usec = 0u;
 
             gpio_put(PIN_US_TRIG, true);
             sleep_us(US_TRIGGER_USEC);
             gpio_put(PIN_US_TRIG, false);
-            gb_armed = true;
+            flags_write(US_ARMED, 0u);
 
             g_deadline_usec  = (time_us_64()) + US_ECHO_TIMEOUT_USEC;
             g_next_ping_usec = (time_us_64()) + US_PING_PERIOD_USEC;
-            gb_waiting       = true;
+            flags_write(US_WAITING, 0u);
         }
     }
     else if (0u != g_fall_usec)
@@ -157,22 +170,18 @@ ultrasonic_task(void)
         // wrapped between the two edges.
         uint32_t echo_usec = g_fall_usec - g_rise_usec;
 
-        g_range_mm           = (echo_usec * MM_PER_CM) / USEC_PER_CM_ROUND_TRIP;
-        g_range_usec         = now_usec;
-        gb_measurement_ready = true;
+        g_range_mm   = (echo_usec * MM_PER_CM) / USEC_PER_CM_ROUND_TRIP;
+        g_range_usec = now_usec;
         g_sample_sequence++;
-        gb_armed   = false;
-        gb_waiting = false;
+        flags_write(US_READY, (US_ARMED | US_WAITING) | US_NO_ECHO);
     }
     else if (now_usec >= g_deadline_usec)
     {
         // No echo, or out of range: nothing is close, so report clear.
-        g_range_mm           = ULTRASONIC_NO_RANGE;
-        g_range_usec         = now_usec;
-        gb_measurement_ready = true;
+        g_range_mm   = ULTRASONIC_NO_RANGE;
+        g_range_usec = now_usec;
         g_sample_sequence++;
-        gb_armed   = false;
-        gb_waiting = false;
+        flags_write(US_READY | US_NO_ECHO, US_ARMED | US_WAITING);
     }
     else
     {
@@ -199,5 +208,46 @@ ultrasonic_range_mm(void)
 
     return (range_mm);
 } /* ultrasonic_range_mm() */
+
+/*!
+ * @brief Report whether the last completed ping had no echo (nothing in
+ *        range, or the sensor is not answering).
+ *
+ * @return True if it timed out.
+ */
+bool
+ultrasonic_last_no_echo(void)
+{
+    return (flag_is(US_NO_ECHO));
+} /* ultrasonic_last_no_echo() */
+
+/*!
+ * @brief Set and clear flag bits together, with interrupts off so the
+ *        read-modify-write of the shared byte cannot be interrupted.
+ *
+ * @param[in] set   US_... bits to set.
+ * @param[in] clear US_... bits to clear.
+ */
+static void
+flags_write(uint32_t set, uint32_t clear)
+{
+    uint32_t saved = save_and_disable_interrupts();
+
+    g_us_flags = (uint8_t)(((g_us_flags & (~clear)) | set) & 0xFFu);
+    restore_interrupts(saved);
+} /* flags_write() */
+
+/*!
+ * @brief Read flag bits (one byte load: atomic, also from the ISR).
+ *
+ * @param[in] mask US_... bits.
+ *
+ * @return True if any of them is set.
+ */
+static bool
+flag_is(uint32_t mask)
+{
+    return (0u != (g_us_flags & mask));
+} /* flag_is() */
 
 /*** end of file ***/

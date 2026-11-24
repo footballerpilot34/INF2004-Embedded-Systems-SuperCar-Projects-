@@ -79,23 +79,31 @@
 #define GRAVITY_QUIET_MG 40
 #define GRAVITY_DEFAULT_MG 1000
 
-static bool       gb_sensor_ok       = false;
-static bool       gb_reading_valid   = false;
 static uint64_t   g_last_sample_usec = 0u;
 static imu_axes_t g_axes             = {0, 0, 0, 0, 0, 0};
-static bool       gb_calibrated      = false;
-static int32_t    g_pitch_zero_x10   = 0;
-static int32_t    g_roll_zero_x10    = 0;
-static int32_t    g_pitch_x10        = 0;
-static int32_t    g_roll_x10         = 0;
-static int32_t    g_pitch_x100       = 0; // Filter state.
-static int32_t    g_roll_x100        = 0;
-static int32_t    g_accel_mg         = 0; // Total, last reading.
+static int16_t    g_pitch_zero_x10   = 0;
+static int16_t    g_roll_zero_x10    = 0;
+static int16_t    g_pitch_x10        = 0;
+static int16_t    g_roll_x10         = 0;
+static int16_t    g_pitch_x100       = 0; // Filter state.
+static int16_t    g_roll_x100        = 0;
+static int16_t    g_accel_mg         = 0; // Total, last reading.
 static int32_t    g_gravity_x100     = (GRAVITY_DEFAULT_MG * 100);
-static bool       gb_gravity_set     = false;
-static int32_t    g_lift[LIFT_WINDOW_SAMPLES]; // (total - 1 g) x ms.
-static uint32_t   g_lift_idx = 0u;
-static int32_t    g_lift_sum = 0;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_sensor_ok : 1;
+    bool b_reading_valid : 1;
+    bool b_calibrated : 1;
+    bool b_gravity_set : 1;
+} g_imu;
+
+static int32_t  g_lift[LIFT_WINDOW_SAMPLES]; // (total - 1 g) x ms.
+static uint32_t g_lift_idx = 0u;
+static int32_t  g_lift_sum = 0;
 
 static bool    reg_write(uint8_t address, uint8_t reg, uint8_t value);
 static bool    reg_read(uint8_t address, uint8_t reg, uint8_t * p_data,
@@ -149,26 +157,26 @@ imu_init(void)
                    MAG_ADDRESS, mag_id[0], mag_id[1], mag_id[2]);
     }
 
-    gb_sensor_ok     = false;
-    gb_reading_valid = false;
+    g_imu.b_sensor_ok     = false;
+    g_imu.b_reading_valid = false;
 
     if (accel_ok && mag_ok)
     {
         // CTRL_REG1 0x57: 100 Hz, X, Y and Z on (was 0x27: 10 Hz).
-        accel_ok     = (reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG1, 0x57u)) &&
-                       (reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG4, 0x88u));
-        mag_ok       = ((reg_write(MAG_ADDRESS, MAG_CRA_REG, 0x10u)) &&
-                        (reg_write(MAG_ADDRESS, MAG_CRB_REG, 0x20u))) &&
-                       (reg_write(MAG_ADDRESS, MAG_MODE_REG, 0x00u));
-        gb_sensor_ok = (accel_ok && mag_ok);
+        accel_ok = (reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG1, 0x57u)) &&
+                   (reg_write(ACCEL_ADDRESS, ACCEL_CTRL_REG4, 0x88u));
+        mag_ok   = ((reg_write(MAG_ADDRESS, MAG_CRA_REG, 0x10u)) &&
+                    (reg_write(MAG_ADDRESS, MAG_CRB_REG, 0x20u))) &&
+                   (reg_write(MAG_ADDRESS, MAG_MODE_REG, 0x00u));
+        g_imu.b_sensor_ok = (accel_ok && mag_ok);
 
-        if (gb_sensor_ok)
+        if (g_imu.b_sensor_ok)
         {
             log_printf("LSM303DLHC ready on I2C1 GP2/GP3: accel 0x19, "
                        "mag 0x1E. Live axes are shown in the UI.");
             sleep_ms(120u);
-            gb_reading_valid   = sample_read(&g_axes);
-            g_last_sample_usec = time_us_64();
+            g_imu.b_reading_valid = sample_read(&g_axes);
+            g_last_sample_usec    = time_us_64();
         }
         else
         {
@@ -176,7 +184,7 @@ imu_init(void)
         }
     }
 
-    return (gb_sensor_ok);
+    return (g_imu.b_sensor_ok);
 } /* imu_init() */
 
 /*!
@@ -188,7 +196,7 @@ imu_init(void)
 void
 imu_task(void)
 {
-    if (gb_sensor_ok)
+    if (g_imu.b_sensor_ok)
     {
         uint64_t now_usec = time_us_64();
 
@@ -197,13 +205,13 @@ imu_task(void)
             uint32_t dt_msec =
                 (uint32_t)((now_usec - g_last_sample_usec) / USEC_PER_MSEC_IMU);
 
-            g_last_sample_usec = now_usec;
-            gb_reading_valid   = sample_read(&g_axes);
-            if (gb_reading_valid)
+            g_last_sample_usec    = now_usec;
+            g_imu.b_reading_valid = sample_read(&g_axes);
+            if (g_imu.b_reading_valid)
             {
                 lift_update(dt_msec);
             }
-            if (gb_reading_valid && gb_calibrated)
+            if (g_imu.b_reading_valid && g_imu.b_calibrated)
             {
                 int32_t pitch = (raw_pitch_x10(&g_axes)) - g_pitch_zero_x10;
                 int32_t roll  = (raw_roll_x10(&g_axes)) - g_roll_zero_x10;
@@ -233,9 +241,9 @@ imu_calibrate(void)
     int32_t pitch_max = INT32_MIN;
     int32_t roll_min  = INT32_MAX;
     int32_t roll_max  = INT32_MIN;
-    bool    b_ok      = gb_sensor_ok;
+    bool    b_ok      = g_imu.b_sensor_ok;
 
-    gb_calibrated = false;
+    g_imu.b_calibrated = false;
     for (uint32_t idx = 0u; (idx < CALIBRATION_SAMPLES) && b_ok; idx++)
     {
         int32_t pitch     = 0;
@@ -280,18 +288,18 @@ imu_calibrate(void)
     }
     if (b_ok)
     {
-        g_pitch_zero_x10 = (int32_t)(pitch_sum / CALIBRATION_SAMPLES);
-        g_roll_zero_x10  = (int32_t)(roll_sum / CALIBRATION_SAMPLES);
-        g_pitch_x10      = 0;
-        g_roll_x10       = 0;
-        g_pitch_x100     = 0;
-        g_roll_x100      = 0;
-        gb_calibrated    = true;
-        g_gravity_x100   = (accel_total_mg(&g_axes)) * 100;
-        gb_gravity_set   = true;
+        g_pitch_zero_x10    = (int32_t)(pitch_sum / CALIBRATION_SAMPLES);
+        g_roll_zero_x10     = (int32_t)(roll_sum / CALIBRATION_SAMPLES);
+        g_pitch_x10         = 0;
+        g_roll_x10          = 0;
+        g_pitch_x100        = 0;
+        g_roll_x100         = 0;
+        g_imu.b_calibrated  = true;
+        g_gravity_x100      = (accel_total_mg(&g_axes)) * 100;
+        g_imu.b_gravity_set = true;
     }
-    gb_reading_valid   = b_ok;
-    g_last_sample_usec = time_us_64();
+    g_imu.b_reading_valid = b_ok;
+    g_last_sample_usec    = time_us_64();
     return (b_ok);
 } /* imu_calibrate() */
 
@@ -301,7 +309,7 @@ imu_calibrate(void)
 bool
 imu_is_ok(void)
 {
-    return (gb_sensor_ok);
+    return (g_imu.b_sensor_ok);
 } /* imu_is_ok() */
 
 /*!
@@ -310,7 +318,7 @@ imu_is_ok(void)
 bool
 imu_reading_is_valid(void)
 {
-    return (gb_reading_valid);
+    return (g_imu.b_reading_valid);
 } /* imu_reading_is_valid() */
 
 /*!
@@ -319,7 +327,7 @@ imu_reading_is_valid(void)
 bool
 imu_is_calibrated(void)
 {
-    return (gb_calibrated);
+    return (g_imu.b_calibrated);
 } /* imu_is_calibrated() */
 
 /*!
@@ -339,7 +347,7 @@ imu_get_axes(imu_axes_t * p_axes)
 int32_t
 imu_pitch_x10(void)
 {
-    return (gb_calibrated && gb_reading_valid ? g_pitch_x10 : 0);
+    return (g_imu.b_calibrated && g_imu.b_reading_valid ? g_pitch_x10 : 0);
 } /* imu_pitch_x10() */
 
 /*!
@@ -348,7 +356,7 @@ imu_pitch_x10(void)
 int32_t
 imu_roll_x10(void)
 {
-    return (gb_calibrated && gb_reading_valid ? g_roll_x10 : 0);
+    return (g_imu.b_calibrated && g_imu.b_reading_valid ? g_roll_x10 : 0);
 } /* imu_roll_x10() */
 
 /*!
@@ -375,7 +383,7 @@ imu_total_tilt_x10(void)
 int32_t
 imu_accel_mg(void)
 {
-    return (gb_reading_valid ? g_accel_mg : 0);
+    return (g_imu.b_reading_valid ? g_accel_mg : 0);
 } /* imu_accel_mg() */
 
 /*!
@@ -406,10 +414,10 @@ lift_update(uint32_t dt_msec)
         (int32_t)((dt_msec > LIFT_MAX_DT_MSEC) ? LIFT_MAX_DT_MSEC : dt_msec);
 
     g_accel_mg = accel_total_mg(&g_axes);
-    if (!gb_gravity_set)
+    if (!g_imu.b_gravity_set)
     {
-        g_gravity_x100 = g_accel_mg * 100; // First reading: start here.
-        gb_gravity_set = true;
+        g_gravity_x100      = g_accel_mg * 100; // First reading: start here.
+        g_imu.b_gravity_set = true;
     }
 
     gravity = g_gravity_x100 / 100;

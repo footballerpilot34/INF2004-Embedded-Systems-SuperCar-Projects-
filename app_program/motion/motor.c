@@ -25,8 +25,8 @@
 #define START_BOOST_USEC 60000u
 
 static uint16_t g_pwm_top                = 0u;
-static int32_t  g_left                   = 0;
-static int32_t  g_right                  = 0;
+static int8_t   g_left                   = 0; // -100..100 %.
+static int8_t   g_right                  = 0;
 static uint64_t g_left_boost_until_usec  = 0u;
 static uint64_t g_right_boost_until_usec = 0u;
 
@@ -103,8 +103,13 @@ motor_set(int32_t left, int32_t right)
             ((right < 0) ? -START_BOOST_PERCENT : START_BOOST_PERCENT);
     }
 
-    g_left  = left;
-    g_right = right;
+    // Kept in 8 bits: held at +/-MAX_SPEED, the most motor_drive() applies.
+    g_left  = (int8_t)((left > MAX_SPEED)
+                           ? MAX_SPEED
+                           : ((left < -MAX_SPEED) ? -MAX_SPEED : left));
+    g_right = (int8_t)((right > MAX_SPEED)
+                           ? MAX_SPEED
+                           : ((right < -MAX_SPEED) ? -MAX_SPEED : right));
     motor_drive(PIN_LEFT_MOTOR_A, PIN_LEFT_MOTOR_B, left_drive,
                 LEFT_MOTOR_REVERSED);
     motor_drive(PIN_RIGHT_MOTOR_A, PIN_RIGHT_MOTOR_B, right_drive,

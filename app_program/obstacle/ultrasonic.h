@@ -22,6 +22,8 @@ void ultrasonic_invalidate(void);
 bool ultrasonic_measurement_ready(void);
 // Increments once per completed ping (including a no-echo timeout).
 uint32_t ultrasonic_sample_sequence(void);
+// True if the last completed ping timed out with no echo.
+bool ultrasonic_last_no_echo(void);
 
 #endif /* ULTRASONIC_H */
 

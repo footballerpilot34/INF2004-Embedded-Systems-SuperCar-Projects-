@@ -12,8 +12,8 @@
 
 typedef struct
 {
-    bool b_left_black;  // Left sensor is over the line.
-    bool b_right_black; // Right sensor is over the line.
+    bool b_left_black : 1;  // Left sensor is over the line.
+    bool b_right_black : 1; // Right sensor is over the line.
 } line_state_t;
 
 typedef enum
@@ -25,8 +25,8 @@ typedef enum
 
 typedef struct
 {
-    bool b_left_high;  // Raw left DOUT level.
-    bool b_right_high; // Raw right DOUT level.
+    bool b_left_high : 1;  // Raw left DOUT level.
+    bool b_right_high : 1; // Raw right DOUT level.
 } line_raw_t;
 
 void            line_sensor_init(void);

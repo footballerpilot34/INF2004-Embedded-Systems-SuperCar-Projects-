@@ -32,6 +32,8 @@ code = r'''
 #include <stdio.h>
 #include <string.h>
 #include "bypass.c"
+#include "bitpack.h"
+#include "mqtt_frame.h"
 static int32_t ml, mr;
 static uint32_t seq, left_edges, right_edges;
 static bool ready = true, settled = true, black, left_only, right_only;
@@ -57,34 +59,54 @@ static int32_t hump_last_height_x10(void) { return 0; }
 static int32_t hump_last_tilt_x10(void) { return 0; }
 static int32_t hump_run_height_x10(void) { return 0; }
 static int32_t hump_run_tilt_x10(void) { return 0; }
-#define PAYLOAD_BYTES 512u
-static bool gb_scan_done;
+#define RANGE_MAX_MM 4095u
+#define MM_MAX 4095
+#define BYTE_MAX 255u
+static struct { bool b_scan_done : 1; } g_mq;
 static uint32_t g_humps_seen;
 static char const *g_topic_obstacle="car/obstacle", *g_topic_hump="car/hump";
-static char sent[512];
+static uint8_t sent[MQTT_FRAME_MAX_BYTES];
+static uint32_t sent_len, sent_front, sent_width;
 static unsigned events;
-static void publish(char const *topic, char const *payload, unsigned qos, unsigned retain) {
+static void publish(char const *topic, uint8_t const *payload, uint32_t length,
+                    unsigned qos, unsigned retain) {
     assert(strcmp(topic,"car/obstacle")==0 && qos==1 && retain==0);
-    assert(strlen(payload)<sizeof(sent)); strcpy(sent,payload); ++events;
+    assert(length>0 && length<=sizeof(sent));
+    memcpy(sent,payload,length); sent_len=length; ++events;
+}
+// Unpack the obstacle frame (layout in mqtt_frame.h): 14 bytes, front and
+// width in 12 bits each, 0 = none.
+static void sent_decode(void) {
+    bitpack_t p;
+    assert(sent_len==14u);
+    bitpack_init(&p,sent,sent_len);
+    assert(bitpack_get(&p,8u)==0xA4u);
+    (void)bitpack_get(&p,32u);
+    sent_front=bitpack_get(&p,12u);
+    for (unsigned i=0;i<3u;i++) { (void)bitpack_get_signed(&p,13u); }
+    sent_width=bitpack_get(&p,12u);
+    assert(!p.b_overrun);
 }
 '''
 source = (src_path('mqtt_comm.c')).read_text()
+helpers = source[source.index('/*!\n * @brief Give a signed mm value'):
+                 source.index('/* to_int16() */') + len('/* to_int16() */')]
 start = re.search(r'static void\s+publish_events\s*\(void\)\s*\{' , source).start()
 end = source.index('/* publish_events() */', start) + len('/* publish_events() */')
-code += source[start:end]
+code += helpers + '\n' + source[start:end]
 code += r'''
 static void start_pass(void) {
     reset_state(false, true); g_front_z=200; g_z=100;
-    phase_enter(PHASE_PASS,0); gb_pass_straight=true;
+    phase_enter(PHASE_PASS,0); g_bp.b_pass_straight=true;
 }
 
 // Advance the incremental planner while time is held at zero in isolated tests.
 static bool planned_begin(void) {
     if (!bypass_begin(&profile,0,true)) return false;
-    for (unsigned i=0;i<256 && g_phase==PHASE_PLAN;++i) {
+    for (unsigned i=0;i<256 && g_bp.phase==PHASE_PLAN;++i) {
         if (bypass_step(0,300)==BYPASS_FAILED) return false;
     }
-    if(g_phase==PHASE_BACKUP) {
+    if(g_bp.phase==PHASE_BACKUP) {
         // Isolated state tests begin after ideal reverse motion; full-route
         // integration below exercises the actual reverse/settling controller.
         g_x=-g_geometry.reverse_mm*sinf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD);
@@ -92,7 +114,7 @@ static bool planned_begin(void) {
         start_pivot(-g_geometry.departure,PHASE_OUT,0);
         phase_enter(PHASE_PIVOT,0);
     }
-    return g_phase==PHASE_PIVOT;
+    return g_bp.phase==PHASE_PIVOT;
 }
 static void fixed_checks(void) {
     for (int i=0;i<31;i++) points[i]=(obstacle_point_t){-30+2*i,300,OBSTACLE_RETURN_RANGE};
@@ -151,21 +173,21 @@ static void fixed_checks(void) {
             // empirical over-advance leaves the pair off-line.
             float contact=trial==3 ? BYPASS_LINE_SENSOR_FORWARD_MM : BYPASS_REACQUIRE_ADVANCE_MM;
             float sensor_x=g_x+contact*sinf(g_heading/DEG_PER_RAD);
-            black=!dry && (g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE || g_phase==PHASE_ALIGN) && fabsf(sensor_x)<=9;
-            if (g_phase==PHASE_PASS) {
+            black=!dry && (g_bp.phase==PHASE_RETURN || g_bp.phase==PHASE_ADVANCE || g_bp.phase==PHASE_ALIGN) && fabsf(sensor_x)<=9;
+            if (g_bp.phase==PHASE_PASS) {
                 assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG);
                 assert(fabsf(g_x-g_target_x)<=BYPASS_LATERAL_TOL_MM);
             }
-            if ((g_phase==PHASE_BRAKE || g_phase==PHASE_PIVOT) && g_after==PHASE_RETURN &&
+            if ((g_bp.phase==PHASE_BRAKE || g_bp.phase==PHASE_PIVOT) && g_bp.after==PHASE_RETURN &&
                 (phases&(1u<<PHASE_PASS))) {
                 if(!checked_return) {assert(g_z>=g_fixed_clear_z);checked_return=true;}
                 // Unequal-wheel pivot motion is explicitly integrated; it must
                 // stay inside the reserved position allowance, not exactly fixed.
                 assert(g_z+BYPASS_POSITION_UNCERTAINTY_MM>=g_fixed_clear_z);
             }
-            if (g_phase==PHASE_OUT || g_phase==PHASE_PASS || g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE || g_phase==PHASE_LINE_NUDGE) assert(ml>=0 && mr>=0);
+            if (g_bp.phase==PHASE_OUT || g_bp.phase==PHASE_PASS || g_bp.phase==PHASE_RETURN || g_bp.phase==PHASE_ADVANCE || g_bp.phase==PHASE_LINE_NUDGE) assert(ml>=0 && mr>=0);
             assert(fabsf(g_heading)<90);
-            phases|=1u<<g_phase;
+            phases|=1u<<g_bp.phase;
             result=bypass_step(t,ULTRASONIC_NO_RANGE);
         }
         if(trial==3) {
@@ -215,9 +237,9 @@ static void fixed_checks(void) {
     // pivot has settled. A stable single sensor matches normal FOLLOW semantics.
     assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0;
     black=false; left_only=false; phase_enter(PHASE_ALIGN,0);
-    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
-    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
-    assert(gb_nudge_used && fabsf(g_target_hdg)<0.01f);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_ALIGN);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_LINE_NUDGE);
+    assert(g_bp.b_nudge_used && fabsf(g_target_hdg)<0.01f);
     assert(bypass_step(140,1000)==BYPASS_RUNNING && ml>0 && mr>0 && ml<mr);
     left_only=true; g_heading=10;
     assert(bypass_step(150,1000)==BYPASS_RUNNING && ml>0 && mr>0);
@@ -235,7 +257,7 @@ static void fixed_checks(void) {
         assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0; black=false;
         phase_enter(PHASE_ALIGN,0);
         assert(bypass_step(10,1000)==BYPASS_RUNNING);
-        assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
+        assert(bypass_step(130,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_LINE_NUDGE);
         if(limit==0) g_phase_mm=BYPASS_NUDGE_MAX_MM;
         if(limit==1) ready=false;
         if(limit==2) g_heading=BYPASS_NUDGE_HEADING_DEG+BYPASS_DRIVE_HEADING_TOL_DEG+1;
@@ -247,12 +269,12 @@ static void fixed_checks(void) {
     assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0; black=false;
     phase_enter(PHASE_ALIGN,0);
     assert(bypass_step(10,1000)==BYPASS_RUNNING);
-    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_LINE_NUDGE);
     float first_search=g_nudge_heading;
     g_phase_mm=BYPASS_NUDGE_MAX_MM*0.75f-1;
-    assert(bypass_step(140,1000)==BYPASS_RUNNING && !gb_nudge_reversed);
+    assert(bypass_step(140,1000)==BYPASS_RUNNING && !g_bp.b_nudge_reversed);
     g_phase_mm=BYPASS_NUDGE_MAX_MM*0.75f;
-    assert(bypass_step(150,1000)==BYPASS_RUNNING && gb_nudge_reversed);
+    assert(bypass_step(150,1000)==BYPASS_RUNNING && g_bp.b_nudge_reversed);
     assert(g_nudge_heading==-first_search && ml>0 && mr>0);
     assert(bypass_step(160,1000)==BYPASS_RUNNING && g_nudge_heading==-first_search);
     bypass_cancel();
@@ -263,24 +285,24 @@ static void fixed_checks(void) {
     assert(bypass_step(130,1000)==BYPASS_FAILED);
     // Residual turn motion, even during a sensor wait, resets quiet time.
     assert(planned_begin()); g_heading=g_target_hdg;
-    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_PIVOT);
     ready=false; left_edges++; right_edges++;
     assert(bypass_step(100,1000)==BYPASS_RUNNING && ml==0 && mr==0);
     ready=true;
-    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
-    assert(bypass_step(100+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_OUT);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_PIVOT);
+    assert(bypass_step(100+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_OUT);
     // Translational coast is integrated as translation before a turn,
     // including motion observed while waiting for a sensor measurement.
     assert(planned_begin()); g_x=g_target_x; g_z=g_geometry.departure_y; g_heading=-g_geometry.departure;
     phase_enter(PHASE_OUT,0); start_pivot(0,PHASE_PASS,0);
-    assert(g_phase==PHASE_BRAKE);
+    assert(g_bp.phase==PHASE_BRAKE);
     float old_x=g_x, old_y=g_z, old_h=g_heading;
     ready=false; left_edges+=100; right_edges+=103;
     assert(bypass_step(100,1000)==BYPASS_RUNNING);
     assert(g_x<old_x && g_z>old_y && fabsf(g_heading-old_h)<0.1f);
     ready=true;
-    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_BRAKE);
-    assert(bypass_step(100+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_BRAKE);
+    assert(bypass_step(100+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_PIVOT);
     // Overshoot never triggers an opposite turn/startup boost.
     assert(planned_begin()); g_heading=g_target_hdg-10;
     assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0);
@@ -303,14 +325,14 @@ static void fixed_checks(void) {
     assert(planned_begin()); g_x=-45; g_z=g_fixed_clear_z+200; g_heading=g_geometry.return_deg; black=true;
     phase_enter(PHASE_RETURN,0);
     for (uint32_t t=10;t<=30;t+=10) assert(bypass_step(t,1000)==BYPASS_RUNNING);
-    assert(g_phase==PHASE_ADVANCE);
+    assert(g_bp.phase==PHASE_ADVANCE);
     assert(BYPASS_REACQUIRE_ADVANCE_MM*sinf(g_heading/DEG_PER_RAD)<BYPASS_LINE_CROSS_MAX_MM);
     g_phase_mm=BYPASS_REACQUIRE_ADVANCE_MM-0.1f;
     g_x=g_line_contact_x+g_phase_mm*sinf(g_heading/DEG_PER_RAD);
-    assert(bypass_step(40,1000)==BYPASS_RUNNING && g_phase==PHASE_ADVANCE && ml>0 && mr>0);
+    assert(bypass_step(40,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_ADVANCE && ml>0 && mr>0);
     g_phase_mm=BYPASS_REACQUIRE_ADVANCE_MM;
-    assert(bypass_step(50,1000)==BYPASS_RUNNING && g_phase==PHASE_BRAKE);
-    assert(bypass_step(50+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
+    assert(bypass_step(50,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_BRAKE);
+    assert(bypass_step(50+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_bp.phase==PHASE_ALIGN);
     assert(g_target_hdg==0);
     assert(planned_begin()); assert(bypass_step(10,BYPASS_FRONT_STOP_MM)==BYPASS_FAILED);
     assert(planned_begin()); ready=false;
@@ -320,7 +342,7 @@ static void fixed_checks(void) {
     phase_t interrupted[]={PHASE_PLAN,PHASE_BRAKE,PHASE_PIVOT,PHASE_OUT,PHASE_PASS,PHASE_RETURN,PHASE_ADVANCE,PHASE_ALIGN,PHASE_LINE_NUDGE};
     for (unsigned i=0;i<sizeof(interrupted)/sizeof(interrupted[0]);++i) {
         assert(planned_begin()); phase_enter(interrupted[i],0); ml=mr=12;
-        bypass_cancel(); assert(g_phase==PHASE_IDLE && ml==0 && mr==0);
+        bypass_cancel(); assert(g_bp.phase==PHASE_IDLE && ml==0 && mr==0);
     }
 }
 
@@ -358,10 +380,10 @@ int main(void) {
 
     start_pass();
     assert(g_pass_min_mm==100+150+180+30);
-    seq++; pass_step(100,200); assert(gb_side_seen);
+    seq++; pass_step(100,200); assert(g_bp.b_side_seen);
     pass_step(200,1000); assert(g_side_clear==0); // Same ping, not another vote.
     for (int i=0;i<5;i++) { seq++; pass_step(300+100*i,ULTRASONIC_NO_RANGE); }
-    assert(g_pass_end_mm==0 && g_phase==PHASE_PASS);
+    assert(g_pass_end_mm==0 && g_bp.phase==PHASE_PASS);
     for (int i=0;i<3;i++) { seq++; pass_step(900+100*i,1000); }
     assert(g_pass_end_mm >= CAR_LENGTH_MM+BYPASS_SIDE_MARGIN_MM);
     uint32_t target=g_pass_end_mm;
@@ -369,16 +391,16 @@ int main(void) {
     for (int i=0;i<3;i++) { seq++; pass_step(1300+100*i,1000); }
     target=g_pass_end_mm;
     g_phase_mm=g_pass_min_mm-1;
-    pass_step(1550,1000); assert(g_phase==PHASE_PASS);
+    pass_step(1550,1000); assert(g_bp.phase==PHASE_PASS);
     g_phase_mm=(target>g_pass_min_mm ? target:g_pass_min_mm);
-    pass_step(1560,1000); assert(g_phase==PHASE_PIVOT); // Only now return.
+    pass_step(1560,1000); assert(g_bp.phase==PHASE_PIVOT); // Only now return.
     start_pass(); g_phase_mm=g_pass_min_mm;
     assert(pass_step(2000,ULTRASONIC_NO_RANGE)==BYPASS_FAILED); // Never seen.
 
     reset_state(false,true); phase_enter(PHASE_RETURN,0);
-    gb_ret_hold=true; g_hold_end_mm=10; g_phase_mm=20;
+    g_bp.b_ret_hold=true; g_hold_end_mm=10; g_phase_mm=20;
     seq++; return_guard(100,ULTRASONIC_NO_RANGE);
-    assert(gb_ret_hold && g_hold_end_mm==0);
+    assert(g_bp.b_ret_hold && g_hold_end_mm==0);
     black=false; phase_enter(PHASE_FINISH,0);
     assert(bypass_step(10,1000)==BYPASS_FAILED && ml==0 && mr==0);
     black=true; phase_enter(PHASE_FINISH,0);
@@ -388,24 +410,23 @@ int main(void) {
     black=false; phase_enter(PHASE_RETURN,0);
     assert(bypass_step(BYPASS_STEP_MAX_MSEC+1,1000)==BYPASS_FAILED);
     phase_enter(PHASE_OUT,0); ml=mr=12; bypass_cancel();
-    assert(g_phase==PHASE_IDLE && ml==0 && mr==0);
+    assert(g_bp.phase==PHASE_IDLE && ml==0 && mr==0);
 
     // Preserve old event fields; expose calibration as null/150/250.
     profile.front_mm=200; profile.width_mm=333;
     profile.finished=true; profile.timed_out=false; profile.cancelled=false;
     profile.centre_seen=true; profile.edges_confirmed=true;
     profile.calibrated_width_valid=false; publish_events();
-    assert(strstr(sent,"\"width\":333") && strstr(sent,"\"front\":200"));
-    assert(strstr(sent,"\"width\":"));
+    sent_decode(); assert(sent_width==333 && sent_front==200);
     unsigned previous=events; publish_events(); assert(events==previous);
     for (uint32_t w=150; w<=250; w+=100) {
-        gb_scan_done=false; profile.calibrated_width_valid=true;
+        g_mq.b_scan_done=false; profile.calibrated_width_valid=true;
         profile.calibrated_width_mm=w; publish_events();
-        assert(!strstr(sent,"calibrated_width"));
-        assert(strstr(sent,"\"width\":333"));
+        // The frame has no calibrated-width field: same 14 bytes, raw width.
+        sent_decode(); assert(sent_width==333);
     }
-    profile.timed_out=true; gb_scan_done=false; publish_events();
-    assert(strstr(sent,"\"width\":null"));
+    profile.timed_out=true; g_mq.b_scan_done=false; publish_events();
+    sent_decode(); assert(sent_width==MQTT_FRAME_NO_RANGE && sent_front==MQTT_FRAME_NO_RANGE);
     return 0;
 }
 '''
@@ -423,7 +444,8 @@ with tempfile.TemporaryDirectory() as directory:
                         f'-DBYPASS_PIVOT_LEFT_X100={left_scale}',
                         f'-DBYPASS_PIVOT_RIGHT_X100={right_scale}',
                         *SRC_INCLUDES,
-                        str(work / 'test.c'), '-lm', '-o', str(work / 'test')],
+                        str(work / 'test.c'), str(src_path('mqtt_frame.c')),
+                        str(src_path('bitpack.c')), '-lm', '-o', str(work / 'test')],
                        check=True, timeout=30)
         subprocess.run([str(work / 'test')], check=True, timeout=10)
 

@@ -39,6 +39,8 @@ the rest of this file and in test IDs.
 | `app_program/gpio_isr.c/.h` | The single GPIO interrupt callback, passing edges to subsystems 1, 2 and 3 |
 | `app_program/power.c/.h` | VSYS battery voltage (ADC) |
 | `app_program/buzzer.c/.h` | Robo Pico piezo buzzer (beeps for calibration and barcodes) |
+| `app_program/fault.c/.h` | The shared fault bitmask (one bit per fault) and the loop pass-time measurement (change requirement 1) |
+| `app_program/bitpack.c/.h` | Packs values into, and out of, a byte buffer in only the bits each needs (binary MQTT frames) |
 | `config/config.h` | Every pin, threshold, speed and network setting |
 | `config/lwipopts.h` | lwIP network stack settings |
 | `TEAM.md` | This file |
@@ -122,8 +124,13 @@ used.** Interrupts (GPIO edges) run on core 0.
 | 10 | `vehicle_task()` (state machine; calls `line_steer`, `hump_task`, `obstacle_scan_task`, `bypass_step` …) | shared |
 | 11 | Stationary scan test (`obstacle_scan_task()`) | S3 |
 | 12 | `line_diag_task()` | S1 |
-| 13 | `buzzer_task()` | shared |
-| 14 | `telemetry_task()` (every 5th tick, 50 ms) | S4 |
+| 13 | `fault_task()` (works out the fault bits) | shared |
+| 14 | `buzzer_task()` | shared |
+| 15 | `telemetry_task()` (every 5th tick, 50 ms) | S4 |
+
+After step 15 the loop records how long the pass took
+(`fault_loop_record()`); the MQTT heartbeat reports the longest pass and
+how many passes overran 10 ms.
 
 If the loop stops for 3 s, the watchdog restarts the car and the next boot
 reports the last stage reached (`stage.h`).
@@ -150,10 +157,12 @@ provider owns the function; the user only calls it.
 | IF-13 | all → S4 | function call + ring buffer | `log_line()`, `log_state()`, `log_obstacle()`, `log_printf()`; read with `log_get()`, `log_next_seq()` | Log lines (64 kept) for the web page and the MQTT `…/log` topic |
 | IF-14 | shared → S1, S2, S3 | GPIO interrupt | `barcode_edge_isr()`, `encoder_edge_isr()`, `ultrasonic_echo_isr()` | Pin edges, called from `gpio_dispatch_isr()` |
 | IF-15 | shared → S4 | function call | `power_vsys_mv()` | Battery voltage for the heartbeat and dashboard |
+| IF-16 | S2, S3, S5, S4, shared → all | function call on one shared byte | `fault_set()`, `fault_clear()`, `fault_update()`, `fault_get()`; `fault_task()` reads `motor_*_speed()`, `encoder_count()`, `imu_is_ok()`, `ultrasonic_last_no_echo()`, `web_is_online()`, `mqtt_comm_is_connected()`, `power_vsys_mv()` | Fault bitmask: motor stall, encoder, IMU, no echo, Wi-Fi loss, MQTT down, battery low, loop overrun (one bit each) |
 
 Integration tests T-INT-01 to T-INT-04 (`testing/integration/TEST_LOG.md`)
 cover IF-01 to IF-12; IF-13 to IF-15 are in use in every run but have no
-separate recorded test.
+separate recorded test. IF-16 was added with change requirement 1 and has
+not been run on the car (see `testing/min_bits/README.md`).
 
 ## 6. Kernel object budget
 
@@ -164,3 +173,19 @@ Memory: the application modules use static data only. The lwIP network
 stack allocates from the C heap (`MEM_LIBC_MALLOC 1`, `MEM_SIZE 4000` in
 `config/lwipopts.h`), including one block per web connection while the car
 runs (`mem_calloc()` in `app_program/comms/web.c`).
+
+Data representation (change requirement 1): each module keeps its flags
+and small state values in one bit-field struct, and small ranges use the
+smallest type that holds them. The full table is in
+`testing/min_bits/DATA_TABLE.md`. Rules for data shared with an interrupt:
+
+- Data written only by an interrupt (encoder counts, the barcode edge
+  ring) is read by the main loop as whole 32-bit words, which is atomic on
+  the RP2040.
+- A packed byte that the main loop writes and an interrupt reads (the
+  ultrasonic flags) is written with interrupts off
+  (`save_and_disable_interrupts()`).
+- The fault byte can be changed from any context, so every
+  read-modify-write of it runs with interrupts off.
+- The bit-field structs are touched only by the main loop (lwIP callbacks
+  also run there, because lwIP is polled), so they need no locking.

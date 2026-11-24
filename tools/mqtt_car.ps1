@@ -12,10 +12,16 @@
 #     - OUTPUT: what the car says - its log (state changes, Wi-Fi,
 #       barcodes, obstacles, humps, ...), events, online/offline and
 #       command replies. It also saves EVERYTHING (pings included) to
-#       %USERPROFILE%\mqtt_log.txt (UTF-8, added to the end);
+#       %USERPROFILE%\mqtt_log.txt (UTF-8, added to the end), one line per
+#       message: time, topic, the payload as "x:" + hex, then " | " and
+#       the decoded text;
 #     - PINGS: the constant telemetry and heartbeat, once a second;
 #  4. keeps this window for typing commands: start, stop, ft1111, set A
-#     left, letters, ...
+#     left, letters, ... Each is sent as a binary command frame.
+#
+# The car's payloads are compact binary frames (change requirement 1), so
+# plain mosquitto_sub shows them as raw bytes; tools\mqtt_frames.ps1
+# decodes them here.
 #
 # The car also keeps trying the broker in config/config.h (MQTT_BROKER_HOST)
 # by itself, every 5 s, whenever it is on the hotspot.
@@ -35,13 +41,38 @@ $Pub       = Join-Path $Mosquitto 'mosquitto_pub.exe'
 # hotspot name); read it as such, not in the console's old code page.
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
-# Split "topic payload" from mosquitto_sub -v into the short topic and body.
+# The binary frame decoder and command encoder.
+. (Join-Path $PSScriptRoot 'mqtt_frames.ps1')
+
+# Split "topic hex" from mosquitto_sub -F '%t %x' into the short topic and
+# the payload's hex.
 function Split-Message ([string] $Line)
 {
     $space = $Line.IndexOf(' ')
     if ($space -lt 0) { return $null }
     return @($Line.Substring(0, $space).Replace("$Prefix/", ''),
-             $Line.Substring($space + 1))
+             $Line.Substring($space + 1).Trim())
+}
+
+# Decode one message for display: its text, and its log category (or '').
+function Get-MessageText ([string] $Topic, [string] $Hex)
+{
+    $bytes = ConvertFrom-Hex $Hex
+    if ($Topic -eq 'online')
+    {
+        return @([Text.Encoding]::ASCII.GetString($bytes), '')
+    }
+    try
+    {
+        $d   = ConvertFrom-Frame $bytes
+        $cat = ''
+        if ($d.Kind -eq 'log') { $cat = Get-Name $LogCats $d.F.category }
+        return @($d.Text, $cat)
+    }
+    catch
+    {
+        return @("(not a frame: x:$Hex)", '')
+    }
 }
 
 # ---------------------------------------------------------------------
@@ -86,13 +117,18 @@ if ($View -eq 'output')
     Write-Host 'Close this window (or Ctrl+C) to stop.' -ForegroundColor DarkGray
     Write-Host ''
 
-    & $Sub -h localhost -t "$Prefix/#" -v | ForEach-Object {
-        $time = Get-Date -Format 'HH:mm:ss.fff'
-        if ($null -ne $writer) { $writer.WriteLine("$time $_") }
+    & $Sub -h localhost -t "$Prefix/#" -F '%t %x' | ForEach-Object {
+        $time  = Get-Date -Format 'HH:mm:ss.fff'
         $parts = Split-Message $_
         if ($null -eq $parts) { return }
         $topic = $parts[0]
-        $body  = $parts[1]
+        $hex   = $parts[1]
+        $shown = Get-MessageText $topic $hex
+        $text  = $shown[0]
+        if ($null -ne $writer)
+        {
+            $writer.WriteLine("$time $Prefix/$topic x:$hex | $text")
+        }
 
         switch ($topic)
         {
@@ -100,56 +136,22 @@ if ($View -eq 'output')
             'heartbeat' { }
             'log'
             {
-                try
-                {
-                    $d = $body | ConvertFrom-Json
-                    $colour = $colours[[string] $d.c]
-                    if (-not $colour) { $colour = 'Gray' }
-                    Write-Host "$time $($d.m)" -ForegroundColor $colour
-                }
-                catch { Write-Host "$time $body" }
+                $colour = $colours[[string] $shown[1]]
+                if (-not $colour) { $colour = 'Gray' }
+                Write-Host "$time $text" -ForegroundColor $colour
             }
             'online'
             {
-                if ($body -eq '1') { Write-Host "$time === CAR ONLINE ===" -ForegroundColor Green }
+                if ($text -eq '1') { Write-Host "$time === CAR ONLINE ===" -ForegroundColor Green }
                 else { Write-Host "$time === CAR OFFLINE ===" -ForegroundColor Red }
             }
-            'barcode'
+            { $_ -in @('barcode', 'obstacle', 'hump') }
             {
-                try
-                {
-                    $d = $body | ConvertFrom-Json
-                    Write-Host "$time >> BARCODE '$($d.msg)' -> $($d.cmd)" -ForegroundColor Magenta
-                }
-                catch { Write-Host "$time >> BARCODE $body" -ForegroundColor Magenta }
+                Write-Host "$time >> $text" -ForegroundColor Magenta
             }
-            'obstacle'
-            {
-                try
-                {
-                    $d = $body | ConvertFrom-Json
-                    $text = ("$time >> OBSTACLE {0} mm ahead, {1} mm wide " +
-                             '(edges {2} / {3} mm, {4} / {5})') -f `
-                        $d.front, $d.width, $d.left, $d.right, $d.lst, $d.rst
-                    Write-Host $text -ForegroundColor Magenta
-                }
-                catch { Write-Host "$time >> OBSTACLE $body" -ForegroundColor Magenta }
-            }
-            'hump'
-            {
-                try
-                {
-                    $d = $body | ConvertFrom-Json
-                    $text = ("$time >> HUMP peak {0} mm, tilt {1:N1} deg " +
-                             '(highest this run {2} mm, {3} humps)') -f `
-                        $d.height_mm, ($d.peak_tilt_x10 / 10), $d.run_height_mm, $d.n
-                    Write-Host $text -ForegroundColor Magenta
-                }
-                catch { Write-Host "$time >> HUMP $body" -ForegroundColor Magenta }
-            }
-            'cmd'     { Write-Host "$time sent: $body" -ForegroundColor DarkCyan }
-            'cmd/ack' { Write-Host "$time car took: $body" -ForegroundColor DarkCyan }
-            default   { Write-Host "$time $topic $body" }
+            'cmd'     { Write-Host "$time sent: $text" -ForegroundColor DarkCyan }
+            'cmd/ack' { Write-Host "$time car took: $text" -ForegroundColor DarkCyan }
+            default   { Write-Host "$time $topic $text" }
         }
     }
     if ($null -ne $writer) { $writer.Close() }
@@ -167,34 +169,22 @@ if ($View -eq 'pings')
         -ForegroundColor DarkGray
     Write-Host ''
 
-    & $Sub -h localhost -t "$Prefix/telemetry" -t "$Prefix/heartbeat" -v |
+    & $Sub -h localhost -t "$Prefix/telemetry" -t "$Prefix/heartbeat" -F '%t %x' |
         ForEach-Object {
         $time  = Get-Date -Format 'HH:mm:ss'
         $parts = Split-Message $_
         if ($null -eq $parts) { return }
-        try
+        $text = (Get-MessageText $parts[0] $parts[1])[0]
+        if ($parts[0] -eq 'telemetry')
         {
-            $d = $parts[1] | ConvertFrom-Json
-            if ($parts[0] -eq 'telemetry')
-            {
-                $script:shown++
-                if (($script:shown % 4) -ne 1) { return }
-                $line = '{0} {1,-13} motors {2,3} {3,3}  IR {4}{5}{6}' +
-                        '  range {7,5}  pitch {8,5:N1}  roll {9,5:N1}' +
-                        '  height {10,4} mm  servo {11,3}'
-                Write-Host ($line -f $time, $d.st, $d.ml, $d.mr, $d.l, $d.r,
-                            $d.b, $d.rg, ($d.pt / 10), ($d.rl / 10), $d.hh,
-                            $d.sv) -ForegroundColor Gray
-            }
-            else
-            {
-                $text = ('{0} heartbeat #{1}  up {2} s  battery {3} mV  ' +
-                         'sent {4}  dropped {5}  connections {6}') -f `
-                    $time, $d.seq, $d.up, $d.vb, $d.sent, $d.drop, $d.conn
-                Write-Host $text -ForegroundColor DarkGray
-            }
+            $script:shown++
+            if (($script:shown % 4) -ne 1) { return }
+            Write-Host "$time $text" -ForegroundColor Gray
         }
-        catch { Write-Host "$time $_" }
+        else
+        {
+            Write-Host "$time $text" -ForegroundColor DarkGray
+        }
     }
     return
 }
@@ -277,10 +267,19 @@ foreach ($name in @('pings', 'output'))
 }
 Write-Host 'Opened the OUTPUT and PINGS windows.'
 
-# 5. Commands.
+# 5. Commands, sent as binary command frames (mosquitto_pub -f sends a
+#    file's bytes exactly as they are).
+$CmdFile = Join-Path $env:TEMP 'supercar_cmd.bin'
 function Send-Command ([string] $Word)
 {
-    & $Pub -h localhost -t "$Prefix/cmd" -m $Word
+    $frame = ConvertTo-CommandFrame $Word
+    if ($null -eq $frame)
+    {
+        Write-Host "Unknown command '$Word' (type help)." -ForegroundColor Yellow
+        return
+    }
+    [IO.File]::WriteAllBytes($CmdFile, $frame)
+    & $Pub -h localhost -t "$Prefix/cmd" -f $CmdFile
 }
 
 function Show-Help
@@ -302,7 +301,8 @@ function Show-Help
     Write-Host '    set AEI right      A, E and I all turn right'
     Write-Host '  letters            show what every letter does'
     Write-Host '  letters reset      back to the table in config.h'
-    Write-Host '  bt, scan, wheel, clear   (as on the page)'
+    Write-Host '  bt, bs, scan, wheel, diag, black, white, mark, v, clear'
+    Write-Host '                     (as on the page)'
     Write-Host '  broker             tell the car this laptop''s address again'
     Write-Host '  help               this list'
     Write-Host '  q                  quit (the other windows keep running)'

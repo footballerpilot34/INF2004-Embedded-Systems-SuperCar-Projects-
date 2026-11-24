@@ -27,19 +27,27 @@ _Static_assert(((SERVO_RANGE_DEG % OBSTACLE_SCAN_COARSE_DEG) == 0) &&
 _Static_assert((((2 * SERVO_RANGE_DEG) / OBSTACLE_SCAN_FINE_DEG) + 1) <=
                    SCAN_CAPACITY,
                "Scan grid exceeds storage");
-static obstacle_point_t   g_points[SCAN_CAPACITY];
-static uint32_t           g_count;
-static int32_t            g_queue[SCAN_CAPACITY];
-static int32_t            g_scan_direction;
-static bool               g_searching_right;
-static uint32_t           g_queue_count;
-static uint32_t           g_queue_pos;
-static uint32_t           g_values[OBSTACLE_SCAN_SAMPLES];
-static uint32_t           g_samples;
-static uint32_t           g_valid;
-static uint32_t           g_sequence;
-static uint32_t           g_started;
-static bool               g_active;
+static obstacle_point_t g_points[SCAN_CAPACITY];
+static uint32_t         g_count;
+static int8_t           g_queue[SCAN_CAPACITY]; // Angles, +/-30 deg.
+static int32_t          g_scan_direction;
+static uint32_t         g_queue_count;
+static uint32_t         g_queue_pos;
+static uint32_t         g_values[OBSTACLE_SCAN_SAMPLES];
+static uint32_t         g_samples;
+static uint32_t         g_valid;
+static uint32_t         g_sequence;
+static uint32_t         g_started;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_searching_right : 1;
+    bool b_active : 1;
+} g_ob;
+
 static obstacle_profile_t g_profile;
 
 /** @brief Clear retired classification fields; geometry remains continuous. */
@@ -66,7 +74,7 @@ has_range(obstacle_point_t const * p_value_p)
     return ((((p_value_p->kind) == OBSTACLE_RETURN_RANGE) ||
              ((p_value_p->kind) == OBSTACLE_RETURN_WEAK_RANGE)) &&
             ((p_value_p->range_mm) > 0u)) &&
-           ((p_value_p->range_mm) != ULTRASONIC_NO_RANGE);
+           ((p_value_p->range_mm) != OBSTACLE_POINT_NO_RANGE);
 }
 
 // Detect the FIRST change immediately. Additional rays only determine whether
@@ -356,7 +364,7 @@ queue_angle(int32_t angle)
     }
     if (g_queue_count < SCAN_CAPACITY)
     {
-        g_queue[g_queue_count++] = angle;
+        g_queue[g_queue_count++] = (int8_t)angle; // +/-SERVO_RANGE_DEG.
     }
 }
 
@@ -380,9 +388,9 @@ obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
     g_profile.front_mm = forward_mm;
     g_count = g_queue_count = g_queue_pos = 0u;
     g_started                             = now_msec;
-    g_active                              = true;
+    g_ob.b_active                         = true;
     g_scan_direction                      = -1;
-    g_searching_right                     = false;
+    g_ob.b_searching_right                = false;
 
     queue_angle(0);
     queue_angle(-OBSTACLE_SCAN_FINE_DEG);
@@ -397,7 +405,7 @@ static void
 store_point(void)
 {
     obstacle_point_t p_value_p = {.angle_deg = g_queue[g_queue_pos],
-                                  .range_mm  = ULTRASONIC_NO_RANGE,
+                                  .range_mm  = OBSTACLE_POINT_NO_RANGE,
                                   .kind      = OBSTACLE_RETURN_UNKNOWN};
     if (g_valid == 0u)
     {
@@ -417,11 +425,14 @@ store_point(void)
                 }
             }
         }
-        p_value_p.range_mm =
+        uint32_t median =
             (g_valid & 1u)
                 ? g_values[g_valid / 2u]
                 : ((g_values[(g_valid / 2u) - 1u]) + (g_values[g_valid / 2u])) /
                       2u;
+        p_value_p.range_mm = (median > OBSTACLE_POINT_RANGE_MAX)
+                                 ? OBSTACLE_POINT_RANGE_MAX
+                                 : median;
         // Keep EVERY available distance, including a single valid echo.
         // Quality affects clearance safety only, never graph visibility.
         bool stable = (g_valid >= 2u) && (((g_values[1]) - (g_values[0])) <=
@@ -471,7 +482,7 @@ finish(bool timeout)
     obstacle_profile_build(g_points, g_count, front, &g_profile);
     g_profile.finished  = true;
     g_profile.timed_out = timeout;
-    g_active            = false;
+    g_ob.b_active       = false;
     servo_set_angle(SERVO_CENTER_DEG);
     if ((g_profile.left_status) == OBSTACLE_EDGE_CONFIRMED)
     {
@@ -563,7 +574,7 @@ finish(bool timeout)
 void
 obstacle_scan_task(uint32_t now_msec)
 {
-    if (!g_active)
+    if (!g_ob.b_active)
     {
         return;
     }
@@ -602,14 +613,14 @@ obstacle_scan_task(uint32_t now_msec)
 
     ++g_queue_pos;
 
-    if (side_finished && (!g_searching_right))
+    if (side_finished && (!g_ob.b_searching_right))
     {
-        g_searching_right = true;
-        g_scan_direction  = 1;
+        g_ob.b_searching_right = true;
+        g_scan_direction       = 1;
         queue_angle(OBSTACLE_SCAN_FINE_DEG);
         log_obstacle("SCAN: left search complete; searching right.");
     }
-    else if (side_finished && g_searching_right)
+    else if (side_finished && g_ob.b_searching_right)
     {
         finish(false);
         return;
@@ -644,11 +655,11 @@ obstacle_scan_task(uint32_t now_msec)
 void
 obstacle_scan_cancel(void)
 {
-    if (g_active)
+    if (g_ob.b_active)
     {
         g_profile.cancelled = true;
     }
-    g_active = false;
+    g_ob.b_active = false;
     obstacle_width_estimate_update(&g_profile);
     g_profile.bypass.available = false;
     servo_set_angle(SERVO_CENTER_DEG);
@@ -657,7 +668,7 @@ obstacle_scan_cancel(void)
 bool
 obstacle_scan_active(void)
 {
-    return g_active;
+    return g_ob.b_active;
 }
 /** @brief Return the current measured scan profile. */
 obstacle_profile_t const *

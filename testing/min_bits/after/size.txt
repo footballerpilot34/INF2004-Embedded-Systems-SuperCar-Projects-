@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+ 455120	      0	  66432	 521552	  7f550	build/supercar.elf

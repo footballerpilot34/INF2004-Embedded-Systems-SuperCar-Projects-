@@ -26,3 +26,7 @@ Release
 
 # macOS
 .DS_Store
+
+# Python bytecode (tools/ and testing/host/ import each other).
+__pycache__/
+*.pyc

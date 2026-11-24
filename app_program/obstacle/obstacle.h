@@ -18,11 +18,18 @@ typedef enum
     OBSTACLE_RETURN_WEAK_RANGE // Actual median, but sparse/unstable echoes.
 } obstacle_return_t;
 
+// One scan point in 4 bytes, not 12 (change requirement 1): the angle
+// is within +/-SERVO_RANGE_DEG (8 bits), the range within the sensor's
+// reach (13 bits: up to 8190 mm) and the kind is one of 4 (2 bits).
+// A point without a usable echo stores OBSTACLE_POINT_NO_RANGE.
+#define OBSTACLE_POINT_NO_RANGE 8191u  // Top value of the 13-bit field.
+#define OBSTACLE_POINT_RANGE_MAX 8190u // Longer echoes are held here.
+
 typedef struct
 {
-    int32_t           angle_deg; // Relative to forward; positive = right.
-    uint32_t          range_mm;
-    obstacle_return_t kind;
+    int8_t   angle_deg;     // Relative to forward; positive = right.
+    uint16_t range_mm : 13; // mm, or OBSTACLE_POINT_NO_RANGE.
+    uint16_t kind : 2;      // obstacle_return_t.
 } obstacle_point_t;
 
 typedef enum
@@ -45,7 +52,7 @@ typedef struct
 
 typedef struct
 {
-    bool     available; // Geometry only; requires corridor checks.
+    bool     available : 1; // Geometry only; requires corridor checks.
     int32_t  left_x_mm;
     int32_t  right_x_mm;
     int32_t  preferred_x_mm;    // Side with the smaller lateral shift.
@@ -55,16 +62,16 @@ typedef struct
 
 typedef struct
 {
-    bool finished;
-    bool timed_out;
-    bool cancelled; // Points retained for the dashboard.
-    bool centre_seen;
-    bool left_bounded; // Angular bracket may end in missing echoes.
-    bool right_bounded;
-    bool edges_confirmed; // Both edge transitions have reliable echoes.
+    bool finished : 1;
+    bool timed_out : 1;
+    bool cancelled : 1; // Points retained for the dashboard.
+    bool centre_seen : 1;
+    bool left_bounded : 1; // Angular bracket may end in missing echoes.
+    bool right_bounded : 1;
+    bool edges_confirmed : 1; // Both edge transitions have reliable echoes.
     obstacle_edge_status_t left_status;
     obstacle_edge_status_t right_status;
-    bool                   exceeds_expected_width;
+    bool                   exceeds_expected_width : 1;
     uint32_t               front_mm;
     int32_t left_mm; // Estimated edge at angular bracket midpoint.
     int32_t right_mm;
@@ -79,11 +86,11 @@ typedef struct
     uint32_t middle_distance_mm;  // Range to the midpoint of the visible edges.
     uint32_t width_mm;            // Only meaningful with BOTH bounded flags.
     uint32_t calibrated_width_mm; // Retired classification field; always zero.
-    bool     calibrated_width_valid; // False means unknown; raw geometry is
-                                     // retained.
-    uint32_t corrected_width_mm;     // Retired compatibility field; never
-                                     // overwrites raw/calibrated width.
-    bool     width_fallback;
+    bool     calibrated_width_valid : 1; // False means unknown; raw geometry is
+                                         // retained.
+    uint32_t corrected_width_mm;         // Retired compatibility field; never
+                                         // overwrites raw/calibrated width.
+    bool     width_fallback : 1;
     uint32_t width_min_mm; // Angular sampling interval, not accuracy.
     uint32_t width_max_mm;
     uint32_t left_ray_mm; // Endpoint ray ranges; NOT corridor clearance.

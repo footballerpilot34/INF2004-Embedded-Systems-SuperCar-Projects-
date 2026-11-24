@@ -1,4 +1,5 @@
 """Exercise the real serial/web/MQTT command dispatch and stationary scan lifecycle."""
+import importlib.util
 from pathlib import Path
 import re
 import subprocess
@@ -30,28 +31,49 @@ def function(source, name):
     end = re.search(r"^}", source[start.start():], re.M)
     return source[start.start():start.start() + end.end()] + "\n"
 
+spec = importlib.util.spec_from_file_location(
+    'mqtt_frame', ROOT / 'tools' / 'mqtt_frame.py')
+mqtt_frame = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mqtt_frame)
+FRAME_TABLE = ',\n'.join(
+    '    {"%s", {%s}, %d}' % (word, ', '.join('0x%02xu' % b for b in data),
+                              len(data))
+    for word in ('v', 'stop', 'ft1100', 'bcar', 'bclist', 'bcreset')
+    for data in [mqtt_frame.encode_command(word)])
+
 code = r'''
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include "config.h"
+#include "mqtt_frame.h"
 #include "web.h"
 #include "vehicle.h"
 #include "obstacle.h"
 #include "ultrasonic.h"
-static bool g_stationary_scan_test, g_stationary_scan_starting, g_encoder_marked, active, finish_next;
-static bool gb_feat_line, gb_feat_avoid, gb_feat_barcode, gb_feat_hump;
+static bool active, finish_next;
+// The firmware's packed flags (change requirement 1), as app_main.c and
+// web.c declare them.
+static struct {
+    bool b_encoder_marked : 1; bool b_stationary_scan_test : 1;
+    bool b_imu_cal_due : 1; bool b_was_online : 1;
+    bool b_stationary_scan_starting : 1;
+} g_app;
+static struct {
+    web_command_t pending : 5; bool b_feat_line : 1; bool b_feat_avoid : 1;
+    bool b_feat_barcode : 1; bool b_feat_hump : 1; bool b_scan_test_busy : 1;
+} g_w;
 void mqtt_comm_set_broker(char const *h) { (void)h; }
-static bool gb_scan_test_busy, ready = true, settled = true;
+static bool ready = true, settled = true;
 static uint32_t g_stationary_scan_since, now = 100, points;
 static unsigned starts, cancellations, tasks, movement, stops;
 static int32_t left, right;
 static int key;
 static uint32_t range = 100, g_history_count, g_history_seq, g_log_floor;
-static web_command_t g_pending;
 static vehicle_state_t state = VEHICLE_READY;
 static obstacle_profile_t profile;
 static char const * gp_scan_test_status = "";
@@ -98,7 +120,7 @@ void obstacle_scan_task(uint32_t now) {
 }
 obstacle_profile_t const * obstacle_profile(void) { return &profile; }
 '''
-code += MAIN[MAIN.index('#define KEY_START'):MAIN.index('static bool g_encoder_marked;')]
+code += MAIN[MAIN.index('#define KEY_START'):MAIN.index('static void          usb_wait(void);')]
 code += function(WEB, 'web_set_scan_test_status') + function(WEB, 'web_set_scan_test_busy')
 for name in ['vehicle_is_idle', 'stationary_scan_test_status', 'stationary_scan_test_start',
              'stationary_scan_test_cancel', 'stationary_scan_test_task', 'command_run', 'serial_poll']:
@@ -112,40 +134,59 @@ code += r'''
 typedef uint8_t u8_t;
 typedef uint16_t u16_t;
 typedef uint32_t u32_t;
-#define CMD_BYTES 24u
+#define CMD_BYTES 8u
 #define MQTT_DATA_FLAG_LAST 1u
-static bool gb_cmd_topic, gb_ack_pending;
-static uint32_t g_cmd_len;
-static char g_cmd_in[CMD_BYTES], g_ack[CMD_BYTES];
+static struct { bool b_cmd_topic : 1; bool b_ack_pending : 1; } g_mq;
+static uint32_t g_cmd_len, g_ack_len;
+static uint8_t g_cmd_in[CMD_BYTES], g_ack[CMD_BYTES];
 static char const *g_topic_cmd = "inf2004/aai14/supercar/cmd";
+// Binary command frames, built by the reference encoder
+// (tools/mqtt_frame.py), as the laptop's tools/mqtt_car.ps1 sends them.
+typedef struct { char const *word; u8_t bytes[4]; u16_t len; } frame_t;
+static frame_t const FRAMES[] = {
+''' + FRAME_TABLE + r'''
+};
+static frame_t const *frame(char const *word) {
+    for (unsigned i = 0; i < sizeof(FRAMES) / sizeof(FRAMES[0]); i++) {
+        if (strcmp(FRAMES[i].word, word) == 0) { return &FRAMES[i]; }
+    }
+    assert(0); return NULL;
+}
+// The car acknowledges a command with the same frame, typed ACK (0xA8).
+static bool ack_is(char const *word) {
+    frame_t const *f = frame(word);
+    return g_ack_len == f->len && g_ack[0] == 0xA8u &&
+           memcmp(g_ack + 1, f->bytes + 1, f->len - 1u) == 0;
+}
 '''
 code += function(MQTT, 'incoming_publish_cb') + function(MQTT, 'incoming_data_cb')
 code += r'''
 static void web(char const * name){command_parse(name);command_run(web_command_take());}
-static void mqtt(char const *payload) {
-    incoming_publish_cb(NULL,g_topic_cmd,(u32_t)strlen(payload));
-    incoming_data_cb(NULL,(u8_t const *)payload,(u16_t)strlen(payload),MQTT_DATA_FLAG_LAST);
+static void mqtt(char const *word) {
+    frame_t const *f = frame(word);
+    incoming_publish_cb(NULL,g_topic_cmd,f->len);
+    incoming_data_cb(NULL,f->bytes,f->len,MQTT_DATA_FLAG_LAST);
 }
 static void fresh(void) { ready=true; settled=true; stationary_scan_test_task(); }
 int main(void) {
     key='g'; web_command_t c=serial_poll();
     assert(c==WEB_CMD_STATIONARY_SCAN && starts==0); command_run(c);
-    assert(starts==0 && g_stationary_scan_test && g_stationary_scan_starting && gb_scan_test_busy);
+    assert(starts==0 && g_app.b_stationary_scan_test && g_app.b_stationary_scan_starting && g_w.b_scan_test_busy);
     stationary_scan_test_task(); assert(tasks==0); // Wait asynchronously for forward ping.
-    fresh(); assert(starts==1 && active && !g_stationary_scan_starting);
+    fresh(); assert(starts==1 && active && !g_app.b_stationary_scan_starting);
     stationary_scan_test_task(); assert(tasks==1 && active);
     web("scan"); assert(starts==1 && strstr(gp_scan_test_status,"already running"));
     unsigned before_dry=movement; key='v'; command_run(serial_poll());
     assert(movement==before_dry); // Rehearsal is rejected while scanning.
     mqtt("v"); command_run(web_command_take()); assert(movement==before_dry);
     web("start"); assert(movement==0);
-    web("stop"); assert(!active && !g_stationary_scan_test && !gb_scan_test_busy && stops==1);
+    web("stop"); assert(!active && !g_app.b_stationary_scan_test && !g_w.b_scan_test_busy && stops==1);
     assert(strstr(gp_scan_test_status,"CANCELLED"));
     unsigned n=starts;
     uint32_t invalid[]={0,OBSTACLE_STOP_MM+1,ULTRASONIC_NO_RANGE};
     for(unsigned i=0;i<3;i++){
         range=invalid[i];web("scan");fresh();
-        assert(starts==n && !g_stationary_scan_test && !gb_scan_test_busy);
+        assert(starts==n && !g_app.b_stationary_scan_test && !g_w.b_scan_test_busy);
     }
     assert(strstr(gp_scan_test_status,"stop range"));
     range=100;state=VEHICLE_FOLLOW_LINE;web("scan");assert(starts==n);
@@ -157,38 +198,44 @@ int main(void) {
     for(unsigned cycle=0;cycle<100;cycle++){
         unsigned old_points=points;
         web("scan");
-        assert(!active && points==old_points && gb_scan_test_busy);
+        assert(!active && points==old_points && g_w.b_scan_test_busy);
         assert(web_command_take()==WEB_CMD_NONE); // No stale queued command.
         stationary_scan_test_task(); assert(starts==n+cycle);
         fresh(); assert(starts==n+cycle+1 && active && points==0);
         stationary_scan_test_task(); assert(points==1);
         finish_next=true;stationary_scan_test_task();finish_next=false;
-        assert(!active && !g_stationary_scan_test && !g_stationary_scan_starting && !gb_scan_test_busy);
+        assert(!active && !g_app.b_stationary_scan_test && !g_app.b_stationary_scan_starting && !g_w.b_scan_test_busy);
         assert(profile.finished && points==2 && !ready);
     }
     // Startup timeout and STOP during preparation release every busy flag.
     web("scan");now+=SCAN_READY_TIMEOUT_MSEC;stationary_scan_test_task();
-    assert(!g_stationary_scan_test && !gb_scan_test_busy && strstr(gp_scan_test_status,"FAILED"));
-    web("scan");web("stop");assert(!g_stationary_scan_test && !g_stationary_scan_starting && !gb_scan_test_busy);
+    assert(!g_app.b_stationary_scan_test && !g_w.b_scan_test_busy && strstr(gp_scan_test_status,"FAILED"));
+    web("scan");web("stop");assert(!g_app.b_stationary_scan_test && !g_app.b_stationary_scan_starting && !g_w.b_scan_test_busy);
     web("scan");fresh();profile.timed_out=true;finish_next=true;
     stationary_scan_test_task();finish_next=false;
-    assert(!g_stationary_scan_test && !gb_scan_test_busy && strstr(gp_scan_test_status,"timed out"));
+    assert(!g_app.b_stationary_scan_test && !g_w.b_scan_test_busy && strstr(gp_scan_test_status,"timed out"));
     web("scan");fresh();key='x';command_run(serial_poll());
-    assert(!active && !g_stationary_scan_test && !gb_scan_test_busy);
+    assert(!active && !g_app.b_stationary_scan_test && !g_w.b_scan_test_busy);
     command_parse("stop");command_parse("scan");assert(web_command_take()==WEB_CMD_STOP);
     assert(movement==0 && left==0 && right==0 && cancellations>=3);
     // Actual MQTT callbacks -> shared parser -> same serial command handler.
     key='v'; web_command_t serial_v=serial_poll();
     assert(serial_v==WEB_CMD_BYPASS_TEST);
-    gb_ack_pending=false;
-    incoming_publish_cb(NULL,"other/topic",1);
+    g_mq.b_ack_pending=false;
+    frame_t const *fv=frame("v");
+    incoming_publish_cb(NULL,"other/topic",fv->len);
+    incoming_data_cb(NULL,fv->bytes,fv->len,MQTT_DATA_FLAG_LAST);
+    assert(!g_mq.b_ack_pending && web_command_take()==WEB_CMD_NONE);
+    // An old text command is not a frame: ignored, not acknowledged.
+    incoming_publish_cb(NULL,g_topic_cmd,1);
     incoming_data_cb(NULL,(u8_t const *)"v",1,MQTT_DATA_FLAG_LAST);
-    assert(!gb_ack_pending && web_command_take()==WEB_CMD_NONE);
-    incoming_publish_cb(NULL,g_topic_cmd,4);
-    incoming_data_cb(NULL,(u8_t const *)" V",2,0);
-    assert(!gb_ack_pending && web_command_take()==WEB_CMD_NONE);
-    incoming_data_cb(NULL,(u8_t const *)"\r\n",2,MQTT_DATA_FLAG_LAST);
-    assert(gb_ack_pending && strcmp(g_ack,"v")==0);
+    assert(!g_mq.b_ack_pending && web_command_take()==WEB_CMD_NONE);
+    // A frame that arrives in two parts.
+    incoming_publish_cb(NULL,g_topic_cmd,fv->len);
+    incoming_data_cb(NULL,fv->bytes,1,0);
+    assert(!g_mq.b_ack_pending && web_command_take()==WEB_CMD_NONE);
+    incoming_data_cb(NULL,fv->bytes+1,(u16_t)(fv->len-1u),MQTT_DATA_FLAG_LAST);
+    assert(g_mq.b_ack_pending && ack_is("v"));
     web_command_t remote_v=web_command_take(); assert(remote_v==serial_v);
     unsigned before=movement; command_run(remote_v); assert(movement==before+1);
     mqtt("v"); mqtt("v"); // Multiple queued copies still dispatch once.
@@ -198,13 +245,13 @@ int main(void) {
     mqtt("stop"); mqtt("v"); command_run(web_command_take());
     assert(stops==stops_before+1 && movement==before+2);
     mqtt("v"); mqtt("stop");
-    assert(strcmp(g_ack,"stop")==0); command_run(web_command_take());
+    assert(ack_is("stop")); command_run(web_command_take());
     assert(stops==stops_before+2 && movement==before+2);
     mqtt("ft1100");
-    assert(strcmp(g_ack,"ft1100")==0);
-    assert(gb_feat_line && gb_feat_avoid && !gb_feat_barcode && !gb_feat_hump);
+    assert(ack_is("ft1100"));
+    assert(g_w.b_feat_line && g_w.b_feat_avoid && !g_w.b_feat_barcode && !g_w.b_feat_hump);
     assert(web_command_take()==WEB_CMD_FEATURE_TEST);
-    mqtt("bcar"); assert(barcode_letters()[0]=='R' && strcmp(g_ack,"bcar")==0);
+    mqtt("bcar"); assert(barcode_letters()[0]=='R' && ack_is("bcar"));
     mqtt("bclist"); assert(web_command_take()==WEB_CMD_NONE);
     mqtt("bcreset"); assert(strcmp(barcode_letters(),BARCODE_LETTER_COMMANDS)==0);
     return 0;
@@ -215,6 +262,7 @@ with tempfile.TemporaryDirectory() as directory:
     source.write_text(code)
     subprocess.run(["cc","-std=c11","-Wall","-Wextra","-Werror",
                     "-fsanitize=undefined","-fno-sanitize-recover=all",
-                    *SRC_INCLUDES,str(source),"-o",str(binary)],check=True,timeout=30)
+                    *SRC_INCLUDES,str(source),str(src_path("mqtt_frame.c")),
+                    str(src_path("bitpack.c")),"-o",str(binary)],check=True,timeout=30)
     subprocess.run([str(binary)],check=True,timeout=10)
 print("Stationary scan checks passed (shared dispatch, rejection, STOP, completion, braking)")

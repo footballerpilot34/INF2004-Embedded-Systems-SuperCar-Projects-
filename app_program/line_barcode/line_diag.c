@@ -34,15 +34,23 @@
 
 #define STATUS_EVERY_TICKS 200u // 2 s at 10 ms per tick.
 
-static bool       gb_active = false;
 static line_raw_t g_last_raw;
 static uint32_t   g_left_changes  = 0u;
 static uint32_t   g_right_changes = 0u;
 static uint32_t   g_ticks         = 0u;
 
 // Learnt levels, per sensor. "Known" flags say whether each was recorded.
-static bool       gb_black_known = false;
-static bool       gb_white_known = false;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_active : 1;
+    bool b_black_known : 1;
+    bool b_white_known : 1;
+} g_ld;
+
 static line_raw_t g_black_raw;
 static line_raw_t g_white_raw;
 
@@ -64,7 +72,7 @@ line_diag_enter(void)
     bool b_right_ok = line_sensor_is_driven(false);
 
     motor_set(0, 0);
-    gb_active       = true;
+    g_ld.b_active   = true;
     g_last_raw      = line_sensor_raw();
     g_left_changes  = 0u;
     g_right_changes = 0u;
@@ -90,13 +98,13 @@ line_diag_enter(void)
 void
 line_diag_exit(void)
 {
-    if (gb_active)
+    if (g_ld.b_active)
     {
         log_line("DIAG OFF. Changes seen: LEFT %" PRIu32 ", RIGHT %" PRIu32 ".",
                  g_left_changes, g_right_changes);
     }
 
-    gb_active = false;
+    g_ld.b_active = false;
 } /* line_diag_exit() */
 
 /*!
@@ -107,7 +115,7 @@ line_diag_exit(void)
 bool
 line_diag_is_active(void)
 {
-    return (gb_active);
+    return (g_ld.b_active);
 } /* line_diag_is_active() */
 
 /*!
@@ -121,7 +129,7 @@ line_diag_task(void)
 {
     line_raw_t raw = line_sensor_raw();
 
-    if (gb_active)
+    if (g_ld.b_active)
     {
         motor_set(0, 0); // Belt and braces: no motion while testing.
 
@@ -170,27 +178,27 @@ line_diag_learn(bool b_black)
 {
     line_raw_t raw = line_sensor_raw();
 
-    if (!gb_active)
+    if (!g_ld.b_active)
     {
         log_line("Enter diagnostic mode ('d' / DIAG) before learning "
                  "black or white.");
     }
     else if (b_black)
     {
-        g_black_raw    = raw;
-        gb_black_known = true;
+        g_black_raw        = raw;
+        g_ld.b_black_known = true;
         log_line("DIAG learnt BLACK: LEFT=%s RIGHT=%s.",
                  level_text(raw.b_left_high), level_text(raw.b_right_high));
     }
     else
     {
-        g_white_raw    = raw;
-        gb_white_known = true;
+        g_white_raw        = raw;
+        g_ld.b_white_known = true;
         log_line("DIAG learnt WHITE: LEFT=%s RIGHT=%s.",
                  level_text(raw.b_left_high), level_text(raw.b_right_high));
     }
 
-    if ((gb_active && gb_black_known) && gb_white_known)
+    if ((g_ld.b_active && g_ld.b_black_known) && g_ld.b_white_known)
     {
         polarity_apply(true, "LEFT", g_black_raw.b_left_high,
                        g_white_raw.b_left_high);

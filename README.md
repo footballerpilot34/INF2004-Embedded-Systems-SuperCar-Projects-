@@ -125,12 +125,12 @@ section 5.
 | `app_program/app_main.c` | `main()`: initialises every module, then runs the 10 ms control loop that calls each module's `*_task()` step (order in `TEAM.md` section 4) |
 | `app_program/vehicle.c` | The vehicle state machine that ties the subsystems together |
 | `app_program/<subsystem>/` | One folder per subsystem: `line_barcode/` (S1), `motion/` (S2), `obstacle/` (S3), `comms/` (S4), `imu_hump/` (S5). Headers used by other folders are that subsystem's public interface; `obstacle/bypass_geometry.h` is private to `bypass.c`, and `obstacle/scan_plot.h` (the dashboard's scan plot) is used only by `comms/web.c` |
-| `app_program/*.c` (others) | Shared helpers: GPIO interrupt dispatch, battery voltage, buzzer |
+| `app_program/*.c` (others) | Shared helpers: GPIO interrupt dispatch, battery voltage, buzzer, the fault bitmask and loop timing (`fault.c`), bit packing for MQTT frames (`bitpack.c`) |
 | `config/config.h` | Every pin, threshold, speed and network setting, shared by the team |
 | `config/lwipopts.h` | Network stack settings |
 | `lib/libwifi/dhcpserver/` | DHCP server for the recovery network (Raspberry Pi pico-examples, MIT licence) |
 | `testing/` | Test records and host tests (`testing/README.md`) |
-| `tools/` | MQTT console, broker setup, BARR-C checker, analysis scripts |
+| `tools/` | MQTT console and its frame decoder, broker setup, BARR-C checker, frame reference (`mqtt_frame.py`), RAM and message-size reports, analysis scripts |
 
 - **Drivers live in the subsystem that owns the hardware** (for example the
   ultrasonic driver in `app_program/obstacle/`), not in a separate driver
@@ -227,21 +227,34 @@ Topics start with `inf2004/aai14/supercar` (`MQTT_TOPIC_PREFIX`):
 `online`, `heartbeat` (every 2 s), `telemetry` (4 per second), `barcode`,
 `obstacle`, `hump`, `log`, `cmd` and `cmd/ack`.
 
+**Payloads are compact binary frames, not JSON** (change requirement 1):
+each value takes only the bits its range needs (telemetry is 24 bytes,
+the heartbeat 28). `online` is still the single character `1` or `0`.
+Commands must be binary command frames too; plain text commands are
+ignored. The layouts are in `app_program/comms/mqtt_frame.h` and
+`testing/min_bits/DATA_TABLE.md`.
+
 On a Windows laptop, run Mosquitto as the broker
 (`tools/mqtt_broker_setup.ps1` opens the listener and firewall once), then
 type **`.\mqtt`** in PowerShell in this folder. It opens three windows:
 INPUT (type commands), OUTPUT (the car's log and events, also saved to
-`%USERPROFILE%\mqtt_log.txt`) and PINGS (heartbeat and telemetry). Commands
-include `start`, `stop`, `ft1111`, `bt`, `calibrate`, `wheel`, `scan`, `v`,
-and `set <letters> <left|right|straight|uturn|none>` to change what each
-barcode letter does.
+`%USERPROFILE%\mqtt_log.txt`) and PINGS (heartbeat and telemetry). It
+decodes the frames and sends commands as frames (`tools/mqtt_frames.ps1`).
+Commands include `start`, `stop`, `ft1111`, `bt`, `calibrate`, `wheel`,
+`scan`, `v`, and `set <letters> <left|right|straight|uturn|none>` to change
+what each barcode letter does.
 
-With the Mosquitto tools directly:
+With the Mosquitto tools directly, show payloads as hex and decode them
+with the Python reference, and send a command frame from a file:
 
 ```sh
-mosquitto_sub -h BROKER_IP -t 'inf2004/aai14/supercar/#' -v
-mosquitto_pub -h BROKER_IP -t 'inf2004/aai14/supercar/cmd' -m start
+mosquitto_sub -h BROKER_IP -t 'inf2004/aai14/supercar/#' -F '%t %x'
+python tools/mqtt_frame.py --decode telemetry <hex>
+python tools/mqtt_frame.py --cmd start          # prints a701
+mosquitto_pub -h BROKER_IP -t 'inf2004/aai14/supercar/cmd' -f start.bin
 ```
+
+(`start.bin` holds the bytes `a7 01`.)
 
 Use a broker on your own network only: anyone who can reach it can move
 the car.

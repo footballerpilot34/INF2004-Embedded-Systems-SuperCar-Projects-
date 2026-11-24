@@ -12,12 +12,13 @@
  * connection, and it comes back by itself once the hotspot does.
  *
  * @par Topics
- * See mqtt_comm.h. Commands arrive on the cmd topic as the same words the
- * web page sends, and go through web_command_submit(), so MQTT and the
- * page control the car in exactly the same way.
+ * See mqtt_comm.h. Every payload except "online" is a compact binary frame
+ * (mqtt_frame.h; change requirement 1), not JSON text. Commands arrive on
+ * the cmd topic as binary command frames; each is turned back into the
+ * word the web page sends and goes through web_command_submit(), so MQTT
+ * and the page control the car in exactly the same way.
  */
 
-#include <ctype.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -32,12 +33,14 @@
 #include "bypass.h"
 #include "config.h"
 #include "encoder.h"
+#include "fault.h"
 #include "hump.h"
 #include "imu.h"
 #include "line_sensor.h"
 #include "log.h"
 #include "motor.h"
 #include "mqtt_comm.h"
+#include "mqtt_frame.h"
 #include "obstacle.h"
 #include "power.h"
 #include "servo.h"
@@ -47,9 +50,13 @@
 
 #define TOPIC_BYTES 64u
 #define HOST_BYTES 64u
-#define PAYLOAD_BYTES 512u
-#define LOG_PER_TASK 4u // Log lines sent per call at most.
-#define CMD_BYTES 24u
+#define PAYLOAD_BYTES 256u // A log frame: header, category, line.
+#define LOG_PER_TASK 4u    // Log lines sent per call at most.
+#define CMD_BYTES 8u       // Longest command frame (3) with room to spare.
+#define RANGE_MAX_MM 4095u // 12-bit range field.
+#define MM_MAX 4095        // 13-bit signed mm fields.
+#define BYTE_MAX 255u
+#define PING_MAX_MSEC 1023u // 10-bit ping field.
 #define STATUS_BYTES 128u
 #define RESOLVE_MAX_MSEC 10000u // DNS gives up after this.
 #define CONNECT_MAX_MSEC 15000u // CONNECT gives up after this.
@@ -64,29 +71,38 @@ typedef enum
 } mq_state_t;
 
 static mqtt_client_t * gp_client          = NULL;
-static mq_state_t      g_state            = MQ_IDLE;
 static uint32_t        g_state_msec       = 0u; // Entered this state (ms).
 static uint32_t        g_retry_at         = 0u; // Next attempt (ms).
 static char            g_host[HOST_BYTES] = MQTT_BROKER_HOST;
 static ip_addr_t       g_broker_ip;
-static bool            gb_dns_done   = false;
-static bool            gb_dns_failed = false;
-static char const *    gp_why        = ""; // Last failure, for status.
-static uint32_t        g_connects    = 0u; // Successful connections.
-static uint32_t        g_sent        = 0u; // Messages queued.
-static uint32_t        g_dropped     = 0u; // Messages that did not fit.
-static uint32_t        g_hb_seq      = 0u;
-static uint32_t        g_next_tele   = 0u;
-static uint32_t        g_next_hb     = 0u;
-static bool            gb_scan_done  = false; // Last obstacle scan seen.
-static uint32_t        g_humps_seen  = 0u;    // hump_count() published.
-static uint32_t        g_log_seq     = 0u;    // Next log line to send.
-static bool            gb_cmd_topic  = false; // Incoming is on cmd.
-static char            g_cmd_in[CMD_BYTES];
+static char const *    gp_why       = ""; // Last failure, for status.
+static uint32_t        g_connects   = 0u; // Successful connections.
+static uint32_t        g_sent       = 0u; // Messages queued.
+static uint32_t        g_dropped    = 0u; // Messages that did not fit.
+static uint32_t        g_hb_seq     = 0u;
+static uint32_t        g_next_tele  = 0u;
+static uint32_t        g_next_hb    = 0u;
+static uint32_t        g_humps_seen = 0u;   // hump_count() published.
+static uint32_t        g_log_seq    = 0u;   // Next log line to send.
+static uint8_t         g_cmd_in[CMD_BYTES]; // Binary command frame.
 static uint32_t        g_cmd_len = 0u;
-static char            g_ack[CMD_BYTES];
-static bool            gb_ack_pending         = false;
-static char            g_status[STATUS_BYTES] = "Off";
+static uint8_t         g_ack[CMD_BYTES];
+static uint32_t        g_ack_len = 0u;
+
+// Flags and small state values, packed into bit-fields: each takes
+// only the bits its range needs (change requirement 1). Only the
+// main loop reads or writes them, so no locking is needed.
+static struct
+{
+    mq_state_t state : 3;
+    bool       b_dns_done : 1;
+    bool       b_dns_failed : 1;
+    bool       b_scan_done : 1; // Last obstacle scan seen.
+    bool       b_cmd_topic : 1; // Incoming is on cmd.
+    bool       b_ack_pending : 1;
+} g_mq = {.state = MQ_IDLE};
+
+static char g_status[STATUS_BYTES] = "Off";
 
 static char g_topic_online[TOPIC_BYTES];
 static char g_topic_hb[TOPIC_BYTES];
@@ -113,16 +129,17 @@ static void     incoming_publish_cb(void * p_arg, char const * p_topic,
                                     u32_t tot_len);
 static void     incoming_data_cb(void * p_arg, u8_t const * p_data, u16_t len,
                                  u8_t flags);
-static void     publish(char const * p_topic, char const * p_payload, u8_t qos,
-                        u8_t retain);
+static void     publish(char const * p_topic, uint8_t const * p_payload,
+                        uint32_t length, u8_t qos, u8_t retain);
 static void     publish_telemetry(uint32_t now_msec);
 static void     publish_heartbeat(uint32_t now_msec);
 static void     publish_events(void);
 static void     publish_log(void);
-static bool   publish_ok(char const * p_topic, char const * p_payload, u8_t qos,
-                         u8_t retain);
-static size_t json_escape(char * p_out, size_t capacity, char const * p_text);
-static void   status_update(void);
+static bool     publish_ok(char const * p_topic, uint8_t const * p_payload,
+                           uint32_t length, u8_t qos, u8_t retain);
+static int16_t  mm_field(int32_t value_mm, bool b_present);
+static int16_t  to_int16(int32_t value);
+static void     status_update(void);
 
 /*!
  * @brief Set up the topics and the client. Call once, after web_init().
@@ -161,7 +178,7 @@ mqtt_comm_init(void)
     {
         (void)snprintf(g_status, STATUS_BYTES, "Off (MQTT_ENABLED false)");
     }
-    g_state = MQ_IDLE;
+    g_mq.state = MQ_IDLE;
 } /* mqtt_comm_init() */
 
 /*!
@@ -181,30 +198,30 @@ mqtt_comm_task(void)
 
     if ((!b_online) || ('\0' == (g_host[0])))
     {
-        if (MQ_IDLE != g_state)
+        if (MQ_IDLE != g_mq.state)
         {
             mqtt_disconnect(gp_client);
             state_set(MQ_IDLE, now_msec);
         }
     }
-    else if (MQ_IDLE == g_state)
+    else if (MQ_IDLE == g_mq.state)
     {
         connect_start(now_msec);
     }
-    else if (MQ_RETRY == g_state)
+    else if (MQ_RETRY == g_mq.state)
     {
         if (((int32_t)(now_msec - g_retry_at)) >= 0)
         {
             connect_start(now_msec);
         }
     }
-    else if (MQ_RESOLVING == g_state)
+    else if (MQ_RESOLVING == g_mq.state)
     {
-        if (gb_dns_done)
+        if (g_mq.b_dns_done)
         {
             connect_to(now_msec);
         }
-        else if (gb_dns_failed)
+        else if (g_mq.b_dns_failed)
         {
             retry_later(now_msec, "broker name not found");
         }
@@ -217,7 +234,7 @@ mqtt_comm_task(void)
             // Still looking it up.
         }
     }
-    else if (MQ_CONNECTING == g_state)
+    else if (MQ_CONNECTING == g_mq.state)
     {
         if ((now_msec - g_state_msec) > CONNECT_MAX_MSEC)
         {
@@ -241,10 +258,10 @@ mqtt_comm_task(void)
             g_next_hb = now_msec + MQTT_HEARTBEAT_MSEC;
             publish_heartbeat(now_msec);
         }
-        if (gb_ack_pending)
+        if (g_mq.b_ack_pending)
         {
-            gb_ack_pending = false;
-            publish(g_topic_ack, g_ack, 1u, 0u);
+            g_mq.b_ack_pending = false;
+            publish(g_topic_ack, g_ack, g_ack_len, 1u, 0u);
         }
         publish_log();
     }
@@ -264,12 +281,12 @@ mqtt_comm_set_broker(char const * p_host)
     (void)snprintf(g_host, HOST_BYTES, "%s", p_host);
     log_printf("MQTT: broker set to \"%s\".", g_host);
 
-    if (((NULL) != gp_client) && (MQ_IDLE != g_state))
+    if (((NULL) != gp_client) && (MQ_IDLE != g_mq.state))
     {
         mqtt_disconnect(gp_client);
     }
-    g_state = MQ_IDLE; // The next task call starts again.
-    gp_why  = "";
+    g_mq.state = MQ_IDLE; // The next task call starts again.
+    gp_why     = "";
 } /* mqtt_comm_set_broker() */
 
 /*!
@@ -284,7 +301,19 @@ mqtt_comm_status_text(void)
 } /* mqtt_comm_status_text() */
 
 /*!
- * @brief Publish a decoded barcode (QoS 1).
+ * @brief Report whether the car is connected to the broker.
+ *
+ * @return True while publishing.
+ */
+bool
+mqtt_comm_is_connected(void)
+{
+    return (MQ_CONNECTED == g_mq.state);
+} /* mqtt_comm_is_connected() */
+
+/*!
+ * @brief Publish a decoded barcode (QoS 1): its command and its text,
+ *        6 bits per Code 39 character.
  *
  * @param[in] p_message The decoded text.
  * @param[in] command   Its command (BARCODE_CMD_NONE for a message).
@@ -292,15 +321,11 @@ mqtt_comm_status_text(void)
 void
 mqtt_comm_barcode(char const * p_message, barcode_command_t command)
 {
-    char   payload[PAYLOAD_BYTES];
-    size_t length = 0u;
+    uint8_t  frame[MQTT_FRAME_MAX_BYTES];
+    uint32_t length = mqtt_frame_barcode(now_msec_get(), (uint32_t)command,
+                                         p_message, frame, sizeof(frame));
 
-    length += (size_t)snprintf(payload, PAYLOAD_BYTES, "{\"msg\":\"");
-    length += json_escape(payload + length, PAYLOAD_BYTES - length, p_message);
-    (void)snprintf(payload + length, PAYLOAD_BYTES - length,
-                   "\",\"cmd\":\"%s\",\"t\":%" PRIu32 "}",
-                   barcode_command_name(command), now_msec_get());
-    publish(g_topic_barcode, payload, 1u, 0u);
+    publish(g_topic_barcode, frame, length, 1u, 0u);
 } /* mqtt_comm_barcode() */
 
 /*!
@@ -323,7 +348,7 @@ now_msec_get(void)
 static void
 state_set(mq_state_t state, uint32_t now_msec)
 {
-    g_state      = state;
+    g_mq.state   = state;
     g_state_msec = now_msec;
 } /* state_set() */
 
@@ -353,8 +378,8 @@ connect_start(uint32_t now_msec)
 {
     err_t err = ERR_OK;
 
-    gb_dns_done   = false;
-    gb_dns_failed = false;
+    g_mq.b_dns_done   = false;
+    g_mq.b_dns_failed = false;
 
     if (ipaddr_aton(g_host, &g_broker_ip))
     {
@@ -414,16 +439,16 @@ dns_found(char const * p_name, ip_addr_t const * p_ip, void * p_arg)
     (void)p_name;
     (void)p_arg;
 
-    if (MQ_RESOLVING == g_state)
+    if (MQ_RESOLVING == g_mq.state)
     {
         if ((NULL) != p_ip)
         {
-            g_broker_ip = *p_ip;
-            gb_dns_done = true;
+            g_broker_ip     = *p_ip;
+            g_mq.b_dns_done = true;
         }
         else
         {
-            gb_dns_failed = true;
+            g_mq.b_dns_failed = true;
         }
     }
 } /* dns_found() */
@@ -455,7 +480,9 @@ connection_cb(mqtt_client_t * p_client, void * p_arg,
         mqtt_set_inpub_callback(p_client, incoming_publish_cb, incoming_data_cb,
                                 NULL);
         (void)mqtt_subscribe(p_client, g_topic_cmd, 1u, NULL, NULL);
-        publish(g_topic_online, "1", 1u, 1u);
+        // "1" (one byte, the same as the will's "0"): lwIP sends the will
+        // as a C string, so a 0x00 byte cannot be used for offline.
+        publish(g_topic_online, (uint8_t const *)"1", 1u, 1u, 1u);
     }
     else if (MQTT_CONNECT_DISCONNECTED == status)
     {
@@ -484,13 +511,15 @@ incoming_publish_cb(void * p_arg, char const * p_topic, u32_t tot_len)
     (void)p_arg;
     (void)tot_len;
 
-    gb_cmd_topic = (0 == (strcmp(p_topic, g_topic_cmd)));
-    g_cmd_len    = 0u;
+    g_mq.b_cmd_topic = (0 == (strcmp(p_topic, g_topic_cmd)));
+    g_cmd_len        = 0u;
 } /* incoming_publish_cb() */
 
 /*!
- * @brief lwIP: part of an incoming payload. A complete cmd payload is
- *        handed to the web command parser (lower case, spaces removed).
+ * @brief lwIP: part of an incoming payload. A complete cmd payload is a
+ *        binary command frame; it is turned into the web page's word and
+ *        handed to the web command parser. Anything else (an old text
+ *        command, a frame from a newer version) is ignored and logged.
  *
  * @param[in] p_arg  Unused.
  * @param[in] p_data The bytes.
@@ -502,37 +531,40 @@ incoming_data_cb(void * p_arg, u8_t const * p_data, u16_t len, u8_t flags)
 {
     (void)p_arg;
 
-    if (!gb_cmd_topic)
+    if (!g_mq.b_cmd_topic)
     {
         return;
     }
 
     for (u16_t idx = 0u; idx < len; idx++)
     {
-        char value_ch = (char)p_data[idx];
-
-        if ((g_cmd_len < (CMD_BYTES - 1u)) && (0 == (isspace((int)value_ch))))
+        if (g_cmd_len < CMD_BYTES)
         {
-            g_cmd_in[g_cmd_len] = (char)tolower((int)value_ch);
-            g_cmd_len++;
+            g_cmd_in[g_cmd_len] = p_data[idx];
         }
+        g_cmd_len++; // Counts on, so an oversized payload is rejected.
     }
 
     if (0u != (flags & MQTT_DATA_FLAG_LAST))
     {
-        g_cmd_in[g_cmd_len] = '\0';
-        if ((0u == g_cmd_len) || (0 == (strncmp(g_cmd_in, "mb", 2u))))
+        char word[MQTT_FRAME_WORD_BYTES];
+
+        // A broker change has no opcode: only the web page can change the
+        // broker, so MQTT cannot lock itself out.
+        if ((g_cmd_len <= CMD_BYTES) &&
+            (mqtt_frame_command(g_cmd_in, g_cmd_len, word, sizeof(word))))
         {
-            // Empty, or a broker change (only from the web page, so MQTT
-            // cannot lock itself out).
-            log_printf("MQTT: command \"%s\" ignored.", g_cmd_in);
+            log_printf("MQTT: command \"%s\".", word);
+            web_command_submit(word);
+            g_ack_len =
+                mqtt_frame_ack(g_cmd_in, g_cmd_len, g_ack, sizeof(g_ack));
+            g_mq.b_ack_pending = (g_ack_len > 0u);
         }
         else
         {
-            log_printf("MQTT: command \"%s\".", g_cmd_in);
-            web_command_submit(g_cmd_in);
-            (void)snprintf(g_ack, CMD_BYTES, "%s", g_cmd_in);
-            gb_ack_pending = true;
+            log_printf("MQTT: %" PRIu32 "-byte cmd payload ignored: not a "
+                       "binary command frame (use tools/mqtt_car.ps1).",
+                       g_cmd_len);
         }
         g_cmd_len = 0u;
     }
@@ -542,14 +574,16 @@ incoming_data_cb(void * p_arg, u8_t const * p_data, u16_t len, u8_t flags)
  * @brief Queue a message; count it as sent or dropped.
  *
  * @param[in] p_topic   The topic.
- * @param[in] p_payload The text.
+ * @param[in] p_payload The bytes.
+ * @param[in] length    How many (0: the frame did not fit; dropped).
  * @param[in] qos       0 or 1.
  * @param[in] retain    1 to keep it on the broker for new subscribers.
  */
 static void
-publish(char const * p_topic, char const * p_payload, u8_t qos, u8_t retain)
+publish(char const * p_topic, uint8_t const * p_payload, uint32_t length,
+        u8_t qos, u8_t retain)
 {
-    if (!publish_ok(p_topic, p_payload, qos, retain))
+    if (!publish_ok(p_topic, p_payload, length, qos, retain))
     {
         g_dropped++; // Not connected, or the send buffer is full.
     }
@@ -559,21 +593,24 @@ publish(char const * p_topic, char const * p_payload, u8_t qos, u8_t retain)
  * @brief Queue one message, and say whether it went.
  *
  * @param[in] p_topic   The full topic.
- * @param[in] p_payload The text.
+ * @param[in] p_payload The bytes.
+ * @param[in] length    How many (0: nothing to send; counts as dropped).
  * @param[in] qos       0 or 1.
  * @param[in] retain    1 to have the broker keep it for new subscribers.
  *
  * @return True if queued; false if not connected or the buffer is full.
  */
 static bool
-publish_ok(char const * p_topic, char const * p_payload, u8_t qos, u8_t retain)
+publish_ok(char const * p_topic, uint8_t const * p_payload, uint32_t length,
+           u8_t qos, u8_t retain)
 {
     err_t err = ERR_CONN;
 
-    if (((NULL) != gp_client) && (MQ_CONNECTED == g_state))
+    if ((((NULL) != gp_client) && (MQ_CONNECTED == g_mq.state)) &&
+        (length > 0u))
     {
-        err = mqtt_publish(gp_client, p_topic, p_payload,
-                           (u16_t)strlen(p_payload), qos, retain, NULL, NULL);
+        err = mqtt_publish(gp_client, p_topic, p_payload, (u16_t)length, qos,
+                           retain, NULL, NULL);
     }
     if (ERR_OK == err)
     {
@@ -585,17 +622,16 @@ publish_ok(char const * p_topic, char const * p_payload, u8_t qos, u8_t retain)
 
 /*!
  * @brief Send the car's new log lines (as the web page's serial monitor
- *        shows them), a few per call: {"c":"state","m":"State: ..."}.
- *        Lines logged while offline go out once connected, as far back as
- *        the log keeps (LOG_LINES); a full send buffer just waits.
+ *        shows them), a few per call, as log frames: the category in 3
+ *        bits, then the line's text. Lines logged while offline go out
+ *        once connected, as far back as the log keeps (LOG_LINES); a full
+ *        send buffer just waits.
  */
 static void
 publish_log(void)
 {
-    static char const * const k_cats[] = {"system", "obstacle", "line", "state",
-                                          "servo"};
-    uint32_t                  next     = log_next_seq();
-    uint32_t                  sent     = 0u;
+    uint32_t next = log_next_seq();
+    uint32_t sent = 0u;
 
     if ((next - g_log_seq) > LOG_LINES)
     {
@@ -604,20 +640,16 @@ publish_log(void)
 
     while ((g_log_seq != next) && (sent < LOG_PER_TASK))
     {
-        char         payload[PAYLOAD_BYTES];
+        uint8_t      payload[PAYLOAD_BYTES];
         char const * p_line = "";
         log_cat_t    cat    = LOG_CAT_SYSTEM;
-        size_t       length = 0u;
+        uint32_t     length = 0u;
 
         if (log_get(g_log_seq, &p_line, &cat))
         {
-            length += (size_t)snprintf(
-                payload, PAYLOAD_BYTES, "{\"c\":\"%s\",\"m\":\"",
-                k_cats[(((uint32_t)cat) < 5u) ? (uint32_t)cat : 0u]);
-            length +=
-                json_escape(payload + length, PAYLOAD_BYTES - length, p_line);
-            (void)snprintf(payload + length, PAYLOAD_BYTES - length, "\"}");
-            if (!publish_ok(g_topic_log, payload, 0u, 0u))
+            length =
+                mqtt_frame_log((uint32_t)cat, p_line, payload, sizeof(payload));
+            if (!publish_ok(g_topic_log, payload, length, 0u, 0u))
             {
                 break; // Buffer full: try again next time.
             }
@@ -628,191 +660,226 @@ publish_log(void)
 } /* publish_log() */
 
 /*!
- * @brief Publish the live readings.
+ * @brief Publish the live readings as one telemetry frame (24 bytes).
  *
  * @param[in] now_msec The time now.
  */
 static void
 publish_telemetry(uint32_t now_msec)
 {
-    char              payload[PAYLOAD_BYTES];
-    line_state_t      line    = line_sensor_read();
-    uint32_t          range   = ultrasonic_range_mm();
-    vehicle_state_t   state   = vehicle_state();
-    barcode_command_t pending = vehicle_pending_turn();
+    uint8_t         frame[MQTT_FRAME_MAX_BYTES];
+    mqtt_tele_t     tele;
+    line_state_t    line  = line_sensor_read();
+    uint32_t        range = ultrasonic_range_mm();
+    vehicle_state_t state = vehicle_state();
+    int32_t         accel = imu_accel_mg();
+    int32_t         servo = servo_angle();
 
-    char range_text[16] = "null";
-    if ((range != ULTRASONIC_NO_RANGE) && (range > 0u))
+    (void)memset(&tele, 0, sizeof(tele));
+    tele.t_msec = now_msec;
+    tele.state  = (uint8_t)state;
+    tele.bypass_phase =
+        (uint8_t)((VEHICLE_BYPASS == state) ? bypass_phase_id() : 0u);
+    tele.motor_left   = (int8_t)motor_left_speed(); // -100..100.
+    tele.motor_right  = (int8_t)motor_right_speed();
+    tele.enc_left     = (uint16_t)encoder_count(PIN_ENC_LEFT_A); // Low 16.
+    tele.enc_right    = (uint16_t)encoder_count(PIN_ENC_RIGHT_A);
+    tele.b_line_left  = line.b_left_black;
+    tele.b_line_right = line.b_right_black;
+    tele.b_barcode    = barcode_is_black();
+    tele.range_mm     = (uint16_t)MQTT_FRAME_NO_RANGE;
+    if ((ULTRASONIC_NO_RANGE != range) && (range > 0u))
     {
-        (void)snprintf(range_text, sizeof(range_text), "%lu",
-                       (unsigned long)range);
+        tele.range_mm =
+            (uint16_t)((range > RANGE_MAX_MM) ? RANGE_MAX_MM : range);
     }
+    tele.pitch_x10    = to_int16(imu_pitch_x10());
+    tele.roll_x10     = to_int16(imu_roll_x10());
+    tele.servo_deg    = (uint8_t)((servo < 0) ? 0 : servo); // 0..180.
+    tele.hump_x10     = to_int16(hump_height_x10());
+    tele.accel_mg     = (uint16_t)((accel < 0) ? 0 : to_int16(accel));
+    tele.lift_mm_s    = to_int16(imu_lift_speed_mm_s());
+    tele.pending_turn = (uint8_t)vehicle_pending_turn();
+    tele.faults       = (uint8_t)fault_get();
 
-    (void)snprintf(
-        payload, PAYLOAD_BYTES,
-        "{\"t\":%" PRIu32 ",\"st\":\"%s\",\"bp\":\"%s\","
-        "\"ml\":%" PRId32 ",\"mr\":%" PRId32 ","
-        "\"el\":%" PRIu32 ",\"er\":%" PRIu32 ","
-        "\"l\":%d,\"r\":%d,\"b\":%d,\"rg\":%s,"
-        "\"pt\":%" PRId32 ",\"rl\":%" PRId32 ","
-        "\"sv\":%" PRId32 ",\"hh\":%" PRId32 ".%" PRId32 ","
-        "\"am\":%" PRId32 ",\"vz\":%" PRId32 ",\"pend\":\"%s\"}",
-        now_msec, vehicle_state_name(state),
-        ((VEHICLE_BYPASS == state) ? bypass_phase_name() : ""),
-        motor_left_speed(), motor_right_speed(), encoder_count(PIN_ENC_LEFT_A),
-        encoder_count(PIN_ENC_RIGHT_A), (line.b_left_black ? 1 : 0),
-        (line.b_right_black ? 1 : 0), (barcode_is_black() ? 1 : 0), range_text,
-        imu_pitch_x10(), imu_roll_x10(), (int32_t)servo_angle(),
-        ((hump_height_x10()) / 10), ((hump_height_x10()) % 10), imu_accel_mg(),
-        imu_lift_speed_mm_s(),
-        ((BARCODE_CMD_NONE == pending) ? "" : barcode_command_name(pending)));
-    publish(g_topic_tele, payload, 0u, 0u);
+    publish(g_topic_tele, frame,
+            mqtt_frame_telemetry(&tele, frame, sizeof(frame)), 0u, 0u);
 } /* publish_telemetry() */
 
 /*!
- * @brief Publish the heartbeat: the car is alive, and how it is doing.
+ * @brief Publish the heartbeat (28 bytes): the car is alive, and how it is
+ *        doing.
  *
  * @param[in] now_msec The time now.
  */
 static void
 publish_heartbeat(uint32_t now_msec)
 {
-    char   payload[PAYLOAD_BYTES];
-    size_t length = 0u;
+    uint8_t          frame[MQTT_FRAME_MAX_BYTES];
+    mqtt_heartbeat_t beat;
+    web_link_t       link;
 
+    web_link_get(&link);
     g_hb_seq++;
-    length += (size_t)snprintf(payload, PAYLOAD_BYTES,
-                               "{\"seq\":%" PRIu32 ",\"up\":%" PRIu32 ","
-                               "\"vb\":%" PRIu32 ",\"sent\":%" PRIu32 ","
-                               "\"drop\":%" PRIu32 ",\"conn\":%" PRIu32
-                               ",\"wifi\":\"",
-                               g_hb_seq, (now_msec / 1000u), power_vsys_mv(),
-                               g_sent, g_dropped, g_connects);
-    length +=
-        json_escape(payload + length, PAYLOAD_BYTES - length, web_wifi_text());
-    length += (size_t)snprintf(payload + length, PAYLOAD_BYTES - length,
-                               "\",\"rr\":\"");
-    length += json_escape(payload + length, PAYLOAD_BYTES - length,
-                          web_restart_reason());
-    (void)snprintf(payload + length, PAYLOAD_BYTES - length, "\"}");
-    publish(g_topic_hb, payload, 0u, 0u);
+
+    (void)memset(&beat, 0, sizeof(beat));
+    beat.seq       = (uint16_t)g_hb_seq; // Low 16 bits: wraps.
+    beat.up_s      = now_msec / 1000u;
+    beat.vsys_mv   = (uint16_t)power_vsys_mv();
+    beat.sent      = (uint16_t)g_sent;
+    beat.dropped   = (uint16_t)g_dropped;
+    beat.connects  = (uint8_t)((g_connects > BYTE_MAX) ? BYTE_MAX : g_connects);
+    beat.wifi_mode = link.mode;
+    beat.hotspot   = link.hotspot;
+    beat.ip        = link.ip;
+    beat.rssi_dbm =
+        (int8_t)((link.rssi_dbm < INT8_MIN) ? INT8_MIN : link.rssi_dbm);
+    beat.b_ping_ok = link.b_ping_ok;
+    beat.ping_msec =
+        (uint16_t)((link.ping_msec > PING_MAX_MSEC) ? PING_MAX_MSEC
+                                                    : link.ping_msec);
+    beat.ping_age_s =
+        (uint8_t)((link.ping_age_s > BYTE_MAX) ? BYTE_MAX : link.ping_age_s);
+    beat.link_drops =
+        (uint8_t)((link.drops > BYTE_MAX) ? BYTE_MAX : link.drops);
+    beat.restart     = (uint8_t)web_restart_code();
+    beat.faults      = (uint8_t)fault_get();
+    beat.loop_max_us = (uint16_t)fault_loop_max_usec_take();
+    beat.overruns    = (uint16_t)fault_loop_overruns();
+
+    publish(g_topic_hb, frame,
+            mqtt_frame_heartbeat(&beat, frame, sizeof(frame)), 0u, 0u);
 } /* publish_heartbeat() */
 
 /*!
- * @brief Publish an obstacle scan once it finishes, and a hump once it is
- *        cleared (its height, and the highest of the run so far).
+ * @brief Publish an obstacle scan once it finishes (14 bytes), and a hump
+ *        once it is cleared (12 bytes: its height, and the highest of the
+ *        run so far).
  */
 static void
 publish_events(void)
 {
-    char                       payload[PAYLOAD_BYTES];
+    uint8_t                    frame[MQTT_FRAME_MAX_BYTES];
     obstacle_profile_t const * p_scan = obstacle_profile();
     uint32_t                   humps  = hump_count();
 
-    if ((p_scan->finished) && (!gb_scan_done))
+    if ((p_scan->finished) && (!g_mq.b_scan_done))
     {
-        char front[16]  = "null";
-        char left[16]   = "null";
-        char right[16]  = "null";
-        char middle[16] = "null";
-        char width[16]  = "null";
-        bool valid      = (!p_scan->timed_out) && (!p_scan->cancelled);
-        if (valid && (p_scan->centre_seen))
+        mqtt_obstacle_t scan;
+        bool            b_valid = (!p_scan->timed_out) && (!p_scan->cancelled);
+        bool            b_mid =
+            (b_valid && (p_scan->edges_confirmed)) && (p_scan->centre_seen);
+
+        (void)memset(&scan, 0, sizeof(scan));
+        scan.t_msec   = now_msec_get();
+        scan.front_mm = (uint16_t)MQTT_FRAME_NO_RANGE;
+        if (b_valid && (p_scan->centre_seen))
         {
-            (void)snprintf(front, sizeof(front), "%" PRIu32, p_scan->front_mm);
+            scan.front_mm = (uint16_t)((p_scan->front_mm > RANGE_MAX_MM)
+                                           ? RANGE_MAX_MM
+                                           : p_scan->front_mm);
         }
-        if (valid && ((p_scan->left_status) == OBSTACLE_EDGE_CONFIRMED))
+        scan.left_mm =
+            mm_field(p_scan->left_mm, b_valid && (OBSTACLE_EDGE_CONFIRMED ==
+                                                  p_scan->left_status));
+        scan.right_mm =
+            mm_field(p_scan->right_mm, b_valid && (OBSTACLE_EDGE_CONFIRMED ==
+                                                   p_scan->right_status));
+        scan.mid_mm   = mm_field(p_scan->middle_x_mm, b_mid);
+        scan.width_mm = (uint16_t)MQTT_FRAME_NO_RANGE;
+        if (b_mid)
         {
-            (void)snprintf(left, sizeof(left), "%" PRId32, p_scan->left_mm);
+            scan.width_mm = (uint16_t)((p_scan->width_mm > RANGE_MAX_MM)
+                                           ? RANGE_MAX_MM
+                                           : p_scan->width_mm);
         }
-        if (valid && ((p_scan->right_status) == OBSTACLE_EDGE_CONFIRMED))
-        {
-            (void)snprintf(right, sizeof(right), "%" PRId32, p_scan->right_mm);
-        }
-        if ((valid && (p_scan->edges_confirmed)) && (p_scan->centre_seen))
-        {
-            (void)snprintf(middle, sizeof(middle), "%" PRId32,
-                           p_scan->middle_x_mm);
-            (void)snprintf(width, sizeof(width), "%" PRIu32, p_scan->width_mm);
-        }
-        (void)snprintf(
-            payload, PAYLOAD_BYTES,
-            "{\"front\":%s,\"left\":%s,\"right\":%s,\"mid\":%s,"
-            "\"width\":%s,\"width_source\":\"%s\",\"lst\":\"%s\","
-            "\"rst\":\"%s\",\"t\":%" PRIu32 "}",
-            front, left, right, middle, width,
-            valid && (p_scan->edges_confirmed) ? "geometric" : "unavailable",
-            obstacle_edge_status_name(p_scan->left_status),
-            obstacle_edge_status_name(p_scan->right_status), now_msec_get());
-        publish(g_topic_obstacle, payload, 1u, 0u);
+        scan.b_geometric  = b_valid && (p_scan->edges_confirmed);
+        scan.left_status  = (uint8_t)p_scan->left_status;
+        scan.right_status = (uint8_t)p_scan->right_status;
+        publish(g_topic_obstacle, frame,
+                mqtt_frame_obstacle(&scan, frame, sizeof(frame)), 1u, 0u);
     }
-    gb_scan_done = p_scan->finished;
+    g_mq.b_scan_done = p_scan->finished;
 
     // Only a cleared hump counts (not one abandoned as BLOCKED or STOP).
     // A new run sets the count back to 0: nothing to publish then.
     if (humps > g_humps_seen)
     {
-        (void)snprintf(payload, PAYLOAD_BYTES,
-                       "{\"height_mm\":%" PRId32 ".%" PRId32 ","
-                       "\"peak_tilt_x10\":%" PRId32 ","
-                       "\"run_height_mm\":%" PRId32 ".%" PRId32 ","
-                       "\"run_peak_tilt_x10\":%" PRId32 ","
-                       "\"n\":%" PRIu32 ",\"t\":%" PRIu32 "}",
-                       ((hump_last_height_x10()) / 10),
-                       ((hump_last_height_x10()) % 10), hump_last_tilt_x10(),
-                       ((hump_run_height_x10()) / 10),
-                       ((hump_run_height_x10()) % 10), hump_run_tilt_x10(),
-                       humps, now_msec_get());
-        publish(g_topic_hump, payload, 1u, 1u);
+        mqtt_hump_t hump;
+
+        hump.t_msec         = now_msec_get();
+        hump.height_x10     = to_int16(hump_last_height_x10());
+        hump.tilt_x10       = to_int16(hump_last_tilt_x10());
+        hump.run_height_x10 = to_int16(hump_run_height_x10());
+        hump.run_tilt_x10   = to_int16(hump_run_tilt_x10());
+        hump.count          = (uint8_t)((humps > BYTE_MAX) ? BYTE_MAX : humps);
+        publish(g_topic_hump, frame,
+                mqtt_frame_hump(&hump, frame, sizeof(frame)), 1u, 1u);
     }
     g_humps_seen = humps;
 } /* publish_events() */
 
 /*!
- * @brief Copy text into a JSON string body, escaping quotes, backslashes
- *        and control characters.
+ * @brief Give a signed mm value for a 13-bit field, or "none".
  *
- * @param[out] p_out    Where to write (no quotes added).
- * @param[in]  capacity Room there, including the terminator.
- * @param[in]  p_text   The text.
+ * @param[in] value_mm  The distance.
+ * @param[in] b_present False if there is no reading.
  *
- * @return The number of characters written.
+ * @return The value held within -4095..4095, or MQTT_FRAME_NO_MM.
  */
-static size_t
-json_escape(char * p_out, size_t capacity, char const * p_text)
+static int16_t
+mm_field(int32_t value_mm, bool b_present)
 {
-    size_t length = 0u;
+    int32_t held = value_mm;
 
-    for (size_t idx = 0u; ('\0' != (p_text[idx])) && ((length + 2u) < capacity);
-         idx++)
+    if (!b_present)
     {
-        char value_ch = p_text[idx];
-
-        if (('"' == value_ch) || ('\\' == value_ch))
-        {
-            p_out[length] = '\\';
-            length++;
-            p_out[length] = value_ch;
-            length++;
-        }
-        else if (((unsigned char)value_ch) < 0x20u)
-        {
-            p_out[length] = ' ';
-            length++;
-        }
-        else
-        {
-            p_out[length] = value_ch;
-            length++;
-        }
+        return ((int16_t)MQTT_FRAME_NO_MM);
     }
-    if (capacity > 0u)
+    if (held > MM_MAX)
     {
-        p_out[length] = '\0';
+        held = MM_MAX;
+    }
+    else if (held < (-MM_MAX))
+    {
+        held = -MM_MAX;
+    }
+    else
+    {
+        // In range.
     }
 
-    return (length);
-} /* json_escape() */
+    return ((int16_t)held);
+} /* mm_field() */
+
+/*!
+ * @brief Hold a value within int16_t before it is packed (the frame field
+ *        then holds it within its own, smaller, range).
+ *
+ * @param[in] value The value.
+ *
+ * @return The value, -32768..32767.
+ */
+static int16_t
+to_int16(int32_t value)
+{
+    int32_t held = value;
+
+    if (held > INT16_MAX)
+    {
+        held = INT16_MAX;
+    }
+    else if (held < INT16_MIN)
+    {
+        held = INT16_MIN;
+    }
+    else
+    {
+        // In range.
+    }
+
+    return ((int16_t)held);
+} /* to_int16() */
 
 /*!
  * @brief Refresh the status text for the web page.
@@ -834,14 +901,14 @@ status_update(void)
         (void)snprintf(g_status, STATUS_BYTES, "Waiting for Wi-Fi (%s)",
                        g_host);
     }
-    else if (MQ_CONNECTED == g_state)
+    else if (MQ_CONNECTED == g_mq.state)
     {
         (void)snprintf(g_status, STATUS_BYTES,
                        "Connected to %s (%" PRIu32 " sent, %" PRIu32
                        " dropped)",
                        g_host, g_sent, g_dropped);
     }
-    else if (MQ_RETRY == g_state)
+    else if (MQ_RETRY == g_mq.state)
     {
         (void)snprintf(g_status, STATUS_BYTES, "%s: %s; retrying", g_host,
                        gp_why);

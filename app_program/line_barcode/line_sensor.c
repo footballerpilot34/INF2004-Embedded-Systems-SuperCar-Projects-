@@ -30,15 +30,21 @@
 
 #define PULL_SETTLE_USEC 50u
 
-static bool gb_left_black_high  = LINE_BLACK_IS_HIGH;
-static bool gb_right_black_high = LINE_BLACK_IS_HIGH;
+// Flags, packed into bit-fields: one bit each (change requirement 1).
+// Only the main loop reads or writes them, so no locking is needed.
+static struct
+{
+    bool b_left_black_high : 1;  // Left DOUT is high over black.
+    bool b_right_black_high : 1; // Right DOUT is high over black.
+    // Crossroad detection, from the side sensor.
+    bool b_jn_armed : 1;   // White seen: a mark can start.
+    bool b_jn_on_mark : 1; // Timing a black mark.
+    bool b_jn_white : 1;   // On white (in a mark: a gap).
+} g_ls = {.b_left_black_high  = LINE_BLACK_IS_HIGH,
+          .b_right_black_high = LINE_BLACK_IS_HIGH};
 
-// Crossroad detection, from the side sensor.
-static bool     gb_jn_armed     = false; // White seen: a mark can start.
-static bool     gb_jn_on_mark   = false; // Timing a black mark.
-static bool     gb_jn_white     = false; // On white (in a mark: a gap).
-static uint32_t g_jn_mark_msec  = 0u;    // The mark began at.
-static uint32_t g_jn_white_msec = 0u;    // The white began at.
+static uint32_t g_jn_mark_msec  = 0u; // The mark began at.
+static uint32_t g_jn_white_msec = 0u; // The white began at.
 
 /*!
  * @brief Set up both line sensor pins as plain inputs.
@@ -70,8 +76,8 @@ line_sensor_read(void)
     line_raw_t   raw = line_sensor_raw();
     line_state_t state;
 
-    state.b_left_black  = (gb_left_black_high == (raw.b_left_high));
-    state.b_right_black = (gb_right_black_high == (raw.b_right_high));
+    state.b_left_black  = (g_ls.b_left_black_high == (raw.b_left_high));
+    state.b_right_black = (g_ls.b_right_black_high == (raw.b_right_high));
 
     return (state);
 } /* line_sensor_read() */
@@ -135,11 +141,11 @@ line_sensor_set_black_level(bool b_left, bool b_black_is_high)
 {
     if (b_left)
     {
-        gb_left_black_high = b_black_is_high;
+        g_ls.b_left_black_high = b_black_is_high;
     }
     else
     {
-        gb_right_black_high = b_black_is_high;
+        g_ls.b_right_black_high = b_black_is_high;
     }
 } /* line_sensor_set_black_level() */
 
@@ -153,7 +159,7 @@ line_sensor_set_black_level(bool b_left, bool b_black_is_high)
 bool
 line_sensor_black_level(bool b_left)
 {
-    return (b_left ? gb_left_black_high : gb_right_black_high);
+    return (b_left ? g_ls.b_left_black_high : g_ls.b_right_black_high);
 } /* line_sensor_black_level() */
 
 /*!
@@ -187,21 +193,21 @@ line_junction_detect(bool b_side_black, bool b_enabled, uint32_t now_msec,
 
     if (!b_enabled)
     {
-        gb_jn_armed   = false; // Wait for white before the next mark.
-        gb_jn_on_mark = false;
-        gb_jn_white   = false;
+        g_ls.b_jn_armed   = false; // Wait for white before the next mark.
+        g_ls.b_jn_on_mark = false;
+        g_ls.b_jn_white   = false;
     }
     else if (!b_side_black)
     {
-        if (!gb_jn_white)
+        if (!g_ls.b_jn_white)
         {
-            gb_jn_white     = true;
+            g_ls.b_jn_white = true;
             g_jn_white_msec = now_msec;
         }
 
         if ((now_msec - g_jn_white_msec) >= LINE_JUNCTION_GAP_MSEC)
         {
-            if (gb_jn_on_mark)
+            if (g_ls.b_jn_on_mark)
             {
                 // Real white: the mark ended when this white began.
                 uint32_t length = g_jn_white_msec - g_jn_mark_msec;
@@ -221,18 +227,18 @@ line_junction_detect(bool b_side_black, bool b_enabled, uint32_t now_msec,
                 }
             }
 
-            gb_jn_armed   = true;
-            gb_jn_on_mark = false;
+            g_ls.b_jn_armed   = true;
+            g_ls.b_jn_on_mark = false;
         }
     }
     else
     {
-        gb_jn_white = false;
+        g_ls.b_jn_white = false;
 
-        if ((!gb_jn_on_mark) && gb_jn_armed)
+        if ((!g_ls.b_jn_on_mark) && g_ls.b_jn_armed)
         {
-            gb_jn_on_mark  = true;
-            g_jn_mark_msec = now_msec;
+            g_ls.b_jn_on_mark = true;
+            g_jn_mark_msec    = now_msec;
         }
     }
 

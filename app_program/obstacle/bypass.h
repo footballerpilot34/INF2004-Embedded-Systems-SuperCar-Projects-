@@ -26,6 +26,7 @@ bool            bypass_test_begin(
 bool         bypass_test_uses_line(void);
 void         bypass_cancel(void);
 char const * bypass_phase_name(void);
+uint32_t     bypass_phase_id(void);
 
 #endif /* BYPASS_H */
 

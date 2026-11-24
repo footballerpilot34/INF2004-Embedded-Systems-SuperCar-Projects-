@@ -44,17 +44,18 @@
 #define NUM_ENCODER_PINS 4u                   // The first 4 watched pins.
 
 // Pins watched for edges: the 4 encoder pins first, then (pin finder)
-// every GPIO not used by anything else on the car.
-static uint32_t const g_watch_pins[ENCODER_NUM_WATCH] = {PIN_ENC_LEFT_A,
-                                                         PIN_ENC_LEFT_B,
-                                                         PIN_ENC_RIGHT_A,
-                                                         PIN_ENC_RIGHT_B,
-                                                         5u,
-                                                         19u,
-                                                         13u,
-                                                         14u,
-                                                         15u,
-                                                         18u};
+// every GPIO not used by anything else on the car. GPIO numbers are
+// 0..29, so 8 bits each.
+static uint8_t const g_watch_pins[ENCODER_NUM_WATCH] = {PIN_ENC_LEFT_A,
+                                                        PIN_ENC_LEFT_B,
+                                                        PIN_ENC_RIGHT_A,
+                                                        PIN_ENC_RIGHT_B,
+                                                        5u,
+                                                        19u,
+                                                        13u,
+                                                        14u,
+                                                        15u,
+                                                        18u};
 
 // Written by the GPIO interrupt only; read anywhere.
 static volatile uint32_t g_count[NUM_WHEELS]     = {0u, 0u};
