@@ -7,6 +7,8 @@
 #include "servo.h"
 #include "ultrasonic.h"
 
+#define scan_debug_log(...) do { if (OBSTACLE_SCAN_DEBUG_LOG) { log_obstacle(__VA_ARGS__); } } while (0)
+
 #define SCAN_CAPACITY 64u
 #define RAD_PER_DEG 0.017453292519943295f
 
@@ -334,8 +336,8 @@ obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
     queue_angle(0);
     queue_angle(-OBSTACLE_SCAN_FINE_DEG);
 
-    log_obstacle("SCAN: centre-outward search, left then right.");
-    log_obstacle("SCAN start: front=%lu mm",
+    scan_debug_log("SCAN: centre-outward search, left then right.");
+    scan_debug_log("SCAN start: front=%lu mm",
                  (unsigned long)forward_mm);
     aim();
 }
@@ -373,11 +375,11 @@ static void store_point(void)
     }
     g_points[pos] = p;
     ++g_count;
-    log_obstacle("SCAN echoes: angle=%ld valid=%lu/3 min=%ld max=%ld mm",
+    scan_debug_log("SCAN echoes: angle=%ld valid=%lu/3 min=%ld max=%ld mm",
         (long)p.angle_deg, (unsigned long)g_valid,
         g_valid ? (long)g_values[0] : -1L,
         g_valid ? (long)g_values[g_valid - 1u] : -1L);
-    log_obstacle("SCAN point: t=%lu ms angle=%ld range=%ld mm return=%u",
+    scan_debug_log("SCAN point: t=%lu ms angle=%ld range=%ld mm return=%u",
         (unsigned long)to_ms_since_boot(get_absolute_time()),
         (long)p.angle_deg,
         has_range(&p) ? (long)p.range_mm : -1L,
@@ -393,60 +395,64 @@ static void finish(bool timeout)
     g_active = false;
     servo_set_angle(SERVO_CENTER_DEG);
     if (g_profile.left_bounded) {
-        log_obstacle("SCAN left edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
+        scan_debug_log("SCAN left edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
             (long)g_profile.left_mm, (unsigned long)g_profile.left_edge.forward_mm,
             (unsigned long)g_profile.left_edge.distance_mm,
             (long)g_profile.left_edge.near_angle_deg, (long)g_profile.left_edge.far_angle_deg,
             obstacle_edge_status_name(g_profile.left_status));
     } else {
-        log_obstacle("SCAN left edge UNKNOWN (%s); observed foreground reaches %ld mm.",
+        scan_debug_log("SCAN left edge UNKNOWN (%s); observed foreground reaches %ld mm.",
             obstacle_edge_status_name(g_profile.left_status), (long)g_profile.left_observed_mm);
     }
     if (g_profile.right_bounded) {
-        log_obstacle("SCAN right edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
+        scan_debug_log("SCAN right edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
             (long)g_profile.right_mm, (unsigned long)g_profile.right_edge.forward_mm,
             (unsigned long)g_profile.right_edge.distance_mm,
             (long)g_profile.right_edge.near_angle_deg, (long)g_profile.right_edge.far_angle_deg,
             obstacle_edge_status_name(g_profile.right_status));
     } else {
-        log_obstacle("SCAN right edge UNKNOWN (%s); observed foreground reaches %ld mm.",
+        scan_debug_log("SCAN right edge UNKNOWN (%s); observed foreground reaches %ld mm.",
             obstacle_edge_status_name(g_profile.right_status), (long)g_profile.right_observed_mm);
     }
     if (g_profile.left_bounded && g_profile.right_bounded) {
-        log_obstacle("SCAN %swidth=%lu mm; sampling interval=%lu..%lu mm",
+        scan_debug_log("SCAN %swidth=%lu mm; sampling interval=%lu..%lu mm",
             g_profile.edges_confirmed ? "" : "apparent ",
             (unsigned long)g_profile.width_mm, (unsigned long)g_profile.width_min_mm,
             (unsigned long)g_profile.width_max_mm);
-        log_obstacle("SCAN middle: x=%ld y=%lu range=%lu mm; centre ray=%lu mm",
+        scan_debug_log("SCAN middle: x=%ld y=%lu range=%lu mm; centre ray=%lu mm",
             (long)g_profile.middle_x_mm, (unsigned long)g_profile.middle_y_mm,
             (unsigned long)g_profile.middle_distance_mm, (unsigned long)g_profile.front_mm);
     } else {
-        log_obstacle("SCAN width UNKNOWN: one or both edges are outside reliable observations.");
+        scan_debug_log("SCAN width UNKNOWN: one or both edges are outside reliable observations.");
     }
     if (g_profile.calibrated_width_valid && !timeout) {
-        log_obstacle("SCAN calibrated width=%lu mm", (unsigned long)g_profile.calibrated_width_mm);
+        scan_debug_log("SCAN calibrated width=%lu mm", (unsigned long)g_profile.calibrated_width_mm);
     } else {
         g_profile.calibrated_width_valid = false;
-        log_obstacle("SCAN calibrated width=UNKNOWN (needs usable physical calibration).");
+        scan_debug_log("SCAN calibrated width=UNKNOWN (needs usable physical calibration).");
     }
     if (timeout) {
         g_profile.bypass.available = false;
-        log_obstacle("SCAN timed out; profile is incomplete.");
+        scan_debug_log("SCAN timed out; profile is incomplete.");
     }
     obstacle_width_estimate_update(&g_profile);
-    log_obstacle("SCAN raw=%lu calibrated=%lu corrected=%lu mm fallback=%u front=%lu mm",
+    scan_debug_log("SCAN raw=%lu calibrated=%lu corrected=%lu mm fallback=%u front=%lu mm",
         (unsigned long)g_profile.width_mm,(unsigned long)g_profile.calibrated_width_mm,
         (unsigned long)g_profile.corrected_width_mm,g_profile.width_fallback,
         (unsigned long)g_profile.front_mm);
+    log_obstacle("SCAN obstacle distance=%lu mm; estimated obstacle width=%lu mm (%s).",
+        (unsigned long)g_profile.front_mm,
+        (unsigned long)g_profile.corrected_width_mm,
+        g_profile.width_fallback ? "nominal estimate" : "measured estimate");
     obstacle_bypass_candidate_t const * path = &g_profile.bypass;
     if (path->available) {
-        log_obstacle("SCAN bypass candidate: left x=%ld, right x=%ld, preferred x=%ld mm.",
+        scan_debug_log("SCAN bypass candidate: left x=%ld, right x=%ld, preferred x=%ld mm.",
             (long)path->left_x_mm, (long)path->right_x_mm, (long)path->preferred_x_mm);
-        log_obstacle("SCAN alongside y=%lu mm; return needs measured rear y + %lu mm.",
+        scan_debug_log("SCAN alongside y=%lu mm; return needs measured rear y + %lu mm.",
             (unsigned long)path->alongside_y_mm, (unsigned long)path->turn_clearance_mm);
-        log_obstacle("SCAN corridor unverified; vehicle controller decides motion.");
+        scan_debug_log("SCAN corridor unverified; vehicle controller decides motion.");
     } else {
-        log_obstacle("SCAN no verified corridor; corrected width available to vehicle controller.");
+        scan_debug_log("SCAN no verified corridor; corrected width available to vehicle controller.");
     }
 }
 
@@ -478,7 +484,7 @@ obstacle_scan_task(uint32_t now_msec)
         g_searching_right = true;
         g_scan_direction = 1;
         queue_angle(OBSTACLE_SCAN_FINE_DEG);
-        log_obstacle("SCAN: left search complete; searching right.");
+        scan_debug_log("SCAN: left search complete; searching right.");
     } else if (side_finished && g_searching_right) {
         finish(false);
         return;

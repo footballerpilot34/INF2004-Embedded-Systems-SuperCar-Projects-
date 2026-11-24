@@ -311,6 +311,10 @@
 #ifndef SENSOR_TO_BUMPER_MM
 #define SENSOR_TO_BUMPER_MM         60      // User measured 6 cm behind bumper.
 #endif
+// Enable detailed ultrasonic scan logs without changing scan behaviour.
+#ifndef OBSTACLE_SCAN_DEBUG_LOG
+#define OBSTACLE_SCAN_DEBUG_LOG false
+#endif
 #define OBSTACLE_SCAN_COARSE_DEG    10
 #define OBSTACLE_SCAN_FINE_DEG      2
 #define OBSTACLE_SCAN_SAMPLES       3u
@@ -520,9 +524,17 @@
 // Driving over it, the drive-wheel case is what shows: pitch -2..-5 and
 // roll +4..+11 for 2-3 s. Still on the flat: within 0.4 deg. HUMP ignores
 // the ultrasonic, so a false hump is unsafe: keep clear of the noise.
-#define HUMP_ENTER_PITCH_X10        30      // 3.0 deg tilt: on a hump.
+// Entering HUMP (user, 2026-11-24): the HEIGHT the car is on (hump.c,
+// telemetry "hh") at least HUMP_ENTER_HEIGHT_X10 for HUMP_ENTER_MSEC,
+// whichever way it tips: 1.0 mm = 0.46 deg roll (one wheel up) or 0.67
+// deg pitch (caster up). Was 3.0 deg total tilt (one wheel: 6.5 mm).
+// CAUTION: still on the flat the tilt is within 0.4 deg (~0.9 mm of
+// roll), and HUMP ignores the ultrasonic. False humps: raise it.
+#define HUMP_ENTER_HEIGHT_X10       10      // 1.0 mm: on a hump.
+#define HUMP_ENTER_PITCH_X10        30      // 3.0 deg: still tilting (peak
+                                            // and leaving use tilt).
 #define HUMP_LEVEL_PITCH_X10        15      // Within 1.5 deg: level again.
-#define HUMP_ENTER_MSEC             300u    // Tilted this long: a hump. A
+#define HUMP_ENTER_MSEC             300u    // That high this long: a hump. A
                                             // jolt tilts the reading for
                                             // less; the hump lasts 2-3 s.
 // Drive axle to caster ball contact (measured 2026-11-19). The caster

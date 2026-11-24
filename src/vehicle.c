@@ -1127,10 +1127,11 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 
 
 /*!
- * @brief Decide whether the car is on a hump: tilted (any way) by
- *        HUMP_ENTER_PITCH for HUMP_ENTER_MSEC without a break (a jolt
- *        tilts the reading for less), or stalled on a slope: wheels still
- *        for HUMP_STALL_MSEC while tilted by HUMP_STALL_TILT.
+ * @brief Decide whether the car is on a hump: raised (any way) by at
+ *        least HUMP_ENTER_HEIGHT (hump_height_x10()) for HUMP_ENTER_MSEC
+ *        without a break (a jolt lifts the reading for less), or stalled
+ *        on a slope: wheels still for HUMP_STALL_MSEC while tilted by
+ *        HUMP_STALL_TILT.
  *
  * @param[in] now_msec The current time.
  * @param[in] tilt_x10 The total tilt, in tenths of a degree.
@@ -1156,7 +1157,7 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
         log_tenths("  roll", imu_roll_x10());
     }
     else if (!gb_feat_hump || b_settling ||
-             (tilt_x10 < HUMP_ENTER_PITCH_X10))
+             (hump_height_x10() < HUMP_ENTER_HEIGHT_X10))
     {
         gb_tilting = false;
     }
@@ -1168,8 +1169,9 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
     else if ((now_msec - g_tilt_msec) >= HUMP_ENTER_MSEC)
     {
         b_held = true;
-        log_obstacle("Tilted for %" PRIu32 " ms -> HUMP, climbing.",
-                     (now_msec - g_tilt_msec));
+        log_obstacle("Raised %" PRId32 ".%" PRId32 " mm for %" PRIu32
+                     " ms -> HUMP, climbing.", (hump_height_x10() / 10),
+                     (hump_height_x10() % 10), (now_msec - g_tilt_msec));
         log_tenths("  pitch", imu_pitch_x10());
         log_tenths("  roll", imu_roll_x10());
     }
@@ -1264,8 +1266,11 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         log_obstacle("Hump: stalled again -> climbing power.");
     }
 
-    // Total tilt (config.h); finish only once it is back near level.
-    if (magnitude >= HUMP_ENTER_PITCH_X10)
+    // Total tilt (config.h); finish only once it is back near level. A
+    // low hump may never tilt by HUMP_ENTER_PITCH: being raised by the
+    // entry height counts too, or the car could never leave HUMP.
+    if ((magnitude >= HUMP_ENTER_PITCH_X10) ||
+        (hump_height_x10() >= HUMP_ENTER_HEIGHT_X10))
     {
         gb_hump_tilted = true;
         if (magnitude > g_hump_peak_tilt_x10)
