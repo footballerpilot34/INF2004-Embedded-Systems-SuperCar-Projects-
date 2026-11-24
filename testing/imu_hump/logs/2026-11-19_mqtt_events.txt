@@ -1,0 +1,19 @@
+# imu_hump: MQTT log events, 2026-11-19
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+     2 13:48:47.474 inf2004/aai14/supercar/hump {"height_mm":10,"peak_tilt_x10":105,"run_height_mm":10,"run_peak_tilt_x10":105,"n":1,"t":325089}
+   270 13:49:49.980 inf2004/aai14/supercar/hump {"height_mm":11.5,"peak_tilt_x10":78,"run_height_mm":11.5,"run_peak_tilt_x10":78,"n":1,"t":490837}
+  1168 13:54:40.209 inf2004/aai14/supercar/hump {"height_mm":7.0,"peak_tilt_x10":47,"run_height_mm":7.0,"run_peak_tilt_x10":47,"n":1,"t":82525}
+  2157 13:58:41.210 inf2004/aai14/supercar/hump {"height_mm":10.5,"peak_tilt_x10":71,"run_height_mm":10.5,"run_peak_tilt_x10":71,"n":1,"t":323115}
+  2245 13:59:00.415 inf2004/aai14/supercar/hump {"height_mm":7.7,"peak_tilt_x10":52,"run_height_mm":7.7,"run_peak_tilt_x10":52,"n":1,"t":342686}
+  2410 13:59:37.220 inf2004/aai14/supercar/hump {"height_mm":7.7,"peak_tilt_x10":52,"run_height_mm":7.7,"run_peak_tilt_x10":52,"n":1,"t":379295}
+  4092 14:08:46.632 inf2004/aai14/supercar/hump {"height_mm":19.8,"peak_tilt_x10":93,"run_height_mm":19.8,"run_peak_tilt_x10":93,"n":1,"t":138535}
+  4141 14:08:58.202 inf2004/aai14/supercar/hump {"height_mm":17.2,"peak_tilt_x10":79,"run_height_mm":17.2,"run_peak_tilt_x10":79,"n":1,"t":150085}
+  4196 14:09:11.061 inf2004/aai14/supercar/hump {"height_mm":15.0,"peak_tilt_x10":69,"run_height_mm":15.0,"run_peak_tilt_x10":69,"n":1,"t":163015}
+  4539 14:10:39.988 inf2004/aai14/supercar/hump {"height_mm":18.9,"peak_tilt_x10":93,"run_height_mm":18.9,"run_peak_tilt_x10":93,"n":1,"t":251515}
+  4838 14:17:00.304 inf2004/aai14/supercar/hump {"height_mm":10.9,"peak_tilt_x10":66,"run_height_mm":10.9,"run_peak_tilt_x10":66,"n":1,"t":60076}
+  4997 14:17:39.347 inf2004/aai14/supercar/hump {"height_mm":10.2,"peak_tilt_x10":70,"run_height_mm":10.2,"run_peak_tilt_x10":70,"n":1,"t":99295}
+  5065 14:17:56.413 inf2004/aai14/supercar/hump {"height_mm":26.2,"peak_tilt_x10":146,"run_height_mm":26.2,"run_peak_tilt_x10":146,"n":1,"t":115025}
+  5164 14:18:38.975 inf2004/aai14/supercar/hump {"height_mm":26.6,"peak_tilt_x10":146,"run_height_mm":26.6,"run_peak_tilt_x10":146,"n":1,"t":140977}
+  5207 14:18:46.994 inf2004/aai14/supercar/hump {"height_mm":12.4,"peak_tilt_x10":67,"run_height_mm":12.4,"run_peak_tilt_x10":67,"n":1,"t":166695}
+  7163 14:38:31.773 inf2004/aai14/supercar/hump {"height_mm":12.4,"peak_tilt_x10":67,"run_height_mm":12.4,"run_peak_tilt_x10":67,"n":1,"t":166695}

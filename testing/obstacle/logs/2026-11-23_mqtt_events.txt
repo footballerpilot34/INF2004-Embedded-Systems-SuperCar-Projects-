@@ -1,0 +1,1874 @@
+# obstacle: MQTT log events, 2026-11-23
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 47258 15:41:01.597 Servo: 90 degrees.
+ 50871 15:55:01.977 Obstacle at 297 mm -> stopped.
+ 50872 15:55:01.982 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 50875 15:55:01.988 SCAN start: front=297 mm
+ 50877 15:55:02.304 SCAN echoes: angle=0 valid=3/3 min=299 max=305 mm
+ 50878 15:55:02.306 SCAN point: t=858182 ms angle=0 range=301 mm return=1
+ 50879 15:55:02.310 Servo: 88 degrees.
+ 50882 15:55:02.604 SCAN echoes: angle=-2 valid=3/3 min=303 max=304 mm
+ 50883 15:55:02.604 SCAN point: t=858641 ms angle=-2 range=304 mm return=1
+ 50884 15:55:02.609 Servo: 86 degrees.
+ 50888 15:55:03.423 SCAN echoes: angle=-4 valid=3/3 min=298 max=299 mm
+ 50889 15:55:03.427 SCAN point: t=859104 ms angle=-4 range=298 mm return=1
+ 50890 15:55:03.430 Servo: 84 degrees.
+ 50893 15:55:03.599 SCAN echoes: angle=-6 valid=3/3 min=298 max=305 mm
+ 50894 15:55:03.599 SCAN point: t=859563 ms angle=-6 range=300 mm return=1
+ 50895 15:55:03.603 Servo: 82 degrees.
+ 50897 15:55:03.934 SCAN echoes: angle=-8 valid=3/3 min=298 max=305 mm
+ 50898 15:55:03.945 SCAN point: t=860011 ms angle=-8 range=300 mm return=1
+ 50899 15:55:03.947 Servo: 80 degrees.
+ 50902 15:55:05.291 SCAN echoes: angle=-10 valid=3/3 min=303 max=305 mm
+ 50903 15:55:05.293 SCAN point: t=860471 ms angle=-10 range=303 mm return=1
+ 50904 15:55:05.293 Servo: 78 degrees.
+ 50907 15:55:05.377 SCAN echoes: angle=-12 valid=3/3 min=302 max=309 mm
+ 50908 15:55:05.379 SCAN point: t=860933 ms angle=-12 range=303 mm return=1
+ 50909 15:55:05.381 Servo: 76 degrees.
+ 50913 15:55:05.383 SCAN echoes: angle=-14 valid=3/3 min=297 max=310 mm
+ 50914 15:55:05.472 SCAN point: t=861391 ms angle=-14 range=300 mm return=1
+ 50915 15:55:05.472 Servo: 74 degrees.
+ 50918 15:55:05.964 SCAN echoes: angle=-16 valid=3/3 min=300 max=301 mm
+ 50919 15:55:05.976 SCAN point: t=861843 ms angle=-16 range=301 mm return=1
+ 50920 15:55:05.979 Servo: 72 degrees.
+ 50923 15:55:06.864 SCAN echoes: angle=-18 valid=3/3 min=299 max=301 mm
+ 50924 15:55:06.864 SCAN point: t=862301 ms angle=-18 range=300 mm return=1
+ 50925 15:55:06.869 Servo: 70 degrees.
+ 50927 15:55:06.871 SCAN echoes: angle=-20 valid=3/3 min=306 max=308 mm
+ 50928 15:55:06.873 SCAN point: t=862751 ms angle=-20 range=308 mm return=1
+ 50929 15:55:06.873 Servo: 68 degrees.
+ 50932 15:55:07.211 SCAN echoes: angle=-22 valid=3/3 min=308 max=310 mm
+ 50933 15:55:07.222 SCAN point: t=863201 ms angle=-22 range=309 mm return=1
+ 50934 15:55:07.226 Servo: 66 degrees.
+ 50937 15:55:07.713 SCAN echoes: angle=-24 valid=3/3 min=307 max=310 mm
+ 50938 15:55:07.715 SCAN point: t=863663 ms angle=-24 range=308 mm return=1
+ 50939 15:55:07.721 Servo: 64 degrees.
+ 50942 15:55:08.022 SCAN echoes: angle=-26 valid=3/3 min=313 max=315 mm
+ 50943 15:55:08.034 SCAN point: t=864121 ms angle=-26 range=315 mm return=1
+ 50944 15:55:08.036 Servo: 62 degrees.
+ 50947 15:55:10.145 SCAN echoes: angle=-28 valid=3/3 min=309 max=311 mm
+ 50948 15:55:10.148 SCAN point: t=864581 ms angle=-28 range=311 mm return=1
+ 50949 15:55:10.148 Servo: 60 degrees.
+ 50952 15:55:10.154 SCAN echoes: angle=-30 valid=3/3 min=311 max=314 mm
+ 50953 15:55:10.154 SCAN point: t=865031 ms angle=-30 range=313 mm return=1
+ 50955 15:55:12.766 Servo: 92 degrees.
+ 50956 15:55:12.767 SCAN echoes: angle=2 valid=3/3 min=301 max=305 mm
+ 50957 15:55:12.769 SCAN point: t=865491 ms angle=2 range=303 mm return=1
+ 50958 15:55:12.772 Servo: 94 degrees.
+ 50959 15:55:12.775 SCAN echoes: angle=4 valid=3/3 min=304 max=309 mm
+ 50960 15:55:12.775 SCAN point: t=865941 ms angle=4 range=309 mm return=1
+ 50961 15:55:12.779 Servo: 96 degrees.
+ 50963 15:55:12.844 SCAN echoes: angle=6 valid=3/3 min=306 max=309 mm
+ 50964 15:55:12.846 SCAN point: t=866401 ms angle=6 range=306 mm return=1
+ 50965 15:55:12.846 Servo: 98 degrees.
+ 50968 15:55:12.846 SCAN echoes: angle=8 valid=3/3 min=307 max=313 mm
+ 50969 15:55:12.846 SCAN point: t=866863 ms angle=8 range=309 mm return=1
+ 50971 15:55:13.053 Servo: 100 degrees.
+ 50972 15:55:13.055 SCAN echoes: angle=10 valid=3/3 min=306 max=314 mm
+ 50973 15:55:13.055 SCAN point: t=867313 ms angle=10 range=308 mm return=1
+ 50974 15:55:13.055 Servo: 102 degrees.
+ 50975 15:55:13.060 SCAN echoes: angle=12 valid=3/3 min=310 max=313 mm
+ 50976 15:55:13.060 SCAN point: t=867771 ms angle=12 range=310 mm return=1
+ 50977 15:55:13.062 Servo: 104 degrees.
+ 50978 15:55:13.212 SCAN echoes: angle=14 valid=3/3 min=314 max=318 mm
+ 50979 15:55:13.219 SCAN point: t=868233 ms angle=14 range=317 mm return=1
+ 50980 15:55:13.221 Servo: 106 degrees.
+ 50981 15:55:13.223 SCAN echoes: angle=16 valid=3/3 min=317 max=318 mm
+ 50982 15:55:13.223 SCAN point: t=868691 ms angle=16 range=318 mm return=1
+ 50983 15:55:13.227 Servo: 108 degrees.
+ 50984 15:55:13.228 SCAN echoes: angle=18 valid=3/3 min=312 max=323 mm
+ 50985 15:55:13.228 SCAN point: t=869141 ms angle=18 range=313 mm return=1
+ 50986 15:55:13.351 Servo: 110 degrees.
+ 50989 15:55:14.862 SCAN echoes: angle=20 valid=3/3 min=316 max=317 mm
+ 50990 15:55:14.862 SCAN point: t=869591 ms angle=20 range=317 mm return=1
+ 50991 15:55:14.866 Servo: 112 degrees.
+ 50993 15:55:14.868 SCAN echoes: angle=22 valid=3/3 min=326 max=344 mm
+ 50994 15:55:14.868 SCAN point: t=870051 ms angle=22 range=327 mm return=1
+ 50995 15:55:14.870 Servo: 114 degrees.
+ 50996 15:55:14.991 SCAN echoes: angle=24 valid=3/3 min=338 max=366 mm
+ 50997 15:55:14.991 SCAN point: t=870511 ms angle=24 range=340 mm return=1
+ 50998 15:55:14.991 Servo: 116 degrees.
+ 51000 15:55:14.997 SCAN echoes: angle=26 valid=3/3 min=351 max=386 mm
+ 51001 15:55:14.997 SCAN point: t=870973 ms angle=26 range=356 mm return=1
+ 51002 15:55:14.999 Servo: 118 degrees.
+ 51005 15:55:15.371 SCAN echoes: angle=28 valid=2/3 min=1438 max=1440 mm
+ 51006 15:55:15.483 SCAN point: t=871451 ms angle=28 range=1439 mm return=1
+ 51007 15:55:15.483 Servo: 120 degrees.
+ 51010 15:55:16.183 SCAN echoes: angle=30 valid=1/3 min=1440 max=1440 mm
+ 51011 15:55:16.183 SCAN point: t=871901 ms angle=30 range=1440 mm return=3
+ 51012 15:55:16.183 Servo: 90 degrees.
+ 51013 15:55:16.183 SCAN left edge: x=-157 y=271 range=313 mm; -30 to -30 deg (estimated at scan limit)
+ 51014 15:55:16.193 inf2004/aai14/supercar/obstacle {"front":301,"left":-157,"right":163,"mid":3,"width":320,"lst":"estimated at scan limit","rst":"estimated distance jump","calibrated_width":null,"left_angle_x10":-300,"right_angle_x10":270,"t":871911}
+ 51015 15:55:16.197 SCAN right edge: x=163 y=320 range=359 mm; 26 to 28 deg (estimated distance jump)
+ 51016 15:55:16.197 SCAN apparent width=320 mm; sampling interval=313..327 mm
+ 51017 15:55:16.215 SCAN middle: x=3 y=296 range=296 mm; centre ray=301 mm
+ 51018 15:55:16.215 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 51019 15:55:16.215 SCAN no bypass candidate. Staying braked.
+ 51020 15:55:16.215 BYPASS fixed 200 mm test: LEFT offset=220 mm, clear at z=541 mm. Corridor assumed empty by oper
+ 51021 15:55:16.229 BYPASS fixed test: pivot, heading 0 deg.
+ 51022 15:55:16.229 State: OBSTACLE_SCAN -> BYPASS
+ 51028 15:55:17.240 BYPASS fixed test: out, heading -59 deg.
+ 51029 15:55:17.242 BYPASS pose (out): x=0 z=0 mm, heading -59 deg, wheels L0 R0.
+ 51032 15:55:17.652 BYPASS pose (out): x=-27 z=16 mm, heading -60 deg, wheels L12 R12.
+ 51035 15:55:18.164 BYPASS pose (out): x=-56 z=33 mm, heading -60 deg, wheels L12 R12.
+ 51038 15:55:20.100 BYPASS pose (out): x=-86 z=50 mm, heading -61 deg, wheels L12 R12.
+ 51042 15:55:20.113 BYPASS pose (out): x=-115 z=66 mm, heading -61 deg, wheels L12 R12.
+ 51045 15:55:20.303 BYPASS pose (out): x=-145 z=82 mm, heading -61 deg, wheels L13 R11.
+ 51046 15:55:20.311 BYPASS pose (out): x=-174 z=99 mm, heading -60 deg, wheels L12 R12.
+ 51049 15:55:20.621 BYPASS pose (out): x=-205 z=116 mm, heading -61 deg, wheels L12 R12.
+ 51052 15:55:21.016 BYPASS fixed test: pivot, heading -61 deg.
+ 51057 15:55:24.284 BYPASS fixed test: pass, heading -1 deg.
+ 51058 15:55:24.284 BYPASS pose (pass): x=-220 z=125 mm, heading -1 deg, wheels L0 R0.
+ 51061 15:55:24.287 BYPASS pose (pass): x=-221 z=155 mm, heading -1 deg, wheels L13 R11.
+ 51062 15:55:24.583 BYPASS pose (pass): x=-221 z=190 mm, heading 0 deg, wheels L13 R11.
+ 51063 15:55:24.594 BYPASS pose (pass): x=-222 z=224 mm, heading 0 deg, wheels L12 R12.
+ 51064 15:55:24.594 BYPASS pose (pass): x=-222 z=258 mm, heading 0 deg, wheels L13 R11.
+ 51067 15:55:24.594 BYPASS pose (pass): x=-222 z=291 mm, heading 0 deg, wheels L13 R11.
+ 51071 15:55:25.435 BYPASS pose (pass): x=-222 z=324 mm, heading 0 deg, wheels L12 R12.
+ 51074 15:55:25.740 BYPASS pose (pass): x=-222 z=358 mm, heading 0 deg, wheels L12 R12.
+ 51077 15:55:26.256 BYPASS pose (pass): x=-222 z=391 mm, heading 0 deg, wheels L12 R12.
+ 51080 15:55:26.568 BYPASS pose (pass): x=-222 z=425 mm, heading 1 deg, wheels L12 R12.
+ 51084 15:55:27.065 BYPASS pose (pass): x=-222 z=459 mm, heading 0 deg, wheels L12 R12.
+ 51087 15:55:27.591 BYPASS pose (pass): x=-222 z=493 mm, heading 1 deg, wheels L12 R12.
+ 51090 15:55:28.089 BYPASS pose (pass): x=-221 z=527 mm, heading 0 deg, wheels L12 R12.
+ 51092 15:55:28.490 BYPASS fixed test: pivot, heading 0 deg.
+ 51098 15:55:29.610 BYPASS fixed test: return, heading 59 deg.
+ 51099 15:55:29.626 BYPASS pose (return): x=-221 z=542 mm, heading 59 deg, wheels L0 R0.
+ 51102 15:55:29.832 BYPASS pose (return): x=-193 z=559 mm, heading 59 deg, wheels L13 R11.
+ 51105 15:55:30.338 BYPASS pose (return): x=-164 z=576 mm, heading 59 deg, wheels L12 R12.
+ 51108 15:55:30.867 BYPASS pose (return): x=-135 z=593 mm, heading 59 deg, wheels L12 R12.
+ 51112 15:55:31.369 BYPASS pose (return): x=-106 z=611 mm, heading 59 deg, wheels L12 R12.
+ 51115 15:55:31.989 BYPASS pose (return): x=-78 z=628 mm, heading 59 deg, wheels L12 R12.
+ 51116 15:55:31.993 BYPASS fixed test: advance, heading 59 deg.
+ 51120 15:55:32.711 BYPASS fixed test: align, heading 59 deg.
+ 51165 15:55:42.840 State: BYPASS -> STOPPED
+ 53852 16:07:04.817 Servo: 90 degrees.
+ 57436 16:20:20.250 Obstacle at 79 mm -> stopped.
+ 57437 16:20:20.255 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 57440 16:20:20.259 SCAN start: front=79 mm
+ 57442 16:20:20.654 SCAN echoes: angle=0 valid=3/3 min=55 max=65 mm
+ 57443 16:20:20.654 SCAN point: t=810339 ms angle=0 range=56 mm return=1
+ 57444 16:20:20.654 Servo: 88 degrees.
+ 57447 16:20:20.964 SCAN echoes: angle=-2 valid=3/3 min=42 max=50 mm
+ 57448 16:20:20.968 SCAN point: t=810787 ms angle=-2 range=50 mm return=1
+ 57449 16:20:20.970 Servo: 86 degrees.
+ 57453 16:20:21.542 SCAN echoes: angle=-4 valid=3/3 min=56 max=66 mm
+ 57454 16:20:21.545 SCAN point: t=811247 ms angle=-4 range=58 mm return=1
+ 57455 16:20:21.545 Servo: 84 degrees.
+ 57458 16:20:21.845 SCAN echoes: angle=-6 valid=3/3 min=55 max=58 mm
+ 57459 16:20:21.845 SCAN point: t=811697 ms angle=-6 range=57 mm return=1
+ 57460 16:20:21.850 Servo: 82 degrees.
+ 57462 16:20:22.321 SCAN echoes: angle=-8 valid=3/3 min=52 max=58 mm
+ 57463 16:20:22.451 SCAN point: t=812157 ms angle=-8 range=55 mm return=1
+ 57464 16:20:22.453 Servo: 80 degrees.
+ 57467 16:20:22.712 SCAN echoes: angle=-10 valid=3/3 min=52 max=54 mm
+ 57468 16:20:22.808 SCAN point: t=812607 ms angle=-10 range=53 mm return=1
+ 57469 16:20:22.814 Servo: 78 degrees.
+ 57473 16:20:23.220 SCAN echoes: angle=-12 valid=3/3 min=57 max=62 mm
+ 57474 16:20:23.222 SCAN point: t=813067 ms angle=-12 range=58 mm return=1
+ 57475 16:20:23.222 Servo: 76 degrees.
+ 57478 16:20:23.670 SCAN echoes: angle=-14 valid=3/3 min=60 max=64 mm
+ 57479 16:20:23.670 SCAN point: t=813519 ms angle=-14 range=62 mm return=1
+ 57480 16:20:23.680 Servo: 74 degrees.
+ 57483 16:20:24.134 SCAN echoes: angle=-16 valid=3/3 min=59 max=61 mm
+ 57484 16:20:24.134 SCAN point: t=813957 ms angle=-16 range=61 mm return=1
+ 57485 16:20:24.134 Servo: 72 degrees.
+ 57487 16:20:24.537 SCAN echoes: angle=-18 valid=3/3 min=50 max=53 mm
+ 57488 16:20:24.755 SCAN point: t=814417 ms angle=-18 range=51 mm return=1
+ 57489 16:20:24.758 Servo: 70 degrees.
+ 57493 16:20:25.069 SCAN echoes: angle=-20 valid=3/3 min=60 max=72 mm
+ 57494 16:20:25.080 SCAN point: t=814867 ms angle=-20 range=69 mm return=1
+ 57495 16:20:25.080 Servo: 68 degrees.
+ 57498 16:20:25.476 SCAN echoes: angle=-22 valid=3/3 min=51 max=60 mm
+ 57499 16:20:25.484 SCAN point: t=815327 ms angle=-22 range=54 mm return=1
+ 57500 16:20:25.484 Servo: 66 degrees.
+ 57503 16:20:25.925 SCAN echoes: angle=-24 valid=3/3 min=52 max=57 mm
+ 57504 16:20:25.930 SCAN point: t=815767 ms angle=-24 range=56 mm return=1
+ 57505 16:20:25.932 Servo: 64 degrees.
+ 57508 16:20:28.394 SCAN echoes: angle=-26 valid=3/3 min=57 max=67 mm
+ 57509 16:20:28.395 SCAN point: t=816217 ms angle=-26 range=66 mm return=1
+ 57510 16:20:28.397 Servo: 62 degrees.
+ 57513 16:20:28.399 SCAN echoes: angle=-28 valid=3/3 min=67 max=76 mm
+ 57514 16:20:28.548 SCAN point: t=816679 ms angle=-28 range=71 mm return=1
+ 57515 16:20:28.553 Servo: 60 degrees.
+ 57517 16:20:28.553 Servo: 90 degrees.
+ 57518 16:20:28.553 State: OBSTACLE_SCAN -> PICKED_UP
+ 58020 16:22:05.842 Obstacle at 288 mm -> stopped.
+ 58021 16:22:05.844 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 58024 16:22:05.944 SCAN start: front=288 mm
+ 58025 16:22:05.944 SCAN echoes: angle=0 valid=0/3 min=-1 max=-1 mm
+ 58026 16:22:05.944 SCAN point: t=913899 ms angle=0 range=-1 mm return=2
+ 58027 16:22:05.944 Servo: 88 degrees.
+ 58028 16:22:05.944 SCAN echoes: angle=-2 valid=1/3 min=891 max=891 mm
+ 58029 16:22:05.944 SCAN point: t=914349 ms angle=-2 range=891 mm return=3
+ 58030 16:22:05.944 Servo: 86 degrees.
+ 58031 16:22:05.944 SCAN echoes: angle=-4 valid=3/3 min=817 max=848 mm
+ 58032 16:22:06.091 SCAN point: t=914807 ms angle=-4 range=837 mm return=1
+ 58033 16:22:06.091 Servo: 84 degrees.
+ 58034 16:22:06.091 SCAN echoes: angle=-6 valid=2/3 min=756 max=850 mm
+ 58035 16:22:06.091 SCAN point: t=915299 ms angle=-6 range=803 mm return=3
+ 58036 16:22:06.091 Servo: 82 degrees.
+ 58037 16:22:06.091 SCAN echoes: angle=-8 valid=3/3 min=394 max=404 mm
+ 58038 16:22:06.091 SCAN point: t=915749 ms angle=-8 range=397 mm return=1
+ 58039 16:22:06.091 Servo: 80 degrees.
+ 58042 16:22:08.270 SCAN echoes: angle=-10 valid=3/3 min=811 max=838 mm
+ 58043 16:22:08.272 SCAN point: t=916207 ms angle=-10 range=830 mm return=1
+ 58044 16:22:08.274 Servo: 78 degrees.
+ 58047 16:22:08.274 SCAN echoes: angle=-12 valid=3/3 min=868 max=871 mm
+ 58048 16:22:08.276 SCAN point: t=916667 ms angle=-12 range=868 mm return=1
+ 58049 16:22:08.385 Servo: 76 degrees.
+ 58050 16:22:08.385 SCAN echoes: angle=-14 valid=3/3 min=826 max=843 mm
+ 58051 16:22:08.385 SCAN point: t=917127 ms angle=-14 range=829 mm return=1
+ 58052 16:22:08.385 Servo: 74 degrees.
+ 58053 16:22:08.385 SCAN echoes: angle=-16 valid=3/3 min=833 max=872 mm
+ 58054 16:22:08.385 SCAN point: t=917587 ms angle=-16 range=833 mm return=1
+ 58055 16:22:08.385 Servo: 72 degrees.
+ 58056 16:22:08.385 SCAN echoes: angle=-18 valid=3/3 min=828 max=863 mm
+ 58057 16:22:08.501 SCAN point: t=918049 ms angle=-18 range=841 mm return=1
+ 58058 16:22:08.501 Servo: 70 degrees.
+ 58060 16:22:08.501 Servo: 90 degrees.
+ 58061 16:22:08.501 State: OBSTACLE_SCAN -> STOPPED
+ 58204 16:22:36.704 Obstacle at 99 mm -> stopped.
+ 58205 16:22:36.845 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 58208 16:22:36.852 SCAN start: front=99 mm
+ 58209 16:22:36.854 SCAN echoes: angle=0 valid=2/3 min=66 max=74 mm
+ 58210 16:22:36.854 SCAN point: t=945727 ms angle=0 range=70 mm return=1
+ 58211 16:22:36.856 Servo: 88 degrees.
+ 58212 16:22:36.858 SCAN echoes: angle=-2 valid=0/3 min=-1 max=-1 mm
+ 58213 16:22:37.070 SCAN point: t=946207 ms angle=-2 range=-1 mm return=2
+ 58214 16:22:37.072 Servo: 86 degrees.
+ 58215 16:22:37.074 SCAN echoes: angle=-4 valid=2/3 min=58 max=62 mm
+ 58216 16:22:37.074 SCAN point: t=946681 ms angle=-4 range=60 mm return=1
+ 58217 16:22:37.074 Servo: 84 degrees.
+ 58221 16:22:37.351 SCAN echoes: angle=-6 valid=0/3 min=-1 max=-1 mm
+ 58222 16:22:37.460 SCAN point: t=947167 ms angle=-6 range=-1 mm return=2
+ 58223 16:22:37.469 Servo: 82 degrees.
+ 58226 16:22:37.900 SCAN echoes: angle=-8 valid=0/3 min=-1 max=-1 mm
+ 58227 16:22:37.902 SCAN point: t=947657 ms angle=-8 range=-1 mm return=2
+ 58228 16:22:37.905 Servo: 80 degrees.
+ 58231 16:22:38.276 SCAN echoes: angle=-10 valid=0/3 min=-1 max=-1 mm
+ 58232 16:22:38.389 SCAN point: t=948139 ms angle=-10 range=-1 mm return=2
+ 58233 16:22:38.401 Servo: 78 degrees.
+ 58236 16:22:38.587 Servo: 90 degrees.
+ 58237 16:22:38.587 State: OBSTACLE_SCAN -> PICKED_UP
+ 58354 16:23:00.848 Obstacle at 180 mm -> stopped.
+ 58355 16:23:01.006 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 58358 16:23:01.019 SCAN start: front=180 mm
+ 58361 16:23:01.102 SCAN echoes: angle=0 valid=2/3 min=95 max=107 mm
+ 58362 16:23:01.199 SCAN point: t=970979 ms angle=0 range=101 mm return=1
+ 58363 16:23:01.215 Servo: 88 degrees.
+ 58366 16:23:01.571 SCAN echoes: angle=-2 valid=0/3 min=-1 max=-1 mm
+ 58367 16:23:01.582 SCAN point: t=971457 ms angle=-2 range=-1 mm return=2
+ 58368 16:23:01.582 Servo: 86 degrees.
+ 58371 16:23:02.046 SCAN echoes: angle=-4 valid=2/3 min=123 max=131 mm
+ 58372 16:23:02.239 SCAN point: t=971948 ms angle=-4 range=127 mm return=1
+ 58373 16:23:02.243 Servo: 84 degrees.
+ 58376 16:23:02.541 SCAN echoes: angle=-6 valid=0/3 min=-1 max=-1 mm
+ 58377 16:23:02.650 SCAN point: t=972437 ms angle=-6 range=-1 mm return=2
+ 58378 16:23:02.650 Servo: 82 degrees.
+ 58382 16:23:03.110 SCAN echoes: angle=-8 valid=0/3 min=-1 max=-1 mm
+ 58383 16:23:03.126 SCAN point: t=972917 ms angle=-8 range=-1 mm return=2
+ 58384 16:23:03.128 Servo: 80 degrees.
+ 58387 16:23:03.586 SCAN echoes: angle=-10 valid=0/3 min=-1 max=-1 mm
+ 58388 16:23:03.586 SCAN point: t=973399 ms angle=-10 range=-1 mm return=2
+ 58389 16:23:03.600 Servo: 78 degrees.
+ 58392 16:23:04.100 SCAN echoes: angle=-12 valid=0/3 min=-1 max=-1 mm
+ 58393 16:23:04.103 SCAN point: t=973877 ms angle=-12 range=-1 mm return=2
+ 58394 16:23:04.107 Servo: 76 degrees.
+ 58397 16:23:04.614 SCAN echoes: angle=-14 valid=0/3 min=-1 max=-1 mm
+ 58398 16:23:04.617 SCAN point: t=974368 ms angle=-14 range=-1 mm return=2
+ 58399 16:23:04.617 Servo: 74 degrees.
+ 58402 16:23:05.101 SCAN echoes: angle=-16 valid=1/3 min=840 max=840 mm
+ 58403 16:23:05.114 SCAN point: t=974857 ms angle=-16 range=840 mm return=3
+ 58404 16:23:05.117 Servo: 72 degrees.
+ 58407 16:23:05.527 SCAN echoes: angle=-18 valid=0/3 min=-1 max=-1 mm
+ 58408 16:23:05.622 SCAN point: t=975337 ms angle=-18 range=-1 mm return=2
+ 58409 16:23:05.623 Servo: 70 degrees.
+ 58412 16:23:05.923 SCAN echoes: angle=-20 valid=0/3 min=-1 max=-1 mm
+ 58413 16:23:05.923 SCAN point: t=975817 ms angle=-20 range=-1 mm return=2
+ 58414 16:23:05.923 Servo: 68 degrees.
+ 58417 16:23:06.607 SCAN echoes: angle=-22 valid=1/3 min=847 max=847 mm
+ 58418 16:23:06.731 SCAN point: t=976308 ms angle=-22 range=847 mm return=3
+ 58419 16:23:06.744 Servo: 66 degrees.
+ 58422 16:23:07.058 SCAN echoes: angle=-24 valid=3/3 min=832 max=849 mm
+ 58423 16:23:07.074 SCAN point: t=976768 ms angle=-24 range=833 mm return=1
+ 58424 16:23:07.074 Servo: 64 degrees.
+ 58428 16:23:07.357 SCAN echoes: angle=-26 valid=0/3 min=-1 max=-1 mm
+ 58429 16:23:07.459 SCAN point: t=977247 ms angle=-26 range=-1 mm return=2
+ 58430 16:23:07.462 Servo: 62 degrees.
+ 58433 16:23:08.025 SCAN echoes: angle=-28 valid=1/3 min=870 max=870 mm
+ 58434 16:23:08.030 SCAN point: t=977737 ms angle=-28 range=870 mm return=3
+ 58435 16:23:08.032 Servo: 60 degrees.
+ 58438 16:23:08.383 SCAN echoes: angle=-30 valid=0/3 min=-1 max=-1 mm
+ 58439 16:23:08.383 SCAN point: t=978227 ms angle=-30 range=-1 mm return=2
+ 58441 16:23:08.401 Servo: 92 degrees.
+ 58444 16:23:08.901 SCAN echoes: angle=2 valid=3/3 min=68 max=69 mm
+ 58445 16:23:08.903 SCAN point: t=978687 ms angle=2 range=68 mm return=1
+ 58446 16:23:08.903 Servo: 94 degrees.
+ 58450 16:23:09.419 SCAN echoes: angle=4 valid=3/3 min=62 max=64 mm
+ 58451 16:23:09.429 SCAN point: t=979140 ms angle=4 range=62 mm return=1
+ 58452 16:23:09.429 Servo: 96 degrees.
+ 58454 16:23:09.705 SCAN echoes: angle=6 valid=3/3 min=54 max=64 mm
+ 58455 16:23:09.859 SCAN point: t=979597 ms angle=6 range=54 mm return=1
+ 58456 16:23:09.869 Servo: 98 degrees.
+ 58459 16:23:10.172 SCAN echoes: angle=8 valid=3/3 min=58 max=60 mm
+ 58460 16:23:10.309 SCAN point: t=980049 ms angle=8 range=58 mm return=1
+ 58461 16:23:10.309 Servo: 100 degrees.
+ 58464 16:23:10.612 SCAN echoes: angle=10 valid=3/3 min=57 max=64 mm
+ 58465 16:23:10.745 SCAN point: t=980508 ms angle=10 range=58 mm return=1
+ 58466 16:23:10.745 Servo: 102 degrees.
+ 58470 16:23:11.228 SCAN echoes: angle=12 valid=3/3 min=53 max=54 mm
+ 58471 16:23:11.228 SCAN point: t=980957 ms angle=12 range=53 mm return=1
+ 58472 16:23:11.228 Servo: 104 degrees.
+ 58475 16:23:11.763 SCAN echoes: angle=14 valid=3/3 min=49 max=51 mm
+ 58476 16:23:11.768 SCAN point: t=981417 ms angle=14 range=50 mm return=1
+ 58477 16:23:11.772 Servo: 106 degrees.
+ 58479 16:23:11.987 SCAN echoes: angle=16 valid=3/3 min=53 max=53 mm
+ 58480 16:23:12.072 SCAN point: t=981857 ms angle=16 range=53 mm return=1
+ 58481 16:23:12.074 Servo: 108 degrees.
+ 58484 16:23:12.526 SCAN echoes: angle=18 valid=3/3 min=53 max=59 mm
+ 58485 16:23:12.702 SCAN point: t=982309 ms angle=18 range=53 mm return=1
+ 58486 16:23:12.702 Servo: 110 degrees.
+ 58489 16:23:12.883 SCAN echoes: angle=20 valid=3/3 min=48 max=52 mm
+ 58490 16:23:13.094 SCAN point: t=982767 ms angle=20 range=52 mm return=1
+ 58491 16:23:13.098 Servo: 112 degrees.
+ 58495 16:23:13.305 SCAN echoes: angle=22 valid=3/3 min=44 max=49 mm
+ 58496 16:23:13.396 SCAN point: t=983209 ms angle=22 range=48 mm return=1
+ 58497 16:23:13.396 Servo: 114 degrees.
+ 58500 16:23:13.903 SCAN echoes: angle=24 valid=3/3 min=48 max=53 mm
+ 58501 16:23:13.907 SCAN point: t=983669 ms angle=24 range=51 mm return=1
+ 58502 16:23:13.909 Servo: 116 degrees.
+ 58505 16:23:14.272 SCAN echoes: angle=26 valid=3/3 min=44 max=53 mm
+ 58506 16:23:14.274 SCAN point: t=984129 ms angle=26 range=52 mm return=1
+ 58507 16:23:14.278 Servo: 118 degrees.
+ 58509 16:23:14.681 SCAN echoes: angle=28 valid=3/3 min=51 max=52 mm
+ 58510 16:23:14.779 SCAN point: t=984577 ms angle=28 range=51 mm return=1
+ 58511 16:23:14.788 Servo: 120 degrees.
+ 58515 16:23:15.244 SCAN echoes: angle=30 valid=3/3 min=39 max=43 mm
+ 58516 16:23:15.244 SCAN point: t=985029 ms angle=30 range=42 mm return=1
+ 58517 16:23:15.244 Servo: 90 degrees.
+ 58518 16:23:15.244 SCAN left edge: x=-2 y=101 range=101 mm; 0 to -2 deg (missing echoes)
+ 58519 16:23:15.259 inf2004/aai14/supercar/obstacle {"front":101,"left":-2,"right":21,"mid":10,"width":23,"lst":"missing echoes","rst":"estimated at scan limit","calibrated_width":null,"left_angle_x10":-10,"right_angle_x10":300,"t":985037}
+ 58520 16:23:15.259 SCAN right edge: x=21 y=36 range=42 mm; 30 to 30 deg (estimated at scan limit)
+ 58521 16:23:15.296 SCAN apparent width=23 mm; sampling interval=21..25 mm
+ 58522 16:23:15.296 SCAN middle: x=10 y=69 range=69 mm; centre ray=101 mm
+ 58523 16:23:15.296 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 58524 16:23:15.296 SCAN no bypass candidate. Staying braked.
+ 58525 16:23:15.296 BYPASS fixed test: incomplete/implausible forward scan; blocked.
+ 58526 16:23:15.296 State: OBSTACLE_SCAN -> BLOCKED
+ 58856 16:24:25.405 Obstacle at 179 mm -> stopped.
+ 58857 16:24:25.405 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 58860 16:24:25.405 SCAN start: front=179 mm
+ 58862 16:24:25.405 SCAN echoes: angle=0 valid=0/3 min=-1 max=-1 mm
+ 58863 16:24:25.500 SCAN point: t=1055280 ms angle=0 range=-1 mm return=2
+ 58864 16:24:25.500 Servo: 88 degrees.
+ 58866 16:24:25.895 SCAN echoes: angle=-2 valid=0/3 min=-1 max=-1 mm
+ 58867 16:24:25.999 SCAN point: t=1055769 ms angle=-2 range=-1 mm return=2
+ 58868 16:24:26.011 Servo: 86 degrees.
+ 58871 16:24:26.359 SCAN echoes: angle=-4 valid=2/3 min=138 max=229 mm
+ 58872 16:24:26.503 SCAN point: t=1056249 ms angle=-4 range=183 mm return=3
+ 58873 16:24:26.511 Servo: 84 degrees.
+ 58876 16:24:27.280 SCAN echoes: angle=-6 valid=3/3 min=214 max=280 mm
+ 58877 16:24:27.525 SCAN point: t=1056697 ms angle=-6 range=234 mm return=1
+ 58878 16:24:27.538 Servo: 82 degrees.
+ 58882 16:24:27.540 SCAN echoes: angle=-8 valid=1/3 min=224 max=224 mm
+ 58883 16:24:27.540 SCAN point: t=1057178 ms angle=-8 range=224 mm return=3
+ 58884 16:24:27.695 Servo: 80 degrees.
+ 58886 16:24:27.895 SCAN echoes: angle=-10 valid=0/3 min=-1 max=-1 mm
+ 58887 16:24:27.895 SCAN point: t=1057657 ms angle=-10 range=-1 mm return=2
+ 58888 16:24:27.895 Servo: 78 degrees.
+ 58891 16:24:29.642 SCAN echoes: angle=-12 valid=3/3 min=192 max=198 mm
+ 58892 16:24:29.650 SCAN point: t=1058117 ms angle=-12 range=192 mm return=1
+ 58893 16:24:29.650 Servo: 76 degrees.
+ 58896 16:24:29.811 SCAN echoes: angle=-14 valid=0/3 min=-1 max=-1 mm
+ 58897 16:24:29.811 SCAN point: t=1058598 ms angle=-14 range=-1 mm return=2
+ 58898 16:24:29.819 Servo: 74 degrees.
+ 58902 16:24:29.983 SCAN echoes: angle=-16 valid=3/3 min=172 max=209 mm
+ 58903 16:24:29.999 SCAN point: t=1059057 ms angle=-16 range=197 mm return=1
+ 58904 16:24:29.999 Servo: 72 degrees.
+ 58905 16:24:30.004 SCAN echoes: angle=-18 valid=1/3 min=288 max=288 mm
+ 58906 16:24:30.004 SCAN point: t=1059549 ms angle=-18 range=288 mm return=3
+ 58907 16:24:30.004 Servo: 70 degrees.
+ 58909 16:24:30.198 SCAN echoes: angle=-20 valid=1/3 min=237 max=237 mm
+ 58910 16:24:30.200 SCAN point: t=1060037 ms angle=-20 range=237 mm return=3
+ 58911 16:24:30.203 Servo: 68 degrees.
+ 58914 16:24:30.606 SCAN echoes: angle=-22 valid=3/3 min=137 max=152 mm
+ 58915 16:24:30.714 SCAN point: t=1060479 ms angle=-22 range=138 mm return=1
+ 58916 16:24:30.714 Servo: 66 degrees.
+ 58920 16:24:31.079 SCAN echoes: angle=-24 valid=3/3 min=123 max=126 mm
+ 58921 16:24:31.081 SCAN point: t=1060939 ms angle=-24 range=124 mm return=1
+ 58922 16:24:31.083 Servo: 64 degrees.
+ 58925 16:24:31.602 SCAN echoes: angle=-26 valid=3/3 min=123 max=127 mm
+ 58926 16:24:31.602 SCAN point: t=1061387 ms angle=-26 range=124 mm return=1
+ 58927 16:24:31.602 Servo: 62 degrees.
+ 58930 16:24:32.756 SCAN echoes: angle=-28 valid=3/3 min=122 max=127 mm
+ 58931 16:24:32.756 SCAN point: t=1061849 ms angle=-28 range=127 mm return=1
+ 58932 16:24:32.756 Servo: 60 degrees.
+ 58934 16:24:32.858 SCAN echoes: angle=-30 valid=3/3 min=129 max=140 mm
+ 58935 16:24:32.858 SCAN point: t=1062307 ms angle=-30 range=138 mm return=1
+ 58937 16:24:32.874 Servo: 92 degrees.
+ 58940 16:24:32.971 SCAN echoes: angle=2 valid=3/3 min=148 max=587 mm
+ 58941 16:24:32.971 SCAN point: t=1062769 ms angle=2 range=163 mm return=1
+ 58942 16:24:32.987 Servo: 94 degrees.
+ 58946 16:24:33.424 SCAN echoes: angle=4 valid=3/3 min=161 max=595 mm
+ 58947 16:24:33.424 SCAN point: t=1063227 ms angle=4 range=170 mm return=1
+ 58948 16:24:33.424 Servo: 96 degrees.
+ 58951 16:24:33.987 SCAN echoes: angle=6 valid=3/3 min=165 max=197 mm
+ 58952 16:24:33.987 SCAN point: t=1063677 ms angle=6 range=184 mm return=1
+ 58953 16:24:34.000 Servo: 98 degrees.
+ 58956 16:24:34.293 SCAN echoes: angle=8 valid=3/3 min=152 max=595 mm
+ 58957 16:24:34.295 SCAN point: t=1064139 ms angle=8 range=595 mm return=1
+ 58958 16:24:34.295 Servo: 100 degrees.
+ 58961 16:24:34.907 SCAN echoes: angle=10 valid=3/3 min=148 max=164 mm
+ 58962 16:24:34.916 SCAN point: t=1064597 ms angle=10 range=157 mm return=1
+ 58963 16:24:34.916 Servo: 102 degrees.
+ 58966 16:24:35.216 SCAN echoes: angle=12 valid=3/3 min=165 max=200 mm
+ 58967 16:24:35.232 SCAN point: t=1065059 ms angle=12 range=199 mm return=1
+ 58968 16:24:35.232 Servo: 104 degrees.
+ 58971 16:24:35.636 SCAN echoes: angle=14 valid=1/3 min=168 max=168 mm
+ 58973 16:24:35.926 SCAN point: t=1065537 ms angle=14 range=168 mm return=3
+ 58974 16:24:35.926 Servo: 106 degrees.
+ 58978 16:24:37.179 Servo: 90 degrees.
+ 58979 16:24:37.185 State: OBSTACLE_SCAN -> STOPPED
+ 59094 16:24:59.379 Obstacle at 140 mm -> stopped.
+ 59095 16:24:59.384 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 59103 16:24:59.544 SCAN start: front=140 mm
+ 59106 16:24:59.637 SCAN echoes: angle=0 valid=2/3 min=128 max=139 mm
+ 59107 16:24:59.637 SCAN point: t=1089469 ms angle=0 range=133 mm return=1
+ 59108 16:24:59.637 Servo: 88 degrees.
+ 59111 16:25:01.071 SCAN echoes: angle=-2 valid=3/3 min=118 max=123 mm
+ 59112 16:25:01.075 SCAN point: t=1089927 ms angle=-2 range=122 mm return=1
+ 59113 16:25:01.075 Servo: 86 degrees.
+ 59115 16:25:01.081 SCAN echoes: angle=-4 valid=3/3 min=127 max=136 mm
+ 59116 16:25:01.081 SCAN point: t=1090377 ms angle=-4 range=136 mm return=1
+ 59117 16:25:01.224 Servo: 84 degrees.
+ 59118 16:25:01.224 SCAN echoes: angle=-6 valid=3/3 min=143 max=147 mm
+ 59119 16:25:01.224 SCAN point: t=1090839 ms angle=-6 range=143 mm return=1
+ 59120 16:25:01.224 Servo: 82 degrees.
+ 59122 16:25:01.486 SCAN echoes: angle=-8 valid=3/3 min=147 max=152 mm
+ 59123 16:25:01.489 SCAN point: t=1091289 ms angle=-8 range=149 mm return=1
+ 59124 16:25:01.493 Servo: 80 degrees.
+ 59127 16:25:01.958 SCAN echoes: angle=-10 valid=3/3 min=157 max=167 mm
+ 59128 16:25:01.958 SCAN point: t=1091749 ms angle=-10 range=163 mm return=1
+ 59129 16:25:01.958 Servo: 78 degrees.
+ 59132 16:25:02.364 SCAN echoes: angle=-12 valid=2/3 min=145 max=151 mm
+ 59133 16:25:02.377 SCAN point: t=1092209 ms angle=-12 range=148 mm return=1
+ 59134 16:25:02.380 Servo: 76 degrees.
+ 59137 16:25:02.975 SCAN echoes: angle=-14 valid=3/3 min=147 max=184 mm
+ 59138 16:25:02.977 SCAN point: t=1092669 ms angle=-14 range=169 mm return=1
+ 59139 16:25:02.977 Servo: 74 degrees.
+ 59142 16:25:03.265 SCAN echoes: angle=-16 valid=3/3 min=165 max=177 mm
+ 59143 16:25:03.265 SCAN point: t=1093119 ms angle=-16 range=167 mm return=1
+ 59144 16:25:03.281 Servo: 72 degrees.
+ 59147 16:25:03.807 SCAN echoes: angle=-18 valid=2/3 min=168 max=203 mm
+ 59148 16:25:03.815 SCAN point: t=1093577 ms angle=-18 range=185 mm return=1
+ 59149 16:25:03.815 Servo: 70 degrees.
+ 59152 16:25:04.192 SCAN echoes: angle=-20 valid=3/3 min=797 max=840 mm
+ 59153 16:25:04.199 SCAN point: t=1094039 ms angle=-20 range=825 mm return=1
+ 59154 16:25:04.199 Servo: 68 degrees.
+ 59157 16:25:04.981 SCAN echoes: angle=-22 valid=3/3 min=482 max=873 mm
+ 59158 16:25:04.983 SCAN point: t=1094487 ms angle=-22 range=498 mm return=1
+ 59159 16:25:04.983 Servo: 66 degrees.
+ 59163 16:25:05.060 SCAN echoes: angle=-24 valid=3/3 min=472 max=484 mm
+ 59164 16:25:05.060 SCAN point: t=1094939 ms angle=-24 range=482 mm return=1
+ 59165 16:25:05.060 Servo: 64 degrees.
+ 59167 16:25:05.625 SCAN echoes: angle=-26 valid=3/3 min=796 max=878 mm
+ 59168 16:25:05.625 SCAN point: t=1095399 ms angle=-26 range=802 mm return=1
+ 59169 16:25:05.625 Servo: 62 degrees.
+ 59172 16:25:06.094 SCAN echoes: angle=-28 valid=3/3 min=806 max=896 mm
+ 59173 16:25:06.189 SCAN point: t=1095857 ms angle=-28 range=830 mm return=1
+ 59174 16:25:06.193 Servo: 60 degrees.
+ 59177 16:25:06.435 SCAN echoes: angle=-30 valid=2/3 min=843 max=902 mm
+ 59178 16:25:06.549 SCAN point: t=1096337 ms angle=-30 range=872 mm return=3
+ 59180 16:25:06.549 Servo: 92 degrees.
+ 59183 16:25:06.905 SCAN echoes: angle=2 valid=3/3 min=855 max=867 mm
+ 59184 16:25:07.007 SCAN point: t=1096787 ms angle=2 range=867 mm return=1
+ 59185 16:25:07.007 Servo: 94 degrees.
+ 59190 16:25:07.421 Servo: 90 degrees.
+ 59191 16:25:07.421 State: OBSTACLE_SCAN -> PICKED_UP
+ 59504 16:26:12.505 Obstacle at 174 mm -> stopped.
+ 59505 16:26:12.591 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 59510 16:26:12.606 SCAN start: front=174 mm
+ 59512 16:26:12.810 SCAN echoes: angle=0 valid=2/3 min=186 max=199 mm
+ 59513 16:26:12.818 SCAN point: t=1162657 ms angle=0 range=192 mm return=1
+ 59514 16:26:12.818 Servo: 88 degrees.
+ 59518 16:26:13.317 SCAN echoes: angle=-2 valid=1/3 min=201 max=201 mm
+ 59519 16:26:13.317 SCAN point: t=1163147 ms angle=-2 range=201 mm return=3
+ 59520 16:26:13.317 Servo: 86 degrees.
+ 59523 16:26:14.036 SCAN echoes: angle=-4 valid=0/3 min=-1 max=-1 mm
+ 59524 16:26:14.038 SCAN point: t=1163627 ms angle=-4 range=-1 mm return=2
+ 59525 16:26:14.042 Servo: 84 degrees.
+ 59528 16:26:14.254 SCAN echoes: angle=-6 valid=3/3 min=168 max=174 mm
+ 59529 16:26:14.256 SCAN point: t=1164090 ms angle=-6 range=171 mm return=1
+ 59530 16:26:14.258 Servo: 82 degrees.
+ 59532 16:26:14.751 SCAN echoes: angle=-8 valid=0/3 min=-1 max=-1 mm
+ 59533 16:26:14.853 SCAN point: t=1164567 ms angle=-8 range=-1 mm return=2
+ 59534 16:26:14.857 Servo: 80 degrees.
+ 59538 16:26:15.175 SCAN echoes: angle=-10 valid=3/3 min=267 max=913 mm
+ 59539 16:26:15.175 SCAN point: t=1165007 ms angle=-10 range=903 mm return=1
+ 59540 16:26:15.175 Servo: 78 degrees.
+ 59544 16:26:16.026 SCAN echoes: angle=-12 valid=3/3 min=913 max=946 mm
+ 59545 16:26:16.037 SCAN point: t=1165449 ms angle=-12 range=938 mm return=1
+ 59546 16:26:16.039 Servo: 76 degrees.
+ 59550 16:26:16.335 Servo: 90 degrees.
+ 59551 16:26:16.335 State: OBSTACLE_SCAN -> STOPPED
+ 59646 16:26:35.228 Obstacle at 300 mm -> stopped.
+ 59647 16:26:35.232 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 59655 16:26:35.332 SCAN start: front=300 mm
+ 59657 16:26:35.335 SCAN echoes: angle=0 valid=3/3 min=278 max=283 mm
+ 59658 16:26:35.335 SCAN point: t=1185099 ms angle=0 range=279 mm return=1
+ 59659 16:26:35.335 Servo: 88 degrees.
+ 59661 16:26:35.864 SCAN echoes: angle=-2 valid=1/3 min=840 max=840 mm
+ 59662 16:26:35.867 SCAN point: t=1185578 ms angle=-2 range=840 mm return=3
+ 59663 16:26:35.867 Servo: 86 degrees.
+ 59666 16:26:35.871 Servo: 90 degrees.
+ 59667 16:26:35.871 State: OBSTACLE_SCAN -> PICKED_UP
+ 59765 16:26:54.983 Obstacle at 243 mm -> stopped.
+ 59766 16:26:54.983 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 59774 16:26:55.094 SCAN start: front=243 mm
+ 59777 16:26:55.094 SCAN echoes: angle=0 valid=0/3 min=-1 max=-1 mm
+ 59778 16:26:55.094 SCAN point: t=1204917 ms angle=0 range=-1 mm return=2
+ 59779 16:26:55.094 Servo: 88 degrees.
+ 59782 16:26:55.559 SCAN echoes: angle=-2 valid=2/3 min=835 max=900 mm
+ 59783 16:26:56.492 SCAN point: t=1205367 ms angle=-2 range=867 mm return=3
+ 59784 16:26:56.495 Servo: 86 degrees.
+ 59787 16:26:56.495 SCAN echoes: angle=-4 valid=3/3 min=828 max=866 mm
+ 59788 16:26:56.495 SCAN point: t=1205827 ms angle=-4 range=832 mm return=1
+ 59789 16:26:56.495 Servo: 84 degrees.
+ 59791 16:26:56.675 SCAN echoes: angle=-6 valid=3/3 min=837 max=931 mm
+ 59792 16:26:56.675 SCAN point: t=1206277 ms angle=-6 range=887 mm return=3
+ 59793 16:26:56.675 Servo: 82 degrees.
+ 59796 16:26:57.206 SCAN echoes: angle=-8 valid=3/3 min=858 max=900 mm
+ 59797 16:26:57.214 SCAN point: t=1206737 ms angle=-8 range=888 mm return=1
+ 59798 16:26:57.214 Servo: 80 degrees.
+ 59802 16:26:57.545 SCAN echoes: angle=-10 valid=3/3 min=871 max=930 mm
+ 59803 16:26:57.558 SCAN point: t=1207190 ms angle=-10 range=878 mm return=1
+ 59804 16:26:57.561 Servo: 78 degrees.
+ 59806 16:26:57.757 SCAN echoes: angle=-12 valid=3/3 min=796 max=1029 mm
+ 59807 16:26:57.854 SCAN point: t=1207649 ms angle=-12 range=803 mm return=1
+ 59808 16:26:57.854 Servo: 76 degrees.
+ 59811 16:26:58.732 SCAN echoes: angle=-14 valid=3/3 min=1016 max=1036 mm
+ 59813 16:26:58.873 SCAN point: t=1208097 ms angle=-14 range=1021 mm return=1
+ 59814 16:26:58.873 Servo: 74 degrees.
+ 59817 16:26:58.873 SCAN echoes: angle=-16 valid=3/3 min=1021 max=1040 mm
+ 59818 16:26:58.873 SCAN point: t=1208549 ms angle=-16 range=1026 mm return=1
+ 59819 16:26:58.873 Servo: 72 degrees.
+ 59822 16:26:58.937 Servo: 90 degrees.
+ 59823 16:26:58.937 State: OBSTACLE_SCAN -> STOPPED
+ 59991 16:27:32.576 Obstacle at 128 mm -> stopped.
+ 59992 16:27:32.580 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 59996 16:27:32.580 SCAN start: front=128 mm
+ 59997 16:27:32.665 SCAN echoes: angle=0 valid=3/3 min=75 max=78 mm
+ 59998 16:27:32.665 SCAN point: t=1242449 ms angle=0 range=76 mm return=1
+ 59999 16:27:32.665 Servo: 88 degrees.
+ 60002 16:27:33.098 SCAN echoes: angle=-2 valid=3/3 min=77 max=95 mm
+ 60003 16:27:33.106 SCAN point: t=1242907 ms angle=-2 range=82 mm return=1
+ 60004 16:27:33.117 Servo: 86 degrees.
+ 60010 16:27:33.521 Servo: 90 degrees.
+ 60011 16:27:33.523 State: OBSTACLE_SCAN -> STOPPED
+ 60306 16:28:37.541 Obstacle at 141 mm -> stopped.
+ 60307 16:28:37.541 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 60310 16:28:37.541 SCAN start: front=141 mm
+ 60312 16:28:37.604 SCAN echoes: angle=0 valid=3/3 min=114 max=141 mm
+ 60313 16:28:37.604 SCAN point: t=1307468 ms angle=0 range=139 mm return=1
+ 60314 16:28:37.616 Servo: 88 degrees.
+ 60317 16:28:38.195 SCAN echoes: angle=-2 valid=3/3 min=112 max=118 mm
+ 60318 16:28:38.195 SCAN point: t=1307927 ms angle=-2 range=116 mm return=1
+ 60319 16:28:38.200 Servo: 86 degrees.
+ 60323 16:28:38.611 SCAN echoes: angle=-4 valid=3/3 min=127 max=138 mm
+ 60324 16:28:38.627 SCAN point: t=1308377 ms angle=-4 range=128 mm return=1
+ 60325 16:28:38.627 Servo: 84 degrees.
+ 60328 16:28:38.667 Servo: 90 degrees.
+ 60329 16:28:38.667 State: OBSTACLE_SCAN -> STOPPED
+ 61315 16:32:05.568 Obstacle at 173 mm -> stopped.
+ 61316 16:32:05.568 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 61325 16:32:05.798 SCAN start: front=173 mm
+ 61327 16:32:05.873 SCAN echoes: angle=0 valid=3/3 min=138 max=156 mm
+ 61328 16:32:05.873 SCAN point: t=1515247 ms angle=0 range=155 mm return=1
+ 61329 16:32:05.873 Servo: 88 degrees.
+ 61330 16:32:05.877 SCAN echoes: angle=-2 valid=3/3 min=733 max=741 mm
+ 61331 16:32:05.877 SCAN point: t=1515707 ms angle=-2 range=737 mm return=1
+ 61332 16:32:05.877 Servo: 86 degrees.
+ 61335 16:32:06.369 SCAN echoes: angle=-4 valid=3/3 min=698 max=713 mm
+ 61336 16:32:06.484 SCAN point: t=1516158 ms angle=-4 range=699 mm return=1
+ 61337 16:32:06.487 Servo: 84 degrees.
+ 61340 16:32:06.729 SCAN echoes: angle=-6 valid=3/3 min=707 max=878 mm
+ 61341 16:32:06.843 SCAN point: t=1516617 ms angle=-6 range=878 mm return=1
+ 61342 16:32:06.843 Servo: 82 degrees.
+ 61346 16:32:07.500 SCAN echoes: angle=-8 valid=3/3 min=865 max=875 mm
+ 61347 16:32:07.502 SCAN point: t=1517070 ms angle=-8 range=871 mm return=1
+ 61348 16:32:07.502 Servo: 80 degrees.
+ 61351 16:32:07.677 SCAN echoes: angle=-10 valid=3/3 min=750 max=870 mm
+ 61352 16:32:07.685 SCAN point: t=1517517 ms angle=-10 range=865 mm return=1
+ 61353 16:32:07.685 Servo: 78 degrees.
+ 61355 16:32:08.080 SCAN echoes: angle=-12 valid=3/3 min=721 max=874 mm
+ 61356 16:32:08.290 SCAN point: t=1517977 ms angle=-12 range=871 mm return=1
+ 61357 16:32:08.292 Servo: 76 degrees.
+ 61360 16:32:08.718 SCAN echoes: angle=-14 valid=3/3 min=866 max=869 mm
+ 61361 16:32:08.737 SCAN point: t=1518437 ms angle=-14 range=866 mm return=1
+ 61362 16:32:08.739 Servo: 74 degrees.
+ 61365 16:32:09.151 SCAN echoes: angle=-16 valid=3/3 min=857 max=876 mm
+ 61366 16:32:09.151 SCAN point: t=1518897 ms angle=-16 range=869 mm return=1
+ 61367 16:32:09.151 Servo: 72 degrees.
+ 61371 16:32:09.496 SCAN echoes: angle=-18 valid=3/3 min=868 max=883 mm
+ 61372 16:32:09.507 SCAN point: t=1519358 ms angle=-18 range=883 mm return=1
+ 61373 16:32:09.510 Servo: 70 degrees.
+ 61376 16:32:10.011 SCAN echoes: angle=-20 valid=3/3 min=861 max=926 mm
+ 61377 16:32:10.011 SCAN point: t=1519797 ms angle=-20 range=879 mm return=1
+ 61378 16:32:10.011 Servo: 68 degrees.
+ 61381 16:32:11.499 SCAN echoes: angle=-22 valid=3/3 min=867 max=924 mm
+ 61382 16:32:11.499 SCAN point: t=1520247 ms angle=-22 range=905 mm return=1
+ 61383 16:32:11.499 Servo: 66 degrees.
+ 61385 16:32:11.600 SCAN echoes: angle=-24 valid=3/3 min=874 max=876 mm
+ 61386 16:32:11.603 SCAN point: t=1520709 ms angle=-24 range=875 mm return=1
+ 61387 16:32:11.603 Servo: 64 degrees.
+ 61391 16:32:11.610 SCAN echoes: angle=-26 valid=3/3 min=867 max=896 mm
+ 61392 16:32:11.610 SCAN point: t=1521167 ms angle=-26 range=872 mm return=1
+ 61393 16:32:11.866 Servo: 62 degrees.
+ 61395 16:32:11.871 SCAN echoes: angle=-28 valid=3/3 min=863 max=906 mm
+ 61396 16:32:11.871 SCAN point: t=1521627 ms angle=-28 range=866 mm return=1
+ 61397 16:32:11.874 Servo: 60 degrees.
+ 61400 16:32:12.464 SCAN echoes: angle=-30 valid=3/3 min=870 max=881 mm
+ 61401 16:32:12.475 SCAN point: t=1522087 ms angle=-30 range=876 mm return=1
+ 61403 16:32:12.475 Servo: 92 degrees.
+ 61406 16:32:12.875 SCAN echoes: angle=2 valid=3/3 min=716 max=872 mm
+ 61407 16:32:12.878 SCAN point: t=1522527 ms angle=2 range=861 mm return=1
+ 61408 16:32:12.878 Servo: 94 degrees.
+ 61410 16:32:13.125 SCAN echoes: angle=4 valid=3/3 min=874 max=884 mm
+ 61411 16:32:13.125 SCAN point: t=1522977 ms angle=4 range=882 mm return=1
+ 61412 16:32:13.125 Servo: 96 degrees.
+ 61416 16:32:13.660 SCAN echoes: angle=6 valid=3/3 min=932 max=940 mm
+ 61417 16:32:13.662 SCAN point: t=1523437 ms angle=6 range=934 mm return=1
+ 61418 16:32:13.665 Servo: 98 degrees.
+ 61421 16:32:14.013 SCAN echoes: angle=8 valid=3/3 min=892 max=931 mm
+ 61422 16:32:14.218 SCAN point: t=1523888 ms angle=8 range=896 mm return=1
+ 61423 16:32:14.226 Servo: 100 degrees.
+ 61426 16:32:14.565 SCAN echoes: angle=10 valid=3/3 min=706 max=732 mm
+ 61427 16:32:14.565 SCAN point: t=1524337 ms angle=10 range=717 mm return=1
+ 61428 16:32:14.565 Servo: 102 degrees.
+ 61431 16:32:14.971 SCAN echoes: angle=12 valid=3/3 min=719 max=901 mm
+ 61432 16:32:14.976 SCAN point: t=1524788 ms angle=12 range=742 mm return=1
+ 61433 16:32:14.976 Servo: 104 degrees.
+ 61436 16:32:15.378 SCAN echoes: angle=14 valid=3/3 min=754 max=914 mm
+ 61437 16:32:15.548 SCAN point: t=1525237 ms angle=14 range=757 mm return=1
+ 61438 16:32:15.556 Servo: 106 degrees.
+ 61441 16:32:15.811 SCAN echoes: angle=16 valid=1/3 min=725 max=725 mm
+ 61442 16:32:16.005 SCAN point: t=1525718 ms angle=16 range=725 mm return=3
+ 61443 16:32:16.009 Servo: 108 degrees.
+ 61446 16:32:16.312 SCAN echoes: angle=18 valid=0/3 min=-1 max=-1 mm
+ 61447 16:32:16.442 SCAN point: t=1526199 ms angle=18 range=-1 mm return=2
+ 61448 16:32:16.442 Servo: 110 degrees.
+ 61451 16:32:16.772 SCAN echoes: angle=20 valid=0/3 min=-1 max=-1 mm
+ 61452 16:32:16.945 SCAN point: t=1526678 ms angle=20 range=-1 mm return=2
+ 61453 16:32:16.945 Servo: 112 degrees.
+ 61457 16:32:17.547 SCAN echoes: angle=22 valid=3/3 min=706 max=731 mm
+ 61458 16:32:17.550 SCAN point: t=1527137 ms angle=22 range=723 mm return=1
+ 61459 16:32:17.550 Servo: 114 degrees.
+ 61462 16:32:18.261 SCAN echoes: angle=24 valid=0/3 min=-1 max=-1 mm
+ 61463 16:32:18.263 SCAN point: t=1527627 ms angle=24 range=-1 mm return=2
+ 61464 16:32:18.267 Servo: 116 degrees.
+ 61467 16:32:18.376 SCAN echoes: angle=26 valid=0/3 min=-1 max=-1 mm
+ 61468 16:32:18.387 SCAN point: t=1528119 ms angle=26 range=-1 mm return=2
+ 61469 16:32:18.389 Servo: 118 degrees.
+ 61472 16:32:18.757 SCAN echoes: angle=28 valid=1/3 min=698 max=698 mm
+ 61473 16:32:18.757 SCAN point: t=1528607 ms angle=28 range=698 mm return=3
+ 61474 16:32:18.757 Servo: 120 degrees.
+ 61478 16:32:19.262 SCAN echoes: angle=30 valid=0/3 min=-1 max=-1 mm
+ 61479 16:32:19.264 SCAN point: t=1529099 ms angle=30 range=-1 mm return=2
+ 61480 16:32:19.267 Servo: 90 degrees.
+ 61481 16:32:19.269 SCAN left edge: x=-3 y=155 range=155 mm; 0 to -2 deg (estimated distance jump)
+ 61482 16:32:19.269 inf2004/aai14/supercar/obstacle {"front":155,"left":-3,"right":3,"mid":0,"width":6,"lst":"estimated distance jump","rst":"echo-bracketed","calibrated_width":null,"left_angle_x10":-10,"right_angle_x10":10,"t":1529108}
+ 61483 16:32:19.269 SCAN right edge: x=3 y=155 range=155 mm; 0 to 2 deg (echo-bracketed)
+ 61484 16:32:19.300 SCAN apparent width=6 mm; sampling interval=0..11 mm
+ 61485 16:32:19.300 SCAN middle: x=0 y=155 range=155 mm; centre ray=155 mm
+ 61486 16:32:19.300 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 61487 16:32:19.300 SCAN no bypass candidate. Staying braked.
+ 61488 16:32:19.310 BYPASS fixed test: bumper gap too small to turn; blocked.
+ 61489 16:32:19.310 State: OBSTACLE_SCAN -> BLOCKED
+ 61620 16:32:31.737 Obstacle at 131 mm -> stopped.
+ 61621 16:32:31.838 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 61626 16:32:31.849 SCAN start: front=131 mm
+ 61628 16:32:32.044 SCAN echoes: angle=0 valid=0/3 min=-1 max=-1 mm
+ 61629 16:32:32.044 SCAN point: t=1541761 ms angle=0 range=-1 mm return=2
+ 61630 16:32:32.044 Servo: 88 degrees.
+ 61633 16:32:32.300 SCAN echoes: angle=-2 valid=3/3 min=676 max=851 mm
+ 61634 16:32:32.452 SCAN point: t=1542210 ms angle=-2 range=690 mm return=1
+ 61635 16:32:32.454 Servo: 86 degrees.
+ 61638 16:32:32.890 SCAN echoes: angle=-4 valid=3/3 min=716 max=745 mm
+ 61639 16:32:32.890 SCAN point: t=1542667 ms angle=-4 range=730 mm return=1
+ 61640 16:32:32.890 Servo: 84 degrees.
+ 61644 16:32:33.802 SCAN echoes: angle=-6 valid=3/3 min=694 max=848 mm
+ 61645 16:32:33.816 SCAN point: t=1543129 ms angle=-6 range=716 mm return=1
+ 61646 16:32:33.818 Servo: 82 degrees.
+ 61649 16:32:34.108 SCAN echoes: angle=-8 valid=3/3 min=708 max=719 mm
+ 61650 16:32:34.121 SCAN point: t=1543587 ms angle=-8 range=709 mm return=1
+ 61651 16:32:34.123 Servo: 80 degrees.
+ 61654 16:32:34.283 SCAN echoes: angle=-10 valid=3/3 min=728 max=828 mm
+ 61655 16:32:34.286 SCAN point: t=1544048 ms angle=-10 range=738 mm return=1
+ 61656 16:32:34.286 Servo: 78 degrees.
+ 61658 16:32:34.643 SCAN echoes: angle=-12 valid=3/3 min=668 max=716 mm
+ 61659 16:32:34.743 SCAN point: t=1544508 ms angle=-12 range=704 mm return=1
+ 61660 16:32:34.747 Servo: 76 degrees.
+ 61666 16:32:35.498 Servo: 90 degrees.
+ 61667 16:32:35.498 State: OBSTACLE_SCAN -> STOPPED
+ 63366 16:38:08.329 Obstacle at 299 mm -> stopped.
+ 63367 16:38:08.557 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 63379 16:38:08.658 SCAN start: front=299 mm
+ 63381 16:38:08.658 SCAN echoes: angle=0 valid=3/3 min=294 max=658 mm
+ 63382 16:38:08.757 SCAN point: t=1878446 ms angle=0 range=314 mm return=1
+ 63383 16:38:08.757 Servo: 88 degrees.
+ 63386 16:38:09.081 SCAN echoes: angle=-2 valid=3/3 min=317 max=654 mm
+ 63387 16:38:09.085 SCAN point: t=1878896 ms angle=-2 range=651 mm return=1
+ 63388 16:38:09.087 Servo: 86 degrees.
+ 63391 16:38:09.459 SCAN echoes: angle=-4 valid=3/3 min=645 max=665 mm
+ 63392 16:38:09.470 SCAN point: t=1879346 ms angle=-4 range=646 mm return=1
+ 63393 16:38:09.470 Servo: 84 degrees.
+ 63396 16:38:10.002 SCAN echoes: angle=-6 valid=3/3 min=645 max=646 mm
+ 63397 16:38:10.007 SCAN point: t=1879806 ms angle=-6 range=645 mm return=1
+ 63398 16:38:10.011 Servo: 82 degrees.
+ 63401 16:38:10.622 SCAN echoes: angle=-8 valid=3/3 min=647 max=654 mm
+ 63402 16:38:10.622 SCAN point: t=1880266 ms angle=-8 range=654 mm return=1
+ 63403 16:38:10.638 Servo: 80 degrees.
+ 63406 16:38:10.919 SCAN echoes: angle=-10 valid=3/3 min=652 max=654 mm
+ 63407 16:38:10.919 SCAN point: t=1880726 ms angle=-10 range=654 mm return=1
+ 63408 16:38:10.922 Servo: 78 degrees.
+ 63412 16:38:11.346 SCAN echoes: angle=-12 valid=3/3 min=311 max=673 mm
+ 63413 16:38:11.350 SCAN point: t=1881176 ms angle=-12 range=658 mm return=1
+ 63414 16:38:11.350 Servo: 76 degrees.
+ 63416 16:38:11.756 SCAN echoes: angle=-14 valid=2/3 min=211 max=699 mm
+ 63417 16:38:11.861 SCAN point: t=1881626 ms angle=-14 range=455 mm return=3
+ 63418 16:38:11.863 Servo: 74 degrees.
+ 63421 16:38:13.338 SCAN echoes: angle=-16 valid=3/3 min=646 max=660 mm
+ 63422 16:38:13.437 SCAN point: t=1882086 ms angle=-16 range=654 mm return=1
+ 63423 16:38:13.447 Servo: 72 degrees.
+ 63426 16:38:13.449 SCAN echoes: angle=-18 valid=2/3 min=770 max=782 mm
+ 63427 16:38:13.449 SCAN point: t=1882546 ms angle=-18 range=776 mm return=1
+ 63428 16:38:13.449 Servo: 70 degrees.
+ 63429 16:38:13.565 SCAN echoes: angle=-20 valid=2/3 min=229 max=232 mm
+ 63430 16:38:13.577 SCAN point: t=1882998 ms angle=-20 range=230 mm return=1
+ 63431 16:38:13.579 Servo: 68 degrees.
+ 63433 16:38:13.579 SCAN echoes: angle=-22 valid=3/3 min=273 max=296 mm
+ 63434 16:38:13.579 SCAN point: t=1883446 ms angle=-22 range=273 mm return=1
+ 63435 16:38:13.579 Servo: 66 degrees.
+ 63438 16:38:14.188 SCAN echoes: angle=-24 valid=3/3 min=354 max=363 mm
+ 63439 16:38:14.188 SCAN point: t=1883908 ms angle=-24 range=359 mm return=1
+ 63440 16:38:14.188 Servo: 64 degrees.
+ 63442 16:38:14.566 SCAN echoes: angle=-26 valid=3/3 min=354 max=358 mm
+ 63443 16:38:14.769 SCAN point: t=1884357 ms angle=-26 range=355 mm return=1
+ 63444 16:38:14.780 Servo: 62 degrees.
+ 63447 16:38:14.908 SCAN echoes: angle=-28 valid=3/3 min=349 max=358 mm
+ 63448 16:38:15.075 SCAN point: t=1884816 ms angle=-28 range=354 mm return=1
+ 63449 16:38:15.075 Servo: 60 degrees.
+ 63453 16:38:15.446 SCAN echoes: angle=-30 valid=3/3 min=358 max=398 mm
+ 63454 16:38:15.446 SCAN point: t=1885278 ms angle=-30 range=380 mm return=1
+ 63456 16:38:15.446 Servo: 92 degrees.
+ 63459 16:38:15.852 SCAN echoes: angle=2 valid=3/3 min=731 max=752 mm
+ 63460 16:38:16.031 SCAN point: t=1885737 ms angle=2 range=744 mm return=1
+ 63461 16:38:16.031 Servo: 94 degrees.
+ 63464 16:38:16.670 SCAN echoes: angle=4 valid=3/3 min=727 max=739 mm
+ 63465 16:38:16.670 SCAN point: t=1886198 ms angle=4 range=738 mm return=1
+ 63466 16:38:16.670 Servo: 96 degrees.
+ 63469 16:38:16.849 SCAN echoes: angle=6 valid=3/3 min=730 max=744 mm
+ 63470 16:38:16.849 SCAN point: t=1886648 ms angle=6 range=743 mm return=1
+ 63471 16:38:16.849 Servo: 98 degrees.
+ 63473 16:38:17.214 SCAN echoes: angle=8 valid=3/3 min=740 max=757 mm
+ 63474 16:38:17.368 SCAN point: t=1887106 ms angle=8 range=752 mm return=1
+ 63475 16:38:17.370 Servo: 100 degrees.
+ 63482 16:38:17.598 Servo: 90 degrees.
+ 63483 16:38:17.598 State: OBSTACLE_SCAN -> STOPPED
+ 63562 16:38:34.727 Obstacle at 166 mm -> stopped.
+ 63563 16:38:34.727 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 63566 16:38:34.731 SCAN start: front=166 mm
+ 63568 16:38:34.895 SCAN echoes: angle=0 valid=3/3 min=156 max=193 mm
+ 63569 16:38:34.895 SCAN point: t=1904768 ms angle=0 range=160 mm return=1
+ 63570 16:38:34.907 Servo: 88 degrees.
+ 63574 16:38:35.501 SCAN echoes: angle=-2 valid=3/3 min=163 max=189 mm
+ 63575 16:38:35.501 SCAN point: t=1905228 ms angle=-2 range=181 mm return=1
+ 63576 16:38:35.501 Servo: 86 degrees.
+ 63580 16:38:36.088 SCAN echoes: angle=-4 valid=0/3 min=-1 max=-1 mm
+ 63581 16:38:36.093 SCAN point: t=1905706 ms angle=-4 range=-1 mm return=2
+ 63582 16:38:36.095 Servo: 84 degrees.
+ 63586 16:38:36.421 Servo: 90 degrees.
+ 63587 16:38:36.421 State: OBSTACLE_SCAN -> STOPPED
+ 64157 16:40:26.513 Obstacle at 163 mm -> stopped.
+ 64158 16:40:26.524 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 64161 16:40:26.524 SCAN start: front=163 mm
+ 64163 16:40:26.524 SCAN echoes: angle=0 valid=2/3 min=887 max=900 mm
+ 64164 16:40:26.534 SCAN point: t=2016238 ms angle=0 range=893 mm return=1
+ 64165 16:40:26.617 Servo: 88 degrees.
+ 64167 16:40:26.922 SCAN echoes: angle=-2 valid=3/3 min=846 max=861 mm
+ 64168 16:40:26.925 SCAN point: t=2016698 ms angle=-2 range=860 mm return=1
+ 64169 16:40:26.927 Servo: 86 degrees.
+ 64172 16:40:27.312 SCAN echoes: angle=-4 valid=3/3 min=844 max=896 mm
+ 64173 16:40:27.316 SCAN point: t=2017156 ms angle=-4 range=875 mm return=1
+ 64174 16:40:27.318 Servo: 84 degrees.
+ 64178 16:40:27.782 SCAN echoes: angle=-6 valid=2/3 min=860 max=896 mm
+ 64179 16:40:27.782 SCAN point: t=2017628 ms angle=-6 range=878 mm return=1
+ 64180 16:40:27.782 Servo: 82 degrees.
+ 64183 16:40:28.648 SCAN echoes: angle=-8 valid=2/3 min=873 max=935 mm
+ 64184 16:40:28.662 SCAN point: t=2018089 ms angle=-8 range=904 mm return=3
+ 64185 16:40:28.662 Servo: 80 degrees.
+ 64187 16:40:28.751 SCAN echoes: angle=-10 valid=2/3 min=852 max=873 mm
+ 64188 16:40:28.760 SCAN point: t=2018568 ms angle=-10 range=862 mm return=1
+ 64189 16:40:28.760 Servo: 78 degrees.
+ 64192 16:40:29.147 SCAN echoes: angle=-12 valid=2/3 min=945 max=970 mm
+ 64193 16:40:29.259 SCAN point: t=2019026 ms angle=-12 range=957 mm return=1
+ 64194 16:40:29.259 Servo: 76 degrees.
+ 64198 16:40:29.660 SCAN echoes: angle=-14 valid=3/3 min=844 max=860 mm
+ 64199 16:40:29.664 SCAN point: t=2019486 ms angle=-14 range=855 mm return=1
+ 64200 16:40:29.664 Servo: 74 degrees.
+ 64203 16:40:30.065 SCAN echoes: angle=-16 valid=1/3 min=906 max=906 mm
+ 64204 16:40:30.065 SCAN point: t=2019938 ms angle=-16 range=906 mm return=3
+ 64205 16:40:30.065 Servo: 72 degrees.
+ 64208 16:40:30.644 SCAN echoes: angle=-18 valid=2/3 min=871 max=876 mm
+ 64209 16:40:30.644 SCAN point: t=2020398 ms angle=-18 range=873 mm return=1
+ 64210 16:40:30.644 Servo: 70 degrees.
+ 64213 16:40:31.018 SCAN echoes: angle=-20 valid=3/3 min=850 max=885 mm
+ 64214 16:40:31.021 SCAN point: t=2020846 ms angle=-20 range=882 mm return=1
+ 64215 16:40:31.021 Servo: 68 degrees.
+ 64218 16:40:32.727 SCAN echoes: angle=-22 valid=1/3 min=915 max=915 mm
+ 64219 16:40:32.731 SCAN point: t=2021320 ms angle=-22 range=915 mm return=3
+ 64220 16:40:32.731 Servo: 66 degrees.
+ 64223 16:40:32.827 SCAN echoes: angle=-24 valid=2/3 min=875 max=893 mm
+ 64224 16:40:32.840 SCAN point: t=2021808 ms angle=-24 range=884 mm return=1
+ 64225 16:40:32.844 Servo: 64 degrees.
+ 64228 16:40:32.844 SCAN echoes: angle=-26 valid=2/3 min=872 max=896 mm
+ 64229 16:40:32.844 SCAN point: t=2022266 ms angle=-26 range=884 mm return=1
+ 64230 16:40:32.957 Servo: 62 degrees.
+ 64231 16:40:32.966 SCAN echoes: angle=-28 valid=3/3 min=863 max=888 mm
+ 64232 16:40:32.966 SCAN point: t=2022730 ms angle=-28 range=874 mm return=1
+ 64233 16:40:32.969 Servo: 60 degrees.
+ 64236 16:40:33.375 SCAN echoes: angle=-30 valid=2/3 min=868 max=879 mm
+ 64237 16:40:33.376 SCAN point: t=2023176 ms angle=-30 range=873 mm return=1
+ 64239 16:40:33.381 Servo: 92 degrees.
+ 64243 16:40:33.963 SCAN echoes: angle=2 valid=3/3 min=857 max=917 mm
+ 64244 16:40:33.963 SCAN point: t=2023626 ms angle=2 range=876 mm return=1
+ 64245 16:40:33.963 Servo: 94 degrees.
+ 64248 16:40:34.304 SCAN echoes: angle=4 valid=3/3 min=859 max=869 mm
+ 64249 16:40:34.306 SCAN point: t=2024089 ms angle=4 range=868 mm return=1
+ 64250 16:40:34.306 Servo: 96 degrees.
+ 64252 16:40:34.790 SCAN echoes: angle=6 valid=3/3 min=868 max=895 mm
+ 64253 16:40:34.879 SCAN point: t=2024547 ms angle=6 range=869 mm return=1
+ 64254 16:40:34.893 Servo: 98 degrees.
+ 64257 16:40:35.120 SCAN echoes: angle=8 valid=3/3 min=881 max=902 mm
+ 64258 16:40:35.216 SCAN point: t=2024996 ms angle=8 range=890 mm return=1
+ 64259 16:40:35.216 Servo: 100 degrees.
+ 64263 16:40:35.555 SCAN echoes: angle=10 valid=2/3 min=873 max=885 mm
+ 64264 16:40:35.565 SCAN point: t=2025448 ms angle=10 range=879 mm return=1
+ 64265 16:40:35.567 Servo: 102 degrees.
+ 64268 16:40:36.211 SCAN echoes: angle=12 valid=3/3 min=881 max=895 mm
+ 64269 16:40:36.220 SCAN point: t=2025906 ms angle=12 range=891 mm return=1
+ 64270 16:40:36.224 Servo: 104 degrees.
+ 64273 16:40:36.516 SCAN echoes: angle=14 valid=2/3 min=846 max=881 mm
+ 64274 16:40:36.531 SCAN point: t=2026356 ms angle=14 range=863 mm return=1
+ 64275 16:40:36.531 Servo: 106 degrees.
+ 64277 16:40:37.403 SCAN echoes: angle=16 valid=3/3 min=872 max=882 mm
+ 64278 16:40:37.470 SCAN point: t=2026816 ms angle=16 range=877 mm return=1
+ 64279 16:40:37.470 Servo: 108 degrees.
+ 64283 16:40:37.470 SCAN echoes: angle=18 valid=3/3 min=852 max=890 mm
+ 64284 16:40:37.470 SCAN point: t=2027276 ms angle=18 range=886 mm return=1
+ 64285 16:40:37.645 Servo: 110 degrees.
+ 64287 16:40:37.859 SCAN echoes: angle=20 valid=3/3 min=855 max=857 mm
+ 64288 16:40:37.859 SCAN point: t=2027726 ms angle=20 range=855 mm return=1
+ 64289 16:40:37.859 Servo: 112 degrees.
+ 64292 16:40:38.638 SCAN echoes: angle=22 valid=3/3 min=860 max=885 mm
+ 64293 16:40:38.646 SCAN point: t=2028176 ms angle=22 range=878 mm return=1
+ 64294 16:40:38.646 Servo: 114 degrees.
+ 64297 16:40:38.935 SCAN echoes: angle=24 valid=3/3 min=627 max=644 mm
+ 64298 16:40:38.944 SCAN point: t=2028628 ms angle=24 range=635 mm return=1
+ 64299 16:40:38.944 Servo: 116 degrees.
+ 64302 16:40:39.185 SCAN echoes: angle=26 valid=3/3 min=621 max=867 mm
+ 64303 16:40:39.195 SCAN point: t=2029076 ms angle=26 range=631 mm return=1
+ 64304 16:40:39.195 Servo: 118 degrees.
+ 64307 16:40:39.855 SCAN echoes: angle=28 valid=3/3 min=616 max=892 mm
+ 64308 16:40:39.861 SCAN point: t=2029538 ms angle=28 range=617 mm return=1
+ 64309 16:40:39.861 Servo: 120 degrees.
+ 64312 16:40:40.111 SCAN echoes: angle=30 valid=3/3 min=660 max=917 mm
+ 64313 16:40:40.111 SCAN point: t=2029998 ms angle=30 range=684 mm return=1
+ 64314 16:40:40.111 Servo: 90 degrees.
+ 64315 16:40:40.118 SCAN left edge UNKNOWN (edge not observed); observed foreground reaches 0 mm.
+ 64316 16:40:40.120 inf2004/aai14/supercar/obstacle {"front":163,"left":0,"right":0,"mid":0,"width":0,"lst":"edge not observed","rst":"edge not observed","calibrated_width":null,"left_angle_x10":0,"right_angle_x10":0,"t":2030007}
+ 64317 16:40:40.120 SCAN right edge UNKNOWN (edge not observed); observed foreground reaches 0 mm.
+ 64318 16:40:40.120 SCAN width UNKNOWN: one or both edges are outside reliable observations.
+ 64319 16:40:40.120 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 64320 16:40:40.512 SCAN no bypass candidate. Staying braked.
+ 64321 16:40:40.512 BYPASS fixed test: bumper gap too small to turn; blocked.
+ 64322 16:40:40.512 State: OBSTACLE_SCAN -> BLOCKED
+ 64373 16:40:48.503 Obstacle at 104 mm -> stopped.
+ 64374 16:40:48.505 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 64377 16:40:48.510 SCAN start: front=104 mm
+ 64378 16:40:48.728 SCAN echoes: angle=0 valid=1/3 min=52 max=52 mm
+ 64379 16:40:48.728 SCAN point: t=2038416 ms angle=0 range=52 mm return=3
+ 64380 16:40:48.728 Servo: 88 degrees.
+ 64383 16:40:51.740 SCAN echoes: angle=-2 valid=3/3 min=33 max=51 mm
+ 64384 16:40:51.745 SCAN point: t=2038878 ms angle=-2 range=38 mm return=1
+ 64385 16:40:51.747 Servo: 86 degrees.
+ 64389 16:40:51.747 SCAN echoes: angle=-4 valid=1/3 min=53 max=53 mm
+ 64390 16:40:51.787 SCAN point: t=2039368 ms angle=-4 range=53 mm return=3
+ 64391 16:40:51.803 Servo: 84 degrees.
+ 64392 16:40:51.806 SCAN echoes: angle=-6 valid=3/3 min=56 max=115 mm
+ 64393 16:40:51.806 SCAN point: t=2039818 ms angle=-6 range=65 mm return=1
+ 64394 16:40:51.806 Servo: 82 degrees.
+ 64395 16:40:51.806 SCAN echoes: angle=-8 valid=3/3 min=54 max=84 mm
+ 64396 16:40:51.806 SCAN point: t=2040276 ms angle=-8 range=60 mm return=1
+ 64397 16:40:51.806 Servo: 80 degrees.
+ 64398 16:40:52.079 SCAN echoes: angle=-10 valid=3/3 min=32 max=50 mm
+ 64399 16:40:52.092 SCAN point: t=2040737 ms angle=-10 range=39 mm return=1
+ 64400 16:40:52.095 Servo: 78 degrees.
+ 64401 16:40:52.095 SCAN echoes: angle=-12 valid=3/3 min=60 max=65 mm
+ 64402 16:40:52.095 SCAN point: t=2041196 ms angle=-12 range=63 mm return=1
+ 64403 16:40:52.095 Servo: 76 degrees.
+ 64404 16:40:52.095 SCAN echoes: angle=-14 valid=3/3 min=62 max=75 mm
+ 64405 16:40:52.095 SCAN point: t=2041649 ms angle=-14 range=66 mm return=1
+ 64406 16:40:52.308 Servo: 74 degrees.
+ 64408 16:40:52.308 SCAN echoes: angle=-16 valid=1/3 min=57 max=57 mm
+ 64409 16:40:52.308 SCAN point: t=2042138 ms angle=-16 range=57 mm return=3
+ 64410 16:40:52.308 Servo: 72 degrees.
+ 64413 16:40:53.061 SCAN echoes: angle=-18 valid=2/3 min=152 max=746 mm
+ 64414 16:40:53.074 SCAN point: t=2042626 ms angle=-18 range=449 mm return=3
+ 64415 16:40:53.076 Servo: 70 degrees.
+ 64418 16:40:53.269 SCAN echoes: angle=-20 valid=2/3 min=598 max=639 mm
+ 64419 16:40:53.277 SCAN point: t=2043088 ms angle=-20 range=618 mm return=3
+ 64420 16:40:53.277 Servo: 68 degrees.
+ 64423 16:40:53.658 SCAN echoes: angle=-22 valid=2/3 min=213 max=247 mm
+ 64424 16:40:53.731 SCAN point: t=2043568 ms angle=-22 range=230 mm return=1
+ 64425 16:40:53.733 Servo: 66 degrees.
+ 64428 16:40:54.133 SCAN echoes: angle=-24 valid=1/3 min=641 max=641 mm
+ 64429 16:40:54.230 SCAN point: t=2044026 ms angle=-24 range=641 mm return=3
+ 64430 16:40:54.233 Servo: 64 degrees.
+ 64433 16:40:54.560 SCAN echoes: angle=-26 valid=3/3 min=604 max=647 mm
+ 64434 16:40:54.645 SCAN point: t=2044476 ms angle=-26 range=605 mm return=1
+ 64435 16:40:54.654 Servo: 62 degrees.
+ 64438 16:40:55.058 SCAN echoes: angle=-28 valid=3/3 min=601 max=629 mm
+ 64439 16:40:55.058 SCAN point: t=2044936 ms angle=-28 range=626 mm return=1
+ 64440 16:40:55.074 Servo: 60 degrees.
+ 64444 16:40:55.589 SCAN echoes: angle=-30 valid=3/3 min=686 max=715 mm
+ 64445 16:40:55.597 SCAN point: t=2045396 ms angle=-30 range=697 mm return=1
+ 64447 16:40:55.597 Servo: 92 degrees.
+ 64450 16:40:56.094 SCAN echoes: angle=2 valid=1/3 min=1101 max=1101 mm
+ 64451 16:40:56.094 SCAN point: t=2045878 ms angle=2 range=1101 mm return=3
+ 64452 16:40:56.094 Servo: 94 degrees.
+ 64454 16:40:56.257 Servo: 90 degrees.
+ 64455 16:40:56.257 State: OBSTACLE_SCAN -> PICKED_UP
+ 64989 16:42:50.264 Obstacle at 300 mm -> stopped.
+ 64990 16:42:50.281 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 64997 16:42:50.468 SCAN start: front=300 mm
+ 65000 16:42:50.577 SCAN echoes: angle=0 valid=0/3 min=-1 max=-1 mm
+ 65001 16:42:50.584 SCAN point: t=2160416 ms angle=0 range=-1 mm return=2
+ 65002 16:42:50.584 Servo: 88 degrees.
+ 65005 16:42:51.143 SCAN echoes: angle=-2 valid=3/3 min=854 max=888 mm
+ 65006 16:42:51.147 SCAN point: t=2160866 ms angle=-2 range=857 mm return=1
+ 65007 16:42:51.147 Servo: 86 degrees.
+ 65010 16:42:51.532 SCAN echoes: angle=-4 valid=3/3 min=883 max=885 mm
+ 65011 16:42:51.538 SCAN point: t=2161326 ms angle=-4 range=883 mm return=1
+ 65012 16:42:51.538 Servo: 84 degrees.
+ 65015 16:42:51.976 SCAN echoes: angle=-6 valid=3/3 min=858 max=876 mm
+ 65016 16:42:51.988 SCAN point: t=2161776 ms angle=-6 range=862 mm return=1
+ 65017 16:42:51.993 Servo: 82 degrees.
+ 65020 16:42:52.413 SCAN echoes: angle=-8 valid=3/3 min=850 max=885 mm
+ 65021 16:42:52.415 SCAN point: t=2162236 ms angle=-8 range=857 mm return=1
+ 65022 16:42:52.417 Servo: 80 degrees.
+ 65025 16:42:53.341 SCAN echoes: angle=-10 valid=3/3 min=846 max=876 mm
+ 65026 16:42:53.341 SCAN point: t=2162698 ms angle=-10 range=875 mm return=1
+ 65027 16:42:53.341 Servo: 78 degrees.
+ 65030 16:42:53.348 SCAN echoes: angle=-12 valid=3/3 min=851 max=884 mm
+ 65031 16:42:53.348 SCAN point: t=2163136 ms angle=-12 range=880 mm return=1
+ 65032 16:42:53.459 Servo: 76 degrees.
+ 65034 16:42:53.737 SCAN echoes: angle=-14 valid=3/3 min=840 max=883 mm
+ 65035 16:42:54.026 SCAN point: t=2163598 ms angle=-14 range=845 mm return=1
+ 65036 16:42:54.038 Servo: 74 degrees.
+ 65039 16:42:54.153 SCAN echoes: angle=-16 valid=2/3 min=888 max=889 mm
+ 65040 16:42:54.159 SCAN point: t=2164058 ms angle=-16 range=888 mm return=1
+ 65041 16:42:54.159 Servo: 72 degrees.
+ 65045 16:42:54.718 SCAN echoes: angle=-18 valid=2/3 min=887 max=897 mm
+ 65046 16:42:54.722 SCAN point: t=2164548 ms angle=-18 range=892 mm return=1
+ 65047 16:42:54.722 Servo: 70 degrees.
+ 65051 16:42:54.807 Servo: 90 degrees.
+ 65052 16:42:54.810 State: OBSTACLE_SCAN -> STOPPED
+ 65160 16:43:15.671 Obstacle at 121 mm -> stopped.
+ 65161 16:43:15.671 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 65164 16:43:15.687 SCAN start: front=121 mm
+ 65166 16:43:15.751 SCAN echoes: angle=0 valid=1/3 min=114 max=114 mm
+ 65167 16:43:15.764 SCAN point: t=2185558 ms angle=0 range=114 mm return=3
+ 65168 16:43:15.764 Servo: 88 degrees.
+ 65171 16:43:16.432 SCAN echoes: angle=-2 valid=3/3 min=861 max=875 mm
+ 65172 16:43:16.686 SCAN point: t=2186006 ms angle=-2 range=866 mm return=1
+ 65173 16:43:16.686 Servo: 86 degrees.
+ 65176 16:43:16.701 SCAN echoes: angle=-4 valid=3/3 min=876 max=918 mm
+ 65177 16:43:16.701 SCAN point: t=2186468 ms angle=-4 range=910 mm return=1
+ 65178 16:43:16.701 Servo: 84 degrees.
+ 65181 16:43:17.765 SCAN echoes: angle=-6 valid=3/3 min=880 max=897 mm
+ 65182 16:43:17.771 SCAN point: t=2186920 ms angle=-6 range=884 mm return=1
+ 65183 16:43:17.773 Servo: 82 degrees.
+ 65186 16:43:17.775 SCAN echoes: angle=-8 valid=3/3 min=866 max=886 mm
+ 65187 16:43:17.775 SCAN point: t=2187367 ms angle=-8 range=873 mm return=1
+ 65188 16:43:17.777 Servo: 80 degrees.
+ 65190 16:43:18.223 SCAN echoes: angle=-10 valid=3/3 min=869 max=929 mm
+ 65191 16:43:18.223 SCAN point: t=2187826 ms angle=-10 range=893 mm return=1
+ 65192 16:43:18.229 Servo: 78 degrees.
+ 65195 16:43:18.409 SCAN echoes: angle=-12 valid=2/3 min=926 max=933 mm
+ 65196 16:43:18.415 SCAN point: t=2188308 ms angle=-12 range=929 mm return=1
+ 65197 16:43:18.417 Servo: 76 degrees.
+ 65200 16:43:18.917 SCAN echoes: angle=-14 valid=2/3 min=1008 max=1105 mm
+ 65201 16:43:19.077 SCAN point: t=2188796 ms angle=-14 range=1056 mm return=3
+ 65202 16:43:19.092 Servo: 74 degrees.
+ 65206 16:43:19.400 SCAN echoes: angle=-16 valid=1/3 min=711 max=711 mm
+ 65207 16:43:19.403 SCAN point: t=2189266 ms angle=-16 range=711 mm return=3
+ 65208 16:43:19.403 Servo: 72 degrees.
+ 65210 16:43:19.543 Servo: 90 degrees.
+ 65211 16:43:19.543 State: OBSTACLE_SCAN -> PICKED_UP
+ 65385 16:43:59.476 Obstacle at 61 mm -> stopped.
+ 65386 16:43:59.478 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 65389 16:43:59.485 SCAN start: front=61 mm
+ 65390 16:43:59.579 SCAN echoes: angle=0 valid=3/3 min=96 max=720 mm
+ 65391 16:43:59.579 SCAN point: t=2227038 ms angle=0 range=690 mm return=1
+ 65392 16:43:59.579 Servo: 88 degrees.
+ 65393 16:43:59.579 SCAN echoes: angle=-2 valid=3/3 min=705 max=715 mm
+ 65394 16:43:59.579 SCAN point: t=2227486 ms angle=-2 range=710 mm return=1
+ 65395 16:43:59.579 Servo: 86 degrees.
+ 65396 16:43:59.579 SCAN echoes: angle=-4 valid=3/3 min=701 max=744 mm
+ 65397 16:43:59.579 SCAN point: t=2227946 ms angle=-4 range=701 mm return=1
+ 65398 16:43:59.747 Servo: 84 degrees.
+ 65399 16:43:59.747 SCAN echoes: angle=-6 valid=1/3 min=573 max=573 mm
+ 65400 16:43:59.747 SCAN point: t=2228426 ms angle=-6 range=573 mm return=3
+ 65401 16:43:59.753 Servo: 82 degrees.
+ 65403 16:43:59.753 Servo: 90 degrees.
+ 65404 16:43:59.756 State: OBSTACLE_SCAN -> PICKED_UP
+ 65635 16:44:51.718 Obstacle at 297 mm -> stopped.
+ 65636 16:44:51.727 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 65648 16:44:51.806 SCAN start: front=297 mm
+ 65650 16:44:52.047 SCAN echoes: angle=0 valid=3/3 min=928 max=933 mm
+ 65651 16:44:52.047 SCAN point: t=2281476 ms angle=0 range=932 mm return=1
+ 65652 16:44:52.047 Servo: 88 degrees.
+ 65654 16:44:52.047 SCAN echoes: angle=-2 valid=3/3 min=920 max=984 mm
+ 65655 16:44:52.047 SCAN point: t=2281936 ms angle=-2 range=923 mm return=1
+ 65656 16:44:52.047 Servo: 86 degrees.
+ 65660 16:44:53.237 SCAN echoes: angle=-4 valid=3/3 min=919 max=951 mm
+ 65661 16:44:53.253 SCAN point: t=2282398 ms angle=-4 range=951 mm return=1
+ 65662 16:44:53.253 Servo: 84 degrees.
+ 65665 16:44:53.253 SCAN echoes: angle=-6 valid=3/3 min=294 max=924 mm
+ 65666 16:44:53.253 SCAN point: t=2282838 ms angle=-6 range=302 mm return=1
+ 65668 16:44:53.446 Servo: 82 degrees.
+ 65670 16:44:53.446 Servo: 90 degrees.
+ 65671 16:44:53.446 State: OBSTACLE_SCAN -> STOPPED
+ 65876 16:45:35.133 Obstacle at 191 mm -> stopped.
+ 65877 16:45:35.133 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 65880 16:45:35.133 SCAN start: front=191 mm
+ 65882 16:45:35.388 SCAN echoes: angle=0 valid=2/3 min=143 max=153 mm
+ 65883 16:45:35.390 SCAN point: t=2325228 ms angle=0 range=148 mm return=1
+ 65884 16:45:35.392 Servo: 88 degrees.
+ 65888 16:45:35.844 SCAN echoes: angle=-2 valid=3/3 min=113 max=125 mm
+ 65889 16:45:35.848 SCAN point: t=2325676 ms angle=-2 range=121 mm return=1
+ 65890 16:45:35.852 Servo: 86 degrees.
+ 65892 16:45:36.211 SCAN echoes: angle=-4 valid=3/3 min=123 max=132 mm
+ 65893 16:45:36.824 SCAN point: t=2326126 ms angle=-4 range=125 mm return=1
+ 65894 16:45:36.832 Servo: 84 degrees.
+ 65897 16:45:36.992 SCAN echoes: angle=-6 valid=0/3 min=-1 max=-1 mm
+ 65898 16:45:36.992 SCAN point: t=2326616 ms angle=-6 range=-1 mm return=2
+ 65899 16:45:36.992 Servo: 82 degrees.
+ 65905 16:45:37.332 Servo: 90 degrees.
+ 65906 16:45:37.332 State: OBSTACLE_SCAN -> STOPPED
+ 66415 16:47:22.774 Obstacle at 189 mm -> stopped.
+ 66416 16:47:22.778 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 66419 16:47:22.785 SCAN start: front=189 mm
+ 66421 16:47:22.787 SCAN echoes: angle=0 valid=2/3 min=224 max=235 mm
+ 66422 16:47:22.787 SCAN point: t=2432446 ms angle=0 range=229 mm return=1
+ 66423 16:47:22.842 Servo: 88 degrees.
+ 66425 16:47:23.177 SCAN echoes: angle=-2 valid=1/3 min=222 max=222 mm
+ 66426 16:47:23.179 SCAN point: t=2432936 ms angle=-2 range=222 mm return=3
+ 66427 16:47:23.179 Servo: 86 degrees.
+ 66431 16:47:23.723 SCAN echoes: angle=-4 valid=0/3 min=-1 max=-1 mm
+ 66432 16:47:23.726 SCAN point: t=2433428 ms angle=-4 range=-1 mm return=2
+ 66433 16:47:23.726 Servo: 84 degrees.
+ 66436 16:47:24.061 SCAN echoes: angle=-6 valid=0/3 min=-1 max=-1 mm
+ 66437 16:47:24.072 SCAN point: t=2433906 ms angle=-6 range=-1 mm return=2
+ 66438 16:47:24.075 Servo: 82 degrees.
+ 66441 16:47:24.475 SCAN echoes: angle=-8 valid=0/3 min=-1 max=-1 mm
+ 66442 16:47:24.609 SCAN point: t=2434386 ms angle=-8 range=-1 mm return=2
+ 66443 16:47:24.609 Servo: 80 degrees.
+ 66446 16:47:24.985 SCAN echoes: angle=-10 valid=1/3 min=218 max=218 mm
+ 66447 16:47:24.996 SCAN point: t=2434846 ms angle=-10 range=218 mm return=3
+ 66448 16:47:24.996 Servo: 78 degrees.
+ 66455 16:47:26.730 Servo: 90 degrees.
+ 66456 16:47:26.730 State: OBSTACLE_SCAN -> STOPPED
+ 66587 16:47:52.210 Obstacle at 140 mm -> stopped.
+ 66588 16:47:52.312 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 66591 16:47:52.326 SCAN start: front=140 mm
+ 66593 16:47:52.388 SCAN echoes: angle=0 valid=2/3 min=101 max=111 mm
+ 66594 16:47:52.388 SCAN point: t=2462226 ms angle=0 range=106 mm return=1
+ 66595 16:47:52.388 Servo: 88 degrees.
+ 66598 16:47:52.807 SCAN echoes: angle=-2 valid=3/3 min=103 max=105 mm
+ 66599 16:47:52.819 SCAN point: t=2462678 ms angle=-2 range=105 mm return=1
+ 66600 16:47:52.823 Servo: 86 degrees.
+ 66603 16:47:53.234 SCAN echoes: angle=-4 valid=1/3 min=614 max=614 mm
+ 66604 16:47:53.234 SCAN point: t=2463126 ms angle=-4 range=614 mm return=3
+ 66605 16:47:53.241 Servo: 84 degrees.
+ 66611 16:47:53.536 Servo: 90 degrees.
+ 66612 16:47:53.536 State: OBSTACLE_SCAN -> STOPPED
+ 66733 16:48:19.373 Obstacle at 216 mm -> stopped.
+ 66734 16:48:19.373 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 66737 16:48:19.378 SCAN start: front=216 mm
+ 66738 16:48:19.624 SCAN echoes: angle=0 valid=1/3 min=222 max=222 mm
+ 66739 16:48:19.626 SCAN point: t=2488418 ms angle=0 range=222 mm return=3
+ 66740 16:48:19.628 Servo: 88 degrees.
+ 66741 16:48:19.630 SCAN echoes: angle=-2 valid=0/3 min=-1 max=-1 mm
+ 66742 16:48:19.630 SCAN point: t=2488898 ms angle=-2 range=-1 mm return=2
+ 66743 16:48:19.630 Servo: 86 degrees.
+ 66746 16:48:19.783 SCAN echoes: angle=-4 valid=0/3 min=-1 max=-1 mm
+ 66747 16:48:19.787 SCAN point: t=2489369 ms angle=-4 range=-1 mm return=2
+ 66748 16:48:19.789 Servo: 84 degrees.
+ 66751 16:48:20.167 SCAN echoes: angle=-6 valid=0/3 min=-1 max=-1 mm
+ 66752 16:48:20.185 SCAN point: t=2489858 ms angle=-6 range=-1 mm return=2
+ 66753 16:48:20.187 Servo: 82 degrees.
+ 66755 16:48:20.415 SCAN echoes: angle=-8 valid=0/3 min=-1 max=-1 mm
+ 66756 16:48:20.479 SCAN point: t=2490336 ms angle=-8 range=-1 mm return=2
+ 66757 16:48:20.495 Servo: 80 degrees.
+ 66762 16:48:20.696 Servo: 90 degrees.
+ 66763 16:48:20.696 State: OBSTACLE_SCAN -> STOPPED
+ 67015 16:49:49.990 Servo: 90 degrees.
+ 67833 16:52:56.867 Obstacle at 299 mm -> stopped.
+ 67834 16:52:56.867 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 67837 16:52:56.877 SCAN start: front=299 mm
+ 67839 16:52:56.877 SCAN echoes: angle=0 valid=3/3 min=302 max=302 mm
+ 67840 16:52:56.877 SCAN point: t=201198 ms angle=0 range=302 mm return=1
+ 67841 16:52:56.930 Servo: 88 degrees.
+ 67843 16:52:57.273 SCAN echoes: angle=-2 valid=3/3 min=300 max=302 mm
+ 67844 16:52:57.437 SCAN point: t=201660 ms angle=-2 range=301 mm return=1
+ 67845 16:52:57.437 Servo: 86 degrees.
+ 67848 16:52:57.778 SCAN echoes: angle=-4 valid=3/3 min=301 max=302 mm
+ 67849 16:52:57.787 SCAN point: t=202118 ms angle=-4 range=301 mm return=1
+ 67850 16:52:57.787 Servo: 84 degrees.
+ 67854 16:52:58.197 SCAN echoes: angle=-6 valid=3/3 min=301 max=301 mm
+ 67855 16:52:58.204 SCAN point: t=202578 ms angle=-6 range=301 mm return=1
+ 67856 16:52:58.207 Servo: 82 degrees.
+ 67859 16:52:58.842 SCAN echoes: angle=-8 valid=3/3 min=301 max=301 mm
+ 67860 16:52:58.847 SCAN point: t=203028 ms angle=-8 range=301 mm return=1
+ 67861 16:52:58.847 Servo: 80 degrees.
+ 67863 16:52:59.117 SCAN echoes: angle=-10 valid=3/3 min=301 max=311 mm
+ 67864 16:52:59.327 SCAN point: t=203478 ms angle=-10 range=301 mm return=1
+ 67865 16:52:59.327 Servo: 78 degrees.
+ 67868 16:52:59.696 SCAN echoes: angle=-12 valid=3/3 min=302 max=310 mm
+ 67869 16:52:59.696 SCAN point: t=203938 ms angle=-12 range=309 mm return=1
+ 67870 16:52:59.704 Servo: 76 degrees.
+ 67873 16:53:00.109 SCAN echoes: angle=-14 valid=3/3 min=308 max=310 mm
+ 67874 16:53:02.688 SCAN point: t=204401 ms angle=-14 range=309 mm return=1
+ 67875 16:53:02.688 Servo: 74 degrees.
+ 67879 16:53:02.898 SCAN echoes: angle=-16 valid=3/3 min=310 max=311 mm
+ 67880 16:53:02.898 SCAN point: t=204848 ms angle=-16 range=310 mm return=1
+ 67881 16:53:02.898 Servo: 72 degrees.
+ 67884 16:53:02.898 SCAN echoes: angle=-18 valid=3/3 min=302 max=310 mm
+ 67885 16:53:02.898 SCAN point: t=205298 ms angle=-18 range=310 mm return=1
+ 67886 16:53:03.194 Servo: 70 degrees.
+ 67887 16:53:03.201 SCAN echoes: angle=-20 valid=3/3 min=309 max=311 mm
+ 67888 16:53:03.201 SCAN point: t=205760 ms angle=-20 range=311 mm return=1
+ 67889 16:53:03.207 Servo: 68 degrees.
+ 67890 16:53:03.207 SCAN echoes: angle=-22 valid=3/3 min=310 max=311 mm
+ 67891 16:53:03.210 SCAN point: t=206218 ms angle=-22 range=311 mm return=1
+ 67892 16:53:03.210 Servo: 66 degrees.
+ 67893 16:53:03.212 SCAN echoes: angle=-24 valid=3/3 min=315 max=315 mm
+ 67894 16:53:03.400 SCAN point: t=206670 ms angle=-24 range=315 mm return=1
+ 67895 16:53:03.416 Servo: 64 degrees.
+ 67896 16:53:03.418 SCAN echoes: angle=-26 valid=3/3 min=319 max=328 mm
+ 67897 16:53:03.418 SCAN point: t=207128 ms angle=-26 range=323 mm return=1
+ 67898 16:53:03.418 Servo: 62 degrees.
+ 67900 16:53:03.418 SCAN echoes: angle=-28 valid=3/3 min=319 max=325 mm
+ 67901 16:53:03.418 SCAN point: t=207588 ms angle=-28 range=324 mm return=1
+ 67902 16:53:03.482 Servo: 60 degrees.
+ 67905 16:53:05.060 SCAN echoes: angle=-30 valid=3/3 min=319 max=342 mm
+ 67906 16:53:05.062 SCAN point: t=208030 ms angle=-30 range=325 mm return=1
+ 67908 16:53:05.062 Servo: 92 degrees.
+ 67911 16:53:05.062 SCAN echoes: angle=2 valid=3/3 min=300 max=302 mm
+ 67912 16:53:05.157 SCAN point: t=208488 ms angle=2 range=301 mm return=1
+ 67913 16:53:05.171 Servo: 94 degrees.
+ 67914 16:53:05.172 SCAN echoes: angle=4 valid=3/3 min=300 max=302 mm
+ 67915 16:53:05.172 SCAN point: t=208948 ms angle=4 range=302 mm return=1
+ 67916 16:53:05.178 Servo: 96 degrees.
+ 67917 16:53:05.178 SCAN echoes: angle=6 valid=3/3 min=301 max=311 mm
+ 67918 16:53:05.178 SCAN point: t=209398 ms angle=6 range=301 mm return=1
+ 67919 16:53:05.178 Servo: 98 degrees.
+ 67921 16:53:05.565 SCAN echoes: angle=8 valid=3/3 min=301 max=310 mm
+ 67922 16:53:05.565 SCAN point: t=209848 ms angle=8 range=302 mm return=1
+ 67923 16:53:05.565 Servo: 100 degrees.
+ 67926 16:53:06.001 SCAN echoes: angle=10 valid=3/3 min=301 max=309 mm
+ 67927 16:53:06.001 SCAN point: t=210300 ms angle=10 range=301 mm return=1
+ 67928 16:53:06.007 Servo: 102 degrees.
+ 67932 16:53:06.489 SCAN echoes: angle=12 valid=3/3 min=309 max=310 mm
+ 67933 16:53:06.501 SCAN point: t=210758 ms angle=12 range=310 mm return=1
+ 67934 16:53:06.501 Servo: 104 degrees.
+ 67936 16:53:07.497 SCAN echoes: angle=14 valid=3/3 min=310 max=310 mm
+ 67937 16:53:07.759 SCAN point: t=211210 ms angle=14 range=310 mm return=1
+ 67938 16:53:07.775 Servo: 106 degrees.
+ 67941 16:53:07.775 SCAN echoes: angle=16 valid=3/3 min=309 max=310 mm
+ 67942 16:53:07.775 SCAN point: t=211670 ms angle=16 range=310 mm return=1
+ 67943 16:53:07.775 Servo: 108 degrees.
+ 67945 16:53:08.223 SCAN echoes: angle=18 valid=3/3 min=308 max=313 mm
+ 67946 16:53:08.227 SCAN point: t=212130 ms angle=18 range=310 mm return=1
+ 67947 16:53:08.227 Servo: 110 degrees.
+ 67951 16:53:08.318 SCAN echoes: angle=20 valid=3/3 min=313 max=314 mm
+ 67952 16:53:08.323 SCAN point: t=212588 ms angle=20 range=313 mm return=1
+ 67953 16:53:08.323 Servo: 112 degrees.
+ 67956 16:53:09.121 SCAN echoes: angle=22 valid=3/3 min=308 max=317 mm
+ 67957 16:53:09.121 SCAN point: t=213050 ms angle=22 range=315 mm return=1
+ 67958 16:53:09.121 Servo: 114 degrees.
+ 67961 16:53:09.421 SCAN echoes: angle=24 valid=3/3 min=323 max=332 mm
+ 67962 16:53:09.435 SCAN point: t=213508 ms angle=24 range=326 mm return=1
+ 67963 16:53:09.435 Servo: 116 degrees.
+ 67965 16:53:10.140 SCAN echoes: angle=26 valid=3/3 min=333 max=344 mm
+ 67966 16:53:10.154 SCAN point: t=213968 ms angle=26 range=340 mm return=1
+ 67967 16:53:10.156 Servo: 118 degrees.
+ 67970 16:53:10.351 SCAN echoes: angle=28 valid=3/3 min=326 max=331 mm
+ 67971 16:53:10.357 SCAN point: t=214418 ms angle=28 range=327 mm return=1
+ 67972 16:53:10.359 Servo: 120 degrees.
+ 67976 16:53:10.966 SCAN echoes: angle=30 valid=3/3 min=338 max=343 mm
+ 67977 16:53:10.966 SCAN point: t=214868 ms angle=30 range=342 mm return=1
+ 67978 16:53:10.966 Servo: 90 degrees.
+ 67979 16:53:10.982 SCAN left edge: x=-163 y=281 range=325 mm; -30 to -30 deg (estimated at scan limit)
+ 67980 16:53:10.982 inf2004/aai14/supercar/obstacle {"front":302,"left":-163,"right":171,"mid":4,"width":334,"lst":"estimated at scan limit","rst":"estimated at scan limit","calibrated_width":null,"left_angle_x10":-300,"right_angle_x10":300,"t":214878}
+ 67981 16:53:10.982 SCAN right edge: x=171 y=296 range=342 mm; 30 to 30 deg (estimated at scan limit)
+ 67982 16:53:10.982 SCAN apparent width=334 mm; sampling interval=334..334 mm
+ 67983 16:53:10.982 SCAN middle: x=4 y=289 range=289 mm; centre ray=302 mm
+ 67984 16:53:10.982 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 67985 16:53:10.993 SCAN no bypass candidate. Staying braked.
+ 67986 16:53:10.993 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 67987 16:53:10.997 BYPASS fixed test: plan, heading 0 deg.
+ 67988 16:53:10.997 State: OBSTACLE_SCAN -> BYPASS
+ 67989 16:53:10.997 BYPASS plan: offset=219 mm, departure=43 deg/321 mm, pass=297 mm, return=65 deg/242 mm, path=86
+ 67990 16:53:10.997 BYPASS fixed test: pivot, heading 0 deg.
+ 67994 16:53:11.896 BYPASS fixed test: out, heading -43 deg.
+ 67995 16:53:11.976 BYPASS pose (out): x=0 z=0 mm, heading -43 deg, wheels L0 R0.
+ 67999 16:53:14.436 BYPASS pose (out): x=-22 z=23 mm, heading -44 deg, wheels L12 R12.
+ 68002 16:53:14.440 BYPASS pose (out): x=-47 z=49 mm, heading -44 deg, wheels L12 R12.
+ 68005 16:53:14.440 BYPASS pose (out): x=-71 z=74 mm, heading -44 deg, wheels L12 R12.
+ 68007 16:53:14.557 BYPASS pose (out): x=-96 z=99 mm, heading -44 deg, wheels L13 R11.
+ 68008 16:53:14.557 BYPASS pose (out): x=-120 z=125 mm, heading -44 deg, wheels L12 R12.
+ 68010 16:53:15.094 BYPASS pose (out): x=-145 z=151 mm, heading -44 deg, wheels L12 R12.
+ 68013 16:53:15.396 BYPASS pose (out): x=-169 z=176 mm, heading -43 deg, wheels L12 R12.
+ 68016 16:53:15.970 BYPASS pose (out): x=-193 z=201 mm, heading -44 deg, wheels L12 R12.
+ 68020 16:53:16.615 BYPASS pose (out): x=-218 z=227 mm, heading -44 deg, wheels L12 R12.
+ 68022 16:53:16.615 BYPASS fixed test: brake, heading -44 deg.
+ 68023 16:53:17.288 BYPASS fixed test: pivot, heading -44 deg.
+ 68028 16:53:17.808 BYPASS fixed test: pass, heading 0 deg.
+ 68029 16:53:17.816 BYPASS pose (pass): x=-220 z=229 mm, heading 0 deg, wheels L0 R0.
+ 68033 16:53:18.367 BYPASS pose (pass): x=-220 z=263 mm, heading 0 deg, wheels L12 R12.
+ 68036 16:53:19.063 BYPASS pose (pass): x=-221 z=298 mm, heading -1 deg, wheels L12 R12.
+ 68039 16:53:19.159 BYPASS pose (pass): x=-221 z=334 mm, heading -1 deg, wheels L13 R11.
+ 68042 16:53:19.694 BYPASS pose (pass): x=-222 z=368 mm, heading -1 deg, wheels L12 R12.
+ 68046 16:53:20.371 BYPASS pose (pass): x=-222 z=403 mm, heading -1 deg, wheels L12 R12.
+ 68049 16:53:22.658 BYPASS pose (pass): x=-223 z=438 mm, heading -1 deg, wheels L12 R12.
+ 68052 16:53:22.658 BYPASS pose (pass): x=-224 z=473 mm, heading -1 deg, wheels L12 R12.
+ 68056 16:53:22.665 BYPASS pose (pass): x=-224 z=508 mm, heading -1 deg, wheels L12 R12.
+ 68057 16:53:22.762 BYPASS fixed test: brake, heading -1 deg.
+ 68058 16:53:22.772 BYPASS fixed test: pivot, heading -1 deg.
+ 68063 16:53:23.861 BYPASS fixed test: return, heading 66 deg.
+ 68064 16:53:23.868 BYPASS pose (return): x=-225 z=534 mm, heading 66 deg, wheels L0 R0.
+ 68067 16:53:24.130 BYPASS pose (return): x=-197 z=546 mm, heading 66 deg, wheels L12 R12.
+ 68071 16:53:24.678 BYPASS pose (return): x=-165 z=561 mm, heading 65 deg, wheels L12 R12.
+ 68074 16:53:25.023 BYPASS pose (return): x=-133 z=576 mm, heading 64 deg, wheels L13 R11.
+ 68077 16:53:25.749 BYPASS pose (return): x=-102 z=591 mm, heading 64 deg, wheels L12 R12.
+ 68080 16:53:26.160 BYPASS pose (return): x=-70 z=607 mm, heading 64 deg, wheels L12 R12.
+ 68083 16:53:27.261 BYPASS fixed test: advance, heading 64 deg.
+ 68087 16:53:27.471 BYPASS fixed test: brake, heading 64 deg.
+ 68089 16:53:27.473 BYPASS fixed test: align, heading 64 deg.
+ 68096 16:53:28.381 State: BYPASS -> FOLLOW_LINE
+ 68310 16:54:22.055 Obstacle at 299 mm -> stopped.
+ 68311 16:54:22.055 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 68314 16:54:22.055 SCAN start: front=299 mm
+ 68316 16:54:22.153 SCAN echoes: angle=0 valid=3/3 min=301 max=303 mm
+ 68317 16:54:22.156 SCAN point: t=286509 ms angle=0 range=301 mm return=1
+ 68318 16:54:22.158 Servo: 88 degrees.
+ 68321 16:54:22.564 SCAN echoes: angle=-2 valid=3/3 min=302 max=303 mm
+ 68322 16:54:22.663 SCAN point: t=286959 ms angle=-2 range=302 mm return=1
+ 68323 16:54:22.663 Servo: 86 degrees.
+ 68326 16:54:23.290 SCAN echoes: angle=-4 valid=3/3 min=302 max=303 mm
+ 68327 16:54:23.292 SCAN point: t=287419 ms angle=-4 range=302 mm return=1
+ 68328 16:54:23.294 Servo: 84 degrees.
+ 68331 16:54:26.025 SCAN echoes: angle=-6 valid=3/3 min=301 max=303 mm
+ 68332 16:54:26.025 SCAN point: t=287869 ms angle=-6 range=303 mm return=1
+ 68333 16:54:26.025 Servo: 82 degrees.
+ 68336 16:54:26.150 SCAN echoes: angle=-8 valid=3/3 min=301 max=302 mm
+ 68337 16:54:26.166 SCAN point: t=288331 ms angle=-8 range=301 mm return=1
+ 68338 16:54:26.169 Servo: 80 degrees.
+ 68342 16:54:26.247 SCAN echoes: angle=-10 valid=3/3 min=301 max=302 mm
+ 68343 16:54:26.247 SCAN point: t=288781 ms angle=-10 range=302 mm return=1
+ 68344 16:54:26.247 Servo: 78 degrees.
+ 68345 16:54:26.247 SCAN echoes: angle=-12 valid=3/3 min=309 max=311 mm
+ 68346 16:54:26.247 SCAN point: t=289239 ms angle=-12 range=310 mm return=1
+ 68347 16:54:26.247 Servo: 76 degrees.
+ 68348 16:54:26.263 SCAN echoes: angle=-14 valid=3/3 min=302 max=311 mm
+ 68349 16:54:26.263 SCAN point: t=289701 ms angle=-14 range=307 mm return=1
+ 68350 16:54:26.327 Servo: 74 degrees.
+ 68351 16:54:26.327 SCAN echoes: angle=-16 valid=3/3 min=310 max=312 mm
+ 68352 16:54:26.327 SCAN point: t=290159 ms angle=-16 range=311 mm return=1
+ 68353 16:54:26.327 Servo: 72 degrees.
+ 68354 16:54:26.327 SCAN echoes: angle=-18 valid=3/3 min=303 max=311 mm
+ 68355 16:54:26.327 SCAN point: t=290609 ms angle=-18 range=307 mm return=1
+ 68356 16:54:26.327 Servo: 70 degrees.
+ 68359 16:54:26.761 SCAN echoes: angle=-20 valid=3/3 min=307 max=311 mm
+ 68360 16:54:26.779 SCAN point: t=291049 ms angle=-20 range=310 mm return=1
+ 68361 16:54:26.781 Servo: 68 degrees.
+ 68363 16:54:27.440 SCAN echoes: angle=-22 valid=3/3 min=307 max=312 mm
+ 68364 16:54:27.507 SCAN point: t=291509 ms angle=-22 range=308 mm return=1
+ 68365 16:54:27.512 Servo: 66 degrees.
+ 68368 16:54:27.665 SCAN echoes: angle=-24 valid=3/3 min=306 max=316 mm
+ 68369 16:54:27.762 SCAN point: t=291972 ms angle=-24 range=311 mm return=1
+ 68370 16:54:27.762 Servo: 64 degrees.
+ 68373 16:54:28.268 SCAN echoes: angle=-26 valid=3/3 min=311 max=312 mm
+ 68374 16:54:28.471 SCAN point: t=292431 ms angle=-26 range=311 mm return=1
+ 68375 16:54:28.471 Servo: 62 degrees.
+ 68379 16:54:30.728 SCAN echoes: angle=-28 valid=3/3 min=315 max=317 mm
+ 68380 16:54:30.730 SCAN point: t=292889 ms angle=-28 range=315 mm return=1
+ 68381 16:54:30.732 Servo: 60 degrees.
+ 68384 16:54:30.842 SCAN echoes: angle=-30 valid=3/3 min=328 max=345 mm
+ 68385 16:54:30.844 SCAN point: t=293349 ms angle=-30 range=333 mm return=1
+ 68387 16:54:30.846 Servo: 92 degrees.
+ 68390 16:54:31.035 SCAN echoes: angle=2 valid=3/3 min=309 max=311 mm
+ 68391 16:54:31.035 SCAN point: t=293811 ms angle=2 range=310 mm return=1
+ 68392 16:54:31.035 Servo: 94 degrees.
+ 68393 16:54:31.046 SCAN echoes: angle=4 valid=3/3 min=310 max=311 mm
+ 68394 16:54:31.046 SCAN point: t=294271 ms angle=4 range=310 mm return=1
+ 68395 16:54:31.046 Servo: 96 degrees.
+ 68396 16:54:31.046 SCAN echoes: angle=6 valid=3/3 min=311 max=312 mm
+ 68397 16:54:31.051 SCAN point: t=294731 ms angle=6 range=311 mm return=1
+ 68398 16:54:31.151 Servo: 98 degrees.
+ 68399 16:54:31.151 SCAN echoes: angle=8 valid=3/3 min=310 max=315 mm
+ 68400 16:54:31.151 SCAN point: t=295179 ms angle=8 range=310 mm return=1
+ 68401 16:54:31.151 Servo: 100 degrees.
+ 68403 16:54:31.276 SCAN echoes: angle=10 valid=3/3 min=314 max=315 mm
+ 68404 16:54:31.276 SCAN point: t=295629 ms angle=10 range=314 mm return=1
+ 68405 16:54:31.276 Servo: 102 degrees.
+ 68408 16:54:31.782 SCAN echoes: angle=12 valid=3/3 min=316 max=319 mm
+ 68409 16:54:31.782 SCAN point: t=296081 ms angle=12 range=319 mm return=1
+ 68410 16:54:31.793 Servo: 104 degrees.
+ 68414 16:54:32.275 SCAN echoes: angle=14 valid=3/3 min=315 max=333 mm
+ 68415 16:54:32.279 SCAN point: t=296532 ms angle=14 range=320 mm return=1
+ 68416 16:54:32.281 Servo: 106 degrees.
+ 68418 16:54:32.615 SCAN echoes: angle=16 valid=3/3 min=325 max=338 mm
+ 68419 16:54:32.615 SCAN point: t=296979 ms angle=16 range=332 mm return=1
+ 68420 16:54:32.620 Servo: 108 degrees.
+ 68423 16:54:33.075 SCAN echoes: angle=18 valid=3/3 min=323 max=333 mm
+ 68424 16:54:33.246 SCAN point: t=297441 ms angle=18 range=325 mm return=1
+ 68425 16:54:33.250 Servo: 110 degrees.
+ 68428 16:54:33.522 SCAN echoes: angle=20 valid=3/3 min=324 max=324 mm
+ 68429 16:54:33.683 SCAN point: t=297889 ms angle=20 range=324 mm return=1
+ 68430 16:54:33.683 Servo: 112 degrees.
+ 68433 16:54:34.121 SCAN echoes: angle=22 valid=3/3 min=327 max=358 mm
+ 68434 16:54:34.123 SCAN point: t=298349 ms angle=22 range=337 mm return=1
+ 68435 16:54:34.123 Servo: 114 degrees.
+ 68439 16:54:34.427 SCAN echoes: angle=24 valid=3/3 min=345 max=362 mm
+ 68440 16:54:34.439 SCAN point: t=298809 ms angle=24 range=345 mm return=1
+ 68441 16:54:34.439 Servo: 116 degrees.
+ 68444 16:54:35.157 SCAN echoes: angle=26 valid=2/3 min=379 max=384 mm
+ 68445 16:54:35.157 SCAN point: t=299282 ms angle=26 range=381 mm return=1
+ 68446 16:54:35.157 Servo: 118 degrees.
+ 68448 16:54:35.351 SCAN echoes: angle=28 valid=0/3 min=-1 max=-1 mm
+ 68449 16:54:35.582 SCAN point: t=299751 ms angle=28 range=-1 mm return=2
+ 68450 16:54:35.582 Servo: 120 degrees.
+ 68453 16:54:35.831 SCAN echoes: angle=30 valid=0/3 min=-1 max=-1 mm
+ 68454 16:54:35.929 SCAN point: t=300229 ms angle=30 range=-1 mm return=2
+ 68455 16:54:35.940 Servo: 90 degrees.
+ 68456 16:54:35.942 SCAN left edge: x=-166 y=288 range=333 mm; -30 to -30 deg (estimated at scan limit)
+ 68457 16:54:35.942 inf2004/aai14/supercar/obstacle {"front":301,"left":-166,"right":174,"mid":4,"width":340,"lst":"estimated at scan limit","rst":"missing echoes","calibrated_width":null,"left_angle_x10":-300,"right_angle_x10":270,"t":300240}
+ 68458 16:54:35.942 SCAN right edge: x=174 y=342 range=384 mm; 26 to 28 deg (missing echoes)
+ 68459 16:54:35.942 SCAN apparent width=340 mm; sampling interval=333..349 mm
+ 68460 16:54:35.942 SCAN middle: x=4 y=315 range=315 mm; centre ray=301 mm
+ 68461 16:54:36.074 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 68462 16:54:36.074 SCAN no bypass candidate. Staying braked.
+ 68463 16:54:36.087 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 68464 16:54:36.089 BYPASS fixed test: plan, heading 0 deg.
+ 68465 16:54:36.091 State: OBSTACLE_SCAN -> BYPASS
+ 68468 16:54:36.261 BYPASS plan: offset=219 mm, departure=43 deg/321 mm, pass=296 mm, return=65 deg/242 mm, path=85
+ 68469 16:54:36.263 BYPASS fixed test: pivot, heading 0 deg.
+ 68474 16:54:38.629 BYPASS fixed test: out, heading -44 deg.
+ 68475 16:54:38.631 BYPASS pose (out): x=0 z=0 mm, heading -44 deg, wheels L0 R0.
+ 68478 16:54:38.633 BYPASS pose (out): x=-20 z=21 mm, heading -44 deg, wheels L12 R12.
+ 68480 16:54:39.044 BYPASS pose (out): x=-45 z=46 mm, heading -44 deg, wheels L12 R12.
+ 68482 16:54:39.060 BYPASS pose (out): x=-70 z=72 mm, heading -44 deg, wheels L12 R12.
+ 68485 16:54:39.255 BYPASS pose (out): x=-94 z=98 mm, heading -44 deg, wheels L12 R12.
+ 68488 16:54:39.867 BYPASS pose (out): x=-118 z=123 mm, heading -45 deg, wheels L13 R11.
+ 68489 16:54:39.883 State: BYPASS -> STOPPED
+ 68636 16:55:16.322 Obstacle at 296 mm -> stopped.
+ 68637 16:55:16.322 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 68640 16:55:16.322 SCAN start: front=296 mm
+ 68642 16:55:17.460 SCAN echoes: angle=0 valid=3/3 min=298 max=305 mm
+ 68643 16:55:17.460 SCAN point: t=340861 ms angle=0 range=302 mm return=1
+ 68644 16:55:17.460 Servo: 88 degrees.
+ 68646 16:55:17.548 SCAN echoes: angle=-2 valid=3/3 min=297 max=303 mm
+ 68647 16:55:17.548 SCAN point: t=341321 ms angle=-2 range=303 mm return=1
+ 68648 16:55:17.548 Servo: 86 degrees.
+ 68651 16:55:17.556 SCAN echoes: angle=-4 valid=3/3 min=293 max=303 mm
+ 68652 16:55:17.557 SCAN point: t=341783 ms angle=-4 range=302 mm return=1
+ 68653 16:55:17.657 Servo: 84 degrees.
+ 68655 16:55:17.860 SCAN echoes: angle=-6 valid=3/3 min=293 max=302 mm
+ 68656 16:55:17.860 SCAN point: t=342241 ms angle=-6 range=293 mm return=1
+ 68657 16:55:17.876 Servo: 82 degrees.
+ 68661 16:55:18.570 SCAN echoes: angle=-8 valid=3/3 min=293 max=303 mm
+ 68662 16:55:18.570 SCAN point: t=342701 ms angle=-8 range=297 mm return=1
+ 68663 16:55:18.570 Servo: 80 degrees.
+ 68666 16:55:18.958 SCAN echoes: angle=-10 valid=3/3 min=293 max=303 mm
+ 68667 16:55:18.970 SCAN point: t=343151 ms angle=-10 range=298 mm return=1
+ 68668 16:55:18.972 Servo: 78 degrees.
+ 68671 16:55:20.506 SCAN echoes: angle=-12 valid=3/3 min=297 max=298 mm
+ 68672 16:55:20.509 SCAN point: t=343601 ms angle=-12 range=298 mm return=1
+ 68673 16:55:20.509 Servo: 76 degrees.
+ 68675 16:55:20.656 SCAN echoes: angle=-14 valid=3/3 min=292 max=303 mm
+ 68676 16:55:20.656 SCAN point: t=344063 ms angle=-14 range=299 mm return=1
+ 68677 16:55:20.656 Servo: 74 degrees.
+ 68681 16:55:20.656 SCAN echoes: angle=-16 valid=3/3 min=297 max=303 mm
+ 68682 16:55:20.937 SCAN point: t=344521 ms angle=-16 range=302 mm return=1
+ 68683 16:55:20.937 Servo: 72 degrees.
+ 68684 16:55:20.953 SCAN echoes: angle=-18 valid=3/3 min=298 max=303 mm
+ 68685 16:55:20.955 SCAN point: t=344973 ms angle=-18 range=299 mm return=1
+ 68686 16:55:20.955 Servo: 70 degrees.
+ 68689 16:55:21.122 SCAN echoes: angle=-20 valid=3/3 min=297 max=299 mm
+ 68690 16:55:21.122 SCAN point: t=345421 ms angle=-20 range=298 mm return=1
+ 68691 16:55:21.122 Servo: 68 degrees.
+ 68694 16:55:21.751 SCAN echoes: angle=-22 valid=3/3 min=298 max=306 mm
+ 68695 16:55:21.751 SCAN point: t=345871 ms angle=-22 range=302 mm return=1
+ 68696 16:55:21.760 Servo: 66 degrees.
+ 68698 16:55:22.050 SCAN echoes: angle=-24 valid=3/3 min=302 max=312 mm
+ 68699 16:55:22.268 SCAN point: t=346333 ms angle=-24 range=302 mm return=1
+ 68700 16:55:22.270 Servo: 64 degrees.
+ 68704 16:55:22.476 SCAN echoes: angle=-26 valid=3/3 min=310 max=312 mm
+ 68705 16:55:22.476 SCAN point: t=346781 ms angle=-26 range=312 mm return=1
+ 68706 16:55:22.480 Servo: 62 degrees.
+ 68709 16:55:22.967 SCAN echoes: angle=-28 valid=3/3 min=312 max=315 mm
+ 68710 16:55:22.967 SCAN point: t=347241 ms angle=-28 range=315 mm return=1
+ 68711 16:55:22.975 Servo: 60 degrees.
+ 68714 16:55:23.386 SCAN echoes: angle=-30 valid=3/3 min=320 max=351 mm
+ 68715 16:55:23.386 SCAN point: t=347693 ms angle=-30 range=333 mm return=1
+ 68717 16:55:23.398 Servo: 92 degrees.
+ 68720 16:55:23.795 SCAN echoes: angle=2 valid=3/3 min=298 max=311 mm
+ 68721 16:55:23.811 SCAN point: t=348153 ms angle=2 range=298 mm return=1
+ 68722 16:55:23.813 Servo: 94 degrees.
+ 68726 16:55:24.421 SCAN echoes: angle=4 valid=3/3 min=297 max=303 mm
+ 68727 16:55:24.425 SCAN point: t=348602 ms angle=4 range=302 mm return=1
+ 68728 16:55:24.425 Servo: 96 degrees.
+ 68730 16:55:24.899 SCAN echoes: angle=6 valid=3/3 min=301 max=311 mm
+ 68731 16:55:24.899 SCAN point: t=349061 ms angle=6 range=302 mm return=1
+ 68732 16:55:24.899 Servo: 98 degrees.
+ 68735 16:55:25.210 SCAN echoes: angle=8 valid=3/3 min=306 max=310 mm
+ 68736 16:55:25.401 SCAN point: t=349511 ms angle=8 range=307 mm return=1
+ 68737 16:55:25.410 Servo: 100 degrees.
+ 68740 16:55:25.859 SCAN echoes: angle=10 valid=3/3 min=311 max=316 mm
+ 68741 16:55:25.863 SCAN point: t=349974 ms angle=10 range=312 mm return=1
+ 68742 16:55:25.865 Servo: 102 degrees.
+ 68745 16:55:26.043 SCAN echoes: angle=12 valid=3/3 min=310 max=316 mm
+ 68746 16:55:26.625 SCAN point: t=350434 ms angle=12 range=315 mm return=1
+ 68747 16:55:26.629 Servo: 104 degrees.
+ 68751 16:55:26.694 SCAN echoes: angle=14 valid=3/3 min=317 max=324 mm
+ 68752 16:55:26.694 SCAN point: t=350881 ms angle=14 range=320 mm return=1
+ 68753 16:55:26.702 Servo: 106 degrees.
+ 68755 16:55:27.063 SCAN echoes: angle=16 valid=3/3 min=315 max=320 mm
+ 68756 16:55:27.077 SCAN point: t=351331 ms angle=16 range=315 mm return=1
+ 68757 16:55:27.079 Servo: 108 degrees.
+ 68760 16:55:27.443 SCAN echoes: angle=18 valid=3/3 min=319 max=325 mm
+ 68761 16:55:27.507 SCAN point: t=351781 ms angle=18 range=320 mm return=1
+ 68762 16:55:27.507 Servo: 110 degrees.
+ 68765 16:55:27.893 SCAN echoes: angle=20 valid=3/3 min=337 max=364 mm
+ 68766 16:55:27.993 SCAN point: t=352231 ms angle=20 range=342 mm return=1
+ 68767 16:55:28.009 Servo: 112 degrees.
+ 68771 16:55:28.390 SCAN echoes: angle=22 valid=3/3 min=350 max=358 mm
+ 68772 16:55:28.405 SCAN point: t=352681 ms angle=22 range=351 mm return=1
+ 68773 16:55:28.405 Servo: 114 degrees.
+ 68776 16:55:31.651 SCAN echoes: angle=24 valid=3/3 min=816 max=824 mm
+ 68777 16:55:31.653 SCAN point: t=353143 ms angle=24 range=819 mm return=1
+ 68778 16:55:31.653 Servo: 116 degrees.
+ 68781 16:55:31.657 SCAN echoes: angle=26 valid=2/3 min=852 max=871 mm
+ 68782 16:55:31.657 SCAN point: t=353603 ms angle=26 range=861 mm return=1
+ 68783 16:55:31.742 Servo: 118 degrees.
+ 68784 16:55:31.742 SCAN echoes: angle=28 valid=3/3 min=823 max=862 mm
+ 68785 16:55:31.750 SCAN point: t=354061 ms angle=28 range=842 mm return=1
+ 68786 16:55:31.750 Servo: 120 degrees.
+ 68788 16:55:31.752 SCAN echoes: angle=30 valid=2/3 min=833 max=861 mm
+ 68789 16:55:31.755 SCAN point: t=354511 ms angle=30 range=847 mm return=1
+ 68790 16:55:31.755 Servo: 90 degrees.
+ 68792 16:55:32.622 SCAN left edge: x=-166 y=288 range=333 mm; -30 to -30 deg (estimated at scan limit)
+ 68793 16:55:32.624 SCAN right edge: x=138 y=325 range=354 mm; 22 to 24 deg (echo-bracketed)
+ 68794 16:55:32.626 SCAN apparent width=304 mm; sampling interval=297..312 mm
+ 68795 16:55:32.628 SCAN middle: x=-14 y=307 range=307 mm; centre ray=302 mm
+ 68796 16:55:32.630 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 68797 16:55:32.630 SCAN no bypass candidate. Staying braked.
+ 68798 16:55:32.632 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 68799 16:55:32.823 BYPASS fixed test: plan, heading 0 deg.
+ 68800 16:55:32.824 State: OBSTACLE_SCAN -> BYPASS
+ 68801 16:55:32.828 BYPASS plan: offset=219 mm, departure=43 deg/321 mm, pass=297 mm, return=65 deg/242 mm, path=86
+ 68802 16:55:32.828 BYPASS fixed test: pivot, heading 0 deg.
+ 68803 16:55:32.828 BYPASS fixed test: out, heading -44 deg.
+ 68804 16:55:32.828 BYPASS pose (out): x=0 z=0 mm, heading -44 deg, wheels L0 R0.
+ 68805 16:55:32.828 BYPASS pose (out): x=-21 z=21 mm, heading -44 deg, wheels L12 R12.
+ 68807 16:55:32.964 BYPASS pose (out): x=-45 z=47 mm, heading -44 deg, wheels L12 R12.
+ 68809 16:55:33.229 BYPASS pose (out): x=-69 z=71 mm, heading -44 deg, wheels L12 R12.
+ 68812 16:55:33.582 BYPASS pose (out): x=-93 z=97 mm, heading -45 deg, wheels L13 R11.
+ 68815 16:55:34.097 BYPASS pose (out): x=-117 z=122 mm, heading -44 deg, wheels L12 R12.
+ 68819 16:55:34.447 BYPASS pose (out): x=-141 z=146 mm, heading -44 deg, wheels L12 R12.
+ 68822 16:55:34.950 BYPASS pose (out): x=-165 z=171 mm, heading -43 deg, wheels L12 R12.
+ 68825 16:55:35.474 BYPASS pose (out): x=-189 z=197 mm, heading -43 deg, wheels L12 R12.
+ 68828 16:55:35.974 BYPASS pose (out): x=-213 z=222 mm, heading -44 deg, wheels L12 R12.
+ 68831 16:55:36.180 BYPASS fixed test: brake, heading -44 deg.
+ 68833 16:55:36.474 BYPASS fixed test: pivot, heading -44 deg.
+ 68838 16:55:37.373 BYPASS fixed test: pass, heading 2 deg.
+ 68839 16:55:37.373 BYPASS pose (pass): x=-220 z=229 mm, heading 2 deg, wheels L0 R0.
+ 68842 16:55:37.921 BYPASS pose (pass): x=-220 z=261 mm, heading 0 deg, wheels L12 R12.
+ 68846 16:55:38.491 BYPASS pose (pass): x=-220 z=296 mm, heading 0 deg, wheels L12 R12.
+ 68849 16:55:39.120 BYPASS pose (pass): x=-220 z=332 mm, heading 0 deg, wheels L12 R12.
+ 68852 16:55:39.730 BYPASS pose (pass): x=-220 z=367 mm, heading -1 deg, wheels L12 R12.
+ 68855 16:55:39.859 BYPASS pose (pass): x=-221 z=403 mm, heading -1 deg, wheels L12 R12.
+ 68859 16:55:40.405 BYPASS pose (pass): x=-221 z=438 mm, heading -1 deg, wheels L13 R11.
+ 68862 16:55:40.916 BYPASS pose (pass): x=-222 z=472 mm, heading -1 deg, wheels L12 R12.
+ 68865 16:55:41.979 BYPASS pose (pass): x=-222 z=507 mm, heading -1 deg, wheels L12 R12.
+ 68867 16:55:41.987 BYPASS fixed test: brake, heading -1 deg.
+ 68869 16:55:41.987 BYPASS fixed test: pivot, heading -1 deg.
+ 68876 16:55:47.351 BYPASS fixed test: return, heading 67 deg.
+ 68877 16:55:47.353 BYPASS pose (return): x=-223 z=534 mm, heading 67 deg, wheels L0 R0.
+ 68879 16:55:47.357 State: BYPASS -> STOPPED
+ 68988 17:13:27.438 Servo: 90 degrees.
+ 69316 17:14:22.886 Obstacle at 53 mm -> stopped.
+ 69317 17:14:22.888 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 69320 17:14:22.896 SCAN start: front=53 mm
+ 69322 17:14:23.396 SCAN echoes: angle=0 valid=3/3 min=35 max=87 mm
+ 69323 17:14:23.401 SCAN point: t=71740 ms angle=0 range=52 mm return=1
+ 69324 17:14:23.403 Servo: 88 degrees.
+ 69327 17:14:23.405 SCAN echoes: angle=-2 valid=0/3 min=-1 max=-1 mm
+ 69328 17:14:23.405 SCAN point: t=72220 ms angle=-2 range=-1 mm return=2
+ 69329 17:14:24.211 Servo: 86 degrees.
+ 69331 17:14:24.428 SCAN echoes: angle=-4 valid=2/3 min=524 max=539 mm
+ 69332 17:14:24.432 SCAN point: t=72712 ms angle=-4 range=531 mm return=1
+ 69333 17:14:24.435 Servo: 84 degrees.
+ 69336 17:14:24.526 SCAN echoes: angle=-6 valid=1/3 min=536 max=536 mm
+ 69337 17:14:24.526 SCAN point: t=73200 ms angle=-6 range=536 mm return=3
+ 69338 17:14:24.526 Servo: 82 degrees.
+ 69341 17:14:24.837 SCAN echoes: angle=-8 valid=1/3 min=526 max=526 mm
+ 69342 17:14:24.948 SCAN point: t=73682 ms angle=-8 range=526 mm return=3
+ 69343 17:14:24.948 Servo: 80 degrees.
+ 69346 17:14:25.367 SCAN echoes: angle=-10 valid=3/3 min=553 max=570 mm
+ 69347 17:14:25.446 SCAN point: t=74140 ms angle=-10 range=557 mm return=1
+ 69348 17:14:25.450 Servo: 78 degrees.
+ 69352 17:14:25.869 SCAN echoes: angle=-12 valid=3/3 min=566 max=592 mm
+ 69353 17:14:25.878 SCAN point: t=74592 ms angle=-12 range=582 mm return=1
+ 69354 17:14:25.880 Servo: 76 degrees.
+ 69359 17:14:26.367 Servo: 90 degrees.
+ 69360 17:14:26.367 State: OBSTACLE_SCAN -> STOPPED
+ 72294 17:24:08.403 Obstacle at 114 mm -> stopped.
+ 72295 17:24:08.407 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 72302 17:24:08.477 SCAN start: front=114 mm
+ 72305 17:24:08.623 SCAN echoes: angle=0 valid=3/3 min=89 max=101 mm
+ 72306 17:24:08.623 SCAN point: t=657357 ms angle=0 range=91 mm return=1
+ 72307 17:24:08.633 Servo: 88 degrees.
+ 72309 17:24:08.974 SCAN echoes: angle=-2 valid=3/3 min=94 max=138 mm
+ 72310 17:24:09.217 SCAN point: t=657819 ms angle=-2 range=112 mm return=1
+ 72311 17:24:09.221 Servo: 86 degrees.
+ 72314 17:24:09.418 SCAN echoes: angle=-4 valid=3/3 min=96 max=114 mm
+ 72315 17:24:09.536 SCAN point: t=658277 ms angle=-4 range=97 mm return=1
+ 72316 17:24:09.536 Servo: 84 degrees.
+ 72319 17:24:09.876 SCAN echoes: angle=-6 valid=3/3 min=83 max=117 mm
+ 72320 17:24:09.950 SCAN point: t=658727 ms angle=-6 range=88 mm return=1
+ 72321 17:24:09.966 Servo: 82 degrees.
+ 72325 17:24:10.451 SCAN echoes: angle=-8 valid=1/3 min=112 max=112 mm
+ 72326 17:24:10.452 SCAN point: t=659207 ms angle=-8 range=112 mm return=3
+ 72327 17:24:10.454 Servo: 80 degrees.
+ 72330 17:24:10.836 SCAN echoes: angle=-10 valid=0/3 min=-1 max=-1 mm
+ 72331 17:24:10.910 SCAN point: t=659687 ms angle=-10 range=-1 mm return=2
+ 72332 17:24:10.914 Servo: 78 degrees.
+ 72335 17:24:11.325 SCAN echoes: angle=-12 valid=1/3 min=115 max=115 mm
+ 72336 17:24:11.399 SCAN point: t=660179 ms angle=-12 range=115 mm return=3
+ 72337 17:24:11.399 Servo: 76 degrees.
+ 72340 17:24:11.929 SCAN echoes: angle=-14 valid=1/3 min=104 max=104 mm
+ 72341 17:24:11.929 SCAN point: t=660659 ms angle=-14 range=104 mm return=3
+ 72342 17:24:11.939 Servo: 74 degrees.
+ 72347 17:24:12.054 Servo: 90 degrees.
+ 72348 17:24:12.054 State: OBSTACLE_SCAN -> STOPPED
+ 72701 17:25:16.550 Obstacle at 53 mm -> stopped.
+ 72702 17:25:16.550 State: LINE_CAL -> OBSTACLE_SCAN
+ 72704 17:25:16.562 SCAN start: front=53 mm
+ 72706 17:25:16.738 SCAN echoes: angle=0 valid=3/3 min=61 max=982 mm
+ 72707 17:25:16.802 SCAN point: t=725577 ms angle=0 range=101 mm return=1
+ 72708 17:25:16.818 Servo: 88 degrees.
+ 72711 17:25:17.712 SCAN echoes: angle=-2 valid=3/3 min=957 max=985 mm
+ 72712 17:25:17.795 SCAN point: t=726037 ms angle=-2 range=983 mm return=1
+ 72713 17:25:17.803 Servo: 86 degrees.
+ 72716 17:25:17.812 SCAN echoes: angle=-4 valid=3/3 min=952 max=965 mm
+ 72717 17:25:17.812 SCAN point: t=726497 ms angle=-4 range=958 mm return=1
+ 72718 17:25:17.812 Servo: 84 degrees.
+ 72720 17:25:18.094 SCAN echoes: angle=-6 valid=3/3 min=978 max=990 mm
+ 72721 17:25:18.206 SCAN point: t=726949 ms angle=-6 range=982 mm return=1
+ 72722 17:25:18.206 Servo: 82 degrees.
+ 72726 17:25:18.610 SCAN echoes: angle=-8 valid=3/3 min=956 max=977 mm
+ 72727 17:25:18.610 SCAN point: t=727407 ms angle=-8 range=971 mm return=1
+ 72728 17:25:18.610 Servo: 80 degrees.
+ 72730 17:25:19.001 SCAN echoes: angle=-10 valid=2/3 min=957 max=974 mm
+ 72731 17:25:19.125 SCAN point: t=727857 ms angle=-10 range=965 mm return=1
+ 72732 17:25:19.125 Servo: 78 degrees.
+ 72735 17:25:19.495 SCAN echoes: angle=-12 valid=1/3 min=975 max=975 mm
+ 72736 17:25:19.559 SCAN point: t=728347 ms angle=-12 range=975 mm return=3
+ 72737 17:25:19.559 Servo: 76 degrees.
+ 72740 17:25:20.067 SCAN echoes: angle=-14 valid=0/3 min=-1 max=-1 mm
+ 72741 17:25:20.156 SCAN point: t=728827 ms angle=-14 range=-1 mm return=2
+ 72742 17:25:20.172 Servo: 74 degrees.
+ 72746 17:25:20.511 SCAN echoes: angle=-16 valid=0/3 min=-1 max=-1 mm
+ 72747 17:25:20.511 SCAN point: t=729299 ms angle=-16 range=-1 mm return=2
+ 72748 17:25:20.511 Servo: 72 degrees.
+ 72751 17:25:20.915 SCAN echoes: angle=-18 valid=0/3 min=-1 max=-1 mm
+ 72752 17:25:20.995 SCAN point: t=729779 ms angle=-18 range=-1 mm return=2
+ 72753 17:25:20.995 Servo: 70 degrees.
+ 72756 17:25:21.623 SCAN echoes: angle=-20 valid=0/3 min=-1 max=-1 mm
+ 72757 17:25:21.623 SCAN point: t=730257 ms angle=-20 range=-1 mm return=2
+ 72758 17:25:21.623 Servo: 68 degrees.
+ 72761 17:25:21.933 SCAN echoes: angle=-22 valid=0/3 min=-1 max=-1 mm
+ 72762 17:25:21.933 SCAN point: t=730737 ms angle=-22 range=-1 mm return=2
+ 72763 17:25:21.933 Servo: 66 degrees.
+ 72768 17:25:24.409 SCAN echoes: angle=-24 valid=0/3 min=-1 max=-1 mm
+ 72769 17:25:24.425 SCAN point: t=731210 ms angle=-24 range=-1 mm return=2
+ 72770 17:25:24.427 Servo: 64 degrees.
+ 72776 17:25:24.552 SCAN echoes: angle=-26 valid=0/3 min=-1 max=-1 mm
+ 72777 17:25:24.552 SCAN point: t=731699 ms angle=-26 range=-1 mm return=2
+ 72778 17:25:24.552 Servo: 62 degrees.
+ 72779 17:25:24.577 SCAN echoes: angle=-28 valid=0/3 min=-1 max=-1 mm
+ 72780 17:25:24.584 SCAN point: t=732187 ms angle=-28 range=-1 mm return=2
+ 72781 17:25:24.584 Servo: 60 degrees.
+ 72782 17:25:24.584 SCAN echoes: angle=-30 valid=0/3 min=-1 max=-1 mm
+ 72783 17:25:24.584 SCAN point: t=732659 ms angle=-30 range=-1 mm return=2
+ 72785 17:25:24.584 Servo: 92 degrees.
+ 72786 17:25:24.665 SCAN echoes: angle=2 valid=3/3 min=944 max=966 mm
+ 72787 17:25:24.666 SCAN point: t=733119 ms angle=2 range=957 mm return=1
+ 72788 17:25:24.666 Servo: 94 degrees.
+ 72789 17:25:24.743 SCAN echoes: angle=4 valid=3/3 min=955 max=964 mm
+ 72790 17:25:24.743 SCAN point: t=733577 ms angle=4 range=961 mm return=1
+ 72791 17:25:24.743 Servo: 96 degrees.
+ 72794 17:25:25.182 SCAN echoes: angle=6 valid=3/3 min=964 max=1001 mm
+ 72795 17:25:25.295 SCAN point: t=734027 ms angle=6 range=997 mm return=1
+ 72796 17:25:25.295 Servo: 98 degrees.
+ 72799 17:25:25.651 SCAN echoes: angle=8 valid=3/3 min=946 max=976 mm
+ 72800 17:25:25.777 SCAN point: t=734487 ms angle=8 range=972 mm return=1
+ 72801 17:25:25.791 Servo: 100 degrees.
+ 72804 17:25:26.134 SCAN echoes: angle=10 valid=3/3 min=954 max=960 mm
+ 72805 17:25:26.134 SCAN point: t=734949 ms angle=10 range=955 mm return=1
+ 72806 17:25:26.134 Servo: 102 degrees.
+ 72810 17:25:26.691 SCAN echoes: angle=12 valid=3/3 min=946 max=984 mm
+ 72811 17:25:26.691 SCAN point: t=735408 ms angle=12 range=981 mm return=1
+ 72812 17:25:26.691 Servo: 104 degrees.
+ 72814 17:25:27.018 SCAN echoes: angle=14 valid=3/3 min=947 max=981 mm
+ 72815 17:25:27.095 SCAN point: t=735869 ms angle=14 range=960 mm return=1
+ 72816 17:25:27.095 Servo: 106 degrees.
+ 72819 17:25:27.514 SCAN echoes: angle=16 valid=3/3 min=947 max=955 mm
+ 72820 17:25:27.604 SCAN point: t=736319 ms angle=16 range=954 mm return=1
+ 72821 17:25:27.608 Servo: 108 degrees.
+ 72824 17:25:27.916 SCAN echoes: angle=18 valid=3/3 min=956 max=960 mm
+ 72825 17:25:28.031 SCAN point: t=736777 ms angle=18 range=959 mm return=1
+ 72826 17:25:28.031 Servo: 110 degrees.
+ 72830 17:25:28.428 SCAN echoes: angle=20 valid=3/3 min=946 max=998 mm
+ 72831 17:25:28.431 SCAN point: t=737239 ms angle=20 range=976 mm return=1
+ 72832 17:25:28.431 Servo: 112 degrees.
+ 72837 17:25:28.880 SCAN echoes: angle=22 valid=3/3 min=960 max=963 mm
+ 72838 17:25:28.885 SCAN point: t=737699 ms angle=22 range=960 mm return=1
+ 72839 17:25:28.887 Servo: 114 degrees.
+ 72841 17:25:28.893 Servo: 90 degrees.
+ 72842 17:25:28.895 State: OBSTACLE_SCAN -> STOPPED
+ 72941 17:26:34.623 Servo: 90 degrees.
+ 73147 17:27:07.929 Obstacle at 97 mm -> stopped.
+ 73148 17:27:07.937 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 73151 17:27:07.941 SCAN start: front=97 mm
+ 73153 17:27:08.239 SCAN echoes: angle=0 valid=2/3 min=64 max=79 mm
+ 73154 17:27:08.242 SCAN point: t=48177 ms angle=0 range=71 mm return=1
+ 73155 17:27:08.242 Servo: 88 degrees.
+ 73159 17:27:08.981 SCAN echoes: angle=-2 valid=2/3 min=1470 max=1477 mm
+ 73160 17:27:08.983 SCAN point: t=48669 ms angle=-2 range=1473 mm return=1
+ 73161 17:27:08.985 Servo: 86 degrees.
+ 73163 17:27:09.089 SCAN echoes: angle=-4 valid=2/3 min=1613 max=1624 mm
+ 73164 17:27:09.230 SCAN point: t=49118 ms angle=-4 range=1618 mm return=1
+ 73165 17:27:09.230 Servo: 84 degrees.
+ 73168 17:27:09.895 SCAN echoes: angle=-6 valid=3/3 min=1484 max=1590 mm
+ 73169 17:27:10.000 SCAN point: t=49577 ms angle=-6 range=1505 mm return=1
+ 73170 17:27:10.009 Servo: 82 degrees.
+ 73173 17:27:10.104 SCAN echoes: angle=-8 valid=3/3 min=1485 max=1487 mm
+ 73174 17:27:10.104 SCAN point: t=50047 ms angle=-8 range=1486 mm return=1
+ 73175 17:27:10.109 Servo: 80 degrees.
+ 73178 17:27:10.509 SCAN echoes: angle=-10 valid=3/3 min=1493 max=1502 mm
+ 73179 17:27:10.610 SCAN point: t=50507 ms angle=-10 range=1501 mm return=1
+ 73180 17:27:10.610 Servo: 78 degrees.
+ 73184 17:27:11.159 SCAN echoes: angle=-12 valid=3/3 min=1483 max=1498 mm
+ 73185 17:27:11.159 SCAN point: t=50969 ms angle=-12 range=1485 mm return=1
+ 73186 17:27:11.169 Servo: 76 degrees.
+ 73189 17:27:11.545 SCAN echoes: angle=-14 valid=2/3 min=1519 max=1552 mm
+ 73190 17:27:11.551 SCAN point: t=51447 ms angle=-14 range=1535 mm return=1
+ 73191 17:27:11.551 Servo: 74 degrees.
+ 73194 17:27:11.944 SCAN echoes: angle=-16 valid=2/3 min=1559 max=1560 mm
+ 73195 17:27:11.948 SCAN point: t=51898 ms angle=-16 range=1559 mm return=1
+ 73196 17:27:11.949 Servo: 72 degrees.
+ 73198 17:27:12.370 SCAN echoes: angle=-18 valid=3/3 min=1551 max=1578 mm
+ 73199 17:27:12.372 SCAN point: t=52360 ms angle=-18 range=1559 mm return=1
+ 73200 17:27:12.372 Servo: 70 degrees.
+ 73204 17:27:12.950 SCAN echoes: angle=-20 valid=0/3 min=-1 max=-1 mm
+ 73205 17:27:12.950 SCAN point: t=52849 ms angle=-20 range=-1 mm return=2
+ 73206 17:27:12.950 Servo: 68 degrees.
+ 73212 17:27:13.247 Servo: 90 degrees.
+ 73213 17:27:13.249 State: OBSTACLE_SCAN -> STOPPED
+ 74909 17:32:42.190 Obstacle at 130 mm -> stopped.
+ 74910 17:32:42.192 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 74913 17:32:42.192 SCAN start: front=130 mm
+ 74915 17:32:42.405 SCAN echoes: angle=0 valid=0/3 min=-1 max=-1 mm
+ 74916 17:32:42.414 SCAN point: t=382362 ms angle=0 range=-1 mm return=2
+ 74917 17:32:42.431 Servo: 88 degrees.
+ 74921 17:32:42.909 SCAN echoes: angle=-2 valid=2/3 min=37 max=45 mm
+ 74922 17:32:42.909 SCAN point: t=382812 ms angle=-2 range=41 mm return=1
+ 74923 17:32:42.909 Servo: 86 degrees.
+ 74928 17:32:43.242 Servo: 90 degrees.
+ 74929 17:32:43.242 State: OBSTACLE_SCAN -> STOPPED
+ 75572 17:34:21.201 Obstacle at 101 mm -> stopped.
+ 75573 17:34:21.201 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 75580 17:34:21.314 SCAN start: front=101 mm
+ 75583 17:34:21.496 SCAN echoes: angle=0 valid=1/3 min=151 max=151 mm
+ 75584 17:34:21.496 SCAN point: t=481413 ms angle=0 range=151 mm return=3
+ 75585 17:34:21.501 Servo: 88 degrees.
+ 75588 17:34:21.988 SCAN echoes: angle=-2 valid=0/3 min=-1 max=-1 mm
+ 75589 17:34:22.000 SCAN point: t=481900 ms angle=-2 range=-1 mm return=2
+ 75590 17:34:22.000 Servo: 86 degrees.
+ 75592 17:34:22.000 Servo: 90 degrees.
+ 75593 17:34:22.000 State: OBSTACLE_SCAN -> PICKED_UP
+ 76334 17:36:58.391 Obstacle at 299 mm -> stopped.
+ 76335 17:36:58.399 State: FOLLOW_LINE -> OBSTACLE_SCAN
+ 76338 17:36:58.405 SCAN start: front=299 mm
+ 76340 17:36:58.584 SCAN echoes: angle=0 valid=3/3 min=301 max=309 mm
+ 76341 17:36:58.584 SCAN point: t=638610 ms angle=0 range=308 mm return=1
+ 76342 17:36:58.597 Servo: 88 degrees.
+ 76345 17:36:59.194 SCAN echoes: angle=-2 valid=3/3 min=300 max=310 mm
+ 76346 17:36:59.206 SCAN point: t=639060 ms angle=-2 range=310 mm return=1
+ 76347 17:36:59.210 Servo: 86 degrees.
+ 76350 17:36:59.503 SCAN echoes: angle=-4 valid=3/3 min=300 max=301 mm
+ 76351 17:36:59.586 SCAN point: t=639520 ms angle=-4 range=300 mm return=1
+ 76352 17:36:59.586 Servo: 84 degrees.
+ 76355 17:36:59.958 SCAN echoes: angle=-6 valid=3/3 min=300 max=301 mm
+ 76356 17:37:00.026 SCAN point: t=639982 ms angle=-6 range=301 mm return=1
+ 76357 17:37:00.028 Servo: 82 degrees.
+ 76360 17:37:00.403 SCAN echoes: angle=-8 valid=3/3 min=300 max=301 mm
+ 76361 17:37:00.465 SCAN point: t=640432 ms angle=-8 range=300 mm return=1
+ 76362 17:37:00.467 Servo: 80 degrees.
+ 76366 17:37:00.871 SCAN echoes: angle=-10 valid=3/3 min=300 max=301 mm
+ 76367 17:37:00.880 SCAN point: t=640890 ms angle=-10 range=301 mm return=1
+ 76368 17:37:00.880 Servo: 78 degrees.
+ 76371 17:37:01.860 SCAN echoes: angle=-12 valid=3/3 min=308 max=310 mm
+ 76372 17:37:01.860 SCAN point: t=641351 ms angle=-12 range=309 mm return=1
+ 76373 17:37:01.860 Servo: 76 degrees.
+ 76375 17:37:01.860 SCAN echoes: angle=-14 valid=3/3 min=301 max=310 mm
+ 76376 17:37:01.860 SCAN point: t=641810 ms angle=-14 range=310 mm return=1
+ 76377 17:37:01.860 Servo: 74 degrees.
+ 76379 17:37:02.233 SCAN echoes: angle=-16 valid=3/3 min=309 max=310 mm
+ 76380 17:37:02.297 SCAN point: t=642270 ms angle=-16 range=310 mm return=1
+ 76381 17:37:02.297 Servo: 72 degrees.
+ 76384 17:37:02.689 SCAN echoes: angle=-18 valid=3/3 min=309 max=310 mm
+ 76385 17:37:02.800 SCAN point: t=642730 ms angle=-18 range=309 mm return=1
+ 76386 17:37:02.800 Servo: 70 degrees.
+ 76390 17:37:03.203 SCAN echoes: angle=-20 valid=3/3 min=310 max=311 mm
+ 76391 17:37:03.203 SCAN point: t=643192 ms angle=-20 range=310 mm return=1
+ 76392 17:37:03.208 Servo: 68 degrees.
+ 76395 17:37:03.696 SCAN echoes: angle=-22 valid=3/3 min=301 max=311 mm
+ 76396 17:37:03.696 SCAN point: t=643640 ms angle=-22 range=302 mm return=1
+ 76397 17:37:03.696 Servo: 66 degrees.
+ 76400 17:37:04.161 SCAN echoes: angle=-24 valid=3/3 min=310 max=315 mm
+ 76401 17:37:04.161 SCAN point: t=644100 ms angle=-24 range=310 mm return=1
+ 76402 17:37:04.161 Servo: 64 degrees.
+ 76404 17:37:04.529 SCAN echoes: angle=-26 valid=3/3 min=310 max=318 mm
+ 76405 17:37:04.674 SCAN point: t=644562 ms angle=-26 range=314 mm return=1
+ 76406 17:37:04.674 Servo: 62 degrees.
+ 76410 17:37:04.965 SCAN echoes: angle=-28 valid=3/3 min=309 max=319 mm
+ 76411 17:37:05.157 SCAN point: t=645010 ms angle=-28 range=318 mm return=1
+ 76412 17:37:05.170 Servo: 60 degrees.
+ 76415 17:37:05.443 SCAN echoes: angle=-30 valid=3/3 min=315 max=324 mm
+ 76416 17:37:05.443 SCAN point: t=645470 ms angle=-30 range=318 mm return=1
+ 76418 17:37:05.447 Servo: 92 degrees.
+ 76421 17:37:05.903 SCAN echoes: angle=2 valid=3/3 min=300 max=310 mm
+ 76422 17:37:05.903 SCAN point: t=645930 ms angle=2 range=309 mm return=1
+ 76423 17:37:05.908 Servo: 94 degrees.
+ 76426 17:37:06.421 SCAN echoes: angle=4 valid=3/3 min=309 max=310 mm
+ 76427 17:37:06.421 SCAN point: t=646380 ms angle=4 range=310 mm return=1
+ 76428 17:37:06.421 Servo: 96 degrees.
+ 76431 17:37:06.878 SCAN echoes: angle=6 valid=3/3 min=309 max=310 mm
+ 76432 17:37:06.890 SCAN point: t=646843 ms angle=6 range=309 mm return=1
+ 76433 17:37:06.890 Servo: 98 degrees.
+ 76436 17:37:07.262 SCAN echoes: angle=8 valid=3/3 min=309 max=314 mm
+ 76437 17:37:07.325 SCAN point: t=647300 ms angle=8 range=309 mm return=1
+ 76438 17:37:07.325 Servo: 100 degrees.
+ 76441 17:37:07.715 SCAN echoes: angle=10 valid=3/3 min=310 max=315 mm
+ 76442 17:37:07.810 SCAN point: t=647762 ms angle=10 range=314 mm return=1
+ 76443 17:37:07.810 Servo: 102 degrees.
+ 76446 17:37:08.249 SCAN echoes: angle=12 valid=3/3 min=310 max=315 mm
+ 76447 17:37:08.249 SCAN point: t=648210 ms angle=12 range=314 mm return=1
+ 76448 17:37:08.249 Servo: 104 degrees.
+ 76451 17:37:08.733 SCAN echoes: angle=14 valid=3/3 min=310 max=320 mm
+ 76452 17:37:08.737 SCAN point: t=648672 ms angle=14 range=318 mm return=1
+ 76453 17:37:08.741 Servo: 106 degrees.
+ 76457 17:37:09.220 SCAN echoes: angle=16 valid=3/3 min=310 max=319 mm
+ 76458 17:37:09.236 SCAN point: t=649120 ms angle=16 range=315 mm return=1
+ 76459 17:37:09.236 Servo: 108 degrees.
+ 76461 17:37:09.538 SCAN echoes: angle=18 valid=3/3 min=318 max=324 mm
+ 76462 17:37:09.623 SCAN point: t=649570 ms angle=18 range=319 mm return=1
+ 76463 17:37:09.623 Servo: 110 degrees.
+ 76466 17:37:10.051 SCAN echoes: angle=20 valid=3/3 min=323 max=328 mm
+ 76467 17:37:10.051 SCAN point: t=650012 ms angle=20 range=324 mm return=1
+ 76468 17:37:10.059 Servo: 112 degrees.
+ 76471 17:37:10.445 SCAN echoes: angle=22 valid=3/3 min=323 max=335 mm
+ 76472 17:37:10.576 SCAN point: t=650460 ms angle=22 range=323 mm return=1
+ 76473 17:37:10.577 Servo: 114 degrees.
+ 76477 17:37:11.183 SCAN echoes: angle=24 valid=3/3 min=327 max=328 mm
+ 76478 17:37:11.185 SCAN point: t=650922 ms angle=24 range=327 mm return=1
+ 76479 17:37:11.185 Servo: 116 degrees.
+ 76482 17:37:11.402 SCAN echoes: angle=26 valid=3/3 min=339 max=345 mm
+ 76483 17:37:11.402 SCAN point: t=651370 ms angle=26 range=340 mm return=1
+ 76484 17:37:11.402 Servo: 118 degrees.
+ 76486 17:37:11.808 SCAN echoes: angle=28 valid=1/3 min=379 max=379 mm
+ 76487 17:37:11.917 SCAN point: t=651850 ms angle=28 range=379 mm return=3
+ 76488 17:37:11.923 Servo: 120 degrees.
+ 76491 17:37:12.659 SCAN echoes: angle=30 valid=0/3 min=-1 max=-1 mm
+ 76492 17:37:12.846 SCAN point: t=652342 ms angle=30 range=-1 mm return=2
+ 76493 17:37:12.846 Servo: 90 degrees.
+ 76494 17:37:12.846 SCAN left edge: x=-159 y=275 range=318 mm; -30 to -30 deg (estimated at scan limit)
+ 76495 17:37:12.846 inf2004/aai14/supercar/obstacle {"front":308,"left":-159,"right":185,"mid":13,"width":344,"lst":"estimated at scan limit","rst":"missing echoes","calibrated_width":null,"left_angle_x10":-300,"right_angle_x10":290,"t":652351}
+ 76496 17:37:12.863 SCAN right edge: x=185 y=335 range=383 mm; 28 to 30 deg (missing echoes)
+ 76497 17:37:12.863 SCAN apparent width=344 mm; sampling interval=337..353 mm
+ 76498 17:37:12.865 SCAN middle: x=13 y=305 range=305 mm; centre ray=308 mm
+ 76499 17:37:12.877 SCAN calibrated width=UNKNOWN (needs usable physical calibration).
+ 76500 17:37:12.881 SCAN no bypass candidate. Staying braked.
+ 76501 17:37:12.881 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 76502 17:37:12.883 BYPASS fixed test: plan, heading 0 deg.
+ 76503 17:37:12.885 State: OBSTACLE_SCAN -> BYPASS
+ 76504 17:37:12.885 BYPASS plan: offset=219 mm, departure=43 deg/321 mm, pass=303 mm, return=65 deg/242 mm, path=86
+ 76505 17:37:12.887 BYPASS fixed test: pivot, heading 0 deg.
+ 76509 17:37:13.874 BYPASS fixed test: out, heading -45 deg.
+ 76510 17:37:13.876 BYPASS pose (out): x=0 z=0 mm, heading -45 deg, wheels L0 R0.
+ 76513 17:37:14.863 BYPASS pose (out): x=-20 z=21 mm, heading -44 deg, wheels L12 R12.
+ 76516 17:37:15.002 BYPASS pose (out): x=-44 z=45 mm, heading -44 deg, wheels L12 R12.
+ 76520 17:37:15.169 BYPASS pose (out): x=-68 z=70 mm, heading -44 deg, wheels L13 R11.
+ 76523 17:37:15.958 BYPASS pose (out): x=-92 z=95 mm, heading -44 deg, wheels L12 R12.
+ 76526 17:37:16.200 BYPASS pose (out): x=-116 z=120 mm, heading -44 deg, wheels L12 R12.
+ 76529 17:37:16.651 BYPASS pose (out): x=-140 z=146 mm, heading -44 deg, wheels L12 R12.
+ 76533 17:37:17.156 BYPASS pose (out): x=-165 z=171 mm, heading -43 deg, wheels L12 R12.
+ 76536 17:37:17.772 BYPASS pose (out): x=-188 z=197 mm, heading -43 deg, wheels L12 R12.
+ 76539 17:37:18.158 BYPASS pose (out): x=-213 z=223 mm, heading -43 deg, wheels L12 R12.
+ 76540 17:37:18.311 BYPASS fixed test: brake, heading -43 deg.
+ 76542 17:37:18.496 BYPASS fixed test: pivot, heading -44 deg.
+ 76548 17:37:19.502 BYPASS fixed test: pass, heading 1 deg.
+ 76549 17:37:19.516 BYPASS pose (pass): x=-220 z=231 mm, heading 1 deg, wheels L0 R0.
+ 76552 17:37:19.990 BYPASS pose (pass): x=-220 z=262 mm, heading 1 deg, wheels L12 R12.
+ 76555 17:37:20.497 BYPASS pose (pass): x=-219 z=298 mm, heading 0 deg, wheels L12 R12.
+ 76559 17:37:21.017 BYPASS pose (pass): x=-219 z=333 mm, heading -1 deg, wheels L12 R12.
+ 76562 17:37:21.523 BYPASS pose (pass): x=-220 z=368 mm, heading -1 deg, wheels L12 R12.
+ 76565 17:37:22.033 BYPASS pose (pass): x=-220 z=401 mm, heading -1 deg, wheels L12 R12.
+ 76568 17:37:23.260 BYPASS pose (pass): x=-221 z=435 mm, heading -1 deg, wheels L12 R12.
+ 76572 17:37:23.269 BYPASS pose (pass): x=-222 z=469 mm, heading -1 deg, wheels L12 R12.
+ 76575 17:37:23.540 BYPASS pose (pass): x=-222 z=504 mm, heading -1 deg, wheels L13 R11.
+ 76578 17:37:24.015 BYPASS pose (pass): x=-223 z=538 mm, heading 0 deg, wheels L12 R12.
+ 76579 17:37:24.095 BYPASS fixed test: brake, heading 0 deg.
+ 76581 17:37:24.303 BYPASS fixed test: pivot, heading 0 deg.
+ 76588 17:37:25.443 BYPASS fixed test: return, heading 66 deg.
+ 76589 17:37:25.552 BYPASS pose (return): x=-223 z=540 mm, heading 66 deg, wheels L0 R0.
+ 76592 17:37:25.974 BYPASS pose (return): x=-195 z=553 mm, heading 65 deg, wheels L12 R12.
+ 76595 17:37:26.566 BYPASS pose (return): x=-163 z=567 mm, heading 65 deg, wheels L12 R12.
+ 76599 17:37:27.074 BYPASS pose (return): x=-132 z=582 mm, heading 64 deg, wheels L12 R12.
+ 76602 17:37:27.504 BYPASS pose (return): x=-100 z=597 mm, heading 64 deg, wheels L12 R12.
+ 76605 17:37:29.599 BYPASS pose (return): x=-68 z=613 mm, heading 64 deg, wheels L12 R12.
+ 76608 17:37:29.617 BYPASS pose (return): x=-36 z=628 mm, heading 64 deg, wheels L12 R12.
+ 76612 17:37:29.729 BYPASS pose (return): x=-5 z=644 mm, heading 64 deg, wheels L13 R11.
+ 76613 17:37:29.729 BYPASS fixed test: advance, heading 64 deg.
+ 76615 17:37:29.821 BYPASS fixed test: brake, heading 64 deg.
+ 76617 17:37:30.015 BYPASS fixed test: align, heading 64 deg.
+ 76663 17:37:40.311 State: BYPASS -> STOPPED

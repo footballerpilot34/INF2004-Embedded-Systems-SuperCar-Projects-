@@ -9,7 +9,7 @@
 | `imu_hump/` | S5 | IMU, hump detection and height, pick-up |
 | `integration/` | — | Two or more subsystems together (interfaces in `TEAM.md`) |
 | `system/` | — | Full demo runs on the course |
-| `host/` | — | Host-side unit tests of the C modules (Python + gcc) |
+| `host/` | — | Host-side unit tests of the C modules (Python + desktop `cc`) |
 | `review/` | — | Recorded build, static-analysis and BARR-C review outputs |
 
 ## Test IDs
@@ -29,8 +29,9 @@ Videos are not committed: list their links in `videos/README.md`.
 ## Host tests
 
 The tests in `host/` compile firmware modules with a desktop C compiler
-(`gcc`) and run them on the PC. They need `gcc` on the `PATH`; the Pico
-toolchain alone is not enough. From the repository root:
+invoked as `cc` and run them on the PC. They need a `cc` command on the
+`PATH` (on most systems this is gcc or clang); the Pico toolchain
+(`arm-none-eabi-gcc`) alone is not enough. From the repository root:
 
 ```
 python testing/host/test_barcode_host.py

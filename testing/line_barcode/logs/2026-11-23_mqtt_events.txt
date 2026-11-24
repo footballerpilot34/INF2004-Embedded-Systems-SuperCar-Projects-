@@ -1,0 +1,1767 @@
+# line_barcode: MQTT log events, 2026-11-23
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 47256 15:41:01.519 === SuperCar AAI14: line + barcode + hump/wall ===
+ 47263 15:41:01.714 Barcode reader OFF; IRQ edges=0
+ 47454 15:41:41.848 State: READY -> LINE_CAL
+ 47455 15:41:41.848 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 47456 15:41:41.848 State: LINE_CAL -> FOLLOW_LINE
+ 47457 15:41:41.848 Barcode reader ON; IRQ edges=9
+ 47461 15:41:42.551 Barcode capture started; IRQ edges=12
+ 47482 15:41:47.275 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 47483 15:41:47.279 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 47486 15:41:47.284 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 47492 15:41:47.977 Barcode capture started; IRQ edges=31
+ 47506 15:41:51.157 Barcode lenient: 9 bars+spaces cannot be "*X*" with at most 8 missing.
+ 47507 15:41:51.157 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 47509 15:41:51.165 Barcode NOT decoded: 9 bars+spaces seen (valid: 10 per character - 1).
+ 47515 15:41:52.189 Barcode capture started; IRQ edges=46
+ 47518 15:41:52.596 Barcode: only 1 bars+spaces seen, ignored.
+ 47529 15:41:53.930 Barcode reader OFF; IRQ edges=46
+ 47633 15:42:16.189 State: STOPPED -> LINE_CAL
+ 47634 15:42:16.311 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 47635 15:42:16.311 State: LINE_CAL -> FOLLOW_LINE
+ 47636 15:42:16.311 Barcode reader ON; IRQ edges=52
+ 47638 15:42:16.382 Barcode capture started; IRQ edges=53
+ 47672 15:42:23.859 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":99819}
+ 47673 15:42:23.869 Barcode: read leniently (21 of 29 bars+spaces, 0+8 missing, 2 stray left out).
+ 47674 15:42:23.871 Barcode COMMAND: "A" = TURN LEFT
+ 47675 15:42:23.871 Pending: TURN LEFT at the next crossroad.
+ 47678 15:42:24.283 Barcode capture started; IRQ edges=94
+ 47680 15:42:24.612 Barcode: only 1 bars+spaces seen, ignored.
+ 47694 15:42:28.015 Line lost: reversing 2590 ms of path to where both sensors were on it.
+ 47696 15:42:28.024 Reverse done (a sensor found black).
+ 47701 15:42:28.110 Barcode reader OFF; IRQ edges=95
+ 47747 15:42:37.924 Barcode A -> TURN RIGHT.
+ 47783 15:42:45.610 State: STOPPED -> LINE_CAL
+ 47784 15:42:45.610 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 47785 15:42:45.610 State: LINE_CAL -> FOLLOW_LINE
+ 47786 15:42:45.610 Barcode reader ON; IRQ edges=101
+ 47790 15:42:45.710 Barcode capture started; IRQ edges=103
+ 47819 15:42:52.276 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN RIGHT","t":128027}
+ 47820 15:42:52.276 Barcode: read leniently (21 of 29 bars+spaces, 0+8 missing, 0 stray left out).
+ 47821 15:42:52.276 Barcode COMMAND: "A" = TURN RIGHT
+ 47822 15:42:52.283 Pending: TURN RIGHT at the next crossroad.
+ 47841 15:42:55.267 Barcode reader OFF; IRQ edges=136
+ 48352 15:45:02.821 State: STOPPED -> LINE_CAL
+ 48353 15:45:02.821 LINE_CAL: turning right (right sensor on black).
+ 48354 15:45:02.849 LINE_CAL: turning left (left sensor on black).
+ 48355 15:45:02.929 LINE_CAL OK: both sensors on the line -> following.
+ 48356 15:45:02.929 State: LINE_CAL -> FOLLOW_LINE
+ 48357 15:45:02.929 Barcode reader ON; IRQ edges=142
+ 48414 15:45:14.394 Barcode reader OFF; IRQ edges=142
+ 48533 15:45:42.205 State: STOPPED -> LINE_CAL
+ 48534 15:45:42.205 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 48535 15:45:42.205 State: LINE_CAL -> FOLLOW_LINE
+ 48536 15:45:42.210 Barcode reader ON; IRQ edges=142
+ 48557 15:45:45.155 Barcode reader OFF; IRQ edges=142
+ 48590 15:45:50.579 Barcode reader ON; IRQ edges=144
+ 48606 15:45:54.466 Barcode capture started; IRQ edges=146
+ 48607 15:45:54.468 Barcode: only 1 bars+spaces seen, ignored.
+ 48614 15:45:55.250 Barcode reader OFF; IRQ edges=147
+ 48816 15:46:39.409 State: STOPPED -> LINE_CAL
+ 48817 15:46:39.409 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 48818 15:46:39.414 State: LINE_CAL -> FOLLOW_LINE
+ 48819 15:46:39.422 Barcode reader ON; IRQ edges=156
+ 48843 15:46:43.611 Barcode reader OFF; IRQ edges=156
+ 48861 15:46:46.896 Barcode reader ON; IRQ edges=159
+ 48871 15:46:48.824 Barcode capture started; IRQ edges=164
+ 48872 15:46:48.826 Barcode capture started; IRQ edges=164
+ 48877 15:46:49.037 Barcode reader OFF; IRQ edges=164
+ 48878 15:46:49.037 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 48879 15:46:49.045 Barcode: only 0 bars+spaces seen, ignored.
+ 50706 15:54:24.474 State: STOPPED -> LINE_CAL
+ 50707 15:54:24.474 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 50708 15:54:24.474 State: LINE_CAL -> FOLLOW_LINE
+ 50709 15:54:24.474 Barcode reader ON; IRQ edges=170
+ 50767 15:54:38.428 Barcode capture started; IRQ edges=172
+ 50778 15:54:40.686 Barcode: only 1 bars+spaces seen, ignored.
+ 50812 15:54:48.639 Line lost: reversing 3350 ms of path to where both sensors were on it.
+ 50814 15:54:48.655 Reverse done (a sensor found black).
+ 50848 15:54:57.742 Barcode capture started; IRQ edges=175
+ 50854 15:54:58.478 Barcode: only 1 bars+spaces seen, ignored.
+ 50873 15:55:01.982 Barcode reader OFF; IRQ edges=176
+ 51221 15:56:01.782 State: STOPPED -> LINE_CAL
+ 51222 15:56:01.782 LINE_CAL: turning left (left sensor on black).
+ 51223 15:56:01.812 LINE_CAL OK: both sensors on the line -> following.
+ 51224 15:56:01.815 State: LINE_CAL -> FOLLOW_LINE
+ 51225 15:56:01.815 Barcode reader ON; IRQ edges=193
+ 51241 15:56:04.646 Barcode capture started; IRQ edges=195
+ 51246 15:56:04.844 Barcode reader OFF; IRQ edges=195
+ 51247 15:56:04.844 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 51248 15:56:04.844 Barcode: only 0 bars+spaces seen, ignored.
+ 53850 16:07:04.812 === SuperCar AAI14: line + barcode + hump/wall ===
+ 53857 16:07:04.844 Barcode reader OFF; IRQ edges=0
+ 53875 16:07:05.225 START: both line sensors on white -> not moving. Put the car on the line, or with one sensor on
+ 53959 16:07:23.065 State: READY -> LINE_CAL
+ 53960 16:07:23.065 LINE_CAL: left sensor on black -> forward, arcing left.
+ 53964 16:07:23.668 LINE_CAL OK: both sensors on the line -> following.
+ 53965 16:07:23.670 State: LINE_CAL -> FOLLOW_LINE
+ 53966 16:07:23.670 Barcode reader ON; IRQ edges=2
+ 53986 16:07:28.326 Barcode capture started; IRQ edges=4
+ 53995 16:07:28.849 Barcode reader OFF; IRQ edges=7
+ 53996 16:07:28.849 Barcode: reading switched off after 2 bars+spaces -> decoding what was read.
+ 53997 16:07:28.849 Barcode: only 2 bars+spaces seen, ignored.
+ 54221 16:08:22.438 START: both line sensors on white -> not moving. Put the car on the line, or with one sensor on
+ 54268 16:08:31.134 State: READY -> LINE_CAL
+ 54269 16:08:31.150 LINE_CAL: right sensor on black -> forward, arcing right.
+ 54270 16:08:31.230 LINE_CAL: left sensor on black -> forward, arcing left.
+ 54271 16:08:31.348 LINE_CAL OK: both sensors on the line -> following.
+ 54272 16:08:31.352 State: LINE_CAL -> FOLLOW_LINE
+ 54273 16:08:31.356 Barcode reader ON; IRQ edges=13
+ 54295 16:08:36.108 Barcode capture started; IRQ edges=18
+ 54297 16:08:36.252 Barcode initial mark 360 ms: treated as junction, scan dropped.
+ 54307 16:08:37.127 Barcode reader OFF; IRQ edges=19
+ 57287 16:20:01.710 START: both line sensors on white -> not moving. Put the car on the line, or with one sensor on
+ 57322 16:20:08.620 State: READY -> LINE_CAL
+ 57323 16:20:08.620 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57328 16:20:09.100 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57329 16:20:09.197 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57330 16:20:09.309 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57332 16:20:09.321 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57333 16:20:09.406 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57334 16:20:09.406 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57335 16:20:09.491 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57336 16:20:09.491 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57338 16:20:09.603 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57339 16:20:09.749 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57340 16:20:09.752 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57342 16:20:09.817 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57343 16:20:10.030 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57344 16:20:10.032 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57345 16:20:10.378 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57347 16:20:10.390 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57348 16:20:10.457 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57349 16:20:10.467 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57351 16:20:10.467 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57352 16:20:10.467 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57353 16:20:10.473 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57354 16:20:10.619 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57356 16:20:10.621 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57357 16:20:10.684 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57358 16:20:10.684 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57359 16:20:10.768 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57361 16:20:10.933 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57362 16:20:11.016 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57364 16:20:11.032 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57366 16:20:11.169 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57367 16:20:11.275 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57368 16:20:11.291 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57370 16:20:11.389 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57371 16:20:11.394 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57372 16:20:11.551 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57373 16:20:11.551 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57375 16:20:11.631 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57376 16:20:11.645 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57377 16:20:11.955 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57378 16:20:11.957 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57380 16:20:11.957 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57381 16:20:11.957 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57382 16:20:12.143 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57383 16:20:12.143 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57385 16:20:12.159 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57386 16:20:12.159 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57387 16:20:12.261 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57388 16:20:12.268 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57390 16:20:14.018 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57391 16:20:14.222 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57392 16:20:14.222 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57394 16:20:14.222 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57395 16:20:14.222 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57396 16:20:14.222 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57397 16:20:14.238 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57399 16:20:14.532 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57400 16:20:14.540 LINE_CAL OK: both sensors on the line -> following.
+ 57401 16:20:14.540 State: LINE_CAL -> FOLLOW_LINE
+ 57402 16:20:14.545 Barcode reader ON; IRQ edges=165
+ 57413 16:20:16.879 Barcode reader OFF; IRQ edges=165
+ 57425 16:20:18.305 Barcode reader ON; IRQ edges=168
+ 57438 16:20:20.257 Barcode reader OFF; IRQ edges=168
+ 57839 16:21:41.053 State: PICKED_UP -> LINE_CAL
+ 57840 16:21:41.065 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57843 16:21:41.753 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57844 16:21:41.753 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57846 16:21:41.753 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57847 16:21:41.753 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57848 16:21:41.914 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57849 16:21:41.914 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57851 16:21:41.981 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57852 16:21:42.123 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57853 16:21:42.123 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57855 16:21:42.371 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57856 16:21:42.371 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57857 16:21:42.576 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57859 16:21:42.578 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57860 16:21:42.578 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57861 16:21:42.719 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57863 16:21:42.722 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57864 16:21:42.877 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57865 16:21:43.086 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57866 16:21:43.090 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57868 16:21:43.090 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57870 16:21:43.090 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57871 16:21:43.142 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57873 16:21:43.142 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57874 16:21:43.617 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57875 16:21:43.617 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57876 16:21:43.617 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57878 16:21:43.617 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57879 16:21:43.617 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57880 16:21:43.617 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57881 16:21:43.701 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57883 16:21:43.712 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57884 16:21:43.806 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57885 16:21:43.911 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57886 16:21:43.911 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57888 16:21:44.033 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57889 16:21:44.033 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57890 16:21:44.215 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57891 16:21:44.215 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57893 16:21:44.215 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57894 16:21:44.327 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57895 16:21:44.338 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57896 16:21:44.525 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57898 16:21:44.534 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57899 16:21:44.616 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57900 16:21:44.623 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57901 16:21:44.623 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57902 16:21:44.697 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57904 16:21:44.826 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57905 16:21:44.826 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57906 16:21:44.923 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57907 16:21:44.939 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57909 16:21:45.077 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57911 16:21:45.087 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57912 16:21:45.148 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57913 16:21:45.148 LINE_CAL: left sensor on black -> forward, arcing left.
+ 57915 16:21:45.262 LINE_CAL: right sensor on black -> forward, arcing right.
+ 57916 16:21:45.423 LINE_CAL OK: both sensors on the line -> following.
+ 57917 16:21:45.441 State: LINE_CAL -> FOLLOW_LINE
+ 57918 16:21:45.443 Barcode reader ON; IRQ edges=189
+ 57922 16:21:46.625 Barcode capture started; IRQ edges=192
+ 57944 16:21:49.952 Barcode reader OFF; IRQ edges=235
+ 57945 16:21:49.955 Barcode: reading switched off after 19 bars+spaces -> decoding what was read.
+ 57946 16:21:49.957 Barcode lenient: 19 bars+spaces cannot be "*X*" with at most 8 missing.
+ 57947 16:21:49.957 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 57950 16:21:49.985 Barcode NOT decoded: 19 bars+spaces seen (valid: 10 per character - 1).
+ 57997 16:21:59.675 State: STOPPED -> LINE_CAL
+ 57998 16:21:59.675 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 57999 16:21:59.685 State: LINE_CAL -> FOLLOW_LINE
+ 58000 16:21:59.685 Barcode reader ON; IRQ edges=238
+ 58022 16:22:05.846 Barcode reader OFF; IRQ edges=238
+ 58141 16:22:25.450 State: STOPPED -> LINE_CAL
+ 58142 16:22:25.450 LINE_CAL: left sensor on black -> forward, arcing left.
+ 58144 16:22:25.767 LINE_CAL: right sensor on black -> forward, arcing right.
+ 58145 16:22:25.769 LINE_CAL: left sensor on black -> forward, arcing left.
+ 58147 16:22:27.748 LINE_CAL: right sensor on black -> forward, arcing right.
+ 58148 16:22:27.750 LINE_CAL: left sensor on black -> forward, arcing left.
+ 58149 16:22:27.750 LINE_CAL: right sensor on black -> forward, arcing right.
+ 58150 16:22:28.028 LINE_CAL: left sensor on black -> forward, arcing left.
+ 58152 16:22:28.036 LINE_CAL: right sensor on black -> forward, arcing right.
+ 58153 16:22:28.036 LINE_CAL: left sensor on black -> forward, arcing left.
+ 58154 16:22:28.036 LINE_CAL OK: both sensors on the line -> following.
+ 58155 16:22:28.036 State: LINE_CAL -> FOLLOW_LINE
+ 58156 16:22:28.036 Barcode reader ON; IRQ edges=290
+ 58157 16:22:28.036 Barcode capture started; IRQ edges=295
+ 58158 16:22:28.149 Barcode lenient: 15 bars+spaces cannot be "*X*" with at most 8 missing.
+ 58159 16:22:28.152 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58162 16:22:28.152 Barcode NOT decoded: 15 bars+spaces seen (valid: 10 per character - 1).
+ 58163 16:22:28.152 Barcode capture started; IRQ edges=330
+ 58179 16:22:31.311 Barcode lenient forward, 0+4 missing: should be wide (#2).
+ 58180 16:22:33.988 Barcode lenient forward, 2+2 missing: letter not a clean A-Z (#9).
+ 58181 16:22:33.998 Barcode lenient forward, 4+0 missing: letter not a clean A-Z (#7).
+ 58182 16:22:34.001 Barcode lenient reversed, 0+4 missing: letter not a clean A-Z (#15).
+ 58183 16:22:34.003 Barcode lenient reversed, 2+2 missing: letter not a clean A-Z (#17).
+ 58184 16:22:34.003 Barcode lenient reversed, 4+0 missing: should be narrow (#21).
+ 58185 16:22:34.003 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58189 16:22:34.097 Barcode NOT decoded: 25 bars+spaces seen (valid: 10 per character - 1).
+ 58196 16:22:35.980 Barcode capture started; IRQ edges=370
+ 58203 16:22:36.704 Barcode: only 1 bars+spaces seen, ignored.
+ 58206 16:22:36.850 Barcode reader OFF; IRQ edges=371
+ 58303 16:22:52.606 State: PICKED_UP -> LINE_CAL
+ 58304 16:22:52.610 LINE_CAL: left sensor on black -> forward, arcing left.
+ 58306 16:22:52.667 LINE_CAL: right sensor on black -> forward, arcing right.
+ 58308 16:22:52.674 LINE_CAL OK: both sensors on the line -> following.
+ 58309 16:22:52.674 State: LINE_CAL -> FOLLOW_LINE
+ 58310 16:22:52.676 Barcode reader ON; IRQ edges=377
+ 58311 16:22:52.736 Barcode capture started; IRQ edges=379
+ 58327 16:22:57.471 Barcode lenient forward, 0+4 missing: letter not a clean A-Z (#11).
+ 58328 16:22:57.480 Barcode lenient forward, 2+2 missing: letter not a clean A-Z (#9).
+ 58329 16:22:57.483 Barcode lenient forward, 4+0 missing: letter not a clean A-Z (#7).
+ 58330 16:22:57.485 Barcode lenient reversed, 0+4 missing: letter not a clean A-Z (#15).
+ 58331 16:22:57.486 Barcode lenient reversed, 2+2 missing: letter not a clean A-Z (#17).
+ 58332 16:22:57.486 Barcode lenient reversed, 4+0 missing: letter not a clean A-Z (#19).
+ 58333 16:22:57.488 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58337 16:22:57.692 Barcode NOT decoded: 25 bars+spaces seen (valid: 10 per character - 1).
+ 58341 16:22:58.369 Barcode capture started; IRQ edges=421
+ 58343 16:22:58.664 Barcode initial mark 376 ms: treated as junction, scan dropped.
+ 58356 16:23:01.015 Barcode reader OFF; IRQ edges=422
+ 58799 16:24:15.987 State: STOPPED -> LINE_CAL
+ 58800 16:24:15.987 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 58801 16:24:15.987 State: LINE_CAL -> FOLLOW_LINE
+ 58802 16:24:16.051 Barcode reader ON; IRQ edges=427
+ 58813 16:24:18.209 Barcode capture started; IRQ edges=429
+ 58822 16:24:20.481 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+ 58823 16:24:20.592 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58825 16:24:20.592 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+ 58826 16:24:20.592 Barcode capture started; IRQ edges=445
+ 58827 16:24:20.592 Barcode: only 1 bars+spaces seen, ignored.
+ 58830 16:24:21.416 Barcode capture started; IRQ edges=448
+ 58844 16:24:23.891 Barcode lenient: 15 bars+spaces cannot be "*X*" with at most 8 missing.
+ 58845 16:24:23.907 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58848 16:24:23.911 Barcode NOT decoded: 15 bars+spaces seen (valid: 10 per character - 1).
+ 58858 16:24:25.405 Barcode reader OFF; IRQ edges=478
+ 59069 16:24:55.103 State: STOPPED -> LINE_CAL
+ 59070 16:24:55.109 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 59071 16:24:55.109 State: LINE_CAL -> FOLLOW_LINE
+ 59072 16:24:55.109 Barcode reader ON; IRQ edges=483
+ 59079 16:24:56.358 Barcode capture started; IRQ edges=489
+ 59096 16:24:59.384 Barcode reader OFF; IRQ edges=512
+ 59097 16:24:59.384 Barcode: reading switched off after 15 bars+spaces -> decoding what was read.
+ 59098 16:24:59.389 Barcode lenient: 15 bars+spaces cannot be "*X*" with at most 8 missing.
+ 59099 16:24:59.389 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59104 16:24:59.556 Barcode NOT decoded: 15 bars+spaces seen (valid: 10 per character - 1).
+ 59457 16:26:05.022 State: STOPPED -> LINE_CAL
+ 59458 16:26:05.022 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 59459 16:26:05.022 State: LINE_CAL -> FOLLOW_LINE
+ 59460 16:26:05.022 Barcode reader ON; IRQ edges=529
+ 59463 16:26:05.314 Barcode capture started; IRQ edges=530
+ 59489 16:26:11.277 Barcode lenient forward, 0+2 missing: should be narrow (#4).
+ 59490 16:26:11.277 Barcode lenient forward, 2+0 missing: should be narrow (#2).
+ 59491 16:26:11.277 Barcode lenient reversed, 0+2 missing: should be narrow (#24).
+ 59492 16:26:11.277 Barcode lenient reversed, 2+0 missing: should be narrow (#26).
+ 59493 16:26:11.291 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59497 16:26:11.518 Barcode NOT decoded: 27 bars+spaces seen (valid: 10 per character - 1).
+ 59502 16:26:12.278 Barcode capture started; IRQ edges=601
+ 59506 16:26:12.598 Barcode reader OFF; IRQ edges=602
+ 59507 16:26:12.598 Barcode: reading switched off after 1 bars+spaces -> decoding what was read.
+ 59508 16:26:12.603 Barcode: only 1 bars+spaces seen, ignored.
+ 59629 16:26:32.477 State: STOPPED -> LINE_CAL
+ 59630 16:26:32.477 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 59631 16:26:32.492 State: LINE_CAL -> FOLLOW_LINE
+ 59632 16:26:32.492 Barcode reader ON; IRQ edges=611
+ 59635 16:26:33.120 Barcode capture started; IRQ edges=613
+ 59648 16:26:35.234 Barcode reader OFF; IRQ edges=622
+ 59649 16:26:35.236 Barcode: reading switched off after 4 bars+spaces -> decoding what was read.
+ 59650 16:26:35.236 Barcode lenient: 4 bars+spaces cannot be "*X*" with at most 8 missing.
+ 59651 16:26:35.238 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59656 16:26:35.335 Barcode NOT decoded: 4 bars+spaces seen (valid: 10 per character - 1).
+ 59741 16:26:50.686 State: STOPPED -> LINE_CAL
+ 59742 16:26:50.686 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 59743 16:26:50.686 State: LINE_CAL -> FOLLOW_LINE
+ 59744 16:26:50.686 Barcode reader ON; IRQ edges=640
+ 59753 16:26:52.427 Barcode capture started; IRQ edges=644
+ 59767 16:26:54.988 Barcode reader OFF; IRQ edges=666
+ 59768 16:26:54.988 Barcode: reading switched off after 11 bars+spaces -> decoding what was read.
+ 59769 16:26:54.994 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 59770 16:26:54.994 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59775 16:26:55.094 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 59941 16:27:24.468 State: STOPPED -> LINE_CAL
+ 59942 16:27:24.468 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 59943 16:27:24.468 State: LINE_CAL -> FOLLOW_LINE
+ 59944 16:27:24.468 Barcode reader ON; IRQ edges=676
+ 59947 16:27:24.681 Barcode capture started; IRQ edges=678
+ 59975 16:27:31.141 Barcode lenient: 13 bars+spaces cannot be "*X*" with at most 8 missing.
+ 59976 16:27:31.141 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59979 16:27:31.141 Barcode NOT decoded: 13 bars+spaces seen (valid: 10 per character - 1).
+ 59982 16:27:31.563 Barcode capture started; IRQ edges=698
+ 59985 16:27:31.643 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+ 59986 16:27:31.648 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59988 16:27:31.651 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+ 59993 16:27:32.580 Barcode reader OFF; IRQ edges=709
+ 60267 16:28:31.087 State: STOPPED -> LINE_CAL
+ 60268 16:28:31.087 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 60269 16:28:31.087 State: LINE_CAL -> FOLLOW_LINE
+ 60270 16:28:31.087 Barcode reader ON; IRQ edges=18871
+ 60273 16:28:31.335 Barcode capture started; IRQ edges=18877
+ 60274 16:28:31.335 Barcode capture started; IRQ edges=18877
+ 60275 16:28:31.335 Barcode capture started; IRQ edges=18877
+ 60290 16:28:34.614 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":1304499}
+ 60291 16:28:34.641 Barcode COMMAND: "A" = TURN LEFT
+ 60292 16:28:34.641 Pending: TURN LEFT at the next crossroad.
+ 60308 16:28:37.541 Barcode reader OFF; IRQ edges=19161
+ 61223 16:31:57.248 State: STOPPED -> LINE_CAL
+ 61224 16:31:57.261 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 61225 16:31:57.261 State: LINE_CAL -> FOLLOW_LINE
+ 61226 16:31:57.261 Barcode reader ON; IRQ edges=19769
+ 61232 16:31:58.417 Barcode capture started; IRQ edges=19785
+ 61233 16:31:58.417 Barcode capture started; IRQ edges=19785
+ 61234 16:31:58.417 Barcode capture started; IRQ edges=19785
+ 61235 16:31:58.429 Barcode capture started; IRQ edges=19785
+ 61236 16:31:58.429 Barcode capture started; IRQ edges=19785
+ 61237 16:31:58.429 Barcode capture started; IRQ edges=19785
+ 61252 16:32:01.516 Barcode lenient: 13 bars+spaces cannot be "*X*" with at most 8 missing.
+ 61253 16:32:01.639 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61256 16:32:01.647 Barcode NOT decoded: 13 bars+spaces seen (valid: 10 per character - 1).
+ 61262 16:32:02.687 Barcode capture started; IRQ edges=20070
+ 61263 16:32:02.791 Barcode capture started; IRQ edges=20070
+ 61264 16:32:02.793 Barcode capture started; IRQ edges=20070
+ 61265 16:32:02.796 Barcode capture started; IRQ edges=20070
+ 61266 16:32:02.796 Barcode capture started; IRQ edges=20070
+ 61267 16:32:02.796 Barcode capture started; IRQ edges=20070
+ 61268 16:32:02.796 Barcode capture started; IRQ edges=20070
+ 61269 16:32:02.796 Barcode capture started; IRQ edges=20070
+ 61270 16:32:04.895 Barcode capture started; IRQ edges=20070
+ 61271 16:32:04.908 Barcode capture started; IRQ edges=20070
+ 61272 16:32:04.908 Barcode capture started; IRQ edges=20070
+ 61273 16:32:04.908 Barcode capture started; IRQ edges=20070
+ 61274 16:32:04.913 Barcode capture started; IRQ edges=20070
+ 61275 16:32:04.915 Barcode capture started; IRQ edges=20070
+ 61276 16:32:04.915 Barcode capture started; IRQ edges=20070
+ 61277 16:32:04.917 Barcode capture started; IRQ edges=20070
+ 61278 16:32:04.991 Barcode capture started; IRQ edges=20070
+ 61279 16:32:04.991 Barcode capture started; IRQ edges=20070
+ 61280 16:32:04.991 Barcode capture started; IRQ edges=20070
+ 61281 16:32:04.991 Barcode capture started; IRQ edges=20070
+ 61282 16:32:05.004 Barcode capture started; IRQ edges=20070
+ 61283 16:32:05.004 Barcode capture started; IRQ edges=20070
+ 61284 16:32:05.004 Barcode capture started; IRQ edges=20070
+ 61285 16:32:05.004 Barcode capture started; IRQ edges=20070
+ 61286 16:32:05.166 Barcode capture started; IRQ edges=20070
+ 61287 16:32:05.175 Barcode capture started; IRQ edges=20070
+ 61288 16:32:05.175 Barcode capture started; IRQ edges=20070
+ 61289 16:32:05.175 Barcode capture started; IRQ edges=20070
+ 61290 16:32:05.175 Barcode capture started; IRQ edges=20070
+ 61291 16:32:05.182 Barcode capture started; IRQ edges=20070
+ 61292 16:32:05.182 Barcode capture started; IRQ edges=20070
+ 61293 16:32:05.182 Barcode capture started; IRQ edges=20070
+ 61294 16:32:05.263 Barcode capture started; IRQ edges=20070
+ 61295 16:32:05.265 Barcode capture started; IRQ edges=20070
+ 61296 16:32:05.265 Barcode capture started; IRQ edges=20070
+ 61297 16:32:05.269 Barcode capture started; IRQ edges=20070
+ 61298 16:32:05.272 Barcode capture started; IRQ edges=20070
+ 61299 16:32:05.272 Barcode capture started; IRQ edges=20070
+ 61300 16:32:05.272 Barcode capture started; IRQ edges=20070
+ 61301 16:32:05.272 Barcode capture started; IRQ edges=20070
+ 61302 16:32:05.344 Barcode capture started; IRQ edges=20070
+ 61303 16:32:05.354 Barcode capture started; IRQ edges=20070
+ 61304 16:32:05.354 Barcode capture started; IRQ edges=20070
+ 61305 16:32:05.359 Barcode capture started; IRQ edges=20070
+ 61306 16:32:05.359 Barcode capture started; IRQ edges=20070
+ 61307 16:32:05.359 Barcode capture started; IRQ edges=20070
+ 61308 16:32:05.359 Barcode capture started; IRQ edges=20070
+ 61309 16:32:05.359 Barcode capture started; IRQ edges=20070
+ 61310 16:32:05.556 Barcode capture started; IRQ edges=20070
+ 61311 16:32:05.556 Barcode capture started; IRQ edges=20070
+ 61312 16:32:05.556 Barcode capture started; IRQ edges=20070
+ 61313 16:32:05.556 Barcode capture started; IRQ edges=20070
+ 61314 16:32:05.568 Barcode capture started; IRQ edges=20070
+ 61317 16:32:05.568 Barcode reader OFF; IRQ edges=20314
+ 61318 16:32:05.783 Barcode: reading switched off after 11 bars+spaces -> decoding what was read.
+ 61319 16:32:05.790 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 61320 16:32:05.790 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61326 16:32:05.862 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 61494 16:32:20.002 Barcode reader ON; IRQ edges=20314
+ 61495 16:32:20.002 Barcode capture started; IRQ edges=20348
+ 61496 16:32:20.002 Barcode capture started; IRQ edges=20348
+ 61497 16:32:20.002 Barcode capture started; IRQ edges=20348
+ 61498 16:32:20.002 Barcode capture started; IRQ edges=20348
+ 61499 16:32:20.002 Barcode capture started; IRQ edges=20348
+ 61500 16:32:20.114 Barcode capture started; IRQ edges=20348
+ 61501 16:32:20.114 Barcode capture started; IRQ edges=20348
+ 61502 16:32:20.114 Barcode capture started; IRQ edges=20348
+ 61503 16:32:20.128 Barcode capture started; IRQ edges=20348
+ 61504 16:32:20.130 Barcode capture started; IRQ edges=20348
+ 61505 16:32:20.130 Barcode capture started; IRQ edges=20348
+ 61506 16:32:20.130 Barcode capture started; IRQ edges=20348
+ 61509 16:32:20.515 Barcode initial mark 698 ms: treated as junction, scan dropped.
+ 61516 16:32:21.158 Barcode reader OFF; IRQ edges=20350
+ 61527 16:32:22.641 Barcode reader ON; IRQ edges=20350
+ 61535 16:32:23.564 Barcode capture started; IRQ edges=20357
+ 61536 16:32:23.574 Barcode capture started; IRQ edges=20357
+ 61552 16:32:27.024 Barcode lenient: 13 bars+spaces cannot be "*X*" with at most 8 missing.
+ 61553 16:32:27.148 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61556 16:32:27.152 Barcode NOT decoded: 13 bars+spaces seen (valid: 10 per character - 1).
+ 61563 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61564 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61565 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61566 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61567 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61568 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61569 16:32:28.755 Barcode capture started; IRQ edges=20589
+ 61570 16:32:29.010 Barcode capture started; IRQ edges=20589
+ 61571 16:32:29.013 Barcode capture started; IRQ edges=20589
+ 61572 16:32:29.015 Barcode capture started; IRQ edges=20589
+ 61573 16:32:29.017 Barcode capture started; IRQ edges=20589
+ 61575 16:32:29.017 Barcode capture started; IRQ edges=20589
+ 61576 16:32:29.019 Barcode capture started; IRQ edges=20589
+ 61577 16:32:29.019 Barcode capture started; IRQ edges=20589
+ 61578 16:32:29.390 Barcode capture started; IRQ edges=20589
+ 61579 16:32:29.403 Barcode capture started; IRQ edges=20589
+ 61580 16:32:29.403 Barcode capture started; IRQ edges=20589
+ 61581 16:32:29.412 Barcode capture started; IRQ edges=20589
+ 61582 16:32:29.412 Barcode capture started; IRQ edges=20589
+ 61583 16:32:29.414 Barcode capture started; IRQ edges=20589
+ 61584 16:32:29.415 Barcode capture started; IRQ edges=20589
+ 61585 16:32:29.417 Barcode capture started; IRQ edges=20589
+ 61586 16:32:29.728 Barcode capture started; IRQ edges=20589
+ 61587 16:32:29.728 Barcode capture started; IRQ edges=20589
+ 61588 16:32:29.728 Barcode capture started; IRQ edges=20589
+ 61589 16:32:29.728 Barcode capture started; IRQ edges=20589
+ 61590 16:32:29.744 Barcode capture started; IRQ edges=20589
+ 61591 16:32:29.744 Barcode capture started; IRQ edges=20589
+ 61592 16:32:29.744 Barcode capture started; IRQ edges=20589
+ 61593 16:32:29.744 Barcode capture started; IRQ edges=20589
+ 61594 16:32:29.810 Barcode capture started; IRQ edges=20589
+ 61595 16:32:29.825 Barcode capture started; IRQ edges=20589
+ 61596 16:32:29.825 Barcode capture started; IRQ edges=20589
+ 61597 16:32:29.825 Barcode capture started; IRQ edges=20589
+ 61598 16:32:29.831 Barcode capture started; IRQ edges=20589
+ 61599 16:32:29.831 Barcode capture started; IRQ edges=20589
+ 61600 16:32:29.831 Barcode capture started; IRQ edges=20589
+ 61601 16:32:29.831 Barcode capture started; IRQ edges=20589
+ 61602 16:32:30.405 Barcode capture started; IRQ edges=20589
+ 61603 16:32:30.405 Barcode capture started; IRQ edges=20589
+ 61604 16:32:30.405 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+ 61605 16:32:30.405 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61607 16:32:30.405 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+ 61608 16:32:30.405 Barcode capture started; IRQ edges=20660
+ 61609 16:32:30.405 Barcode capture started; IRQ edges=20660
+ 61610 16:32:30.643 Barcode capture started; IRQ edges=20660
+ 61611 16:32:30.643 Barcode capture started; IRQ edges=20660
+ 61612 16:32:30.643 Barcode capture started; IRQ edges=20660
+ 61622 16:32:31.838 Barcode reader OFF; IRQ edges=20678
+ 61623 16:32:31.838 Barcode: reading switched off after 3 bars+spaces -> decoding what was read.
+ 61624 16:32:31.838 Barcode: only 3 bars+spaces seen, ignored.
+ 61797 16:33:03.165 State: STOPPED -> LINE_CAL
+ 61798 16:33:03.165 LINE_CAL: left sensor on black -> forward, arcing left.
+ 61799 16:33:03.167 LINE_CAL OK: both sensors on the line -> following.
+ 61800 16:33:03.167 State: LINE_CAL -> FOLLOW_LINE
+ 61801 16:33:03.169 Barcode reader ON; IRQ edges=20963
+ 61809 16:33:04.998 Barcode capture started; IRQ edges=20979
+ 61810 16:33:04.998 Barcode capture started; IRQ edges=20979
+ 61811 16:33:04.998 Barcode capture started; IRQ edges=20979
+ 61812 16:33:05.014 Barcode capture started; IRQ edges=20979
+ 61813 16:33:05.014 Barcode capture started; IRQ edges=20979
+ 61825 16:33:07.276 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 61826 16:33:07.412 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61829 16:33:07.423 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 61836 16:33:08.423 Barcode capture started; IRQ edges=21119
+ 61837 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61838 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61839 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61840 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61841 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61842 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61843 16:33:08.538 Barcode capture started; IRQ edges=21119
+ 61844 16:33:08.936 Barcode capture started; IRQ edges=21119
+ 61845 16:33:08.947 Barcode capture started; IRQ edges=21119
+ 61846 16:33:08.949 Barcode capture started; IRQ edges=21119
+ 61847 16:33:08.949 Barcode capture started; IRQ edges=21119
+ 61848 16:33:08.952 Barcode capture started; IRQ edges=21119
+ 61849 16:33:08.953 Barcode capture started; IRQ edges=21119
+ 61850 16:33:08.954 Barcode capture started; IRQ edges=21119
+ 61851 16:33:08.955 Barcode capture started; IRQ edges=21119
+ 61852 16:33:09.200 Barcode capture started; IRQ edges=21119
+ 61853 16:33:09.216 Barcode capture started; IRQ edges=21119
+ 61854 16:33:09.216 Barcode capture started; IRQ edges=21119
+ 61855 16:33:09.221 Barcode capture started; IRQ edges=21119
+ 61856 16:33:09.221 Barcode capture started; IRQ edges=21119
+ 61868 16:33:12.502 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+ 61869 16:33:12.504 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61871 16:33:12.509 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+ 61875 16:33:12.642 Barcode reader OFF; IRQ edges=21168
+ 62087 16:34:01.687 State: STOPPED -> LINE_CAL
+ 62088 16:34:01.687 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 62089 16:34:01.687 State: LINE_CAL -> FOLLOW_LINE
+ 62090 16:34:01.687 Barcode reader ON; IRQ edges=27889
+ 62092 16:34:01.723 Barcode capture started; IRQ edges=27922
+ 62093 16:34:01.723 Barcode capture started; IRQ edges=27922
+ 62094 16:34:01.723 Barcode capture started; IRQ edges=27922
+ 62095 16:34:01.723 Barcode capture started; IRQ edges=27922
+ 62096 16:34:01.739 Barcode capture started; IRQ edges=27922
+ 62097 16:34:01.739 Barcode capture started; IRQ edges=27922
+ 62098 16:34:01.739 Barcode capture started; IRQ edges=27922
+ 62099 16:34:01.879 Barcode capture started; IRQ edges=27922
+ 62100 16:34:01.888 Barcode capture started; IRQ edges=27922
+ 62101 16:34:01.888 Barcode capture started; IRQ edges=27922
+ 62102 16:34:01.888 Barcode capture started; IRQ edges=27922
+ 62105 16:34:02.277 Barcode: only 1 bars+spaces seen, ignored.
+ 62106 16:34:02.277 Barcode capture started; IRQ edges=27940
+ 62107 16:34:02.277 Barcode capture started; IRQ edges=27940
+ 62108 16:34:02.277 Barcode capture started; IRQ edges=27940
+ 62109 16:34:02.277 Barcode capture started; IRQ edges=27940
+ 62110 16:34:02.277 Barcode capture started; IRQ edges=27940
+ 62111 16:34:02.277 Barcode capture started; IRQ edges=27940
+ 62114 16:34:02.645 Barcode: only 1 bars+spaces seen, ignored.
+ 62117 16:34:03.208 Barcode capture started; IRQ edges=27958
+ 62118 16:34:03.208 Barcode capture started; IRQ edges=27958
+ 62119 16:34:03.208 Barcode capture started; IRQ edges=27958
+ 62120 16:34:03.208 Barcode capture started; IRQ edges=27958
+ 62121 16:34:03.379 Barcode capture started; IRQ edges=27958
+ 62122 16:34:03.389 Barcode capture started; IRQ edges=27958
+ 62130 16:34:04.198 Barcode reader OFF; IRQ edges=27958
+ 62131 16:34:04.198 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 62132 16:34:04.198 Barcode: only 0 bars+spaces seen, ignored.
+ 62206 16:34:19.086 State: STOPPED -> LINE_CAL
+ 62207 16:34:19.102 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 62208 16:34:19.102 State: LINE_CAL -> FOLLOW_LINE
+ 62209 16:34:19.102 Barcode reader ON; IRQ edges=29164
+ 62213 16:34:19.882 Barcode capture started; IRQ edges=29190
+ 62214 16:34:19.882 Barcode capture started; IRQ edges=29190
+ 62215 16:34:19.882 Barcode capture started; IRQ edges=29190
+ 62216 16:34:19.882 Barcode capture started; IRQ edges=29190
+ 62217 16:34:19.882 Barcode capture started; IRQ edges=29190
+ 62218 16:34:19.882 Barcode capture started; IRQ edges=29190
+ 62219 16:34:19.890 Barcode capture started; IRQ edges=29190
+ 62220 16:34:19.892 Barcode capture started; IRQ edges=29190
+ 62221 16:34:20.007 Barcode capture started; IRQ edges=29190
+ 62239 16:34:23.301 Barcode lenient forward, 0+8 missing: letter not a clean A-Z (#11).
+ 62240 16:34:23.311 Barcode lenient forward, 8+0 missing: letter not a clean A-Z (#3).
+ 62241 16:34:23.311 Barcode lenient reversed, 0+8 missing: letter not a clean A-Z (#11).
+ 62242 16:34:23.315 Barcode lenient reversed, 8+0 missing: letter not a clean A-Z (#19).
+ 62243 16:34:23.316 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 62247 16:34:23.515 Barcode NOT decoded: 21 bars+spaces seen (valid: 10 per character - 1).
+ 62259 16:34:27.074 Barcode capture started; IRQ edges=29628
+ 62260 16:34:27.081 Barcode capture started; IRQ edges=29628
+ 62261 16:34:27.081 Barcode capture started; IRQ edges=29628
+ 62262 16:34:27.081 Barcode capture started; IRQ edges=29628
+ 62263 16:34:27.081 Barcode capture started; IRQ edges=29628
+ 62264 16:34:27.081 Barcode capture started; IRQ edges=29628
+ 62265 16:34:27.081 Barcode capture started; IRQ edges=29628
+ 62269 16:34:27.531 Barcode: only 1 bars+spaces seen, ignored.
+ 62276 16:34:28.248 Barcode reader OFF; IRQ edges=29629
+ 62329 16:34:39.448 State: STOPPED -> LINE_CAL
+ 62330 16:34:39.448 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 62331 16:34:39.454 State: LINE_CAL -> FOLLOW_LINE
+ 62332 16:34:39.454 Barcode reader ON; IRQ edges=29789
+ 62335 16:34:40.089 Barcode capture started; IRQ edges=29804
+ 62336 16:34:40.089 Barcode capture started; IRQ edges=29804
+ 62337 16:34:40.089 Barcode capture started; IRQ edges=29804
+ 62338 16:34:40.089 Barcode capture started; IRQ edges=29804
+ 62339 16:34:40.089 Barcode capture started; IRQ edges=29804
+ 62355 16:34:44.376 Barcode: read leniently (21 of 29 bars+spaces, 8+0 missing, 0 stray left out).
+ 62356 16:34:44.376 Barcode COMMAND: "A" = TURN LEFT
+ 62357 16:34:44.376 Pending: TURN LEFT at the next crossroad.
+ 62358 16:34:44.381 Barcode capture started; IRQ edges=30098
+ 62359 16:34:44.381 Barcode capture started; IRQ edges=30098
+ 62360 16:34:44.381 Barcode capture started; IRQ edges=30098
+ 62361 16:34:44.381 Barcode capture started; IRQ edges=30098
+ 62362 16:34:44.381 Barcode capture started; IRQ edges=30098
+ 62363 16:34:44.806 Barcode capture started; IRQ edges=30098
+ 62364 16:34:44.815 Barcode capture started; IRQ edges=30098
+ 62365 16:34:44.817 Barcode capture started; IRQ edges=30098
+ 62366 16:34:44.817 Barcode capture started; IRQ edges=30098
+ 62367 16:34:44.819 Barcode capture started; IRQ edges=30098
+ 62368 16:34:44.819 Barcode capture started; IRQ edges=30098
+ 62369 16:34:44.821 Barcode capture started; IRQ edges=30098
+ 62370 16:34:44.822 Barcode capture started; IRQ edges=30098
+ 62371 16:34:44.892 Barcode capture started; IRQ edges=30098
+ 62372 16:34:44.895 Barcode capture started; IRQ edges=30098
+ 62373 16:34:44.895 Barcode capture started; IRQ edges=30098
+ 62374 16:34:44.895 Barcode capture started; IRQ edges=30098
+ 62375 16:34:44.895 Barcode capture started; IRQ edges=30098
+ 62376 16:34:44.895 Barcode capture started; IRQ edges=30098
+ 62377 16:34:44.902 Barcode capture started; IRQ edges=30098
+ 62378 16:34:44.902 Barcode capture started; IRQ edges=30098
+ 62381 16:34:45.488 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+ 62382 16:34:45.488 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 62384 16:34:45.488 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+ 62389 16:34:47.158 Barcode capture started; IRQ edges=30161
+ 62390 16:34:47.165 Barcode capture started; IRQ edges=30161
+ 62392 16:34:47.254 Barcode initial mark 372 ms: treated as junction, scan dropped.
+ 62393 16:34:47.260 Side sensor: 370 ms black mark -> crossroad.
+ 62394 16:34:47.260 Crossroad: TURN LEFT now.
+ 62395 16:34:47.260 State: FOLLOW_LINE -> TURN
+ 62396 16:34:47.260 Barcode reader OFF; IRQ edges=30162
+ 62408 16:34:49.290 TURN LEFT done (on the line, 2698 ms).
+ 62409 16:34:49.298 State: TURN -> FOLLOW_LINE
+ 62410 16:34:49.300 Barcode reader ON; IRQ edges=30166
+ 62418 16:34:50.204 Barcode reader OFF; IRQ edges=30166
+ 62574 16:35:25.161 State: STOPPED -> LINE_CAL
+ 62575 16:35:25.161 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 62576 16:35:25.161 State: LINE_CAL -> FOLLOW_LINE
+ 62577 16:35:25.161 Barcode reader ON; IRQ edges=30216
+ 62581 16:35:25.552 Barcode capture started; IRQ edges=30222
+ 62582 16:35:25.552 Barcode capture started; IRQ edges=30222
+ 62596 16:35:29.648 Barcode lenient: 19 bars+spaces cannot be "*X*" with at most 8 missing.
+ 62597 16:35:29.648 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 62600 16:35:29.654 Barcode NOT decoded: 19 bars+spaces seen (valid: 10 per character - 1).
+ 62603 16:35:30.223 Barcode capture started; IRQ edges=30403
+ 62604 16:35:30.509 Barcode capture started; IRQ edges=30403
+ 62607 16:35:30.716 Barcode: only 1 bars+spaces seen, ignored.
+ 62613 16:35:34.124 Barcode capture started; IRQ edges=30425
+ 62614 16:35:34.124 Barcode capture started; IRQ edges=30425
+ 62615 16:35:34.136 Barcode capture started; IRQ edges=30425
+ 62616 16:35:34.136 Barcode capture started; IRQ edges=30425
+ 62617 16:35:34.136 Barcode capture started; IRQ edges=30425
+ 62618 16:35:34.136 Barcode capture started; IRQ edges=30425
+ 62619 16:35:34.136 Barcode capture started; IRQ edges=30425
+ 62621 16:35:34.330 Barcode initial mark 419 ms: treated as junction, scan dropped.
+ 62624 16:35:34.351 Barcode reader OFF; IRQ edges=30427
+ 62685 16:35:47.001 State: STOPPED -> LINE_CAL
+ 62686 16:35:47.001 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 62687 16:35:47.001 State: LINE_CAL -> FOLLOW_LINE
+ 62688 16:35:47.001 Barcode reader ON; IRQ edges=30509
+ 62692 16:35:47.454 Barcode capture started; IRQ edges=30515
+ 62693 16:35:47.551 Barcode capture started; IRQ edges=30515
+ 62711 16:35:52.671 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":1741129}
+ 62712 16:35:52.671 Barcode: read leniently (21 of 29 bars+spaces, 8+0 missing, 0 stray left out).
+ 62713 16:35:52.683 Barcode COMMAND: "A" = TURN LEFT
+ 62714 16:35:52.683 Pending: TURN LEFT at the next crossroad.
+ 62717 16:35:52.725 Barcode capture started; IRQ edges=30821
+ 62718 16:35:52.725 Barcode capture started; IRQ edges=30821
+ 62719 16:35:52.725 Barcode capture started; IRQ edges=30821
+ 62720 16:35:52.725 Barcode capture started; IRQ edges=30821
+ 62721 16:35:52.741 Barcode capture started; IRQ edges=30821
+ 62722 16:35:52.741 Barcode capture started; IRQ edges=30821
+ 62723 16:35:52.741 Barcode capture started; IRQ edges=30821
+ 62724 16:35:53.055 Barcode capture started; IRQ edges=30821
+ 62725 16:35:53.061 Barcode capture started; IRQ edges=30821
+ 62726 16:35:53.061 Barcode capture started; IRQ edges=30821
+ 62727 16:35:53.065 Barcode capture started; IRQ edges=30821
+ 62728 16:35:53.065 Barcode capture started; IRQ edges=30821
+ 62729 16:35:53.065 Barcode capture started; IRQ edges=30821
+ 62730 16:35:53.065 Barcode capture started; IRQ edges=30821
+ 62731 16:35:53.065 Barcode capture started; IRQ edges=30821
+ 62732 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62733 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62734 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62735 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62736 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62737 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62738 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62739 16:35:53.178 Barcode capture started; IRQ edges=30821
+ 62740 16:35:53.256 Barcode capture started; IRQ edges=30821
+ 62741 16:35:53.259 Barcode capture started; IRQ edges=30821
+ 62742 16:35:53.259 Barcode capture started; IRQ edges=30821
+ 62743 16:35:53.259 Barcode capture started; IRQ edges=30821
+ 62744 16:35:53.259 Barcode capture started; IRQ edges=30821
+ 62745 16:35:53.259 Barcode capture started; IRQ edges=30821
+ 62746 16:35:53.259 Barcode capture started; IRQ edges=30821
+ 62747 16:35:53.259 Barcode: only 1 bars+spaces seen, ignored.
+ 62748 16:35:53.323 Barcode capture started; IRQ edges=30832
+ 62749 16:35:53.339 Barcode capture started; IRQ edges=30832
+ 62750 16:35:53.339 Barcode capture started; IRQ edges=30832
+ 62751 16:35:53.339 Barcode capture started; IRQ edges=30832
+ 62752 16:35:53.339 Barcode: only 1 bars+spaces seen, ignored.
+ 62753 16:35:53.339 Barcode capture started; IRQ edges=30839
+ 62754 16:35:53.339 Barcode capture started; IRQ edges=30839
+ 62757 16:35:53.850 Barcode initial mark 454 ms: treated as junction, scan dropped.
+ 62758 16:35:53.860 Side sensor: 458 ms black mark -> crossroad.
+ 62759 16:35:53.860 Crossroad: TURN LEFT now.
+ 62760 16:35:53.864 State: FOLLOW_LINE -> TURN
+ 62761 16:35:53.865 Barcode reader OFF; IRQ edges=30840
+ 62770 16:35:55.316 State: TURN -> STOPPED
+ 62889 16:36:21.104 State: STOPPED -> LINE_CAL
+ 62890 16:36:21.104 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 62891 16:36:21.109 State: LINE_CAL -> FOLLOW_LINE
+ 62892 16:36:21.111 Barcode reader ON; IRQ edges=30899
+ 62924 16:36:27.109 Barcode reader OFF; IRQ edges=30899
+ 63335 16:38:02.367 State: STOPPED -> LINE_CAL
+ 63336 16:38:02.378 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 63337 16:38:02.380 State: LINE_CAL -> FOLLOW_LINE
+ 63338 16:38:02.380 Barcode reader ON; IRQ edges=31319
+ 63348 16:38:04.316 Barcode capture started; IRQ edges=31321
+ 63368 16:38:08.561 Barcode reader OFF; IRQ edges=31424
+ 63369 16:38:08.561 Barcode: reading switched off after 21 bars+spaces -> decoding what was read.
+ 63370 16:38:08.563 Barcode lenient forward, 0+8 missing: letter not a clean A-Z (#11).
+ 63371 16:38:08.563 Barcode lenient forward, 8+0 missing: letter not a clean A-Z (#3).
+ 63372 16:38:08.565 Barcode lenient reversed, 0+8 missing: letter not a clean A-Z (#11).
+ 63373 16:38:08.569 Barcode lenient reversed, 8+0 missing: should be narrow (#21).
+ 63374 16:38:08.653 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 63380 16:38:08.658 Barcode NOT decoded: 21 bars+spaces seen (valid: 10 per character - 1).
+ 63512 16:38:25.278 State: STOPPED -> LINE_CAL
+ 63513 16:38:25.278 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 63514 16:38:25.338 State: LINE_CAL -> FOLLOW_LINE
+ 63515 16:38:25.338 Barcode reader ON; IRQ edges=31471
+ 63520 16:38:26.476 Barcode capture started; IRQ edges=31475
+ 63547 16:38:32.289 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":1901969}
+ 63548 16:38:32.291 Barcode: read leniently (23 of 29 bars+spaces, 6+0 missing, 4 stray left out).
+ 63549 16:38:32.293 Barcode COMMAND: "A" = TURN LEFT
+ 63550 16:38:32.293 Pending: TURN LEFT at the next crossroad.
+ 63564 16:38:34.731 Barcode reader OFF; IRQ edges=31602
+ 63681 16:38:56.300 State: STOPPED -> LINE_CAL
+ 63682 16:38:56.300 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 63683 16:38:56.300 State: LINE_CAL -> FOLLOW_LINE
+ 63684 16:38:56.307 Barcode reader ON; IRQ edges=31664
+ 63687 16:38:56.728 Barcode capture started; IRQ edges=31675
+ 63688 16:38:56.807 Barcode capture started; IRQ edges=31675
+ 63703 16:38:59.643 Barcode lenient: 4 bars+spaces cannot be "*X*" with at most 8 missing.
+ 63704 16:38:59.645 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 63706 16:38:59.647 Barcode NOT decoded: 4 bars+spaces seen (valid: 10 per character - 1).
+ 63729 16:39:04.015 Barcode capture started; IRQ edges=31699
+ 63735 16:39:04.260 Barcode reader OFF; IRQ edges=31699
+ 63736 16:39:04.260 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 63737 16:39:04.260 Barcode: only 0 bars+spaces seen, ignored.
+ 63827 16:39:24.463 State: PICKED_UP -> LINE_CAL
+ 63828 16:39:24.467 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 63829 16:39:24.467 State: LINE_CAL -> FOLLOW_LINE
+ 63830 16:39:24.467 Barcode reader ON; IRQ edges=31700
+ 63832 16:39:24.727 Barcode capture started; IRQ edges=31704
+ 63837 16:39:25.559 Barcode: only 3 bars+spaces seen, ignored.
+ 63838 16:39:25.664 Barcode capture started; IRQ edges=31727
+ 63846 16:39:27.199 Barcode initial mark 1560 ms: treated as junction, scan dropped.
+ 63849 16:39:27.478 Barcode capture started; IRQ edges=31768
+ 63850 16:39:27.553 Barcode capture started; IRQ edges=31768
+ 63860 16:39:29.611 Barcode: only 0 bars+spaces seen, ignored.
+ 63869 16:39:30.846 Barcode capture started; IRQ edges=31782
+ 63875 16:39:31.316 Barcode reader OFF; IRQ edges=31782
+ 63876 16:39:31.318 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 63877 16:39:31.320 Barcode: only 0 bars+spaces seen, ignored.
+ 63964 16:39:49.102 State: PICKED_UP -> LINE_CAL
+ 63965 16:39:49.102 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 63966 16:39:49.102 State: LINE_CAL -> FOLLOW_LINE
+ 63967 16:39:49.117 Barcode reader ON; IRQ edges=31856
+ 63971 16:39:50.015 Barcode capture started; IRQ edges=31868
+ 63972 16:39:50.019 Barcode capture started; IRQ edges=31868
+ 63986 16:39:52.621 Barcode lenient forward, 0+0 missing: letter not a clean A-Z (#11).
+ 63987 16:39:54.764 Barcode lenient reversed, 0+0 missing: letter not a clean A-Z (#19).
+ 63988 16:39:54.766 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 63992 16:39:54.773 Barcode NOT decoded: 29 bars+spaces seen (valid: 10 per character - 1).
+ 64017 16:39:58.086 Line lost: reversing 2550 ms of path to where both sensors were on it.
+ 64019 16:39:58.356 Reverse done (a sensor found black).
+ 64031 16:40:00.051 Barcode reader OFF; IRQ edges=31961
+ 64143 16:40:23.929 State: STOPPED -> LINE_CAL
+ 64144 16:40:23.929 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 64145 16:40:23.929 State: LINE_CAL -> FOLLOW_LINE
+ 64146 16:40:23.929 Barcode reader ON; IRQ edges=31974
+ 64159 16:40:26.524 Barcode reader OFF; IRQ edges=31974
+ 64327 16:40:40.632 Barcode reader ON; IRQ edges=31974
+ 64332 16:40:41.499 Barcode capture started; IRQ edges=31983
+ 64347 16:40:45.227 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+ 64348 16:40:45.231 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64351 16:40:45.237 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+ 64353 16:40:45.239 Barcode capture started; IRQ edges=32061
+ 64362 16:40:46.881 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+ 64363 16:40:46.893 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64365 16:40:46.897 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+ 64375 16:40:48.507 Barcode reader OFF; IRQ edges=32080
+ 64764 16:42:10.013 State: PICKED_UP -> LINE_CAL
+ 64765 16:42:10.013 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 64766 16:42:10.013 State: LINE_CAL -> FOLLOW_LINE
+ 64767 16:42:10.019 Barcode reader ON; IRQ edges=32751
+ 64770 16:42:10.470 Barcode capture started; IRQ edges=32753
+ 64805 16:42:17.272 Barcode reader OFF; IRQ edges=32771
+ 64806 16:42:17.272 Barcode: reading switched off after 14 bars+spaces -> decoding what was read.
+ 64807 16:42:17.272 Barcode lenient: 14 bars+spaces cannot be "*X*" with at most 8 missing.
+ 64808 16:42:17.283 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64811 16:42:17.347 Barcode NOT decoded: 14 bars+spaces seen (valid: 10 per character - 1).
+ 64859 16:42:27.889 State: STOPPED -> LINE_CAL
+ 64860 16:42:27.893 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 64861 16:42:27.895 State: LINE_CAL -> FOLLOW_LINE
+ 64862 16:42:27.895 Barcode reader ON; IRQ edges=32772
+ 64864 16:42:28.447 Barcode capture started; IRQ edges=32774
+ 64867 16:42:28.863 Barcode: only 1 bars+spaces seen, ignored.
+ 64870 16:42:29.272 Barcode capture started; IRQ edges=32777
+ 64894 16:42:34.291 Barcode lenient forward, 0+4 missing: should be wide (#2).
+ 64895 16:42:34.294 Barcode lenient forward, 2+2 missing: letter not a clean A-Z (#9).
+ 64896 16:42:34.294 Barcode lenient forward, 4+0 missing: letter not a clean A-Z (#7).
+ 64897 16:42:34.294 Barcode lenient reversed, 0+4 missing: letter not a clean A-Z (#15).
+ 64898 16:42:34.294 Barcode lenient reversed, 2+2 missing: letter not a clean A-Z (#17).
+ 64899 16:42:34.294 Barcode lenient reversed, 4+0 missing: should be narrow (#24).
+ 64900 16:42:34.294 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64904 16:42:34.379 Barcode NOT decoded: 25 bars+spaces seen (valid: 10 per character - 1).
+ 64922 16:42:39.809 Line lost: reversing 2970 ms of path to where both sensors were on it.
+ 64924 16:42:39.812 Reverse done (a sensor found black).
+ 64932 16:42:39.976 Barcode reader OFF; IRQ edges=32842
+ 64971 16:42:47.904 State: STOPPED -> LINE_CAL
+ 64972 16:42:47.907 LINE_CAL: right sensor on black -> forward, arcing right.
+ 64974 16:42:48.068 LINE_CAL: left sensor on black -> forward, arcing left.
+ 64975 16:42:48.192 LINE_CAL OK: both sensors on the line -> following.
+ 64976 16:42:48.198 State: LINE_CAL -> FOLLOW_LINE
+ 64977 16:42:48.198 Barcode reader ON; IRQ edges=32844
+ 64979 16:42:48.679 Barcode capture started; IRQ edges=32845
+ 64991 16:42:50.281 Barcode reader OFF; IRQ edges=32851
+ 64992 16:42:50.286 Barcode: reading switched off after 5 bars+spaces -> decoding what was read.
+ 64993 16:42:50.453 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+ 64994 16:42:50.464 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64998 16:42:50.472 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+ 65106 16:43:06.487 State: STOPPED -> LINE_CAL
+ 65107 16:43:06.487 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 65108 16:43:06.487 State: LINE_CAL -> FOLLOW_LINE
+ 65109 16:43:06.487 Barcode reader ON; IRQ edges=32856
+ 65112 16:43:06.855 Barcode capture started; IRQ edges=32858
+ 65141 16:43:13.372 Barcode lenient forward, 0+6 missing: letter not a clean A-Z (#11).
+ 65142 16:43:13.372 Barcode lenient forward, 6+0 missing: letter not a clean A-Z (#5).
+ 65143 16:43:13.372 Barcode lenient reversed, 0+6 missing: letter not a clean A-Z (#13).
+ 65144 16:43:13.380 Barcode lenient reversed, 6+0 missing: should be wide (#5).
+ 65145 16:43:13.380 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65150 16:43:13.452 Barcode NOT decoded: 23 bars+spaces seen (valid: 10 per character - 1).
+ 65162 16:43:15.671 Barcode reader OFF; IRQ edges=32897
+ 65340 16:43:49.961 State: PICKED_UP -> LINE_CAL
+ 65341 16:43:49.961 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 65342 16:43:49.961 State: LINE_CAL -> FOLLOW_LINE
+ 65343 16:43:49.961 Barcode reader ON; IRQ edges=32913
+ 65346 16:43:50.485 Barcode capture started; IRQ edges=32914
+ 65348 16:43:50.769 Barcode: only 1 bars+spaces seen, ignored.
+ 65350 16:43:50.936 Barcode capture started; IRQ edges=32917
+ 65358 16:43:53.312 Barcode lenient: 9 bars+spaces cannot be "*X*" with at most 8 missing.
+ 65359 16:43:53.312 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65361 16:43:53.535 Barcode NOT decoded: 9 bars+spaces seen (valid: 10 per character - 1).
+ 65362 16:43:53.549 Barcode capture started; IRQ edges=32948
+ 65374 16:43:55.436 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 65375 16:43:55.436 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65378 16:43:55.451 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 65387 16:43:59.480 Barcode reader OFF; IRQ edges=32973
+ 65588 16:44:42.064 State: PICKED_UP -> LINE_CAL
+ 65589 16:44:42.080 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 65590 16:44:42.080 State: LINE_CAL -> FOLLOW_LINE
+ 65591 16:44:42.080 Barcode reader ON; IRQ edges=33059
+ 65595 16:44:43.947 Barcode capture started; IRQ edges=33061
+ 65637 16:44:51.727 Barcode reader OFF; IRQ edges=33102
+ 65638 16:44:51.727 Barcode: reading switched off after 21 bars+spaces -> decoding what was read.
+ 65639 16:44:51.727 Barcode lenient forward, 0+8 missing: letter not a clean A-Z (#11).
+ 65640 16:44:51.727 Barcode lenient forward, 8+0 missing: letter not a clean A-Z (#3).
+ 65641 16:44:51.727 Barcode lenient reversed, 0+8 missing: letter not a clean A-Z (#11).
+ 65642 16:44:51.806 Barcode lenient reversed, 8+0 missing: letter not a clean A-Z (#19).
+ 65643 16:44:51.806 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65649 16:44:51.806 Barcode NOT decoded: 21 bars+spaces seen (valid: 10 per character - 1).
+ 65819 16:45:25.402 State: STOPPED -> LINE_CAL
+ 65820 16:45:25.404 LINE_CAL: left sensor on black -> forward, arcing left.
+ 65823 16:45:25.549 LINE_CAL OK: both sensors on the line -> following.
+ 65824 16:45:25.549 State: LINE_CAL -> FOLLOW_LINE
+ 65825 16:45:25.549 Barcode reader ON; IRQ edges=33727
+ 65832 16:45:27.322 Barcode capture started; IRQ edges=33735
+ 65833 16:45:27.326 Barcode capture started; IRQ edges=33735
+ 65834 16:45:27.326 Barcode capture started; IRQ edges=33735
+ 65859 16:45:32.560 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":2322168}
+ 65860 16:45:32.560 Barcode COMMAND: "A" = TURN LEFT
+ 65861 16:45:32.560 Pending: TURN LEFT at the next crossroad.
+ 65874 16:45:35.020 Line lost: reversing 360 ms of path to where both sensors were on it.
+ 65875 16:45:35.133 Reverse done (a sensor found black).
+ 65878 16:45:35.133 Barcode reader OFF; IRQ edges=34022
+ 66219 16:46:46.105 State: STOPPED -> LINE_CAL
+ 66220 16:46:46.105 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 66221 16:46:46.114 State: LINE_CAL -> FOLLOW_LINE
+ 66222 16:46:46.114 Barcode reader ON; IRQ edges=34112
+ 66225 16:46:46.492 Barcode capture started; IRQ edges=34121
+ 66226 16:46:46.492 Barcode capture started; IRQ edges=34121
+ 66227 16:46:46.492 Barcode capture started; IRQ edges=34121
+ 66228 16:46:46.504 Barcode capture started; IRQ edges=34121
+ 66277 16:46:55.613 Barcode reader OFF; IRQ edges=34578
+ 66278 16:46:55.613 Barcode: reading switched off after 32 bars+spaces -> decoding what was read.
+ 66279 16:46:55.613 Barcode lenient: 32 bars+spaces cannot be "*X*" with at most 8 missing.
+ 66280 16:46:55.613 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 66286 16:46:55.818 Barcode NOT decoded: 32 bars+spaces seen (valid: 10 per character - 1).
+ 66364 16:47:14.571 State: STOPPED -> LINE_CAL
+ 66365 16:47:14.573 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 66366 16:47:14.575 State: LINE_CAL -> FOLLOW_LINE
+ 66367 16:47:14.575 Barcode reader ON; IRQ edges=35082
+ 66373 16:47:15.527 Barcode capture started; IRQ edges=35123
+ 66374 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66375 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66376 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66377 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66378 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66379 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66380 16:47:15.664 Barcode capture started; IRQ edges=35123
+ 66381 16:47:15.743 Barcode capture started; IRQ edges=35123
+ 66382 16:47:15.758 Barcode capture started; IRQ edges=35123
+ 66383 16:47:15.761 Barcode capture started; IRQ edges=35123
+ 66384 16:47:15.761 Barcode capture started; IRQ edges=35123
+ 66385 16:47:15.761 Barcode capture started; IRQ edges=35123
+ 66386 16:47:15.761 Barcode capture started; IRQ edges=35123
+ 66387 16:47:15.761 Barcode capture started; IRQ edges=35123
+ 66405 16:47:20.848 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":2430646}
+ 66406 16:47:20.850 Barcode COMMAND: "A" = TURN LEFT
+ 66407 16:47:20.850 Pending: TURN LEFT at the next crossroad.
+ 66417 16:47:22.778 Barcode reader OFF; IRQ edges=35379
+ 66532 16:47:42.389 State: STOPPED -> LINE_CAL
+ 66533 16:47:42.389 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 66534 16:47:42.404 State: LINE_CAL -> FOLLOW_LINE
+ 66535 16:47:42.407 Barcode reader ON; IRQ edges=35423
+ 66538 16:47:43.279 Barcode capture started; IRQ edges=35431
+ 66539 16:47:43.279 Barcode capture started; IRQ edges=35431
+ 66540 16:47:43.279 Barcode capture started; IRQ edges=35431
+ 66541 16:47:43.279 Barcode capture started; IRQ edges=35431
+ 66574 16:47:49.823 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":2459746}
+ 66575 16:47:49.870 Barcode COMMAND: "F" = U-TURN
+ 66576 16:47:49.870 Pending: U-TURN at the next crossroad.
+ 66589 16:47:52.326 Barcode reader OFF; IRQ edges=35645
+ 66696 16:48:11.502 State: STOPPED -> LINE_CAL
+ 66697 16:48:11.502 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 66698 16:48:11.502 State: LINE_CAL -> FOLLOW_LINE
+ 66699 16:48:11.502 Barcode reader ON; IRQ edges=35755
+ 66710 16:48:13.786 Barcode capture started; IRQ edges=35760
+ 66711 16:48:13.793 Barcode capture started; IRQ edges=35760
+ 66728 16:48:19.345 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":2487217}
+ 66729 16:48:19.350 Barcode COMMAND: "A" = TURN LEFT
+ 66730 16:48:19.350 Pending: TURN LEFT at the next crossroad.
+ 66735 16:48:19.376 Barcode reader OFF; IRQ edges=36068
+ 67013 16:49:49.988 === SuperCar AAI14: line + barcode + hump/wall ===
+ 67020 16:49:50.050 Barcode reader OFF; IRQ edges=218
+ 67818 16:52:54.172 State: READY -> LINE_CAL
+ 67819 16:52:54.176 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 67820 16:52:54.227 State: LINE_CAL -> FOLLOW_LINE
+ 67821 16:52:54.227 Barcode reader ON; IRQ edges=382
+ 67835 16:52:56.867 Barcode reader OFF; IRQ edges=382
+ 68097 16:53:28.392 Barcode reader ON; IRQ edges=449
+ 68099 16:53:29.391 Line lost: reversing 230 ms of path to where both sensors were on it.
+ 68101 16:53:29.391 Barcode capture started; IRQ edges=458
+ 68102 16:53:29.391 Barcode capture started; IRQ edges=458
+ 68103 16:53:29.391 Barcode capture started; IRQ edges=458
+ 68105 16:53:29.391 Barcode: only 1 bars+spaces seen, ignored.
+ 68124 16:53:43.685 Barcode reader OFF; IRQ edges=460
+ 68129 16:53:44.645 Barcode reader ON; IRQ edges=460
+ 68132 16:53:44.645 Barcode reader OFF; IRQ edges=460
+ 68296 16:54:19.876 State: STOPPED -> LINE_CAL
+ 68297 16:54:19.876 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 68298 16:54:19.876 State: LINE_CAL -> FOLLOW_LINE
+ 68299 16:54:19.876 Barcode reader ON; IRQ edges=510
+ 68312 16:54:22.055 Barcode reader OFF; IRQ edges=510
+ 68627 16:55:15.736 State: STOPPED -> LINE_CAL
+ 68628 16:55:15.736 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 68629 16:55:15.749 State: LINE_CAL -> FOLLOW_LINE
+ 68630 16:55:15.749 Barcode reader ON; IRQ edges=1946
+ 68638 16:55:16.322 Barcode reader OFF; IRQ edges=1946
+ 68986 17:13:27.430 === SuperCar AAI14: line + barcode + hump/wall ===
+ 68993 17:13:27.515 Barcode reader OFF; IRQ edges=0
+ 69070 17:13:40.846 State: READY -> LINE_CAL
+ 69071 17:13:40.854 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 69072 17:13:40.854 State: LINE_CAL -> FOLLOW_LINE
+ 69073 17:13:40.854 Barcode reader ON; IRQ edges=0
+ 69083 17:13:42.831 Barcode capture started; IRQ edges=8
+ 69084 17:13:42.831 Barcode capture started; IRQ edges=8
+ 69085 17:13:42.841 Barcode capture started; IRQ edges=8
+ 69086 17:13:42.841 Barcode capture started; IRQ edges=8
+ 69105 17:13:48.018 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":35680}
+ 69106 17:13:48.025 Barcode COMMAND: "A" = TURN LEFT
+ 69107 17:13:48.025 Pending: TURN LEFT at the next crossroad.
+ 69110 17:13:48.025 Barcode capture started; IRQ edges=366
+ 69111 17:13:48.025 Barcode capture started; IRQ edges=366
+ 69112 17:13:48.032 Barcode capture started; IRQ edges=366
+ 69113 17:13:48.032 Barcode capture started; IRQ edges=366
+ 69114 17:13:48.035 Barcode capture started; IRQ edges=366
+ 69115 17:13:48.035 Barcode capture started; IRQ edges=366
+ 69116 17:13:48.035 Barcode initial mark 520 ms: treated as junction, scan dropped.
+ 69117 17:13:48.112 Side sensor: 522 ms black mark -> crossroad.
+ 69118 17:13:48.112 Crossroad: TURN LEFT now.
+ 69119 17:13:48.112 State: FOLLOW_LINE -> TURN
+ 69120 17:13:48.112 Barcode reader OFF; IRQ edges=368
+ 69132 17:13:49.909 State: TURN -> STOPPED
+ 69237 17:14:12.594 State: STOPPED -> LINE_CAL
+ 69238 17:14:12.594 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 69239 17:14:12.594 State: LINE_CAL -> FOLLOW_LINE
+ 69240 17:14:12.594 Barcode reader ON; IRQ edges=691
+ 69266 17:14:18.085 Barcode capture started; IRQ edges=740
+ 69267 17:14:18.085 Barcode capture started; IRQ edges=740
+ 69268 17:14:18.085 Barcode capture started; IRQ edges=740
+ 69269 17:14:18.085 Barcode capture started; IRQ edges=740
+ 69270 17:14:18.101 Barcode capture started; IRQ edges=740
+ 69271 17:14:18.101 Barcode capture started; IRQ edges=740
+ 69272 17:14:18.101 Barcode capture started; IRQ edges=740
+ 69273 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69274 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69275 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69276 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69277 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69278 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69279 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69280 17:14:18.263 Barcode capture started; IRQ edges=740
+ 69281 17:14:18.381 Barcode capture started; IRQ edges=740
+ 69282 17:14:18.381 Barcode capture started; IRQ edges=740
+ 69283 17:14:18.381 Barcode capture started; IRQ edges=740
+ 69284 17:14:18.381 Barcode capture started; IRQ edges=740
+ 69285 17:14:18.381 Barcode capture started; IRQ edges=740
+ 69286 17:14:18.381 Barcode capture started; IRQ edges=740
+ 69287 17:14:18.391 Barcode capture started; IRQ edges=740
+ 69288 17:14:18.391 Barcode capture started; IRQ edges=740
+ 69293 17:14:19.570 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+ 69294 17:14:19.570 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 69296 17:14:19.570 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+ 69318 17:14:22.893 Barcode reader OFF; IRQ edges=768
+ 69835 17:16:11.934 State: STOPPED -> LINE_CAL
+ 69836 17:16:11.934 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 69837 17:16:11.939 State: LINE_CAL -> FOLLOW_LINE
+ 69838 17:16:11.939 Barcode reader ON; IRQ edges=1246
+ 69841 17:16:12.292 Barcode capture started; IRQ edges=1248
+ 69863 17:16:17.146 Barcode lenient forward, 0+6 missing: should be wide (#7).
+ 69864 17:16:17.159 Barcode lenient forward, 6+0 missing: should be narrow (#2).
+ 69865 17:16:17.161 Barcode lenient reversed, 0+6 missing: letter not a clean A-Z (#13).
+ 69866 17:16:17.163 Barcode lenient reversed, 6+0 missing: letter not a clean A-Z (#19).
+ 69867 17:16:17.163 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 69871 17:16:17.223 Barcode NOT decoded: 23 bars+spaces seen (valid: 10 per character - 1).
+ 69889 17:16:20.765 Line lost: reversing 2810 ms of path to where both sensors were on it.
+ 69892 17:16:21.173 Reverse done (a sensor found black).
+ 69897 17:16:21.220 Barcode reader OFF; IRQ edges=1280
+ 69939 17:16:29.711 State: STOPPED -> LINE_CAL
+ 69940 17:16:29.711 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 69941 17:16:29.711 State: LINE_CAL -> FOLLOW_LINE
+ 69942 17:16:29.711 Barcode reader ON; IRQ edges=1283
+ 69947 17:16:30.625 Barcode capture started; IRQ edges=1285
+ 69972 17:16:36.769 Barcode lenient forward, 0+8 missing: should be wide (#7).
+ 69973 17:16:36.772 Barcode lenient forward, 8+0 missing: letter not a clean A-Z (#3).
+ 69974 17:16:36.772 Barcode lenient reversed, 0+8 missing: letter not a clean A-Z (#11).
+ 69975 17:16:36.772 Barcode lenient reversed, 8+0 missing: letter not a clean A-Z (#19).
+ 69976 17:16:36.772 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 69980 17:16:36.860 Barcode NOT decoded: 21 bars+spaces seen (valid: 10 per character - 1).
+ 69992 17:16:40.462 Line lost: reversing 2770 ms of path to where both sensors were on it.
+ 69994 17:16:40.462 Reverse done (a sensor found black).
+ 69995 17:16:40.563 Barcode capture started; IRQ edges=1322
+ 69996 17:16:40.563 Barcode: only 1 bars+spaces seen, ignored.
+ 70001 17:16:40.659 Barcode reader OFF; IRQ edges=1323
+ 70057 17:16:52.261 State: STOPPED -> LINE_CAL
+ 70058 17:16:52.261 LINE_CAL: turning right (right sensor on black).
+ 70060 17:16:52.277 LINE_CAL OK: both sensors on the line -> following.
+ 70061 17:16:52.277 State: LINE_CAL -> FOLLOW_LINE
+ 70062 17:16:52.277 Barcode reader ON; IRQ edges=1327
+ 70064 17:16:52.551 Barcode capture started; IRQ edges=1329
+ 70084 17:16:57.973 Barcode lenient: 13 bars+spaces cannot be "*X*" with at most 8 missing.
+ 70085 17:16:57.973 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70088 17:16:57.973 Barcode NOT decoded: 13 bars+spaces seen (valid: 10 per character - 1).
+ 70101 17:16:59.520 Barcode reader OFF; IRQ edges=1357
+ 70137 17:17:06.920 State: STOPPED -> LINE_CAL
+ 70138 17:17:06.923 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 70139 17:17:06.925 State: LINE_CAL -> FOLLOW_LINE
+ 70140 17:17:06.925 Barcode reader ON; IRQ edges=1359
+ 70144 17:17:07.656 Barcode capture started; IRQ edges=1361
+ 70152 17:17:09.232 Barcode reader OFF; IRQ edges=1367
+ 70153 17:17:09.236 Barcode: reading switched off after 4 bars+spaces -> decoding what was read.
+ 70154 17:17:09.236 Barcode lenient: 4 bars+spaces cannot be "*X*" with at most 8 missing.
+ 70155 17:17:09.236 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70157 17:17:09.236 Barcode NOT decoded: 4 bars+spaces seen (valid: 10 per character - 1).
+ 70523 17:18:28.423 State: STOPPED -> LINE_CAL
+ 70524 17:18:28.423 LINE_CAL: turning left (no sensor on black).
+ 70526 17:18:28.729 LINE_CAL: turning right (right sensor on black).
+ 70528 17:18:28.842 LINE_CAL: turning left (left sensor on black).
+ 70529 17:18:28.903 LINE_CAL: turning right (right sensor on black).
+ 70530 17:18:29.210 LINE_CAL: turning left (left sensor on black).
+ 70532 17:18:29.210 LINE_CAL: turning right (right sensor on black).
+ 70533 17:18:29.382 LINE_CAL: turning left (left sensor on black).
+ 70534 17:18:29.392 LINE_CAL: turning right (right sensor on black).
+ 70536 17:18:29.394 LINE_CAL: turning left (left sensor on black).
+ 70537 17:18:29.394 LINE_CAL: turning right (right sensor on black).
+ 70539 17:18:29.509 LINE_CAL: turning left (left sensor on black).
+ 70540 17:18:29.509 LINE_CAL: turning right (right sensor on black).
+ 70542 17:18:29.666 LINE_CAL: turning left (left sensor on black).
+ 70543 17:18:29.725 LINE_CAL: turning right (right sensor on black).
+ 70544 17:18:29.727 LINE_CAL: turning left (left sensor on black).
+ 70546 17:18:29.812 LINE_CAL: turning right (right sensor on black).
+ 70547 17:18:29.876 LINE_CAL: turning left (left sensor on black).
+ 70548 17:18:30.022 LINE_CAL: turning right (right sensor on black).
+ 70549 17:18:30.022 LINE_CAL: turning left (left sensor on black).
+ 70551 17:18:30.103 LINE_CAL: turning right (right sensor on black).
+ 70552 17:18:30.233 LINE_CAL: turning left (left sensor on black).
+ 70553 17:18:30.233 LINE_CAL: turning right (right sensor on black).
+ 70555 17:18:30.329 LINE_CAL: turning left (left sensor on black).
+ 70556 17:18:30.329 LINE_CAL: turning right (right sensor on black).
+ 70557 17:18:30.409 LINE_CAL: turning left (left sensor on black).
+ 70558 17:18:30.540 LINE_CAL OK: both sensors on the line -> following.
+ 70559 17:18:30.540 State: LINE_CAL -> FOLLOW_LINE
+ 70560 17:18:30.540 Barcode reader ON; IRQ edges=1577
+ 70567 17:18:31.726 Barcode capture started; IRQ edges=1602
+ 70568 17:18:31.835 Barcode capture started; IRQ edges=1602
+ 70569 17:18:31.838 Barcode capture started; IRQ edges=1602
+ 70570 17:18:31.840 Barcode capture started; IRQ edges=1602
+ 70571 17:18:31.840 Barcode capture started; IRQ edges=1602
+ 70572 17:18:31.843 Barcode capture started; IRQ edges=1602
+ 70573 17:18:31.843 Barcode capture started; IRQ edges=1602
+ 70574 17:18:31.843 Barcode capture started; IRQ edges=1602
+ 70575 17:18:31.956 Barcode capture started; IRQ edges=1602
+ 70576 17:18:31.958 Barcode capture started; IRQ edges=1602
+ 70577 17:18:31.958 Barcode capture started; IRQ edges=1602
+ 70579 17:18:32.168 Barcode: only 3 bars+spaces seen, ignored.
+ 70582 17:18:32.779 Barcode capture started; IRQ edges=1660
+ 70615 17:18:38.948 Barcode reader OFF; IRQ edges=1712
+ 70616 17:18:38.948 Barcode: reading switched off after 17 bars+spaces -> decoding what was read.
+ 70617 17:18:38.948 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+ 70618 17:18:38.948 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70621 17:18:38.983 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+ 70757 17:19:09.900 State: STOPPED -> LINE_CAL
+ 70758 17:19:09.900 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 70759 17:19:09.906 State: LINE_CAL -> FOLLOW_LINE
+ 70760 17:19:09.908 Barcode reader ON; IRQ edges=1863
+ 70764 17:19:10.704 Barcode capture started; IRQ edges=1865
+ 70778 17:19:13.294 Barcode reader OFF; IRQ edges=1877
+ 70779 17:19:13.294 Barcode: reading switched off after 8 bars+spaces -> decoding what was read.
+ 70780 17:19:13.300 Barcode lenient: 8 bars+spaces cannot be "*X*" with at most 8 missing.
+ 70781 17:19:13.300 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70783 17:19:13.360 Barcode NOT decoded: 8 bars+spaces seen (valid: 10 per character - 1).
+ 71007 17:20:06.345 State: STOPPED -> LINE_CAL
+ 71008 17:20:06.345 LINE_CAL: turning right (right sensor on black).
+ 71009 17:20:06.379 LINE_CAL: turning left (left sensor on black).
+ 71011 17:20:06.530 LINE_CAL: turning right (right sensor on black).
+ 71012 17:20:06.530 LINE_CAL: turning left (left sensor on black).
+ 71013 17:20:06.598 LINE_CAL: turning right (right sensor on black).
+ 71014 17:20:06.709 LINE_CAL: turning left (left sensor on black).
+ 71016 17:20:06.818 LINE_CAL: turning right (right sensor on black).
+ 71017 17:20:06.818 LINE_CAL: turning left (left sensor on black).
+ 71018 17:20:06.906 LINE_CAL: turning right (right sensor on black).
+ 71020 17:20:06.996 LINE_CAL: turning left (left sensor on black).
+ 71021 17:20:07.148 LINE_CAL: turning right (right sensor on black).
+ 71022 17:20:07.156 LINE_CAL: turning left (left sensor on black).
+ 71024 17:20:07.257 LINE_CAL: turning right (right sensor on black).
+ 71025 17:20:07.317 LINE_CAL: turning left (left sensor on black).
+ 71026 17:20:07.319 LINE_CAL: turning right (right sensor on black).
+ 71027 17:20:07.405 LINE_CAL: turning left (left sensor on black).
+ 71029 17:20:07.518 LINE_CAL: turning right (right sensor on black).
+ 71030 17:20:07.598 LINE_CAL: turning left (left sensor on black).
+ 71031 17:20:07.738 LINE_CAL: turning right (right sensor on black).
+ 71033 17:20:07.738 LINE_CAL: turning left (left sensor on black).
+ 71034 17:20:07.809 LINE_CAL: turning right (right sensor on black).
+ 71035 17:20:07.884 LINE_CAL: turning left (left sensor on black).
+ 71037 17:20:08.009 LINE_CAL: turning right (right sensor on black).
+ 71038 17:20:08.159 LINE_CAL: turning left (left sensor on black).
+ 71039 17:20:08.171 LINE_CAL: turning right (right sensor on black).
+ 71040 17:20:08.250 LINE_CAL: turning left (left sensor on black).
+ 71043 17:20:08.334 LINE_CAL: turning right (right sensor on black).
+ 71044 17:20:08.334 LINE_CAL: turning left (left sensor on black).
+ 71045 17:20:08.427 LINE_CAL: turning right (right sensor on black).
+ 71047 17:20:08.507 LINE_CAL: turning left (left sensor on black).
+ 71048 17:20:08.623 LINE_CAL: turning right (right sensor on black).
+ 71049 17:20:08.765 LINE_CAL: turning left (left sensor on black).
+ 71050 17:20:08.765 LINE_CAL: turning right (right sensor on black).
+ 71052 17:20:08.827 LINE_CAL OK: both sensors on the line -> following.
+ 71053 17:20:08.827 State: LINE_CAL -> FOLLOW_LINE
+ 71054 17:20:08.827 Barcode reader ON; IRQ edges=1885
+ 71058 17:20:09.601 Barcode capture started; IRQ edges=1887
+ 71063 17:20:10.420 Barcode: only 1 bars+spaces seen, ignored.
+ 71064 17:20:10.483 Barcode capture started; IRQ edges=1890
+ 71091 17:20:15.296 Barcode reader OFF; IRQ edges=1914
+ 71092 17:20:15.296 Barcode: reading switched off after 17 bars+spaces -> decoding what was read.
+ 71093 17:20:15.296 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+ 71094 17:20:15.296 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71097 17:20:15.309 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+ 71458 17:21:34.647 State: STOPPED -> LINE_CAL
+ 71459 17:21:34.647 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 71460 17:21:34.647 State: LINE_CAL -> FOLLOW_LINE
+ 71461 17:21:34.647 Barcode reader ON; IRQ edges=1926
+ 71488 17:21:40.326 Barcode capture started; IRQ edges=1930
+ 71491 17:21:40.839 Barcode initial mark 440 ms: treated as junction, scan dropped.
+ 71505 17:21:43.856 Line lost: reversing 2350 ms of path to where both sensors were on it.
+ 71506 17:21:43.963 Reverse done (a sensor found black).
+ 71514 17:21:44.402 Barcode reader OFF; IRQ edges=1931
+ 71574 17:21:57.404 State: STOPPED -> LINE_CAL
+ 71575 17:21:57.406 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 71576 17:21:57.408 State: LINE_CAL -> FOLLOW_LINE
+ 71577 17:21:57.408 Barcode reader ON; IRQ edges=1933
+ 71596 17:22:01.290 Barcode capture started; IRQ edges=1936
+ 71598 17:22:01.615 Barcode: only 1 bars+spaces seen, ignored.
+ 71600 17:22:01.934 Barcode capture started; IRQ edges=1939
+ 71623 17:22:05.777 Barcode reader OFF; IRQ edges=1974
+ 71624 17:22:05.777 Barcode: reading switched off after 20 bars+spaces -> decoding what was read.
+ 71625 17:22:05.782 Barcode lenient: 20 bars+spaces cannot be "*X*" with at most 8 missing.
+ 71626 17:22:05.782 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71629 17:22:05.797 Barcode NOT decoded: 20 bars+spaces seen (valid: 10 per character - 1).
+ 71684 17:22:17.344 State: STOPPED -> LINE_CAL
+ 71685 17:22:17.344 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 71686 17:22:17.344 State: LINE_CAL -> FOLLOW_LINE
+ 71687 17:22:17.344 Barcode reader ON; IRQ edges=1975
+ 71694 17:22:18.679 Barcode capture started; IRQ edges=1976
+ 71731 17:22:26.607 Barcode lenient forward, 0+8 missing: letter not a clean A-Z (#11).
+ 71732 17:22:26.778 Barcode lenient forward, 8+0 missing: letter not a clean A-Z (#3).
+ 71733 17:22:26.778 Barcode lenient reversed, 0+8 missing: letter not a clean A-Z (#11).
+ 71734 17:22:26.778 Barcode lenient reversed, 8+0 missing: letter not a clean A-Z (#19).
+ 71735 17:22:26.778 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71739 17:22:26.863 Barcode NOT decoded: 21 bars+spaces seen (valid: 10 per character - 1).
+ 71747 17:22:27.340 Barcode reader OFF; IRQ edges=2020
+ 71832 17:22:45.438 State: STOPPED -> LINE_CAL
+ 71833 17:22:45.438 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 71834 17:22:45.438 State: LINE_CAL -> FOLLOW_LINE
+ 71835 17:22:45.438 Barcode reader ON; IRQ edges=2049
+ 71842 17:22:46.526 Barcode capture started; IRQ edges=2062
+ 71847 17:22:47.677 Barcode initial mark 1158 ms: treated as junction, scan dropped.
+ 71849 17:22:47.852 Barcode capture started; IRQ edges=2071
+ 71854 17:22:48.838 Barcode initial mark 788 ms: treated as junction, scan dropped.
+ 71856 17:22:48.928 Barcode capture started; IRQ edges=2078
+ 71864 17:22:50.338 Barcode initial mark 1374 ms: treated as junction, scan dropped.
+ 71865 17:22:50.340 Barcode capture started; IRQ edges=2082
+ 71877 17:22:52.856 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+ 71878 17:22:52.856 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71880 17:22:52.856 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+ 71884 17:22:53.721 Barcode capture started; IRQ edges=2098
+ 71891 17:22:54.013 Barcode reader OFF; IRQ edges=2098
+ 71892 17:22:54.013 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 71893 17:22:54.013 Barcode: only 0 bars+spaces seen, ignored.
+ 71957 17:23:07.429 State: STOPPED -> LINE_CAL
+ 71958 17:23:07.433 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 71959 17:23:07.433 State: LINE_CAL -> FOLLOW_LINE
+ 71960 17:23:07.433 Barcode reader ON; IRQ edges=2180
+ 71968 17:23:08.900 Barcode capture started; IRQ edges=2181
+ 71989 17:23:14.056 Barcode lenient forward, 0+6 missing: letter not a clean A-Z (#11).
+ 71990 17:23:14.140 Barcode lenient forward, 6+0 missing: letter not a clean A-Z (#5).
+ 71991 17:23:14.140 Barcode lenient reversed, 0+6 missing: should be narrow (#23).
+ 71992 17:23:14.150 Barcode lenient reversed, 6+0 missing: should be narrow (#2).
+ 71994 17:23:14.150 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71998 17:23:14.215 Barcode NOT decoded: 23 bars+spaces seen (valid: 10 per character - 1).
+ 71999 17:23:14.215 Barcode capture started; IRQ edges=2221
+ 72006 17:23:15.422 Barcode: only 1 bars+spaces seen, ignored.
+ 72016 17:23:17.506 Line lost: reversing 1420 ms of path to where both sensors were on it.
+ 72017 17:23:17.508 Reverse done (a sensor found black).
+ 72025 17:23:18.228 Barcode reader OFF; IRQ edges=2222
+ 72063 17:23:25.905 State: STOPPED -> LINE_CAL
+ 72064 17:23:25.905 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 72065 17:23:25.905 State: LINE_CAL -> FOLLOW_LINE
+ 72066 17:23:25.905 Barcode reader ON; IRQ edges=2225
+ 72072 17:23:29.145 Barcode capture started; IRQ edges=2227
+ 72092 17:23:32.071 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":620918}
+ 72093 17:23:32.124 Barcode: read leniently (21 of 29 bars+spaces, 8+0 missing, 4 stray left out).
+ 72094 17:23:32.124 Barcode COMMAND: "A" = TURN LEFT
+ 72095 17:23:32.124 Pending: TURN LEFT at the next crossroad.
+ 72098 17:23:32.435 Barcode capture started; IRQ edges=2276
+ 72099 17:23:32.498 Barcode capture started; IRQ edges=2276
+ 72100 17:23:32.511 Barcode capture started; IRQ edges=2276
+ 72101 17:23:32.514 Barcode capture started; IRQ edges=2276
+ 72104 17:23:32.916 Barcode initial mark 352 ms: treated as junction, scan dropped.
+ 72105 17:23:32.916 Side sensor: 350 ms black mark -> crossroad.
+ 72106 17:23:32.916 Crossroad: TURN LEFT now.
+ 72107 17:23:32.932 State: FOLLOW_LINE -> TURN
+ 72108 17:23:32.932 Barcode reader OFF; IRQ edges=2277
+ 72120 17:23:35.323 TURN LEFT done (on the line, 2530 ms).
+ 72121 17:23:35.455 State: TURN -> FOLLOW_LINE
+ 72122 17:23:35.455 Barcode reader ON; IRQ edges=2279
+ 72126 17:23:36.298 Barcode capture started; IRQ edges=2281
+ 72136 17:23:37.216 Barcode reader OFF; IRQ edges=2303
+ 72137 17:23:37.216 Barcode: reading switched off after 4 bars+spaces -> decoding what was read.
+ 72138 17:23:37.216 Barcode lenient: 4 bars+spaces cannot be "*X*" with at most 8 missing.
+ 72139 17:23:37.216 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 72141 17:23:37.330 Barcode NOT decoded: 4 bars+spaces seen (valid: 10 per character - 1).
+ 72273 17:24:04.871 State: STOPPED -> LINE_CAL
+ 72274 17:24:04.871 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 72275 17:24:04.871 State: LINE_CAL -> FOLLOW_LINE
+ 72276 17:24:04.871 Barcode reader ON; IRQ edges=2350
+ 72287 17:24:07.122 Barcode capture started; IRQ edges=2352
+ 72296 17:24:08.409 Barcode reader OFF; IRQ edges=2362
+ 72297 17:24:08.409 Barcode: reading switched off after 6 bars+spaces -> decoding what was read.
+ 72298 17:24:08.412 Barcode lenient: 6 bars+spaces cannot be "*X*" with at most 8 missing.
+ 72299 17:24:08.412 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 72303 17:24:08.479 Barcode NOT decoded: 6 bars+spaces seen (valid: 10 per character - 1).
+ 72370 17:24:16.186 State: STOPPED -> LINE_CAL
+ 72371 17:24:16.186 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 72372 17:24:16.186 State: LINE_CAL -> FOLLOW_LINE
+ 72373 17:24:16.191 Barcode reader ON; IRQ edges=2368
+ 72377 17:24:16.607 Barcode capture started; IRQ edges=2370
+ 72402 17:24:22.152 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":670928}
+ 72403 17:24:22.152 Barcode: read leniently (21 of 29 bars+spaces, 0+8 missing, 0 stray left out).
+ 72404 17:24:22.157 Barcode COMMAND: "F" = U-TURN
+ 72405 17:24:22.159 Pending: U-TURN at the next crossroad.
+ 72422 17:24:25.615 Line lost: reversing 2610 ms of path to where both sensors were on it.
+ 72424 17:24:25.836 Reverse done (a sensor found black).
+ 72430 17:24:26.997 Barcode capture started; IRQ edges=2404
+ 72433 17:24:27.404 Barcode: only 1 bars+spaces seen, ignored.
+ 72440 17:24:27.854 Barcode reader OFF; IRQ edges=2404
+ 72546 17:24:50.324 State: STOPPED -> LINE_CAL
+ 72547 17:24:50.324 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 72548 17:24:50.340 State: LINE_CAL -> FOLLOW_LINE
+ 72549 17:24:50.340 Barcode reader ON; IRQ edges=2410
+ 72552 17:24:50.631 Barcode capture started; IRQ edges=2414
+ 72553 17:24:50.687 Barcode capture started; IRQ edges=2414
+ 72578 17:24:56.113 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":704878}
+ 72579 17:24:56.115 Barcode: read leniently (21 of 29 bars+spaces, 0+8 missing, 0 stray left out).
+ 72580 17:24:56.118 Barcode COMMAND: "F" = U-TURN
+ 72581 17:24:56.118 Pending: U-TURN at the next crossroad.
+ 72599 17:24:59.944 Line lost: reversing 2590 ms of path to where both sensors were on it.
+ 72601 17:25:00.060 Reverse done (a sensor found black).
+ 72610 17:25:00.888 Barcode reader OFF; IRQ edges=2449
+ 72679 17:25:15.390 State: STOPPED -> LINE_CAL
+ 72680 17:25:15.390 LINE_CAL: turning right (right sensor on black).
+ 72681 17:25:15.545 LINE_CAL: turning left (left sensor on black).
+ 72682 17:25:15.545 LINE_CAL: turning right (right sensor on black).
+ 72684 17:25:15.609 LINE_CAL: turning left (left sensor on black).
+ 72685 17:25:15.625 LINE_CAL: turning right (right sensor on black).
+ 72686 17:25:15.694 LINE_CAL: turning left (left sensor on black).
+ 72688 17:25:15.905 LINE_CAL: turning right (right sensor on black).
+ 72689 17:25:15.905 LINE_CAL: turning left (left sensor on black).
+ 72690 17:25:16.003 LINE_CAL: turning right (right sensor on black).
+ 72691 17:25:16.113 LINE_CAL: turning left (left sensor on black).
+ 72693 17:25:16.223 LINE_CAL: turning right (right sensor on black).
+ 72694 17:25:16.223 LINE_CAL: turning left (left sensor on black).
+ 72695 17:25:16.320 LINE_CAL: turning right (right sensor on black).
+ 72698 17:25:16.325 LINE_CAL: turning left (left sensor on black).
+ 72699 17:25:16.448 LINE_CAL: turning right (right sensor on black).
+ 72700 17:25:16.550 LINE_CAL: turning left (left sensor on black).
+ 72702 17:25:16.550 State: LINE_CAL -> OBSTACLE_SCAN
+ 72939 17:26:34.621 === SuperCar AAI14: line + barcode + hump/wall ===
+ 72946 17:26:34.706 Barcode reader OFF; IRQ edges=0
+ 72987 17:26:40.231 State: READY -> LINE_CAL
+ 72988 17:26:40.240 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 72989 17:26:40.240 State: LINE_CAL -> FOLLOW_LINE
+ 72990 17:26:40.240 Barcode reader ON; IRQ edges=0
+ 72996 17:26:41.035 Barcode capture started; IRQ edges=9
+ 72997 17:26:41.037 Barcode capture started; IRQ edges=9
+ 72998 17:26:41.040 Barcode capture started; IRQ edges=9
+ 73018 17:26:45.342 Barcode lenient: 13 bars+spaces cannot be "*X*" with at most 8 missing.
+ 73019 17:26:45.342 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73022 17:26:45.350 Barcode NOT decoded: 13 bars+spaces seen (valid: 10 per character - 1).
+ 73043 17:26:49.707 Line lost: reversing 2790 ms of path to where both sensors were on it.
+ 73045 17:26:49.981 Reverse done (a sensor found black).
+ 73056 17:26:51.339 Barcode reader OFF; IRQ edges=34
+ 73097 17:26:59.519 State: STOPPED -> LINE_CAL
+ 73098 17:26:59.519 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 73099 17:26:59.525 State: LINE_CAL -> FOLLOW_LINE
+ 73100 17:26:59.525 Barcode reader ON; IRQ edges=37
+ 73104 17:27:00.200 Barcode capture started; IRQ edges=39
+ 73126 17:27:04.770 Barcode lenient: 15 bars+spaces cannot be "*X*" with at most 8 missing.
+ 73127 17:27:04.779 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73130 17:27:04.782 Barcode NOT decoded: 15 bars+spaces seen (valid: 10 per character - 1).
+ 73135 17:27:06.827 Barcode capture started; IRQ edges=70
+ 73136 17:27:06.829 Barcode capture started; IRQ edges=70
+ 73137 17:27:06.831 Barcode capture started; IRQ edges=70
+ 73142 17:27:07.029 Barcode: only 3 bars+spaces seen, ignored.
+ 73149 17:27:07.939 Barcode reader OFF; IRQ edges=74
+ 73251 17:27:20.779 State: STOPPED -> LINE_CAL
+ 73252 17:27:20.781 LINE_CAL: right sensor on black -> forward, arcing right.
+ 73254 17:27:20.959 LINE_CAL OK: both sensors on the line -> following.
+ 73255 17:27:20.968 State: LINE_CAL -> FOLLOW_LINE
+ 73256 17:27:20.969 Barcode reader ON; IRQ edges=77
+ 73257 17:27:21.070 Barcode capture started; IRQ edges=79
+ 73282 17:27:26.439 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+ 73283 17:27:26.439 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73286 17:27:26.447 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+ 73291 17:27:27.319 Barcode capture started; IRQ edges=110
+ 73297 17:27:28.773 Barcode: only 3 bars+spaces seen, ignored.
+ 73309 17:27:30.869 Line lost: reversing 600 ms of path to where both sensors were on it.
+ 73313 17:27:31.506 Reverse done (a sensor found black).
+ 73317 17:27:31.513 Barcode reader OFF; IRQ edges=117
+ 73404 17:27:50.554 State: STOPPED -> LINE_CAL
+ 73405 17:27:50.554 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 73406 17:27:50.563 State: LINE_CAL -> FOLLOW_LINE
+ 73407 17:27:50.563 Barcode reader ON; IRQ edges=138
+ 73413 17:27:51.953 Barcode capture started; IRQ edges=146
+ 73414 17:27:51.956 Barcode capture started; IRQ edges=146
+ 73415 17:27:51.956 Barcode capture started; IRQ edges=146
+ 73418 17:27:51.956 Barcode: only 1 bars+spaces seen, ignored.
+ 73419 17:27:52.068 Barcode capture started; IRQ edges=149
+ 73448 17:27:58.264 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":98188}
+ 73449 17:27:58.264 Barcode: read leniently (23 of 29 bars+spaces, 6+0 missing, 4 stray left out).
+ 73450 17:27:58.264 Barcode COMMAND: "Z" = TURN RIGHT
+ 73451 17:27:58.264 Pending: TURN RIGHT at the next crossroad.
+ 73460 17:27:59.988 Line lost: reversing 640 ms of path to where both sensors were on it.
+ 73461 17:27:59.988 Reverse done (a sensor found black).
+ 73471 17:28:01.502 Barcode reader OFF; IRQ edges=203
+ 73552 17:28:18.064 State: STOPPED -> LINE_CAL
+ 73553 17:28:18.064 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 73554 17:28:18.064 State: LINE_CAL -> FOLLOW_LINE
+ 73555 17:28:18.064 Barcode reader ON; IRQ edges=208
+ 73564 17:28:19.844 Barcode capture started; IRQ edges=220
+ 73565 17:28:19.846 Barcode capture started; IRQ edges=220
+ 73566 17:28:19.846 Barcode capture started; IRQ edges=220
+ 73567 17:28:19.846 Barcode capture started; IRQ edges=220
+ 73587 17:28:23.088 Barcode reader OFF; IRQ edges=234
+ 73588 17:28:23.088 Barcode: reading switched off after 9 bars+spaces -> decoding what was read.
+ 73589 17:28:23.090 Barcode lenient: 9 bars+spaces cannot be "*X*" with at most 8 missing.
+ 73590 17:28:23.224 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73592 17:28:23.232 Barcode NOT decoded: 9 bars+spaces seen (valid: 10 per character - 1).
+ 73653 17:28:35.000 State: STOPPED -> LINE_CAL
+ 73654 17:28:35.004 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 73655 17:28:35.004 State: LINE_CAL -> FOLLOW_LINE
+ 73656 17:28:35.004 Barcode reader ON; IRQ edges=262
+ 73660 17:28:35.564 Barcode capture started; IRQ edges=264
+ 73692 17:28:42.572 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":142607}
+ 73693 17:28:42.604 Barcode COMMAND: "F" = U-TURN
+ 73694 17:28:42.606 Pending: U-TURN at the next crossroad.
+ 73704 17:28:44.623 Line lost: reversing 1830 ms of path to where both sensors were on it.
+ 73705 17:28:44.718 Reverse done (a sensor found black).
+ 73715 17:28:45.523 Barcode reader OFF; IRQ edges=317
+ 73821 17:29:07.777 State: STOPPED -> LINE_CAL
+ 73822 17:29:07.779 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 73823 17:29:07.781 State: LINE_CAL -> FOLLOW_LINE
+ 73824 17:29:07.786 Barcode reader ON; IRQ edges=322
+ 73827 17:29:08.254 Barcode capture started; IRQ edges=324
+ 73860 17:29:15.229 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":175227}
+ 73861 17:29:15.242 Barcode COMMAND: "A" = TURN LEFT
+ 73862 17:29:15.244 Pending: TURN LEFT at the next crossroad.
+ 73872 17:29:17.290 Line lost: reversing 330 ms of path to where both sensors were on it.
+ 73873 17:29:17.360 Reverse done (a sensor found black).
+ 73879 17:29:17.610 Barcode reader OFF; IRQ edges=369
+ 73959 17:29:37.494 State: STOPPED -> LINE_CAL
+ 73960 17:29:37.494 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 73961 17:29:37.497 State: LINE_CAL -> FOLLOW_LINE
+ 73962 17:29:37.541 Barcode reader ON; IRQ edges=371
+ 73964 17:29:37.542 Barcode capture started; IRQ edges=373
+ 73985 17:29:41.558 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 73986 17:29:41.653 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73989 17:29:41.658 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 74002 17:29:44.122 Line lost: reversing 330 ms of path to where both sensors were on it.
+ 74003 17:29:44.295 Reverse done (a sensor found black).
+ 74008 17:29:44.304 Barcode reader OFF; IRQ edges=473
+ 74205 17:30:28.049 State: STOPPED -> LINE_CAL
+ 74206 17:30:28.055 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 74207 17:30:28.055 State: LINE_CAL -> FOLLOW_LINE
+ 74208 17:30:28.058 Barcode reader ON; IRQ edges=745
+ 74216 17:30:29.558 Barcode capture started; IRQ edges=750
+ 74246 17:30:36.018 Barcode lenient forward, 0+8 missing: letter not a clean A-Z (#11).
+ 74247 17:30:36.018 Barcode lenient forward, 8+0 missing: should be narrow (#2).
+ 74248 17:30:36.029 Barcode lenient reversed, 0+8 missing: should be wide (#20).
+ 74249 17:30:36.029 Barcode lenient reversed, 8+0 missing: letter not a clean A-Z (#19).
+ 74250 17:30:36.032 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 74254 17:30:36.239 Barcode NOT decoded: 21 bars+spaces seen (valid: 10 per character - 1).
+ 74264 17:30:38.196 Line lost: reversing 630 ms of path to where both sensors were on it.
+ 74265 17:30:38.198 Reverse done (a sensor found black).
+ 74276 17:30:39.148 Barcode reader OFF; IRQ edges=865
+ 74345 17:30:53.044 State: STOPPED -> LINE_CAL
+ 74346 17:30:53.044 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 74347 17:30:53.054 State: LINE_CAL -> FOLLOW_LINE
+ 74348 17:30:53.067 Barcode reader ON; IRQ edges=878
+ 74357 17:30:55.078 Barcode capture started; IRQ edges=879
+ 74390 17:31:01.147 Barcode reader OFF; IRQ edges=955
+ 74391 17:31:01.147 Barcode: reading switched off after 17 bars+spaces -> decoding what was read.
+ 74392 17:31:01.147 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+ 74393 17:31:01.147 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 74396 17:31:01.231 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+ 74594 17:31:45.269 State: STOPPED -> LINE_CAL
+ 74595 17:31:45.269 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 74596 17:31:45.269 State: LINE_CAL -> FOLLOW_LINE
+ 74597 17:31:45.278 Barcode reader ON; IRQ edges=6815
+ 74604 17:31:46.783 Barcode capture started; IRQ edges=6818
+ 74620 17:31:51.462 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":330162}
+ 74621 17:31:51.464 Barcode COMMAND: "F" = U-TURN
+ 74622 17:31:51.468 Pending: U-TURN at the next crossroad.
+ 74626 17:31:51.490 Barcode capture started; IRQ edges=7011
+ 74627 17:31:51.500 Barcode capture started; IRQ edges=7011
+ 74628 17:31:51.500 Barcode capture started; IRQ edges=7011
+ 74629 17:31:51.500 Barcode initial mark 363 ms: treated as junction, scan dropped.
+ 74630 17:31:51.506 Side sensor: 370 ms black mark -> crossroad.
+ 74631 17:31:51.506 Crossroad: U-TURN now.
+ 74632 17:31:51.506 State: FOLLOW_LINE -> TURN
+ 74633 17:31:51.607 Barcode reader OFF; IRQ edges=7013
+ 74648 17:31:54.602 U-TURN done (line found, 3429 ms).
+ 74649 17:31:54.810 State: TURN -> FOLLOW_LINE
+ 74650 17:31:54.810 Barcode reader ON; IRQ edges=7070
+ 74653 17:31:54.892 Barcode capture started; IRQ edges=7072
+ 74657 17:31:55.636 Barcode: only 1 bars+spaces seen, ignored.
+ 74665 17:31:56.346 Barcode reader OFF; IRQ edges=7074
+ 74723 17:32:10.345 State: STOPPED -> LINE_CAL
+ 74724 17:32:10.345 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 74725 17:32:10.345 State: LINE_CAL -> FOLLOW_LINE
+ 74726 17:32:10.354 Barcode reader ON; IRQ edges=7119
+ 74733 17:32:10.377 Barcode capture started; IRQ edges=7124
+ 74734 17:32:10.434 Barcode capture started; IRQ edges=7124
+ 74758 17:32:15.934 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":355252}
+ 74759 17:32:15.936 Barcode: read leniently (27 of 29 bars+spaces, 0+2 missing, 4 stray left out).
+ 74760 17:32:15.936 Barcode COMMAND: "F" = U-TURN
+ 74761 17:32:15.936 Pending: U-TURN at the next crossroad.
+ 74773 17:32:17.714 Line lost: reversing 1820 ms of path to where both sensors were on it.
+ 74777 17:32:17.724 Barcode reader OFF; IRQ edges=7330
+ 74841 17:32:31.587 State: STOPPED -> LINE_CAL
+ 74842 17:32:31.587 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 74843 17:32:31.594 State: LINE_CAL -> FOLLOW_LINE
+ 74844 17:32:31.594 Barcode reader ON; IRQ edges=7363
+ 74849 17:32:32.603 Barcode capture started; IRQ edges=7390
+ 74850 17:32:32.603 Barcode capture started; IRQ edges=7390
+ 74851 17:32:32.603 Barcode capture started; IRQ edges=7390
+ 74852 17:32:32.603 Barcode capture started; IRQ edges=7390
+ 74853 17:32:32.603 Barcode capture started; IRQ edges=7390
+ 74854 17:32:32.603 Barcode capture started; IRQ edges=7390
+ 74855 17:32:32.613 Barcode capture started; IRQ edges=7390
+ 74856 17:32:32.703 Barcode capture started; IRQ edges=7390
+ 74857 17:32:32.711 Barcode capture started; IRQ edges=7390
+ 74858 17:32:32.714 Barcode capture started; IRQ edges=7390
+ 74859 17:32:32.714 Barcode capture started; IRQ edges=7390
+ 74890 17:32:39.210 inf2004/aai14/supercar/barcode {"msg":"A","cmd":"TURN LEFT","t":379251}
+ 74891 17:32:39.223 Barcode: read leniently (23 of 29 bars+spaces, 6+0 missing, 4 stray left out).
+ 74892 17:32:39.223 Barcode COMMAND: "A" = TURN LEFT
+ 74893 17:32:39.223 Pending: TURN LEFT at the next crossroad.
+ 74903 17:32:41.310 Line lost: reversing 1450 ms of path to where both sensors were on it.
+ 74904 17:32:41.313 Reverse done (a sensor found black).
+ 74911 17:32:42.192 Barcode reader OFF; IRQ edges=7558
+ 75005 17:32:59.362 State: STOPPED -> LINE_CAL
+ 75006 17:32:59.362 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75007 17:32:59.369 State: LINE_CAL -> FOLLOW_LINE
+ 75008 17:32:59.369 Barcode reader ON; IRQ edges=7625
+ 75012 17:33:00.013 Barcode capture started; IRQ edges=7635
+ 75013 17:33:00.854 Barcode capture started; IRQ edges=7635
+ 75014 17:33:00.857 Barcode capture started; IRQ edges=7635
+ 75015 17:33:00.857 Barcode capture started; IRQ edges=7635
+ 75044 17:33:06.237 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":406181}
+ 75045 17:33:06.253 Barcode: read leniently (23 of 29 bars+spaces, 6+0 missing, 4 stray left out).
+ 75046 17:33:06.253 Barcode COMMAND: "F" = U-TURN
+ 75047 17:33:06.253 Pending: U-TURN at the next crossroad.
+ 75057 17:33:08.299 Line lost: reversing 1370 ms of path to where both sensors were on it.
+ 75058 17:33:08.300 Reverse done (a sensor found black).
+ 75068 17:33:09.233 Barcode reader OFF; IRQ edges=7800
+ 75126 17:33:21.119 State: STOPPED -> LINE_CAL
+ 75127 17:33:21.119 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75129 17:33:21.357 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75130 17:33:21.500 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75131 17:33:21.597 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75133 17:33:21.681 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75134 17:33:21.689 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75135 17:33:21.835 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75137 17:33:21.835 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75138 17:33:21.918 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75139 17:33:21.996 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75140 17:33:22.121 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75142 17:33:22.122 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75143 17:33:22.238 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75144 17:33:22.352 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75146 17:33:22.432 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75147 17:33:22.436 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75148 17:33:22.505 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75149 17:33:22.570 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75151 17:33:22.683 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75153 17:33:22.847 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75154 17:33:22.851 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75155 17:33:22.853 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75157 17:33:22.995 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75158 17:33:23.002 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75159 17:33:23.066 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75160 17:33:23.070 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75162 17:33:23.133 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75163 17:33:23.199 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75164 17:33:23.309 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75166 17:33:23.405 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75167 17:33:24.123 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75168 17:33:24.198 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75170 17:33:24.210 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75171 17:33:24.210 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75172 17:33:24.213 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75173 17:33:24.213 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75175 17:33:24.213 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75176 17:33:24.278 LINE_CAL: left sensor on black -> forward, arcing left.
+ 75177 17:33:24.284 LINE_CAL: right sensor on black -> forward, arcing right.
+ 75178 17:33:24.285 LINE_CAL OK: both sensors on the line -> following.
+ 75179 17:33:24.285 State: LINE_CAL -> FOLLOW_LINE
+ 75180 17:33:24.285 Barcode reader ON; IRQ edges=8033
+ 75181 17:33:24.285 Barcode capture started; IRQ edges=8129
+ 75182 17:33:24.285 Barcode capture started; IRQ edges=8129
+ 75183 17:33:24.285 Barcode capture started; IRQ edges=8129
+ 75184 17:33:24.351 Barcode capture started; IRQ edges=8129
+ 75185 17:33:24.351 Barcode capture started; IRQ edges=8129
+ 75186 17:33:24.351 Barcode capture started; IRQ edges=8129
+ 75187 17:33:24.351 Barcode capture started; IRQ edges=8129
+ 75188 17:33:24.358 Barcode capture started; IRQ edges=8129
+ 75189 17:33:24.358 Barcode capture started; IRQ edges=8129
+ 75190 17:33:24.358 Barcode capture started; IRQ edges=8129
+ 75191 17:33:24.358 Barcode capture started; IRQ edges=8129
+ 75192 17:33:24.472 Barcode capture started; IRQ edges=8129
+ 75193 17:33:24.488 Barcode capture started; IRQ edges=8129
+ 75194 17:33:24.488 Barcode capture started; IRQ edges=8129
+ 75195 17:33:24.491 Barcode capture started; IRQ edges=8129
+ 75196 17:33:24.491 Barcode capture started; IRQ edges=8129
+ 75197 17:33:24.491 Barcode capture started; IRQ edges=8129
+ 75198 17:33:24.491 Barcode capture started; IRQ edges=8129
+ 75199 17:33:24.491 Barcode capture started; IRQ edges=8129
+ 75200 17:33:24.568 Barcode capture started; IRQ edges=8129
+ 75201 17:33:24.581 Barcode capture started; IRQ edges=8129
+ 75202 17:33:24.584 Barcode capture started; IRQ edges=8129
+ 75203 17:33:24.584 Barcode capture started; IRQ edges=8129
+ 75204 17:33:24.584 Barcode capture started; IRQ edges=8129
+ 75205 17:33:24.584 Barcode capture started; IRQ edges=8129
+ 75206 17:33:24.584 Barcode capture started; IRQ edges=8129
+ 75207 17:33:24.584 Barcode capture started; IRQ edges=8129
+ 75208 17:33:24.672 Barcode capture started; IRQ edges=8129
+ 75209 17:33:24.672 Barcode capture started; IRQ edges=8129
+ 75210 17:33:24.672 Barcode capture started; IRQ edges=8129
+ 75211 17:33:24.672 Barcode capture started; IRQ edges=8129
+ 75212 17:33:24.672 Barcode capture started; IRQ edges=8129
+ 75213 17:33:24.672 Barcode capture started; IRQ edges=8129
+ 75238 17:33:29.898 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":429871}
+ 75239 17:33:29.898 Barcode: read leniently (21 of 29 bars+spaces, 8+0 missing, 4 stray left out).
+ 75240 17:33:29.898 Barcode COMMAND: "Z" = TURN RIGHT
+ 75241 17:33:29.898 Pending: TURN RIGHT at the next crossroad.
+ 75254 17:33:31.710 Barcode reader OFF; IRQ edges=8300
+ 75297 17:33:41.716 State: STOPPED -> LINE_CAL
+ 75298 17:33:41.716 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75299 17:33:41.716 State: LINE_CAL -> FOLLOW_LINE
+ 75300 17:33:41.746 Barcode reader ON; IRQ edges=8378
+ 75301 17:33:41.887 Barcode capture started; IRQ edges=8422
+ 75302 17:33:41.887 Barcode capture started; IRQ edges=8422
+ 75303 17:33:41.887 Barcode capture started; IRQ edges=8422
+ 75304 17:33:41.899 Barcode capture started; IRQ edges=8422
+ 75305 17:33:41.899 Barcode capture started; IRQ edges=8422
+ 75306 17:33:41.899 Barcode capture started; IRQ edges=8422
+ 75307 17:33:41.903 Barcode capture started; IRQ edges=8422
+ 75308 17:33:41.903 Barcode capture started; IRQ edges=8422
+ 75309 17:33:42.088 Barcode capture started; IRQ edges=8422
+ 75310 17:33:42.093 Barcode capture started; IRQ edges=8422
+ 75311 17:33:42.095 Barcode capture started; IRQ edges=8422
+ 75312 17:33:42.095 Barcode capture started; IRQ edges=8422
+ 75313 17:33:42.097 Barcode capture started; IRQ edges=8422
+ 75314 17:33:42.097 Barcode capture started; IRQ edges=8422
+ 75315 17:33:42.099 Barcode capture started; IRQ edges=8422
+ 75316 17:33:42.101 Barcode capture started; IRQ edges=8422
+ 75318 17:33:42.210 Barcode initial mark 371 ms: treated as junction, scan dropped.
+ 75319 17:33:42.290 Barcode capture started; IRQ edges=8430
+ 75320 17:33:42.390 Barcode capture started; IRQ edges=8430
+ 75324 17:33:42.900 Barcode initial mark 444 ms: treated as junction, scan dropped.
+ 75326 17:33:42.982 Barcode capture started; IRQ edges=8447
+ 75327 17:33:42.982 Barcode capture started; IRQ edges=8447
+ 75328 17:33:42.990 Barcode capture started; IRQ edges=8447
+ 75329 17:33:42.990 Barcode capture started; IRQ edges=8447
+ 75330 17:33:42.993 Barcode capture started; IRQ edges=8447
+ 75331 17:33:42.993 Barcode capture started; IRQ edges=8447
+ 75355 17:33:48.249 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":448292}
+ 75356 17:33:48.274 Barcode: read leniently (21 of 29 bars+spaces, 8+0 missing, 0 stray left out).
+ 75357 17:33:48.274 Barcode COMMAND: "Z" = TURN RIGHT
+ 75358 17:33:48.274 Pending: TURN RIGHT at the next crossroad.
+ 75368 17:33:50.292 Line lost: reversing 1670 ms of path to where both sensors were on it.
+ 75369 17:33:50.370 Reverse done (a sensor found black).
+ 75380 17:33:51.428 Barcode reader OFF; IRQ edges=8611
+ 75442 17:34:04.615 State: STOPPED -> LINE_CAL
+ 75443 17:34:04.615 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75444 17:34:04.615 State: LINE_CAL -> FOLLOW_LINE
+ 75445 17:34:04.615 Barcode reader ON; IRQ edges=8683
+ 75454 17:34:06.268 Barcode capture started; IRQ edges=8729
+ 75455 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75456 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75457 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75458 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75459 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75460 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75461 17:34:06.461 Barcode capture started; IRQ edges=8729
+ 75462 17:34:06.541 Barcode capture started; IRQ edges=8729
+ 75463 17:34:06.541 Barcode capture started; IRQ edges=8729
+ 75464 17:34:06.557 Barcode capture started; IRQ edges=8729
+ 75465 17:34:06.557 Barcode capture started; IRQ edges=8729
+ 75466 17:34:06.557 Barcode capture started; IRQ edges=8729
+ 75467 17:34:06.557 Barcode capture started; IRQ edges=8729
+ 75468 17:34:06.557 Barcode capture started; IRQ edges=8729
+ 75469 17:34:06.557 Barcode capture started; IRQ edges=8729
+ 75503 17:34:12.329 Barcode reader OFF; IRQ edges=9169
+ 75504 17:34:12.329 Barcode: reading switched off after 18 bars+spaces -> decoding what was read.
+ 75505 17:34:12.409 Barcode lenient: 18 bars+spaces cannot be "*X*" with at most 8 missing.
+ 75506 17:34:12.409 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 75510 17:34:12.417 Barcode NOT decoded: 18 bars+spaces seen (valid: 10 per character - 1).
+ 75546 17:34:18.545 State: STOPPED -> LINE_CAL
+ 75547 17:34:18.561 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75548 17:34:18.561 State: LINE_CAL -> FOLLOW_LINE
+ 75549 17:34:18.561 Barcode reader ON; IRQ edges=9294
+ 75558 17:34:20.356 Barcode capture started; IRQ edges=9320
+ 75559 17:34:20.366 Barcode capture started; IRQ edges=9320
+ 75560 17:34:20.368 Barcode capture started; IRQ edges=9320
+ 75561 17:34:20.370 Barcode capture started; IRQ edges=9320
+ 75562 17:34:20.372 Barcode capture started; IRQ edges=9320
+ 75563 17:34:20.372 Barcode capture started; IRQ edges=9320
+ 75564 17:34:20.374 Barcode capture started; IRQ edges=9320
+ 75565 17:34:20.461 Barcode capture started; IRQ edges=9320
+ 75566 17:34:20.461 Barcode capture started; IRQ edges=9320
+ 75574 17:34:21.201 Barcode reader OFF; IRQ edges=9362
+ 75575 17:34:21.214 Barcode: reading switched off after 7 bars+spaces -> decoding what was read.
+ 75576 17:34:21.214 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+ 75577 17:34:21.214 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 75581 17:34:21.318 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+ 75644 17:34:31.660 State: STOPPED -> LINE_CAL
+ 75645 17:34:31.660 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75646 17:34:31.660 State: LINE_CAL -> FOLLOW_LINE
+ 75647 17:34:31.660 Barcode reader ON; IRQ edges=9379
+ 75650 17:34:32.054 Barcode capture started; IRQ edges=9389
+ 75651 17:34:32.054 Barcode capture started; IRQ edges=9389
+ 75652 17:34:32.060 Barcode capture started; IRQ edges=9389
+ 75653 17:34:32.060 Barcode capture started; IRQ edges=9389
+ 75673 17:34:36.336 Barcode lenient forward, 0+2 missing: letter not a clean A-Z (#11).
+ 75674 17:34:36.350 Barcode lenient forward, 2+0 missing: should be narrow (#2).
+ 75675 17:34:36.352 Barcode lenient reversed, 0+2 missing: should be wide (#26).
+ 75676 17:34:36.352 Barcode lenient reversed, 2+0 missing: letter not a clean A-Z (#19).
+ 75677 17:34:36.355 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 75681 17:34:36.519 Barcode NOT decoded: 27 bars+spaces seen (valid: 10 per character - 1).
+ 75692 17:34:37.506 Barcode reader OFF; IRQ edges=9761
+ 75729 17:34:44.837 State: STOPPED -> LINE_CAL
+ 75730 17:34:44.837 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75731 17:34:44.841 State: LINE_CAL -> FOLLOW_LINE
+ 75732 17:34:44.841 Barcode reader ON; IRQ edges=9822
+ 75735 17:34:45.371 Barcode capture started; IRQ edges=9828
+ 75736 17:34:45.472 Barcode capture started; IRQ edges=9828
+ 75751 17:34:48.665 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":508682}
+ 75752 17:34:48.698 Barcode COMMAND: "Z" = TURN RIGHT
+ 75753 17:34:48.698 Pending: TURN RIGHT at the next crossroad.
+ 75778 17:34:52.984 Barcode reader OFF; IRQ edges=10146
+ 75824 17:35:02.462 State: STOPPED -> LINE_CAL
+ 75825 17:35:02.468 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 75826 17:35:02.468 State: LINE_CAL -> FOLLOW_LINE
+ 75827 17:35:02.468 Barcode reader ON; IRQ edges=10169
+ 75836 17:35:04.816 Barcode capture started; IRQ edges=10177
+ 75837 17:35:05.016 Barcode capture started; IRQ edges=10177
+ 75838 17:35:05.022 Barcode capture started; IRQ edges=10177
+ 75863 17:35:09.346 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":529390}
+ 75864 17:35:09.356 Barcode COMMAND: "Z" = TURN RIGHT
+ 75865 17:35:09.356 Pending: TURN RIGHT at the next crossroad.
+ 75876 17:35:11.692 Line lost: reversing 290 ms of path to where both sensors were on it.
+ 75878 17:35:11.790 Reverse done (a sensor found black).
+ 75886 17:35:12.596 Barcode reader OFF; IRQ edges=10448
+ 76324 17:36:57.019 State: STOPPED -> LINE_CAL
+ 76325 17:36:57.019 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 76326 17:36:57.019 State: LINE_CAL -> FOLLOW_LINE
+ 76327 17:36:57.019 Barcode reader ON; IRQ edges=10734
+ 76336 17:36:58.403 Barcode reader OFF; IRQ edges=10734

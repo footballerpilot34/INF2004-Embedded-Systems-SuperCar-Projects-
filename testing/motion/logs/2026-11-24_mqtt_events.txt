@@ -1,0 +1,540 @@
+# motion: MQTT log events, 2026-11-24
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 77859 10:35:11.859 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 81462 10:49:13.061 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 81509 10:49:38.966 Last restart: power-on or brown-out (supply dipped).
+ 81518 10:49:38.986 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 81610 10:49:59.389 Stalled on a slope for 205 ms -> HUMP, more power.
+ 85137 13:09:44.301 Last restart: power-on or brown-out (supply dipped).
+ 85146 13:09:44.331 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 85301 13:10:18.715 Stalled on a slope for 200 ms -> HUMP, more power.
+ 85307 13:10:18.922 Hump: still stalled -> power 17.
+ 88439 13:21:18.018 BYPASS pose (out): x=0 z=0 mm, heading -44 deg, wheels L0 R0.
+ 88442 13:21:18.635 BYPASS pose (out): x=-22 z=23 mm, heading -44 deg, wheels L12 R12.
+ 88446 13:21:19.035 BYPASS pose (out): x=-47 z=48 mm, heading -44 deg, wheels L13 R11.
+ 88449 13:21:19.501 BYPASS pose (out): x=-70 z=73 mm, heading -44 deg, wheels L12 R12.
+ 88452 13:21:20.340 BYPASS pose (out): x=-94 z=98 mm, heading -44 deg, wheels L13 R11.
+ 88455 13:21:21.196 BYPASS pose (out): x=-118 z=122 mm, heading -44 deg, wheels L13 R11.
+ 88459 13:21:21.727 BYPASS pose (out): x=-143 z=148 mm, heading -44 deg, wheels L12 R12.
+ 88462 13:21:21.989 BYPASS pose (out): x=-166 z=172 mm, heading -44 deg, wheels L12 R12.
+ 88465 13:21:22.076 BYPASS pose (out): x=-190 z=197 mm, heading -44 deg, wheels L13 R11.
+ 88468 13:21:22.620 BYPASS pose (out): x=-214 z=222 mm, heading -44 deg, wheels L13 R11.
+ 88478 13:21:24.047 BYPASS pose (pass): x=-220 z=228 mm, heading 0 deg, wheels L0 R0.
+ 88481 13:21:24.430 BYPASS pose (pass): x=-221 z=260 mm, heading -1 deg, wheels L13 R11.
+ 89020 13:23:45.079 Last restart: power-on or brown-out (supply dipped).
+ 89029 13:23:45.240 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 89737 13:26:10.326 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+ 89754 13:26:12.580 BYPASS pose (out): x=-4 z=3 mm, heading -81 deg, wheels L0 R0.
+ 89757 13:26:12.582 BYPASS pose (out): x=-36 z=9 mm, heading -81 deg, wheels L13 R11.
+ 89760 13:26:13.119 BYPASS pose (out): x=-69 z=14 mm, heading -80 deg, wheels L12 R12.
+ 89764 13:26:13.505 BYPASS pose (out): x=-102 z=20 mm, heading -80 deg, wheels L12 R12.
+ 89767 13:26:14.039 BYPASS pose (out): x=-136 z=26 mm, heading -80 deg, wheels L12 R12.
+ 89770 13:26:14.481 BYPASS pose (out): x=-169 z=31 mm, heading -79 deg, wheels L12 R12.
+ 89773 13:26:14.943 BYPASS pose (out): x=-204 z=37 mm, heading -80 deg, wheels L12 R12.
+ 89785 13:26:16.680 BYPASS pose (pass): x=-213 z=40 mm, heading 1 deg, wheels L0 R0.
+ 89789 13:26:18.261 BYPASS pose (pass): x=-213 z=70 mm, heading 0 deg, wheels L12 R12.
+ 89792 13:26:18.273 BYPASS pose (pass): x=-213 z=107 mm, heading 0 deg, wheels L12 R12.
+ 89794 13:26:18.413 BYPASS pose (pass): x=-213 z=142 mm, heading -1 deg, wheels L13 R11.
+ 89797 13:26:19.039 BYPASS pose (pass): x=-214 z=178 mm, heading -1 deg, wheels L13 R11.
+ 89801 13:26:19.168 BYPASS pose (pass): x=-214 z=211 mm, heading 0 deg, wheels L12 R12.
+ 89804 13:26:20.054 BYPASS pose (pass): x=-214 z=246 mm, heading 0 deg, wheels L12 R12.
+ 89807 13:26:20.257 BYPASS pose (pass): x=-215 z=281 mm, heading -1 deg, wheels L13 R11.
+ 89810 13:26:21.193 BYPASS pose (pass): x=-215 z=316 mm, heading 0 deg, wheels L12 R12.
+ 89814 13:26:21.289 BYPASS pose (pass): x=-215 z=351 mm, heading 0 deg, wheels L12 R12.
+ 89817 13:26:21.957 BYPASS pose (pass): x=-215 z=386 mm, heading -1 deg, wheels L13 R11.
+ 89820 13:26:25.213 BYPASS pose (pass): x=-216 z=421 mm, heading 0 deg, wheels L13 R11.
+ 90141 13:27:13.812 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+ 90152 13:27:14.760 BYPASS pose (back-up): x=0 z=0 mm, heading -10 deg, wheels L0 R0.
+ 90164 13:27:18.247 BYPASS pose (out): x=-2 z=-7 mm, heading -78 deg, wheels L0 R0.
+ 90167 13:27:18.247 BYPASS pose (out): x=-30 z=0 mm, heading -77 deg, wheels L12 R12.
+ 90168 13:27:18.421 BYPASS pose (out): x=-63 z=7 mm, heading -77 deg, wheels L13 R11.
+ 90169 13:27:18.421 BYPASS pose (out): x=-95 z=14 mm, heading -77 deg, wheels L12 R12.
+ 90171 13:27:18.421 BYPASS pose (out): x=-128 z=22 mm, heading -77 deg, wheels L12 R12.
+ 90174 13:27:19.270 BYPASS pose (out): x=-161 z=29 mm, heading -77 deg, wheels L12 R12.
+ 90178 13:27:20.098 BYPASS pose (out): x=-193 z=37 mm, heading -77 deg, wheels L12 R12.
+ 90190 13:27:21.433 BYPASS pose (pass): x=-213 z=42 mm, heading 0 deg, wheels L0 R0.
+ 90193 13:27:21.931 BYPASS pose (pass): x=-213 z=76 mm, heading 0 deg, wheels L13 R11.
+ 90196 13:27:22.314 BYPASS pose (pass): x=-213 z=111 mm, heading 0 deg, wheels L12 R12.
+ 90199 13:27:23.241 BYPASS pose (pass): x=-214 z=145 mm, heading 0 deg, wheels L12 R12.
+ 90203 13:27:23.329 BYPASS pose (pass): x=-214 z=181 mm, heading 0 deg, wheels L12 R12.
+ 90206 13:27:23.848 BYPASS pose (pass): x=-214 z=214 mm, heading 0 deg, wheels L12 R12.
+ 90209 13:27:24.300 BYPASS pose (pass): x=-214 z=248 mm, heading 0 deg, wheels L12 R12.
+ 90212 13:27:24.821 BYPASS pose (pass): x=-214 z=283 mm, heading 0 deg, wheels L12 R12.
+ 90216 13:27:25.278 BYPASS pose (pass): x=-214 z=318 mm, heading 0 deg, wheels L12 R12.
+ 90219 13:27:26.330 BYPASS pose (pass): x=-215 z=353 mm, heading 0 deg, wheels L12 R12.
+ 90222 13:27:26.558 BYPASS pose (pass): x=-215 z=388 mm, heading 0 deg, wheels L12 R12.
+ 90225 13:27:28.354 BYPASS pose (pass): x=-215 z=423 mm, heading 0 deg, wheels L13 R11.
+ 90234 13:27:28.588 BYPASS pose (return): x=-215 z=433 mm, heading 66 deg, wheels L0 R0.
+ 90237 13:27:28.980 BYPASS pose (return): x=-185 z=446 mm, heading 66 deg, wheels L12 R12.
+ 90784 13:30:08.539 Last restart: power-on or brown-out (supply dipped).
+ 90793 13:30:08.738 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 90916 13:30:34.011 Hump: stalled again -> climbing power.
+ 90917 13:30:34.013 Hump: still stalled -> power 17.
+ 90919 13:30:34.389 Hump: stalled again -> climbing power.
+ 90920 13:30:34.389 Hump: still stalled -> power 22.
+ 90921 13:30:34.389 Hump: still stalled -> power 27.
+ 90923 13:30:34.389 Hump: stalled again -> climbing power.
+ 90926 13:30:34.928 Hump: stalled again -> climbing power.
+ 90927 13:30:34.928 Hump: still stalled -> power 32.
+ 90928 13:30:34.928 Hump: still stalled -> power 37.
+ 90930 13:30:34.928 Hump: stalled again -> climbing power.
+ 90932 13:30:34.928 Hump: stalled again -> climbing power.
+ 90933 13:30:34.940 Hump: still stalled -> power 42.
+ 90935 13:30:35.505 Hump: still stuck at power 40 after 9480 ms -> BLOCKED.
+ 91040 13:30:56.119 Hump: stalled again -> climbing power.
+ 91042 13:30:56.121 Hump: still stalled -> power 17.
+ 91045 13:30:56.266 Hump: still stalled -> power 22.
+ 91046 13:30:56.266 Hump: still stalled -> power 27.
+ 91047 13:30:56.266 Hump: still stalled -> power 32.
+ 91048 13:30:56.266 Hump: still stalled -> power 37.
+ 91057 13:30:56.997 Hump: stalled again -> climbing power.
+ 91060 13:30:57.324 Hump: stalled again -> climbing power.
+ 91062 13:30:57.329 Hump: still stalled -> power 42.
+ 91093 13:31:03.949 Hump: still stuck at power 9 after 15008 ms -> BLOCKED.
+ 91414 13:31:59.655 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+ 91431 13:32:01.591 BYPASS pose (out): x=-5 z=5 mm, heading -76 deg, wheels L0 R0.
+ 91434 13:32:01.990 BYPASS pose (out): x=-34 z=12 mm, heading -76 deg, wheels L12 R12.
+ 91437 13:32:02.590 BYPASS pose (out): x=-66 z=20 mm, heading -76 deg, wheels L12 R12.
+ 91441 13:32:02.933 BYPASS pose (out): x=-98 z=28 mm, heading -76 deg, wheels L13 R11.
+ 91444 13:32:04.111 BYPASS pose (out): x=-132 z=37 mm, heading -75 deg, wheels L12 R12.
+ 91447 13:32:04.120 BYPASS pose (out): x=-164 z=45 mm, heading -75 deg, wheels L12 R12.
+ 91450 13:32:04.573 BYPASS pose (out): x=-198 z=54 mm, heading -75 deg, wheels L12 R12.
+ 91461 13:32:06.498 BYPASS pose (pass): x=-212 z=59 mm, heading 0 deg, wheels L0 R0.
+ 91464 13:32:06.675 BYPASS pose (pass): x=-212 z=90 mm, heading 0 deg, wheels L12 R12.
+ 91468 13:32:07.617 BYPASS pose (pass): x=-213 z=126 mm, heading -1 deg, wheels L13 R11.
+ 91471 13:32:07.896 BYPASS pose (pass): x=-213 z=160 mm, heading 0 deg, wheels L12 R12.
+ 91474 13:32:08.237 BYPASS pose (pass): x=-213 z=194 mm, heading -1 deg, wheels L12 R12.
+ 91477 13:32:08.958 BYPASS pose (pass): x=-214 z=229 mm, heading -1 deg, wheels L12 R12.
+ 91481 13:32:09.158 BYPASS pose (pass): x=-214 z=263 mm, heading 0 deg, wheels L12 R12.
+ 91484 13:32:09.645 BYPASS pose (pass): x=-214 z=299 mm, heading 0 deg, wheels L12 R12.
+ 91487 13:32:10.389 BYPASS pose (pass): x=-215 z=333 mm, heading -1 deg, wheels L13 R11.
+ 91491 13:32:10.624 BYPASS pose (pass): x=-215 z=368 mm, heading -1 deg, wheels L13 R11.
+ 91494 13:32:11.569 BYPASS pose (pass): x=-215 z=402 mm, heading -1 deg, wheels L12 R12.
+ 91497 13:32:12.025 BYPASS pose (pass): x=-215 z=436 mm, heading 0 deg, wheels L12 R12.
+ 91508 13:32:13.433 BYPASS pose (return): x=-215 z=446 mm, heading 65 deg, wheels L0 R0.
+ 91511 13:32:13.740 BYPASS pose (return): x=-188 z=459 mm, heading 65 deg, wheels L12 R12.
+ 91514 13:32:16.250 BYPASS pose (return): x=-156 z=474 mm, heading 65 deg, wheels L12 R12.
+ 94837 13:44:54.404 Stalled on a slope for 1330 ms -> HUMP, more power.
+ 94888 13:45:18.748 Stalled on a slope for 962 ms -> HUMP, more power.
+ 94894 13:45:18.858 Hump: still stalled -> power 17.
+ 94896 13:45:18.858 Hump: stalled again -> climbing power.
+ 94966 13:45:24.736 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 95127 13:45:56.232 Stalled on a slope for 262 ms -> HUMP, more power.
+ 95141 13:45:57.973 Hump: stalled again -> climbing power.
+ 95145 13:45:58.580 Hump: stalled again -> climbing power.
+ 97844 13:56:05.212 Hump: still stalled -> power 17.
+ 98255 13:57:27.613 Hump: still stalled -> power 17.
+ 98870 13:59:15.355 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 98903 13:59:17.422 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99111 13:59:35.118 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99272 13:59:56.743 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99655 14:01:05.867 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99660 14:01:05.963 Stalled on a slope for 210 ms -> HUMP, more power.
+ 99671 14:01:07.113 Hump: stalled again -> climbing power.
+100092 14:02:09.056 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+100178 14:02:23.660 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+100201 14:02:24.607 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+101613 14:08:03.257 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+102243 14:09:59.826 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+102258 14:10:01.405 BYPASS pose (out): x=-5 z=4 mm, heading -80 deg, wheels L0 R0.
+102261 14:10:02.011 BYPASS pose (out): x=-34 z=9 mm, heading -79 deg, wheels L13 R11.
+102264 14:10:02.626 BYPASS pose (out): x=-65 z=15 mm, heading -80 deg, wheels L13 R11.
+102267 14:10:04.872 BYPASS pose (out): x=-98 z=21 mm, heading -80 deg, wheels L13 R11.
+102271 14:10:05.096 BYPASS pose (out): x=-131 z=27 mm, heading -80 deg, wheels L12 R12.
+102274 14:10:05.096 BYPASS pose (out): x=-164 z=33 mm, heading -79 deg, wheels L12 R12.
+102276 14:10:05.288 BYPASS pose (out): x=-198 z=40 mm, heading -79 deg, wheels L12 R12.
+102285 14:10:06.287 BYPASS pose (pass): x=-213 z=43 mm, heading 1 deg, wheels L0 R0.
+102288 14:10:07.055 BYPASS pose (pass): x=-212 z=74 mm, heading 0 deg, wheels L12 R12.
+102291 14:10:07.174 BYPASS pose (pass): x=-212 z=109 mm, heading -1 deg, wheels L12 R12.
+102295 14:10:07.689 BYPASS pose (pass): x=-213 z=143 mm, heading 0 deg, wheels L12 R12.
+102298 14:10:08.190 BYPASS pose (pass): x=-213 z=177 mm, heading 0 deg, wheels L12 R12.
+102301 14:10:09.575 BYPASS pose (pass): x=-213 z=213 mm, heading -1 deg, wheels L12 R12.
+102304 14:10:09.581 BYPASS pose (pass): x=-214 z=246 mm, heading 0 deg, wheels L12 R12.
+102308 14:10:09.839 BYPASS pose (pass): x=-214 z=281 mm, heading 0 deg, wheels L12 R12.
+102311 14:10:10.193 BYPASS pose (pass): x=-214 z=316 mm, heading 0 deg, wheels L12 R12.
+102314 14:10:10.712 BYPASS pose (pass): x=-214 z=351 mm, heading 0 deg, wheels L13 R11.
+102318 14:10:11.521 BYPASS pose (pass): x=-215 z=385 mm, heading -1 deg, wheels L12 R12.
+102329 14:10:12.839 BYPASS pose (return): x=-215 z=398 mm, heading 66 deg, wheels L0 R0.
+102333 14:10:13.763 BYPASS pose (return): x=-184 z=412 mm, heading 65 deg, wheels L12 R12.
+102569 14:11:38.450 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+102915 14:12:27.795 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+102933 14:12:31.019 BYPASS pose (out): x=-5 z=4 mm, heading -79 deg, wheels L0 R0.
+102937 14:12:31.023 BYPASS pose (out): x=-34 z=10 mm, heading -80 deg, wheels L12 R12.
+102939 14:12:31.207 BYPASS pose (out): x=-67 z=15 mm, heading -80 deg, wheels L12 R12.
+102942 14:12:31.469 BYPASS pose (out): x=-99 z=20 mm, heading -82 deg, wheels L13 R11.
+102945 14:12:32.507 BYPASS pose (out): x=-132 z=25 mm, heading -81 deg, wheels L13 R11.
+102949 14:12:32.524 BYPASS pose (out): x=-165 z=31 mm, heading -80 deg, wheels L12 R12.
+102952 14:12:35.263 BYPASS pose (out): x=-200 z=37 mm, heading -80 deg, wheels L12 R12.
+102960 14:12:35.407 BYPASS pose (pass): x=-213 z=39 mm, heading 0 deg, wheels L0 R0.
+102961 14:12:35.407 BYPASS pose (pass): x=-213 z=69 mm, heading -1 deg, wheels L12 R12.
+102964 14:12:36.383 BYPASS pose (pass): x=-213 z=104 mm, heading -1 deg, wheels L13 R11.
+102967 14:12:36.448 BYPASS pose (pass): x=-214 z=138 mm, heading 0 deg, wheels L12 R12.
+102971 14:12:36.837 BYPASS pose (pass): x=-214 z=173 mm, heading -1 deg, wheels L12 R12.
+102975 14:12:37.538 BYPASS pose (pass): x=-214 z=207 mm, heading -1 deg, wheels L12 R12.
+102978 14:12:37.883 BYPASS pose (pass): x=-214 z=240 mm, heading 0 deg, wheels L12 R12.
+102981 14:12:38.529 BYPASS pose (pass): x=-215 z=273 mm, heading -1 deg, wheels L12 R12.
+102985 14:12:38.928 BYPASS pose (pass): x=-216 z=307 mm, heading -1 deg, wheels L13 R11.
+102988 14:12:39.486 BYPASS pose (pass): x=-216 z=341 mm, heading 0 deg, wheels L13 R11.
+102991 14:12:39.917 BYPASS pose (pass): x=-216 z=375 mm, heading -1 deg, wheels L12 R12.
+103002 14:12:41.623 BYPASS pose (return): x=-216 z=395 mm, heading 67 deg, wheels L0 R0.
+103448 14:13:55.998 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+103465 14:13:58.046 BYPASS pose (out): x=-3 z=3 mm, heading -79 deg, wheels L0 R0.
+103469 14:14:00.167 BYPASS pose (out): x=-32 z=9 mm, heading -79 deg, wheels L12 R12.
+103472 14:14:00.167 BYPASS pose (out): x=-64 z=15 mm, heading -79 deg, wheels L12 R12.
+103474 14:14:00.268 BYPASS pose (out): x=-97 z=21 mm, heading -80 deg, wheels L12 R12.
+103475 14:14:00.268 BYPASS pose (out): x=-131 z=27 mm, heading -79 deg, wheels L12 R12.
+103479 14:14:00.569 BYPASS pose (out): x=-163 z=34 mm, heading -79 deg, wheels L11 R13.
+103482 14:14:01.652 BYPASS pose (out): x=-197 z=40 mm, heading -80 deg, wheels L12 R12.
+103494 14:14:02.951 BYPASS pose (pass): x=-212 z=43 mm, heading 0 deg, wheels L0 R0.
+103497 14:14:03.381 BYPASS pose (pass): x=-212 z=75 mm, heading 0 deg, wheels L12 R12.
+103500 14:14:03.853 BYPASS pose (pass): x=-213 z=109 mm, heading 0 deg, wheels L12 R12.
+103503 14:14:04.471 BYPASS pose (pass): x=-213 z=142 mm, heading -1 deg, wheels L12 R12.
+103507 14:14:04.882 BYPASS pose (pass): x=-213 z=176 mm, heading 0 deg, wheels L12 R12.
+103510 14:14:05.509 BYPASS pose (pass): x=-214 z=210 mm, heading -1 deg, wheels L13 R11.
+103513 14:14:05.976 BYPASS pose (pass): x=-214 z=242 mm, heading 0 deg, wheels L12 R12.
+103516 14:14:06.319 BYPASS pose (pass): x=-214 z=276 mm, heading 0 deg, wheels L12 R12.
+103520 14:14:06.840 BYPASS pose (pass): x=-214 z=309 mm, heading -1 deg, wheels L12 R12.
+103523 14:14:07.337 BYPASS pose (pass): x=-214 z=343 mm, heading 0 deg, wheels L12 R12.
+103526 14:14:07.839 BYPASS pose (pass): x=-215 z=377 mm, heading 0 deg, wheels L13 R11.
+103538 14:14:09.697 BYPASS pose (return): x=-214 z=398 mm, heading 65 deg, wheels L0 R0.
+103541 14:14:10.117 BYPASS pose (return): x=-185 z=412 mm, heading 64 deg, wheels L12 R12.
+103545 14:14:12.400 BYPASS pose (return): x=-153 z=427 mm, heading 65 deg, wheels L12 R12.
+104195 14:15:41.085 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+104212 14:15:43.223 BYPASS pose (out): x=-4 z=3 mm, heading -81 deg, wheels L0 R0.
+104215 14:15:43.606 BYPASS pose (out): x=-34 z=8 mm, heading -80 deg, wheels L12 R12.
+104218 14:15:44.114 BYPASS pose (out): x=-67 z=14 mm, heading -80 deg, wheels L12 R12.
+104222 14:15:44.652 BYPASS pose (out): x=-101 z=20 mm, heading -80 deg, wheels L12 R12.
+104225 14:15:45.127 BYPASS pose (out): x=-136 z=27 mm, heading -80 deg, wheels L12 R12.
+104228 14:15:45.655 BYPASS pose (out): x=-170 z=33 mm, heading -80 deg, wheels L12 R12.
+104231 14:15:46.190 BYPASS pose (out): x=-205 z=39 mm, heading -80 deg, wheels L12 R12.
+104242 14:15:47.695 BYPASS pose (pass): x=-212 z=41 mm, heading -1 deg, wheels L0 R0.
+104245 14:15:48.134 BYPASS pose (pass): x=-213 z=71 mm, heading -1 deg, wheels L12 R12.
+104249 14:15:48.713 BYPASS pose (pass): x=-213 z=107 mm, heading -1 deg, wheels L12 R12.
+104252 14:15:49.221 BYPASS pose (pass): x=-213 z=140 mm, heading 0 deg, wheels L12 R12.
+104255 14:15:49.625 BYPASS pose (pass): x=-214 z=175 mm, heading -1 deg, wheels L13 R11.
+104258 14:15:50.154 BYPASS pose (pass): x=-214 z=211 mm, heading -1 deg, wheels L12 R12.
+104262 14:15:50.715 BYPASS pose (pass): x=-214 z=246 mm, heading -1 deg, wheels L12 R12.
+104265 14:15:51.495 BYPASS pose (pass): x=-215 z=281 mm, heading -1 deg, wheels L12 R12.
+104268 14:15:51.716 BYPASS pose (pass): x=-215 z=316 mm, heading -1 deg, wheels L12 R12.
+104271 14:15:52.407 BYPASS pose (pass): x=-215 z=350 mm, heading -1 deg, wheels L13 R11.
+104275 14:15:52.687 BYPASS pose (pass): x=-216 z=385 mm, heading -1 deg, wheels L13 R11.
+104285 14:15:54.487 BYPASS pose (return): x=-216 z=398 mm, heading 66 deg, wheels L0 R0.
+104290 14:15:56.215 BYPASS pose (return): x=-187 z=412 mm, heading 65 deg, wheels L12 R12.
+104293 14:15:56.215 BYPASS pose (return): x=-155 z=427 mm, heading 64 deg, wheels L12 R12.
+104296 14:15:56.222 BYPASS pose (return): x=-123 z=442 mm, heading 64 deg, wheels L12 R12.
+104298 14:15:56.402 BYPASS pose (return): x=-91 z=458 mm, heading 65 deg, wheels L12 R12.
+104740 14:16:53.905 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+104757 14:16:56.138 BYPASS pose (out): x=-4 z=2 mm, heading -80 deg, wheels L0 R0.
+104760 14:16:56.521 BYPASS pose (out): x=-32 z=7 mm, heading -80 deg, wheels L12 R12.
+104764 14:16:56.963 BYPASS pose (out): x=-65 z=13 mm, heading -80 deg, wheels L13 R11.
+104767 14:16:57.484 BYPASS pose (out): x=-98 z=19 mm, heading -80 deg, wheels L12 R12.
+104770 14:16:57.982 BYPASS pose (out): x=-133 z=26 mm, heading -79 deg, wheels L12 R12.
+104773 14:16:58.503 BYPASS pose (out): x=-167 z=32 mm, heading -80 deg, wheels L12 R12.
+104777 14:16:59.000 BYPASS pose (out): x=-201 z=38 mm, heading -80 deg, wheels L12 R12.
+104789 14:17:01.131 BYPASS pose (pass): x=-213 z=41 mm, heading 0 deg, wheels L0 R0.
+104792 14:17:01.450 BYPASS pose (pass): x=-213 z=72 mm, heading 0 deg, wheels L12 R12.
+104795 14:17:03.294 BYPASS pose (pass): x=-213 z=108 mm, heading 0 deg, wheels L12 R12.
+104798 14:17:03.300 BYPASS pose (pass): x=-213 z=142 mm, heading 0 deg, wheels L12 R12.
+104802 14:17:03.363 BYPASS pose (pass): x=-214 z=177 mm, heading 0 deg, wheels L12 R12.
+104803 14:17:03.377 BYPASS pose (pass): x=-214 z=212 mm, heading 0 deg, wheels L12 R12.
+104806 14:17:03.817 BYPASS pose (pass): x=-214 z=246 mm, heading 0 deg, wheels L13 R11.
+104809 14:17:04.314 BYPASS pose (pass): x=-214 z=281 mm, heading -1 deg, wheels L12 R12.
+104813 14:17:04.818 BYPASS pose (pass): x=-215 z=316 mm, heading 0 deg, wheels L12 R12.
+104816 14:17:06.550 BYPASS pose (pass): x=-215 z=350 mm, heading -1 deg, wheels L12 R12.
+104819 14:17:06.550 BYPASS pose (pass): x=-215 z=385 mm, heading -1 deg, wheels L12 R12.
+104829 14:17:07.476 BYPASS pose (return): x=-215 z=398 mm, heading 67 deg, wheels L0 R0.
+104832 14:17:07.898 BYPASS pose (return): x=-184 z=411 mm, heading 65 deg, wheels L12 R12.
+104835 14:17:08.418 BYPASS pose (return): x=-153 z=426 mm, heading 64 deg, wheels L13 R11.
+104839 14:17:08.947 BYPASS pose (return): x=-121 z=441 mm, heading 64 deg, wheels L12 R12.
+109362 14:33:52.856 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+110198 14:36:38.795 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+111327 14:40:46.446 Last restart: power-on or brown-out (supply dipped).
+111336 14:40:46.581 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+112644 14:45:23.031 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+112659 14:45:24.542 BYPASS pose (out): x=-4 z=4 mm, heading -80 deg, wheels L0 R0.
+112662 14:45:25.079 BYPASS pose (out): x=-36 z=10 mm, heading -80 deg, wheels L13 R11.
+112665 14:45:25.471 BYPASS pose (out): x=-72 z=16 mm, heading -79 deg, wheels L12 R12.
+112668 14:45:26.203 BYPASS pose (out): x=-106 z=23 mm, heading -79 deg, wheels L12 R12.
+112672 14:45:26.524 BYPASS pose (out): x=-141 z=29 mm, heading -79 deg, wheels L12 R12.
+112675 14:45:27.199 BYPASS pose (out): x=-175 z=36 mm, heading -79 deg, wheels L12 R12.
+112678 14:45:27.503 BYPASS pose (out): x=-211 z=42 mm, heading -79 deg, wheels L12 R12.
+112689 14:45:29.047 BYPASS pose (pass): x=-214 z=44 mm, heading 0 deg, wheels L0 R0.
+112692 14:45:29.442 BYPASS pose (pass): x=-214 z=75 mm, heading 0 deg, wheels L12 R12.
+112695 14:45:29.909 BYPASS pose (pass): x=-215 z=112 mm, heading -1 deg, wheels L12 R12.
+112698 14:45:30.416 BYPASS pose (pass): x=-215 z=147 mm, heading 0 deg, wheels L13 R11.
+112702 14:45:30.881 BYPASS pose (pass): x=-215 z=184 mm, heading -1 deg, wheels L13 R11.
+112705 14:45:31.415 BYPASS pose (pass): x=-216 z=219 mm, heading -1 deg, wheels L12 R12.
+112708 14:45:32.671 BYPASS pose (pass): x=-216 z=254 mm, heading 0 deg, wheels L12 R12.
+112711 14:45:32.677 BYPASS pose (pass): x=-216 z=291 mm, heading -1 deg, wheels L12 R12.
+112715 14:45:32.884 BYPASS pose (pass): x=-217 z=327 mm, heading 0 deg, wheels L12 R12.
+112718 14:45:33.543 BYPASS pose (pass): x=-217 z=362 mm, heading 0 deg, wheels L13 R11.
+112730 14:45:35.598 BYPASS pose (return): x=-217 z=399 mm, heading 64 deg, wheels L0 R0.
+112733 14:45:35.703 BYPASS pose (return): x=-189 z=412 mm, heading 64 deg, wheels L13 R11.
+112736 14:45:36.203 BYPASS pose (return): x=-156 z=428 mm, heading 65 deg, wheels L12 R12.
+113109 14:46:33.272 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+113125 14:46:33.959 BYPASS pose (out): x=-3 z=3 mm, heading -79 deg, wheels L0 R0.
+113128 14:46:34.382 BYPASS pose (out): x=-33 z=9 mm, heading -79 deg, wheels L13 R11.
+113132 14:46:34.886 BYPASS pose (out): x=-67 z=15 mm, heading -79 deg, wheels L12 R12.
+113135 14:46:35.521 BYPASS pose (out): x=-101 z=22 mm, heading -79 deg, wheels L12 R12.
+113138 14:46:35.896 BYPASS pose (out): x=-136 z=29 mm, heading -79 deg, wheels L13 R11.
+113141 14:46:36.402 BYPASS pose (out): x=-170 z=36 mm, heading -79 deg, wheels L13 R11.
+113145 14:46:36.930 BYPASS pose (out): x=-204 z=43 mm, heading -78 deg, wheels L12 R12.
+113155 14:46:38.467 BYPASS pose (pass): x=-212 z=45 mm, heading 1 deg, wheels L0 R0.
+113159 14:46:38.952 BYPASS pose (pass): x=-212 z=78 mm, heading 0 deg, wheels L12 R12.
+113162 14:46:39.415 BYPASS pose (pass): x=-212 z=113 mm, heading 0 deg, wheels L12 R12.
+113165 14:46:39.926 BYPASS pose (pass): x=-212 z=148 mm, heading 0 deg, wheels L12 R12.
+113168 14:46:40.426 BYPASS pose (pass): x=-212 z=184 mm, heading 0 deg, wheels L12 R12.
+113172 14:46:40.930 BYPASS pose (pass): x=-212 z=219 mm, heading -1 deg, wheels L12 R12.
+113175 14:46:41.541 BYPASS pose (pass): x=-212 z=254 mm, heading -1 deg, wheels L12 R12.
+113178 14:46:41.954 BYPASS pose (pass): x=-213 z=289 mm, heading -1 deg, wheels L13 R11.
+113181 14:46:42.458 BYPASS pose (pass): x=-213 z=323 mm, heading 0 deg, wheels L12 R12.
+113185 14:46:42.929 BYPASS pose (pass): x=-213 z=358 mm, heading 0 deg, wheels L12 R12.
+113188 14:46:43.466 BYPASS pose (pass): x=-213 z=393 mm, heading 0 deg, wheels L12 R12.
+113199 14:46:45.164 BYPASS pose (return): x=-213 z=399 mm, heading 66 deg, wheels L0 R0.
+113202 14:46:45.421 BYPASS pose (return): x=-184 z=412 mm, heading 65 deg, wheels L12 R12.
+113205 14:46:45.945 BYPASS pose (return): x=-151 z=428 mm, heading 64 deg, wheels L12 R12.
+113635 14:47:50.152 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+113652 14:47:52.156 BYPASS pose (out): x=-3 z=3 mm, heading -75 deg, wheels L0 R0.
+113656 14:47:52.608 BYPASS pose (out): x=-33 z=10 mm, heading -76 deg, wheels L12 R12.
+113659 14:47:53.076 BYPASS pose (out): x=-67 z=19 mm, heading -75 deg, wheels L12 R12.
+113662 14:47:53.575 BYPASS pose (out): x=-100 z=28 mm, heading -76 deg, wheels L12 R12.
+113665 14:47:54.334 BYPASS pose (out): x=-134 z=36 mm, heading -76 deg, wheels L12 R12.
+113669 14:47:54.653 BYPASS pose (out): x=-167 z=45 mm, heading -75 deg, wheels L12 R12.
+113672 14:47:55.088 BYPASS pose (out): x=-199 z=54 mm, heading -75 deg, wheels L12 R12.
+113684 14:47:56.866 BYPASS pose (pass): x=-212 z=57 mm, heading 2 deg, wheels L0 R0.
+114408 14:50:07.303 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+114421 14:50:08.776 BYPASS pose (out): x=-3 z=2 mm, heading -81 deg, wheels L0 R0.
+114424 14:50:08.781 BYPASS pose (out): x=-34 z=7 mm, heading -81 deg, wheels L12 R12.
+114427 14:50:08.856 BYPASS pose (out): x=-68 z=13 mm, heading -81 deg, wheels L12 R12.
+114430 14:50:09.348 BYPASS pose (out): x=-102 z=18 mm, heading -81 deg, wheels L12 R12.
+114433 14:50:12.481 BYPASS pose (out): x=-136 z=24 mm, heading -80 deg, wheels L12 R12.
+114436 14:50:12.695 BYPASS pose (out): x=-171 z=30 mm, heading -81 deg, wheels L13 R11.
+114440 14:50:12.697 BYPASS pose (out): x=-204 z=35 mm, heading -80 deg, wheels L12 R12.
+114444 14:50:12.759 BYPASS pose (pass): x=-214 z=38 mm, heading 0 deg, wheels L0 R0.
+114447 14:50:13.096 BYPASS pose (pass): x=-213 z=68 mm, heading 0 deg, wheels L12 R12.
+114450 14:50:13.564 BYPASS pose (pass): x=-213 z=102 mm, heading 0 deg, wheels L12 R12.
+114453 14:50:14.126 BYPASS pose (pass): x=-214 z=138 mm, heading -1 deg, wheels L12 R12.
+114457 14:50:14.584 BYPASS pose (pass): x=-214 z=173 mm, heading -1 deg, wheels L12 R12.
+114460 14:50:15.103 BYPASS pose (pass): x=-214 z=208 mm, heading -1 deg, wheels L12 R12.
+114463 14:50:15.591 BYPASS pose (pass): x=-215 z=243 mm, heading 0 deg, wheels L13 R11.
+114466 14:50:16.090 BYPASS pose (pass): x=-215 z=278 mm, heading 0 deg, wheels L12 R12.
+114470 14:50:16.587 BYPASS pose (pass): x=-215 z=312 mm, heading 0 deg, wheels L12 R12.
+114473 14:50:17.100 BYPASS pose (pass): x=-215 z=346 mm, heading 0 deg, wheels L12 R12.
+114476 14:50:17.635 BYPASS pose (pass): x=-215 z=382 mm, heading -1 deg, wheels L12 R12.
+114488 14:50:19.262 BYPASS pose (return): x=-215 z=397 mm, heading 66 deg, wheels L0 R0.
+114491 14:50:19.790 BYPASS pose (return): x=-185 z=410 mm, heading 65 deg, wheels L13 R11.
+114494 14:50:21.643 BYPASS pose (return): x=-153 z=426 mm, heading 64 deg, wheels L13 R11.
+115194 14:52:26.257 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+115211 14:52:28.340 BYPASS pose (out): x=-4 z=3 mm, heading -81 deg, wheels L0 R0.
+115215 14:52:28.803 BYPASS pose (out): x=-35 z=8 mm, heading -81 deg, wheels L13 R11.
+115218 14:52:29.294 BYPASS pose (out): x=-70 z=14 mm, heading -81 deg, wheels L13 R11.
+115221 14:52:29.808 BYPASS pose (out): x=-104 z=19 mm, heading -81 deg, wheels L13 R11.
+115224 14:52:32.001 BYPASS pose (out): x=-140 z=25 mm, heading -80 deg, wheels L13 R11.
+115228 14:52:32.007 BYPASS pose (out): x=-175 z=31 mm, heading -81 deg, wheels L12 R12.
+115231 14:52:32.096 BYPASS pose (out): x=-209 z=37 mm, heading -80 deg, wheels L12 R12.
+115239 14:52:32.890 BYPASS pose (pass): x=-213 z=38 mm, heading 0 deg, wheels L0 R0.
+115242 14:52:33.315 BYPASS pose (pass): x=-213 z=70 mm, heading 0 deg, wheels L12 R12.
+115245 14:52:33.803 BYPASS pose (pass): x=-213 z=104 mm, heading 0 deg, wheels L12 R12.
+115248 14:52:34.315 BYPASS pose (pass): x=-213 z=140 mm, heading 0 deg, wheels L12 R12.
+115252 14:52:34.818 BYPASS pose (pass): x=-213 z=176 mm, heading -1 deg, wheels L12 R12.
+115255 14:52:35.306 BYPASS pose (pass): x=-214 z=211 mm, heading 0 deg, wheels L12 R12.
+115258 14:52:35.810 BYPASS pose (pass): x=-214 z=248 mm, heading -1 deg, wheels L13 R11.
+115261 14:52:36.538 BYPASS pose (pass): x=-214 z=283 mm, heading 0 deg, wheels L12 R12.
+115265 14:52:36.913 BYPASS pose (pass): x=-215 z=319 mm, heading -1 deg, wheels L13 R11.
+115268 14:52:37.334 BYPASS pose (pass): x=-215 z=354 mm, heading -1 deg, wheels L12 R12.
+115271 14:52:37.841 BYPASS pose (pass): x=-215 z=389 mm, heading -1 deg, wheels L12 R12.
+115282 14:52:40.663 BYPASS pose (return): x=-216 z=396 mm, heading 65 deg, wheels L0 R0.
+115285 14:52:40.733 BYPASS pose (return): x=-187 z=410 mm, heading 65 deg, wheels L12 R12.
+115288 14:52:40.733 BYPASS pose (return): x=-155 z=425 mm, heading 64 deg, wheels L12 R12.
+115292 14:52:40.831 BYPASS pose (return): x=-123 z=441 mm, heading 65 deg, wheels L12 R12.
+117763 15:03:59.195 Last restart: power-on or brown-out (supply dipped).
+117772 15:03:59.339 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+118512 15:06:48.005 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+118522 15:06:48.607 BYPASS pose (out): x=-3 z=3 mm, heading -76 deg, wheels L0 R0.
+118525 15:06:49.172 BYPASS pose (out): x=-34 z=10 mm, heading -76 deg, wheels L12 R12.
+118529 15:06:51.077 BYPASS pose (out): x=-65 z=18 mm, heading -77 deg, wheels L12 R12.
+118532 15:06:51.079 BYPASS pose (out): x=-97 z=26 mm, heading -76 deg, wheels L12 R12.
+118535 15:06:51.084 BYPASS pose (out): x=-129 z=33 mm, heading -76 deg, wheels L12 R12.
+118537 15:06:51.222 BYPASS pose (out): x=-161 z=41 mm, heading -76 deg, wheels L12 R12.
+118541 15:06:51.643 BYPASS pose (out): x=-193 z=49 mm, heading -77 deg, wheels L12 R12.
+118552 15:06:55.744 BYPASS pose (pass): x=-213 z=54 mm, heading 1 deg, wheels L0 R0.
+118555 15:06:55.746 BYPASS pose (pass): x=-213 z=85 mm, heading 1 deg, wheels L12 R12.
+118558 15:06:55.880 BYPASS pose (pass): x=-212 z=119 mm, heading 0 deg, wheels L12 R12.
+118559 15:06:55.880 BYPASS pose (pass): x=-212 z=153 mm, heading -1 deg, wheels L12 R12.
+118560 15:06:55.896 BYPASS pose (pass): x=-213 z=185 mm, heading 0 deg, wheels L12 R12.
+118561 15:06:55.896 BYPASS pose (pass): x=-213 z=220 mm, heading -1 deg, wheels L13 R11.
+118564 15:06:56.200 BYPASS pose (pass): x=-213 z=253 mm, heading 0 deg, wheels L12 R12.
+118567 15:06:58.640 BYPASS pose (pass): x=-213 z=287 mm, heading 0 deg, wheels L12 R12.
+118571 15:06:58.844 BYPASS pose (pass): x=-213 z=321 mm, heading 0 deg, wheels L12 R12.
+118574 15:06:58.851 BYPASS pose (pass): x=-213 z=354 mm, heading 0 deg, wheels L12 R12.
+118576 15:07:00.275 BYPASS pose (pass): x=-214 z=388 mm, heading 0 deg, wheels L13 R11.
+118585 15:07:00.397 BYPASS pose (return): x=-213 z=402 mm, heading 65 deg, wheels L0 R0.
+118588 15:07:00.531 BYPASS pose (return): x=-182 z=417 mm, heading 65 deg, wheels L12 R12.
+118656 15:07:47.285 Last restart: power-on or brown-out (supply dipped).
+118666 15:07:49.409 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+118901 15:08:37.021 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+118916 15:08:39.683 BYPASS pose (out): x=-4 z=3 mm, heading -79 deg, wheels L0 R0.
+118918 15:08:39.816 BYPASS pose (out): x=-35 z=9 mm, heading -79 deg, wheels L12 R12.
+118919 15:08:39.816 BYPASS pose (out): x=-68 z=16 mm, heading -79 deg, wheels L12 R12.
+118922 15:08:39.914 BYPASS pose (out): x=-100 z=23 mm, heading -79 deg, wheels L12 R12.
+118926 15:08:40.590 BYPASS pose (out): x=-132 z=29 mm, heading -78 deg, wheels L12 R12.
+118929 15:08:40.943 BYPASS pose (out): x=-164 z=36 mm, heading -78 deg, wheels L12 R12.
+118932 15:08:41.606 BYPASS pose (out): x=-197 z=43 mm, heading -78 deg, wheels L13 R11.
+118943 15:08:42.997 BYPASS pose (pass): x=-213 z=47 mm, heading -1 deg, wheels L0 R0.
+118946 15:08:43.564 BYPASS pose (pass): x=-213 z=78 mm, heading -1 deg, wheels L12 R12.
+118949 15:08:44.124 BYPASS pose (pass): x=-214 z=112 mm, heading 0 deg, wheels L12 R12.
+118953 15:08:44.757 BYPASS pose (pass): x=-214 z=146 mm, heading 0 deg, wheels L12 R12.
+118956 15:08:45.096 BYPASS pose (pass): x=-214 z=180 mm, heading 0 deg, wheels L12 R12.
+118959 15:08:45.706 BYPASS pose (pass): x=-214 z=215 mm, heading -1 deg, wheels L12 R12.
+118962 15:08:46.167 BYPASS pose (pass): x=-214 z=248 mm, heading 0 deg, wheels L12 R12.
+118966 15:08:46.780 BYPASS pose (pass): x=-214 z=281 mm, heading 0 deg, wheels L12 R12.
+118969 15:08:47.070 BYPASS pose (pass): x=-214 z=315 mm, heading 0 deg, wheels L12 R12.
+118972 15:08:47.528 BYPASS pose (pass): x=-214 z=348 mm, heading 0 deg, wheels L12 R12.
+118975 15:08:48.012 BYPASS pose (pass): x=-214 z=382 mm, heading 0 deg, wheels L12 R12.
+118987 15:08:52.316 BYPASS pose (return): x=-214 z=400 mm, heading 64 deg, wheels L0 R0.
+118990 15:08:52.503 BYPASS pose (return): x=-185 z=413 mm, heading 64 deg, wheels L13 R11.
+119068 15:16:47.609 Last restart: power-on or brown-out (supply dipped).
+119077 15:16:47.625 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+119427 15:17:28.505 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+119443 15:17:30.379 BYPASS pose (out): x=-4 z=3 mm, heading -79 deg, wheels L0 R0.
+119447 15:17:30.715 BYPASS pose (out): x=-32 z=8 mm, heading -79 deg, wheels L12 R12.
+119450 15:17:31.250 BYPASS pose (out): x=-65 z=14 mm, heading -79 deg, wheels L12 R12.
+119454 15:17:31.741 BYPASS pose (out): x=-97 z=20 mm, heading -80 deg, wheels L13 R11.
+119458 15:17:32.402 BYPASS pose (out): x=-131 z=27 mm, heading -79 deg, wheels L13 R11.
+119461 15:17:32.785 BYPASS pose (out): x=-164 z=33 mm, heading -80 deg, wheels L12 R12.
+119464 15:17:33.609 BYPASS pose (out): x=-197 z=39 mm, heading -79 deg, wheels L12 R12.
+119475 15:17:35.544 BYPASS pose (pass): x=-213 z=42 mm, heading 1 deg, wheels L0 R0.
+119478 15:17:35.548 BYPASS pose (pass): x=-213 z=72 mm, heading 0 deg, wheels L12 R12.
+119482 15:17:35.844 BYPASS pose (pass): x=-213 z=107 mm, heading 0 deg, wheels L12 R12.
+119485 15:17:36.363 BYPASS pose (pass): x=-213 z=142 mm, heading 0 deg, wheels L12 R12.
+119488 15:17:36.914 BYPASS pose (pass): x=-213 z=176 mm, heading 0 deg, wheels L12 R12.
+119491 15:17:37.383 BYPASS pose (pass): x=-213 z=210 mm, heading 0 deg, wheels L12 R12.
+119495 15:17:38.001 BYPASS pose (pass): x=-214 z=244 mm, heading 0 deg, wheels L12 R12.
+119498 15:17:38.419 BYPASS pose (pass): x=-214 z=278 mm, heading 0 deg, wheels L12 R12.
+119501 15:17:38.879 BYPASS pose (pass): x=-214 z=312 mm, heading 0 deg, wheels L12 R12.
+119504 15:17:42.512 BYPASS pose (pass): x=-214 z=346 mm, heading 0 deg, wheels L12 R12.
+119508 15:17:42.619 BYPASS pose (pass): x=-214 z=381 mm, heading 0 deg, wheels L12 R12.
+119516 15:17:42.701 BYPASS pose (return): x=-214 z=398 mm, heading 67 deg, wheels L0 R0.
+120452 15:19:17.022 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+120469 15:19:18.970 BYPASS pose (out): x=-3 z=3 mm, heading -75 deg, wheels L0 R0.
+120472 15:19:19.577 BYPASS pose (out): x=-32 z=10 mm, heading -75 deg, wheels L12 R12.
+120476 15:19:20.085 BYPASS pose (out): x=-64 z=19 mm, heading -75 deg, wheels L12 R12.
+120479 15:19:20.739 BYPASS pose (out): x=-96 z=27 mm, heading -75 deg, wheels L12 R12.
+120482 15:19:20.997 BYPASS pose (out): x=-128 z=36 mm, heading -75 deg, wheels L12 R12.
+120485 15:19:21.480 BYPASS pose (out): x=-161 z=45 mm, heading -75 deg, wheels L13 R11.
+120489 15:19:22.076 BYPASS pose (out): x=-194 z=53 mm, heading -75 deg, wheels L12 R12.
+120501 15:19:23.880 BYPASS pose (pass): x=-214 z=60 mm, heading 0 deg, wheels L0 R0.
+120504 15:19:24.379 BYPASS pose (pass): x=-214 z=89 mm, heading 0 deg, wheels L12 R12.
+120507 15:19:24.834 BYPASS pose (pass): x=-214 z=124 mm, heading 0 deg, wheels L12 R12.
+120510 15:19:25.378 BYPASS pose (pass): x=-213 z=156 mm, heading 0 deg, wheels L12 R12.
+120514 15:19:25.840 BYPASS pose (pass): x=-213 z=190 mm, heading 0 deg, wheels L12 R12.
+120517 15:19:26.640 BYPASS pose (pass): x=-213 z=224 mm, heading 0 deg, wheels L12 R12.
+120520 15:19:26.867 BYPASS pose (pass): x=-213 z=258 mm, heading 0 deg, wheels L12 R12.
+120523 15:19:27.340 BYPASS pose (pass): x=-213 z=292 mm, heading 0 deg, wheels L12 R12.
+120527 15:19:27.863 BYPASS pose (pass): x=-213 z=326 mm, heading 0 deg, wheels L12 R12.
+120530 15:19:28.389 BYPASS pose (pass): x=-214 z=360 mm, heading 0 deg, wheels L12 R12.
+120533 15:19:28.858 BYPASS pose (pass): x=-214 z=393 mm, heading 0 deg, wheels L12 R12.
+120545 15:19:31.382 BYPASS pose (return): x=-213 z=406 mm, heading 66 deg, wheels L0 R0.
+120548 15:19:31.382 BYPASS pose (return): x=-186 z=419 mm, heading 66 deg, wheels L12 R12.
+120551 15:19:31.465 BYPASS pose (return): x=-155 z=433 mm, heading 65 deg, wheels L12 R12.
+120555 15:19:32.053 BYPASS pose (return): x=-123 z=448 mm, heading 65 deg, wheels L12 R12.
+121073 15:21:44.492 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+121344 15:22:31.907 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+121362 15:22:33.836 BYPASS pose (out): x=-3 z=2 mm, heading -75 deg, wheels L0 R0.
+121366 15:22:34.444 BYPASS pose (out): x=-32 z=10 mm, heading -75 deg, wheels L12 R12.
+121370 15:22:34.895 BYPASS pose (out): x=-65 z=19 mm, heading -76 deg, wheels L13 R11.
+121373 15:22:35.490 BYPASS pose (out): x=-99 z=27 mm, heading -76 deg, wheels L12 R12.
+121376 15:22:35.893 BYPASS pose (out): x=-132 z=36 mm, heading -75 deg, wheels L12 R12.
+121379 15:22:36.387 BYPASS pose (out): x=-165 z=45 mm, heading -75 deg, wheels L12 R12.
+121383 15:22:36.893 BYPASS pose (out): x=-198 z=53 mm, heading -76 deg, wheels L13 R11.
+121394 15:22:38.652 BYPASS pose (pass): x=-212 z=57 mm, heading 1 deg, wheels L0 R0.
+121397 15:22:38.952 BYPASS pose (pass): x=-212 z=87 mm, heading 0 deg, wheels L12 R12.
+121400 15:22:39.446 BYPASS pose (pass): x=-212 z=122 mm, heading 0 deg, wheels L12 R12.
+121403 15:22:40.067 BYPASS pose (pass): x=-212 z=156 mm, heading 0 deg, wheels L12 R12.
+121407 15:22:40.482 BYPASS pose (pass): x=-212 z=192 mm, heading 0 deg, wheels L12 R12.
+121410 15:22:41.043 BYPASS pose (pass): x=-212 z=226 mm, heading 0 deg, wheels L12 R12.
+121413 15:22:41.529 BYPASS pose (pass): x=-212 z=261 mm, heading 0 deg, wheels L12 R12.
+121416 15:22:42.085 BYPASS pose (pass): x=-213 z=295 mm, heading 0 deg, wheels L12 R12.
+121420 15:22:42.533 BYPASS pose (pass): x=-213 z=330 mm, heading 0 deg, wheels L12 R12.
+121423 15:22:42.997 BYPASS pose (pass): x=-213 z=364 mm, heading 0 deg, wheels L13 R11.
+121426 15:22:43.658 BYPASS pose (pass): x=-213 z=398 mm, heading 0 deg, wheels L13 R11.
+121437 15:22:46.945 BYPASS pose (return): x=-213 z=405 mm, heading 67 deg, wheels L0 R0.
+121440 15:22:46.949 BYPASS pose (return): x=-186 z=417 mm, heading 65 deg, wheels L12 R12.
+121443 15:22:47.345 BYPASS pose (return): x=-154 z=432 mm, heading 65 deg, wheels L12 R12.
+121444 15:22:47.352 BYPASS pose (return): x=-122 z=447 mm, heading 65 deg, wheels L13 R11.
+121445 15:22:47.352 BYPASS pose (return): x=-90 z=463 mm, heading 65 deg, wheels L12 R12.
+125352 15:37:35.549 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+125366 15:37:36.903 BYPASS pose (out): x=-5 z=4 mm, heading -79 deg, wheels L0 R0.
+125370 15:37:37.585 BYPASS pose (out): x=-36 z=10 mm, heading -79 deg, wheels L12 R12.
+125373 15:37:37.896 BYPASS pose (out): x=-69 z=17 mm, heading -79 deg, wheels L12 R12.
+125376 15:37:38.379 BYPASS pose (out): x=-100 z=23 mm, heading -79 deg, wheels L12 R12.
+125379 15:37:40.607 BYPASS pose (out): x=-132 z=29 mm, heading -79 deg, wheels L12 R12.
+125383 15:37:40.607 BYPASS pose (out): x=-163 z=35 mm, heading -79 deg, wheels L13 R11.
+125385 15:37:40.667 BYPASS pose (out): x=-194 z=41 mm, heading -79 deg, wheels L12 R12.
+125394 15:37:41.886 BYPASS pose (pass): x=-211 z=46 mm, heading 1 deg, wheels L0 R0.
+125397 15:37:42.248 BYPASS pose (pass): x=-211 z=76 mm, heading 0 deg, wheels L12 R12.
+125400 15:37:42.731 BYPASS pose (pass): x=-211 z=109 mm, heading 0 deg, wheels L12 R12.
+125404 15:37:43.625 BYPASS pose (pass): x=-211 z=141 mm, heading 0 deg, wheels L13 R11.
+125407 15:37:43.856 BYPASS pose (pass): x=-211 z=173 mm, heading 0 deg, wheels L12 R12.
+125410 15:37:44.240 BYPASS pose (pass): x=-211 z=206 mm, heading 0 deg, wheels L12 R12.
+125413 15:37:44.774 BYPASS pose (pass): x=-211 z=239 mm, heading 0 deg, wheels L13 R11.
+125417 15:37:45.467 BYPASS pose (pass): x=-212 z=270 mm, heading 0 deg, wheels L12 R12.
+125420 15:37:45.792 BYPASS pose (pass): x=-212 z=303 mm, heading 0 deg, wheels L12 R12.
+125423 15:37:46.279 BYPASS pose (pass): x=-212 z=336 mm, heading 0 deg, wheels L12 R12.
+125426 15:37:46.756 BYPASS pose (pass): x=-212 z=369 mm, heading 0 deg, wheels L12 R12.
+125439 15:37:48.653 BYPASS pose (return): x=-211 z=399 mm, heading 64 deg, wheels L0 R0.
+125443 15:37:49.145 BYPASS pose (return): x=-183 z=412 mm, heading 65 deg, wheels L12 R12.
+125446 15:37:49.765 BYPASS pose (return): x=-153 z=426 mm, heading 64 deg, wheels L12 R12.
+125449 15:37:51.495 BYPASS pose (return): x=-125 z=439 mm, heading 65 deg, wheels L12 R12.
+125452 15:37:51.511 BYPASS pose (return): x=-96 z=453 mm, heading 65 deg, wheels L12 R12.
+125456 15:37:51.588 BYPASS pose (return): x=-67 z=467 mm, heading 65 deg, wheels L12 R12.
+125458 15:37:51.670 BYPASS pose (return): x=-37 z=480 mm, heading 65 deg, wheels L12 R12.
+125591 15:38:19.569 Stalled on a slope for 410 ms -> HUMP, more power.
+125597 15:38:19.581 Hump: still stalled -> power 17.
+125599 15:38:19.669 Hump: stalled again -> climbing power.
+125601 15:38:19.770 Hump: still stalled -> power 22.
+125634 15:38:23.727 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+126780 15:43:36.316 Last restart: power-on or brown-out (supply dipped).
+126789 15:43:36.325 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+127274 15:45:06.193 Stalled on a slope for 548 ms -> HUMP, more power.
+127291 15:45:08.635 Hump: stalled again -> climbing power.
+127558 15:45:50.762 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+127572 15:45:53.060 BYPASS pose (out): x=-5 z=4 mm, heading -78 deg, wheels L0 R0.
+127575 15:45:53.353 BYPASS pose (out): x=-35 z=11 mm, heading -78 deg, wheels L12 R12.
+127579 15:45:53.903 BYPASS pose (out): x=-65 z=17 mm, heading -78 deg, wheels L13 R11.
+127582 15:45:54.255 BYPASS pose (out): x=-94 z=23 mm, heading -79 deg, wheels L12 R12.
+127585 15:45:54.821 BYPASS pose (out): x=-125 z=29 mm, heading -79 deg, wheels L13 R11.
+127588 15:45:55.275 BYPASS pose (out): x=-155 z=35 mm, heading -79 deg, wheels L13 R11.
+127592 15:45:56.382 BYPASS pose (out): x=-185 z=41 mm, heading -78 deg, wheels L12 R12.
+127605 15:45:57.959 BYPASS pose (pass): x=-212 z=48 mm, heading 1 deg, wheels L0 R0.
+127608 15:45:58.351 BYPASS pose (pass): x=-211 z=78 mm, heading 0 deg, wheels L12 R12.
+127611 15:45:58.857 BYPASS pose (pass): x=-211 z=111 mm, heading 0 deg, wheels L12 R12.
+127615 15:45:59.373 BYPASS pose (pass): x=-211 z=143 mm, heading 0 deg, wheels L12 R12.
+127618 15:46:01.370 BYPASS pose (pass): x=-211 z=176 mm, heading 0 deg, wheels L12 R12.
+127621 15:46:01.427 BYPASS pose (pass): x=-211 z=208 mm, heading 0 deg, wheels L12 R12.
+127624 15:46:01.431 BYPASS pose (pass): x=-211 z=241 mm, heading 0 deg, wheels L12 R12.
+127626 15:46:01.508 BYPASS pose (pass): x=-211 z=273 mm, heading 0 deg, wheels L12 R12.
+127629 15:46:01.895 BYPASS pose (pass): x=-211 z=306 mm, heading 0 deg, wheels L12 R12.
+127632 15:46:02.473 BYPASS pose (pass): x=-211 z=339 mm, heading 0 deg, wheels L12 R12.
+127635 15:46:02.921 BYPASS pose (pass): x=-211 z=371 mm, heading 0 deg, wheels L12 R12.
+127647 15:46:04.795 BYPASS pose (return): x=-210 z=400 mm, heading 67 deg, wheels L0 R0.
+127651 15:46:05.338 BYPASS pose (return): x=-182 z=412 mm, heading 66 deg, wheels L11 R13.
+127655 15:46:05.790 BYPASS pose (return): x=-154 z=425 mm, heading 65 deg, wheels L12 R12.
+127658 15:46:06.251 BYPASS pose (return): x=-126 z=438 mm, heading 65 deg, wheels L12 R12.
+127661 15:46:06.773 BYPASS pose (return): x=-99 z=451 mm, heading 65 deg, wheels L12 R12.
+127664 15:46:07.327 BYPASS pose (return): x=-71 z=464 mm, heading 65 deg, wheels L13 R11.
+127668 15:46:07.904 BYPASS pose (return): x=-41 z=478 mm, heading 65 deg, wheels L12 R12.
+128000 15:46:52.077 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+128410 15:48:10.748 Stalled on a slope for 810 ms -> HUMP, more power.
+128427 15:48:11.945 Stalled on a slope for 627 ms -> HUMP, more power.
+128908 15:49:27.752 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129007 15:49:45.251 Stalled on a slope for 221 ms -> HUMP, more power.
+129014 15:49:45.466 Hump: still stalled -> power 17.
+129033 15:49:48.552 Hump: still stalled -> power 17.
+129455 15:50:59.541 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129481 15:51:02.144 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129776 15:51:57.333 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129811 15:52:00.576 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129926 15:52:19.098 Stalled on a slope for 690 ms -> HUMP, more power.
+129932 15:52:19.338 Hump: still stalled -> power 17.

@@ -1,0 +1,192 @@
+# motion: MQTT log events, 2026-11-23
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 47257 15:41:01.597 Last restart: power-on or brown-out (supply dipped).
+ 47266 15:41:01.723 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 47483 15:41:47.279 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 47507 15:41:51.157 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 48553 15:45:45.155 Stalled on a slope for 209 ms -> HUMP, more power.
+ 48572 15:45:47.678 Hump: stalled again -> climbing power.
+ 48610 15:45:54.471 Stalled on a slope for 210 ms -> HUMP, more power.
+ 51029 15:55:17.242 BYPASS pose (out): x=0 z=0 mm, heading -59 deg, wheels L0 R0.
+ 51032 15:55:17.652 BYPASS pose (out): x=-27 z=16 mm, heading -60 deg, wheels L12 R12.
+ 51035 15:55:18.164 BYPASS pose (out): x=-56 z=33 mm, heading -60 deg, wheels L12 R12.
+ 51038 15:55:20.100 BYPASS pose (out): x=-86 z=50 mm, heading -61 deg, wheels L12 R12.
+ 51042 15:55:20.113 BYPASS pose (out): x=-115 z=66 mm, heading -61 deg, wheels L12 R12.
+ 51045 15:55:20.303 BYPASS pose (out): x=-145 z=82 mm, heading -61 deg, wheels L13 R11.
+ 51046 15:55:20.311 BYPASS pose (out): x=-174 z=99 mm, heading -60 deg, wheels L12 R12.
+ 51049 15:55:20.621 BYPASS pose (out): x=-205 z=116 mm, heading -61 deg, wheels L12 R12.
+ 51058 15:55:24.284 BYPASS pose (pass): x=-220 z=125 mm, heading -1 deg, wheels L0 R0.
+ 51061 15:55:24.287 BYPASS pose (pass): x=-221 z=155 mm, heading -1 deg, wheels L13 R11.
+ 51062 15:55:24.583 BYPASS pose (pass): x=-221 z=190 mm, heading 0 deg, wheels L13 R11.
+ 51063 15:55:24.594 BYPASS pose (pass): x=-222 z=224 mm, heading 0 deg, wheels L12 R12.
+ 51064 15:55:24.594 BYPASS pose (pass): x=-222 z=258 mm, heading 0 deg, wheels L13 R11.
+ 51067 15:55:24.594 BYPASS pose (pass): x=-222 z=291 mm, heading 0 deg, wheels L13 R11.
+ 51071 15:55:25.435 BYPASS pose (pass): x=-222 z=324 mm, heading 0 deg, wheels L12 R12.
+ 51074 15:55:25.740 BYPASS pose (pass): x=-222 z=358 mm, heading 0 deg, wheels L12 R12.
+ 51077 15:55:26.256 BYPASS pose (pass): x=-222 z=391 mm, heading 0 deg, wheels L12 R12.
+ 51080 15:55:26.568 BYPASS pose (pass): x=-222 z=425 mm, heading 1 deg, wheels L12 R12.
+ 51084 15:55:27.065 BYPASS pose (pass): x=-222 z=459 mm, heading 0 deg, wheels L12 R12.
+ 51087 15:55:27.591 BYPASS pose (pass): x=-222 z=493 mm, heading 1 deg, wheels L12 R12.
+ 51090 15:55:28.089 BYPASS pose (pass): x=-221 z=527 mm, heading 0 deg, wheels L12 R12.
+ 51099 15:55:29.626 BYPASS pose (return): x=-221 z=542 mm, heading 59 deg, wheels L0 R0.
+ 51102 15:55:29.832 BYPASS pose (return): x=-193 z=559 mm, heading 59 deg, wheels L13 R11.
+ 51105 15:55:30.338 BYPASS pose (return): x=-164 z=576 mm, heading 59 deg, wheels L12 R12.
+ 51108 15:55:30.867 BYPASS pose (return): x=-135 z=593 mm, heading 59 deg, wheels L12 R12.
+ 51112 15:55:31.369 BYPASS pose (return): x=-106 z=611 mm, heading 59 deg, wheels L12 R12.
+ 51115 15:55:31.989 BYPASS pose (return): x=-78 z=628 mm, heading 59 deg, wheels L12 R12.
+ 51242 15:56:04.831 Stalled on a slope for 212 ms -> HUMP, more power.
+ 51251 15:56:04.942 Hump: still stalled -> power 17.
+ 53851 16:07:04.812 Last restart: power-on or brown-out (supply dipped).
+ 53860 16:07:04.844 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 57947 16:21:49.957 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58159 16:22:28.152 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58185 16:22:34.003 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58333 16:22:57.488 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58823 16:24:20.592 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 58845 16:24:23.907 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59099 16:24:59.389 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59493 16:26:11.291 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59651 16:26:35.238 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59770 16:26:54.994 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59976 16:27:31.141 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 59986 16:27:31.648 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61253 16:32:01.639 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61320 16:32:05.790 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61553 16:32:27.148 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61605 16:32:30.405 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61826 16:33:07.412 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 61869 16:33:12.504 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 62243 16:34:23.316 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 62382 16:34:45.488 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 62597 16:35:29.648 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 63374 16:38:08.653 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 63704 16:38:59.645 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 63988 16:39:54.766 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64348 16:40:45.231 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64363 16:40:46.893 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64808 16:42:17.283 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64900 16:42:34.294 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 64994 16:42:50.464 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65145 16:43:13.380 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65359 16:43:53.312 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65375 16:43:55.436 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 65643 16:44:51.806 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 66280 16:46:55.613 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 67023 16:49:50.064 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 67995 16:53:11.976 BYPASS pose (out): x=0 z=0 mm, heading -43 deg, wheels L0 R0.
+ 67999 16:53:14.436 BYPASS pose (out): x=-22 z=23 mm, heading -44 deg, wheels L12 R12.
+ 68002 16:53:14.440 BYPASS pose (out): x=-47 z=49 mm, heading -44 deg, wheels L12 R12.
+ 68005 16:53:14.440 BYPASS pose (out): x=-71 z=74 mm, heading -44 deg, wheels L12 R12.
+ 68007 16:53:14.557 BYPASS pose (out): x=-96 z=99 mm, heading -44 deg, wheels L13 R11.
+ 68008 16:53:14.557 BYPASS pose (out): x=-120 z=125 mm, heading -44 deg, wheels L12 R12.
+ 68010 16:53:15.094 BYPASS pose (out): x=-145 z=151 mm, heading -44 deg, wheels L12 R12.
+ 68013 16:53:15.396 BYPASS pose (out): x=-169 z=176 mm, heading -43 deg, wheels L12 R12.
+ 68016 16:53:15.970 BYPASS pose (out): x=-193 z=201 mm, heading -44 deg, wheels L12 R12.
+ 68020 16:53:16.615 BYPASS pose (out): x=-218 z=227 mm, heading -44 deg, wheels L12 R12.
+ 68029 16:53:17.816 BYPASS pose (pass): x=-220 z=229 mm, heading 0 deg, wheels L0 R0.
+ 68033 16:53:18.367 BYPASS pose (pass): x=-220 z=263 mm, heading 0 deg, wheels L12 R12.
+ 68036 16:53:19.063 BYPASS pose (pass): x=-221 z=298 mm, heading -1 deg, wheels L12 R12.
+ 68039 16:53:19.159 BYPASS pose (pass): x=-221 z=334 mm, heading -1 deg, wheels L13 R11.
+ 68042 16:53:19.694 BYPASS pose (pass): x=-222 z=368 mm, heading -1 deg, wheels L12 R12.
+ 68046 16:53:20.371 BYPASS pose (pass): x=-222 z=403 mm, heading -1 deg, wheels L12 R12.
+ 68049 16:53:22.658 BYPASS pose (pass): x=-223 z=438 mm, heading -1 deg, wheels L12 R12.
+ 68052 16:53:22.658 BYPASS pose (pass): x=-224 z=473 mm, heading -1 deg, wheels L12 R12.
+ 68056 16:53:22.665 BYPASS pose (pass): x=-224 z=508 mm, heading -1 deg, wheels L12 R12.
+ 68064 16:53:23.868 BYPASS pose (return): x=-225 z=534 mm, heading 66 deg, wheels L0 R0.
+ 68067 16:53:24.130 BYPASS pose (return): x=-197 z=546 mm, heading 66 deg, wheels L12 R12.
+ 68071 16:53:24.678 BYPASS pose (return): x=-165 z=561 mm, heading 65 deg, wheels L12 R12.
+ 68074 16:53:25.023 BYPASS pose (return): x=-133 z=576 mm, heading 64 deg, wheels L13 R11.
+ 68077 16:53:25.749 BYPASS pose (return): x=-102 z=591 mm, heading 64 deg, wheels L12 R12.
+ 68080 16:53:26.160 BYPASS pose (return): x=-70 z=607 mm, heading 64 deg, wheels L12 R12.
+ 68120 16:53:43.676 Stalled on a slope for 202 ms -> HUMP, more power.
+ 68475 16:54:38.631 BYPASS pose (out): x=0 z=0 mm, heading -44 deg, wheels L0 R0.
+ 68478 16:54:38.633 BYPASS pose (out): x=-20 z=21 mm, heading -44 deg, wheels L12 R12.
+ 68480 16:54:39.044 BYPASS pose (out): x=-45 z=46 mm, heading -44 deg, wheels L12 R12.
+ 68482 16:54:39.060 BYPASS pose (out): x=-70 z=72 mm, heading -44 deg, wheels L12 R12.
+ 68485 16:54:39.255 BYPASS pose (out): x=-94 z=98 mm, heading -44 deg, wheels L12 R12.
+ 68488 16:54:39.867 BYPASS pose (out): x=-118 z=123 mm, heading -45 deg, wheels L13 R11.
+ 68804 16:55:32.828 BYPASS pose (out): x=0 z=0 mm, heading -44 deg, wheels L0 R0.
+ 68805 16:55:32.828 BYPASS pose (out): x=-21 z=21 mm, heading -44 deg, wheels L12 R12.
+ 68807 16:55:32.964 BYPASS pose (out): x=-45 z=47 mm, heading -44 deg, wheels L12 R12.
+ 68809 16:55:33.229 BYPASS pose (out): x=-69 z=71 mm, heading -44 deg, wheels L12 R12.
+ 68812 16:55:33.582 BYPASS pose (out): x=-93 z=97 mm, heading -45 deg, wheels L13 R11.
+ 68815 16:55:34.097 BYPASS pose (out): x=-117 z=122 mm, heading -44 deg, wheels L12 R12.
+ 68819 16:55:34.447 BYPASS pose (out): x=-141 z=146 mm, heading -44 deg, wheels L12 R12.
+ 68822 16:55:34.950 BYPASS pose (out): x=-165 z=171 mm, heading -43 deg, wheels L12 R12.
+ 68825 16:55:35.474 BYPASS pose (out): x=-189 z=197 mm, heading -43 deg, wheels L12 R12.
+ 68828 16:55:35.974 BYPASS pose (out): x=-213 z=222 mm, heading -44 deg, wheels L12 R12.
+ 68839 16:55:37.373 BYPASS pose (pass): x=-220 z=229 mm, heading 2 deg, wheels L0 R0.
+ 68842 16:55:37.921 BYPASS pose (pass): x=-220 z=261 mm, heading 0 deg, wheels L12 R12.
+ 68846 16:55:38.491 BYPASS pose (pass): x=-220 z=296 mm, heading 0 deg, wheels L12 R12.
+ 68849 16:55:39.120 BYPASS pose (pass): x=-220 z=332 mm, heading 0 deg, wheels L12 R12.
+ 68852 16:55:39.730 BYPASS pose (pass): x=-220 z=367 mm, heading -1 deg, wheels L12 R12.
+ 68855 16:55:39.859 BYPASS pose (pass): x=-221 z=403 mm, heading -1 deg, wheels L12 R12.
+ 68859 16:55:40.405 BYPASS pose (pass): x=-221 z=438 mm, heading -1 deg, wheels L13 R11.
+ 68862 16:55:40.916 BYPASS pose (pass): x=-222 z=472 mm, heading -1 deg, wheels L12 R12.
+ 68865 16:55:41.979 BYPASS pose (pass): x=-222 z=507 mm, heading -1 deg, wheels L12 R12.
+ 68877 16:55:47.353 BYPASS pose (return): x=-223 z=534 mm, heading 67 deg, wheels L0 R0.
+ 68987 17:13:27.438 Last restart: power-on or brown-out (supply dipped).
+ 68996 17:13:27.518 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 69294 17:14:19.570 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 69867 17:16:17.163 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 69976 17:16:36.772 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70085 17:16:57.973 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70155 17:17:09.236 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70618 17:18:38.948 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 70781 17:19:13.300 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71094 17:20:15.296 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71626 17:22:05.782 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71735 17:22:26.778 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71878 17:22:52.856 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 71994 17:23:14.150 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 72139 17:23:37.216 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 72299 17:24:08.412 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 72436 17:24:27.840 Stalled on a slope for 207 ms -> HUMP, more power.
+ 72445 17:24:29.973 Hump: still stalled -> power 17.
+ 72447 17:24:29.984 Hump: still stalled -> power 22.
+ 72940 17:26:34.621 Last restart: power-on or brown-out (supply dipped).
+ 72949 17:26:34.712 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 73019 17:26:45.342 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73127 17:27:04.779 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73283 17:27:26.439 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73467 17:28:01.494 Stalled on a slope for 201 ms -> HUMP, more power.
+ 73583 17:28:23.079 Stalled on a slope for 1120 ms -> HUMP, more power.
+ 73590 17:28:23.224 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 73711 17:28:45.510 Stalled on a slope for 200 ms -> HUMP, more power.
+ 73986 17:29:41.653 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 74250 17:30:36.032 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 74272 17:30:39.143 Stalled on a slope for 202 ms -> HUMP, more power.
+ 74393 17:31:01.147 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 75499 17:34:12.329 Stalled on a slope for 200 ms -> HUMP, more power.
+ 75506 17:34:12.409 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 75577 17:34:21.214 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 75677 17:34:36.355 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 76510 17:37:13.876 BYPASS pose (out): x=0 z=0 mm, heading -45 deg, wheels L0 R0.
+ 76513 17:37:14.863 BYPASS pose (out): x=-20 z=21 mm, heading -44 deg, wheels L12 R12.
+ 76516 17:37:15.002 BYPASS pose (out): x=-44 z=45 mm, heading -44 deg, wheels L12 R12.
+ 76520 17:37:15.169 BYPASS pose (out): x=-68 z=70 mm, heading -44 deg, wheels L13 R11.
+ 76523 17:37:15.958 BYPASS pose (out): x=-92 z=95 mm, heading -44 deg, wheels L12 R12.
+ 76526 17:37:16.200 BYPASS pose (out): x=-116 z=120 mm, heading -44 deg, wheels L12 R12.
+ 76529 17:37:16.651 BYPASS pose (out): x=-140 z=146 mm, heading -44 deg, wheels L12 R12.
+ 76533 17:37:17.156 BYPASS pose (out): x=-165 z=171 mm, heading -43 deg, wheels L12 R12.
+ 76536 17:37:17.772 BYPASS pose (out): x=-188 z=197 mm, heading -43 deg, wheels L12 R12.
+ 76539 17:37:18.158 BYPASS pose (out): x=-213 z=223 mm, heading -43 deg, wheels L12 R12.
+ 76549 17:37:19.516 BYPASS pose (pass): x=-220 z=231 mm, heading 1 deg, wheels L0 R0.
+ 76552 17:37:19.990 BYPASS pose (pass): x=-220 z=262 mm, heading 1 deg, wheels L12 R12.
+ 76555 17:37:20.497 BYPASS pose (pass): x=-219 z=298 mm, heading 0 deg, wheels L12 R12.
+ 76559 17:37:21.017 BYPASS pose (pass): x=-219 z=333 mm, heading -1 deg, wheels L12 R12.
+ 76562 17:37:21.523 BYPASS pose (pass): x=-220 z=368 mm, heading -1 deg, wheels L12 R12.
+ 76565 17:37:22.033 BYPASS pose (pass): x=-220 z=401 mm, heading -1 deg, wheels L12 R12.
+ 76568 17:37:23.260 BYPASS pose (pass): x=-221 z=435 mm, heading -1 deg, wheels L12 R12.
+ 76572 17:37:23.269 BYPASS pose (pass): x=-222 z=469 mm, heading -1 deg, wheels L12 R12.
+ 76575 17:37:23.540 BYPASS pose (pass): x=-222 z=504 mm, heading -1 deg, wheels L13 R11.
+ 76578 17:37:24.015 BYPASS pose (pass): x=-223 z=538 mm, heading 0 deg, wheels L12 R12.
+ 76589 17:37:25.552 BYPASS pose (return): x=-223 z=540 mm, heading 66 deg, wheels L0 R0.
+ 76592 17:37:25.974 BYPASS pose (return): x=-195 z=553 mm, heading 65 deg, wheels L12 R12.
+ 76595 17:37:26.566 BYPASS pose (return): x=-163 z=567 mm, heading 65 deg, wheels L12 R12.
+ 76599 17:37:27.074 BYPASS pose (return): x=-132 z=582 mm, heading 64 deg, wheels L12 R12.
+ 76602 17:37:27.504 BYPASS pose (return): x=-100 z=597 mm, heading 64 deg, wheels L12 R12.
+ 76605 17:37:29.599 BYPASS pose (return): x=-68 z=613 mm, heading 64 deg, wheels L12 R12.
+ 76608 17:37:29.617 BYPASS pose (return): x=-36 z=628 mm, heading 64 deg, wheels L12 R12.
+ 76612 17:37:29.729 BYPASS pose (return): x=-5 z=644 mm, heading 64 deg, wheels L13 R11.

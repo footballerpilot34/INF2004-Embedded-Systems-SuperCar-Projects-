@@ -1,0 +1,606 @@
+# comms: MQTT log events, 2026-11-20
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+  8345 16:58:14.232 inf2004/aai14/supercar/online 1
+  8440 16:58:35.002 inf2004/aai14/supercar/cmd ft0001
+  8442 16:58:35.372 inf2004/aai14/supercar/cmd/ack ft0001
+  8479 16:58:43.856 inf2004/aai14/supercar/cmd stop
+  8480 16:58:43.872 inf2004/aai14/supercar/cmd/ack stop
+ 10628 17:06:52.762 inf2004/aai14/supercar/cmd ft1111
+ 10629 17:06:52.788 inf2004/aai14/supercar/cmd/ack ft1111
+ 10703 17:07:10.796 inf2004/aai14/supercar/cmd stop
+ 10730 17:07:15.571 inf2004/aai14/supercar/cmd ft1111
+ 10731 17:07:15.630 inf2004/aai14/supercar/cmd/ack ft1111
+ 10814 17:07:34.800 inf2004/aai14/supercar/cmd stop
+ 10815 17:07:34.817 inf2004/aai14/supercar/cmd/ack stop
+ 11717 17:10:55.844 inf2004/aai14/supercar/cmd/ack stop
+ 13534 17:17:56.022 inf2004/aai14/supercar/online 0
+ 13535 17:19:05.746 inf2004/aai14/supercar/online 1
+ 13544 17:19:05.825 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 13552 17:19:05.906 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 13553 17:19:05.906 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 13555 17:19:05.906 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 13558 17:19:05.973 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 13559 17:19:05.973 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 13670 17:19:30.517 inf2004/aai14/supercar/cmd ft1001
+ 13671 17:19:30.550 inf2004/aai14/supercar/cmd/ack ft1001
+ 13672 17:19:30.566 MQTT: command "ft1001".
+ 13767 17:19:43.019 inf2004/aai14/supercar/cmd stop
+ 13768 17:19:43.081 inf2004/aai14/supercar/cmd/ack stop
+ 13769 17:19:43.100 MQTT: command "stop".
+ 13924 17:20:16.945 inf2004/aai14/supercar/cmd ft1001
+ 13925 17:20:16.991 inf2004/aai14/supercar/cmd/ack ft1001
+ 13926 17:20:17.009 MQTT: command "ft1001".
+ 14001 17:20:28.891 inf2004/aai14/supercar/cmd stop
+ 14003 17:20:29.019 inf2004/aai14/supercar/cmd/ack stop
+ 14004 17:20:29.019 MQTT: command "stop".
+ 14398 17:21:58.772 inf2004/aai14/supercar/cmd ft1001
+ 14401 17:21:59.931 inf2004/aai14/supercar/cmd/ack ft1001
+ 14402 17:21:59.934 MQTT: command "ft1001".
+ 14486 17:22:09.291 inf2004/aai14/supercar/cmd stop
+ 14488 17:22:09.491 inf2004/aai14/supercar/cmd/ack stop
+ 14489 17:22:09.524 MQTT: command "stop".
+ 14672 17:22:49.777 inf2004/aai14/supercar/online 0
+ 14673 17:22:49.922 inf2004/aai14/supercar/online 1
+ 14676 17:22:49.967 MQTT: broker set to "172.20.10.3".
+ 14677 17:22:49.968 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 14678 17:22:49.969 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 14860 17:26:03.212 inf2004/aai14/supercar/online 1
+ 15070 17:26:49.418 inf2004/aai14/supercar/cmd bcar
+ 15072 17:26:49.562 inf2004/aai14/supercar/cmd/ack bcar
+ 15073 17:26:49.566 MQTT: command "bcar".
+ 15153 17:27:07.112 inf2004/aai14/supercar/cmd ft1010
+ 15155 17:27:07.193 inf2004/aai14/supercar/cmd/ack ft1010
+ 15156 17:27:07.193 MQTT: command "ft1010".
+ 15284 17:27:17.128 inf2004/aai14/supercar/cmd stop
+ 15286 17:27:17.207 inf2004/aai14/supercar/cmd/ack stop
+ 15287 17:27:17.207 MQTT: command "stop".
+ 15485 17:28:01.282 inf2004/aai14/supercar/cmd ft1010
+ 15486 17:28:01.314 inf2004/aai14/supercar/cmd/ack ft1010
+ 15487 17:28:01.344 MQTT: command "ft1010".
+ 15541 17:28:10.555 inf2004/aai14/supercar/cmd stop
+ 15542 17:28:10.578 inf2004/aai14/supercar/cmd/ack stop
+ 15543 17:28:10.626 MQTT: command "stop".
+ 15634 17:28:28.756 inf2004/aai14/supercar/cmd ft1010
+ 15635 17:28:28.769 inf2004/aai14/supercar/cmd/ack ft1010
+ 15636 17:28:28.816 MQTT: command "ft1010".
+ 15706 17:28:41.618 inf2004/aai14/supercar/cmd stop
+ 15707 17:28:41.648 inf2004/aai14/supercar/cmd/ack stop
+ 15708 17:28:41.681 MQTT: command "stop".
+ 15805 17:29:00.418 inf2004/aai14/supercar/cmd ft1010
+ 15806 17:29:00.435 inf2004/aai14/supercar/cmd/ack ft1010
+ 15807 17:29:00.464 MQTT: command "ft1010".
+ 15903 17:29:16.479 inf2004/aai14/supercar/cmd stop
+ 15904 17:29:16.507 inf2004/aai14/supercar/cmd/ack stop
+ 15905 17:29:16.525 MQTT: command "stop".
+ 15934 17:29:22.208 inf2004/aai14/supercar/cmd bcfr
+ 15935 17:29:22.242 inf2004/aai14/supercar/cmd/ack bcfr
+ 15936 17:29:22.244 MQTT: command "bcfr".
+ 16017 17:29:39.631 inf2004/aai14/supercar/cmd ft1010
+ 16018 17:29:39.639 inf2004/aai14/supercar/cmd/ack ft1010
+ 16019 17:29:39.679 MQTT: command "ft1010".
+ 16067 17:29:48.493 inf2004/aai14/supercar/cmd stop
+ 16068 17:29:48.541 inf2004/aai14/supercar/cmd/ack stop
+ 16069 17:29:48.586 MQTT: command "stop".
+ 16107 17:29:54.141 inf2004/aai14/supercar/cmd ft1010
+ 16109 17:29:54.255 inf2004/aai14/supercar/cmd/ack ft1010
+ 16110 17:29:54.265 MQTT: command "ft1010".
+ 16200 17:30:10.438 inf2004/aai14/supercar/cmd stop
+ 16201 17:30:10.462 inf2004/aai14/supercar/cmd/ack stop
+ 16202 17:30:10.503 MQTT: command "stop".
+ 16285 17:30:29.332 inf2004/aai14/supercar/cmd ft1010
+ 16286 17:30:29.348 inf2004/aai14/supercar/cmd/ack ft1010
+ 16287 17:30:29.411 MQTT: command "ft1010".
+ 16331 17:30:37.508 inf2004/aai14/supercar/cmd stop
+ 16333 17:30:37.718 inf2004/aai14/supercar/cmd/ack stop
+ 16334 17:30:37.718 MQTT: command "stop".
+ 16402 17:30:51.390 inf2004/aai14/supercar/cmd ft1010
+ 16405 17:30:52.954 inf2004/aai14/supercar/cmd/ack ft1010
+ 16406 17:30:52.957 MQTT: command "ft1010".
+ 16456 17:31:00.490 inf2004/aai14/supercar/cmd stop
+ 16457 17:31:00.523 inf2004/aai14/supercar/cmd/ack stop
+ 16458 17:31:00.555 MQTT: command "stop".
+ 16512 17:31:11.877 inf2004/aai14/supercar/cmd ft1010
+ 16513 17:31:11.911 inf2004/aai14/supercar/cmd/ack ft1010
+ 16514 17:31:11.940 MQTT: command "ft1010".
+ 16590 17:31:23.229 inf2004/aai14/supercar/cmd stop
+ 16594 17:31:23.356 inf2004/aai14/supercar/cmd/ack stop
+ 16595 17:31:23.358 MQTT: command "stop".
+ 16772 17:32:01.987 inf2004/aai14/supercar/cmd ft1011
+ 16773 17:32:02.001 inf2004/aai14/supercar/cmd/ack ft1011
+ 16774 17:32:02.017 MQTT: command "ft1011".
+ 16822 17:32:11.648 inf2004/aai14/supercar/cmd stop
+ 16824 17:32:11.712 inf2004/aai14/supercar/cmd/ack stop
+ 16825 17:32:11.712 MQTT: command "stop".
+ 16852 17:32:17.189 inf2004/aai14/supercar/cmd calibrate
+ 16854 17:32:22.354 inf2004/aai14/supercar/cmd/ack calibrate
+ 16855 17:32:22.354 MQTT: command "calibrate".
+ 16907 17:32:33.195 inf2004/aai14/supercar/cmd ft1010
+ 16908 17:32:33.209 inf2004/aai14/supercar/cmd/ack ft1010
+ 16909 17:32:33.225 MQTT: command "ft1010".
+ 16931 17:32:36.591 inf2004/aai14/supercar/cmd stop
+ 16932 17:32:36.606 inf2004/aai14/supercar/cmd/ack stop
+ 16933 17:32:36.667 MQTT: command "stop".
+ 16970 17:32:44.299 inf2004/aai14/supercar/cmd ft1011
+ 16971 17:32:44.317 inf2004/aai14/supercar/cmd/ack ft1011
+ 16972 17:32:44.347 MQTT: command "ft1011".
+ 17035 17:32:54.247 inf2004/aai14/supercar/cmd stop
+ 17036 17:32:54.295 inf2004/aai14/supercar/cmd/ack stop
+ 17037 17:32:54.322 MQTT: command "stop".
+ 17143 17:33:18.198 inf2004/aai14/supercar/cmd ft1011
+ 17144 17:33:18.212 inf2004/aai14/supercar/cmd/ack ft1011
+ 17145 17:33:18.260 MQTT: command "ft1011".
+ 17226 17:33:32.382 inf2004/aai14/supercar/cmd stop
+ 17227 17:33:32.398 inf2004/aai14/supercar/cmd/ack stop
+ 17228 17:33:32.474 MQTT: command "stop".
+ 17391 17:34:12.393 inf2004/aai14/supercar/cmd ft1011
+ 17392 17:34:12.444 inf2004/aai14/supercar/cmd/ack ft1011
+ 17393 17:34:12.470 MQTT: command "ft1011".
+ 17492 17:34:29.607 inf2004/aai14/supercar/cmd stop
+ 17494 17:34:29.741 inf2004/aai14/supercar/cmd/ack stop
+ 17495 17:34:29.850 MQTT: command "stop".
+ 18056 17:36:35.524 inf2004/aai14/supercar/cmd ft1011
+ 18060 17:36:36.127 inf2004/aai14/supercar/cmd/ack ft1011
+ 18061 17:36:36.127 MQTT: command "ft1011".
+ 18119 17:36:43.853 inf2004/aai14/supercar/cmd stop
+ 18120 17:36:43.885 inf2004/aai14/supercar/cmd/ack stop
+ 18121 17:36:43.987 MQTT: command "stop".
+ 18175 17:36:56.017 inf2004/aai14/supercar/cmd ft1111
+ 18176 17:36:56.048 inf2004/aai14/supercar/cmd/ack ft1111
+ 18177 17:36:56.085 MQTT: command "ft1111".
+ 18251 17:37:08.810 inf2004/aai14/supercar/cmd ft1111
+ 18252 17:37:08.870 inf2004/aai14/supercar/cmd/ack ft1111
+ 18253 17:37:08.911 MQTT: command "ft1111".
+ 18456 17:38:05.047 inf2004/aai14/supercar/online 0
+ 18457 17:38:40.051 inf2004/aai14/supercar/online 1
+ 18568 17:39:03.016 inf2004/aai14/supercar/cmd calibrate
+ 18569 17:39:03.113 inf2004/aai14/supercar/cmd/ack calibrate
+ 18570 17:39:08.086 MQTT: command "calibrate".
+ 18606 17:39:15.518 inf2004/aai14/supercar/cmd ft1001
+ 18607 17:39:15.567 inf2004/aai14/supercar/cmd/ack ft1001
+ 18608 17:39:15.583 MQTT: command "ft1001".
+ 18677 17:39:26.352 inf2004/aai14/supercar/cmd stop
+ 18681 17:39:26.508 inf2004/aai14/supercar/cmd/ack stop
+ 18682 17:39:26.516 MQTT: command "stop".
+ 18733 17:39:37.406 inf2004/aai14/supercar/cmd ft1001
+ 18735 17:39:37.547 inf2004/aai14/supercar/cmd/ack ft1001
+ 18736 17:39:37.555 MQTT: command "ft1001".
+ 18835 17:39:54.772 inf2004/aai14/supercar/cmd stop
+ 18836 17:39:54.804 inf2004/aai14/supercar/cmd/ack stop
+ 18837 17:39:54.852 MQTT: command "stop".
+ 18873 17:40:03.394 inf2004/aai14/supercar/cmd ft1001
+ 18876 17:40:03.874 inf2004/aai14/supercar/cmd/ack ft1001
+ 18877 17:40:03.874 MQTT: command "ft1001".
+ 18992 17:40:24.744 inf2004/aai14/supercar/cmd stop
+ 18993 17:40:24.824 inf2004/aai14/supercar/cmd/ack stop
+ 18994 17:40:24.858 MQTT: command "stop".
+ 19054 17:40:37.759 inf2004/aai14/supercar/cmd ft1001
+ 19056 17:40:37.972 inf2004/aai14/supercar/cmd/ack ft1001
+ 19057 17:40:37.980 MQTT: command "ft1001".
+ 19112 17:40:45.462 inf2004/aai14/supercar/cmd stop
+ 19113 17:40:45.494 inf2004/aai14/supercar/cmd/ack stop
+ 19114 17:40:45.542 MQTT: command "stop".
+ 20350 17:45:29.682 inf2004/aai14/supercar/online 1
+ 20531 17:46:25.033 inf2004/aai14/supercar/online 0
+ 20532 17:46:45.681 inf2004/aai14/supercar/online 1
+ 20541 17:46:45.761 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 20548 17:46:45.829 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 20549 17:46:45.837 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 20551 17:46:45.837 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 20554 17:46:45.899 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 20555 17:46:45.899 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 20573 17:47:05.050 inf2004/aai14/supercar/online 0
+ 20574 17:47:27.976 inf2004/aai14/supercar/online 1
+ 20708 17:47:57.417 inf2004/aai14/supercar/cmd ft1100
+ 20709 17:47:57.499 inf2004/aai14/supercar/cmd/ack ft1100
+ 21088 17:49:21.590 inf2004/aai14/supercar/cmd ft1100
+ 21090 17:49:21.707 inf2004/aai14/supercar/cmd/ack ft1100
+ 21166 17:49:38.673 inf2004/aai14/supercar/cmd stop
+ 21167 17:49:38.677 inf2004/aai14/supercar/cmd/ack stop
+ 21185 17:49:42.273 inf2004/aai14/supercar/cmd ft1100
+ 21186 17:49:42.353 inf2004/aai14/supercar/cmd/ack ft1100
+ 21398 17:50:29.542 inf2004/aai14/supercar/cmd ft1100
+ 21400 17:50:29.814 inf2004/aai14/supercar/cmd/ack ft1100
+ 21420 17:50:33.885 inf2004/aai14/supercar/cmd stop
+ 21421 17:50:33.929 inf2004/aai14/supercar/cmd/ack stop
+ 21437 17:50:37.219 inf2004/aai14/supercar/cmd ft1100
+ 21439 17:50:37.321 inf2004/aai14/supercar/cmd/ack ft1100
+ 21676 17:51:30.453 inf2004/aai14/supercar/cmd stop
+ 21677 17:51:30.459 inf2004/aai14/supercar/cmd/ack stop
+ 21719 17:51:39.604 inf2004/aai14/supercar/cmd ft1100
+ 21720 17:51:39.644 inf2004/aai14/supercar/cmd/ack ft1100
+ 22583 17:54:52.778 inf2004/aai14/supercar/cmd stop
+ 22585 17:54:52.826 inf2004/aai14/supercar/cmd/ack stop
+ 22606 17:54:57.416 inf2004/aai14/supercar/cmd ft1100
+ 22607 17:54:57.427 inf2004/aai14/supercar/cmd/ack ft1100
+ 22710 17:55:19.994 inf2004/aai14/supercar/cmd stop
+ 22711 17:55:20.042 inf2004/aai14/supercar/cmd/ack stop
+ 22741 17:55:26.374 inf2004/aai14/supercar/cmd ft1100
+ 22742 17:55:26.390 inf2004/aai14/supercar/cmd/ack ft1100
+ 23001 17:56:23.791 inf2004/aai14/supercar/cmd stop
+ 23002 17:56:23.833 inf2004/aai14/supercar/cmd/ack stop
+ 23146 17:56:55.845 inf2004/aai14/supercar/cmd ft1100
+ 23147 17:56:55.896 inf2004/aai14/supercar/cmd/ack ft1100
+ 23484 17:58:10.432 inf2004/aai14/supercar/cmd stop
+ 23485 17:58:10.468 inf2004/aai14/supercar/cmd/ack stop
+ 23517 17:58:17.313 inf2004/aai14/supercar/cmd ft1100
+ 23518 17:58:17.470 inf2004/aai14/supercar/cmd/ack ft1100
+ 23833 17:59:27.447 inf2004/aai14/supercar/cmd stop
+ 23835 17:59:27.534 inf2004/aai14/supercar/cmd/ack stop
+ 23890 17:59:39.557 inf2004/aai14/supercar/cmd ft1100
+ 23891 17:59:39.586 inf2004/aai14/supercar/cmd/ack ft1100
+ 24005 18:00:04.630 inf2004/aai14/supercar/cmd stop
+ 24006 18:00:04.701 inf2004/aai14/supercar/cmd/ack stop
+ 24046 18:00:13.216 inf2004/aai14/supercar/cmd ft1100
+ 24048 18:00:13.496 inf2004/aai14/supercar/cmd/ack ft1100
+ 24248 18:00:57.596 inf2004/aai14/supercar/cmd stop
+ 24249 18:00:57.658 inf2004/aai14/supercar/cmd/ack stop
+ 24431 18:01:39.058 inf2004/aai14/supercar/cmd ft1100
+ 24437 18:01:39.837 inf2004/aai14/supercar/cmd/ack ft1100
+ 26069 18:07:42.928 inf2004/aai14/supercar/cmd stop
+ 26071 18:07:43.021 inf2004/aai14/supercar/cmd/ack stop
+ 26129 18:07:55.912 inf2004/aai14/supercar/cmd calibrate
+ 26131 18:07:56.540 inf2004/aai14/supercar/cmd/ack calibrate
+ 26213 18:08:14.610 inf2004/aai14/supercar/cmd ft1111
+ 26215 18:08:14.695 inf2004/aai14/supercar/cmd/ack ft1111
+ 26364 18:08:47.463 inf2004/aai14/supercar/cmd stop
+ 26365 18:08:47.525 inf2004/aai14/supercar/cmd/ack stop
+ 26426 18:09:01.437 inf2004/aai14/supercar/cmd ft1111
+ 26427 18:09:01.500 inf2004/aai14/supercar/cmd/ack ft1111
+ 26526 18:09:23.213 inf2004/aai14/supercar/cmd stop
+ 26527 18:09:23.249 inf2004/aai14/supercar/cmd/ack stop
+ 26677 18:09:57.448 inf2004/aai14/supercar/cmd ft1111
+ 26679 18:09:57.528 inf2004/aai14/supercar/cmd/ack ft1111
+ 26743 18:10:11.512 inf2004/aai14/supercar/cmd stop
+ 26744 18:10:11.560 inf2004/aai14/supercar/cmd/ack stop
+ 26959 18:10:59.875 inf2004/aai14/supercar/cmd ft1111
+ 26960 18:10:59.987 inf2004/aai14/supercar/cmd/ack ft1111
+ 27006 18:11:09.971 inf2004/aai14/supercar/cmd stop
+ 27007 18:11:10.035 inf2004/aai14/supercar/cmd/ack stop
+ 27438 18:12:45.635 inf2004/aai14/supercar/cmd bcas
+ 27439 18:12:45.650 inf2004/aai14/supercar/cmd/ack bcas
+ 27450 18:12:47.727 inf2004/aai14/supercar/cmd bcfs
+ 27451 18:12:47.759 inf2004/aai14/supercar/cmd/ack bcfs
+ 27461 18:12:49.811 inf2004/aai14/supercar/cmd bczs
+ 27462 18:12:49.827 inf2004/aai14/supercar/cmd/ack bczs
+ 27635 18:13:28.092 inf2004/aai14/supercar/cmd ft1111
+ 27636 18:13:28.171 inf2004/aai14/supercar/cmd/ack ft1111
+ 27671 18:13:36.158 inf2004/aai14/supercar/cmd stop
+ 27674 18:13:36.222 inf2004/aai14/supercar/cmd/ack stop
+ 27826 18:14:10.989 inf2004/aai14/supercar/cmd ft1111
+ 27829 18:14:12.284 inf2004/aai14/supercar/cmd/ack ft1111
+ 27866 18:14:18.992 inf2004/aai14/supercar/cmd stop
+ 27868 18:14:19.068 inf2004/aai14/supercar/cmd/ack stop
+ 27933 18:14:33.417 inf2004/aai14/supercar/cmd ft1111
+ 27935 18:14:33.676 inf2004/aai14/supercar/cmd/ack ft1111
+ 27991 18:14:46.033 inf2004/aai14/supercar/cmd stop
+ 27993 18:14:47.255 inf2004/aai14/supercar/cmd/ack stop
+ 28064 18:15:01.509 inf2004/aai14/supercar/cmd bclist
+ 28065 18:15:01.540 inf2004/aai14/supercar/cmd/ack bclist
+ 28188 18:15:28.809 inf2004/aai14/supercar/cmd bcfs
+ 28190 18:15:28.825 inf2004/aai14/supercar/cmd/ack bcfs
+ 28277 18:15:48.367 inf2004/aai14/supercar/cmd ft1111
+ 28278 18:15:48.373 inf2004/aai14/supercar/cmd/ack ft1111
+ 28313 18:15:55.775 inf2004/aai14/supercar/cmd bclist
+ 28314 18:15:55.806 inf2004/aai14/supercar/cmd/ack bclist
+ 28345 18:16:02.753 inf2004/aai14/supercar/cmd stop
+ 28348 18:16:02.902 inf2004/aai14/supercar/cmd/ack stop
+ 28380 18:16:10.062 inf2004/aai14/supercar/cmd ft1111
+ 28382 18:16:10.174 inf2004/aai14/supercar/cmd/ack ft1111
+ 28450 18:16:25.687 inf2004/aai14/supercar/cmd stop
+ 28451 18:16:25.719 inf2004/aai14/supercar/cmd/ack stop
+ 28922 18:18:10.380 inf2004/aai14/supercar/cmd bclist
+ 28923 18:18:10.585 inf2004/aai14/supercar/cmd/ack bclist
+ 29255 18:19:23.998 inf2004/aai14/supercar/cmd bclist
+ 29256 18:19:24.028 inf2004/aai14/supercar/cmd/ack bclist
+ 29927 18:22:11.226 inf2004/aai14/supercar/online 0
+ 29928 18:22:42.150 inf2004/aai14/supercar/cmd bcfs
+ 29929 18:22:42.913 inf2004/aai14/supercar/online 1
+ 29938 18:22:42.977 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 29946 18:22:43.041 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 29947 18:22:43.041 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 29949 18:22:43.041 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 29952 18:22:43.137 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 29953 18:22:43.137 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 30034 18:23:01.158 inf2004/aai14/supercar/online 0
+ 30035 18:23:01.236 inf2004/aai14/supercar/online 1
+ 30038 18:23:01.256 MQTT: broker set to "172.20.10.3".
+ 30039 18:23:01.256 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 30040 18:23:01.256 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 30042 18:23:04.231 inf2004/aai14/supercar/online 1
+ 30083 18:23:12.793 inf2004/aai14/supercar/cmd bcfs
+ 30084 18:23:12.814 inf2004/aai14/supercar/cmd/ack bcfs
+ 30085 18:23:12.832 MQTT: command "bcfs".
+ 30120 18:23:20.454 inf2004/aai14/supercar/cmd ft1111
+ 30121 18:23:20.473 inf2004/aai14/supercar/cmd/ack ft1111
+ 30122 18:23:20.504 MQTT: command "ft1111".
+ 30146 18:23:28.838 inf2004/aai14/supercar/cmd stop
+ 30155 18:23:28.997 inf2004/aai14/supercar/cmd/ack stop
+ 30156 18:23:28.997 MQTT: command "stop".
+ 30198 18:23:37.422 inf2004/aai14/supercar/cmd ft1111
+ 30199 18:23:37.462 inf2004/aai14/supercar/cmd/ack ft1111
+ 30200 18:23:37.486 MQTT: command "ft1111".
+ 30268 18:23:51.034 inf2004/aai14/supercar/cmd stop
+ 30280 18:23:52.550 inf2004/aai14/supercar/cmd/ack stop
+ 30281 18:23:52.551 MQTT: command "stop".
+ 30471 18:24:34.117 inf2004/aai14/supercar/cmd ft1111
+ 30473 18:24:34.227 inf2004/aai14/supercar/cmd/ack ft1111
+ 30474 18:24:34.227 MQTT: command "ft1111".
+ 30528 18:24:42.003 inf2004/aai14/supercar/cmd stop
+ 30529 18:24:42.033 inf2004/aai14/supercar/cmd/ack stop
+ 30530 18:24:42.066 MQTT: command "stop".
+ 30685 18:25:15.880 inf2004/aai14/supercar/cmd ft1111
+ 30686 18:25:15.929 inf2004/aai14/supercar/cmd/ack ft1111
+ 30687 18:25:15.978 MQTT: command "ft1111".
+ 30743 18:25:25.653 inf2004/aai14/supercar/cmd stop
+ 30744 18:25:25.688 inf2004/aai14/supercar/cmd/ack stop
+ 30745 18:25:25.718 MQTT: command "stop".
+ 30825 18:25:42.932 inf2004/aai14/supercar/cmd ft1111
+ 30826 18:25:42.970 inf2004/aai14/supercar/cmd/ack ft1111
+ 30827 18:25:43.075 MQTT: command "ft1111".
+ 30890 18:25:54.245 inf2004/aai14/supercar/cmd stop
+ 30891 18:25:54.284 inf2004/aai14/supercar/cmd/ack stop
+ 30892 18:25:54.320 MQTT: command "stop".
+ 30953 18:26:07.242 inf2004/aai14/supercar/cmd ft1111
+ 30956 18:26:07.496 inf2004/aai14/supercar/cmd/ack ft1111
+ 30957 18:26:07.499 MQTT: command "ft1111".
+ 31012 18:26:16.871 inf2004/aai14/supercar/cmd stop
+ 31014 18:26:17.017 inf2004/aai14/supercar/cmd/ack stop
+ 31015 18:26:17.017 MQTT: command "stop".
+ 31100 18:26:35.283 inf2004/aai14/supercar/cmd ft1111
+ 31101 18:26:35.350 inf2004/aai14/supercar/cmd/ack ft1111
+ 31102 18:26:35.363 MQTT: command "ft1111".
+ 31150 18:26:43.274 inf2004/aai14/supercar/cmd stop
+ 31151 18:26:43.286 inf2004/aai14/supercar/cmd/ack stop
+ 31152 18:26:43.383 MQTT: command "stop".
+ 31206 18:26:54.635 inf2004/aai14/supercar/cmd ft1111
+ 31207 18:26:54.683 inf2004/aai14/supercar/cmd/ack ft1111
+ 31208 18:26:54.703 MQTT: command "ft1111".
+ 31271 18:27:07.648 inf2004/aai14/supercar/cmd stop
+ 31273 18:27:07.813 inf2004/aai14/supercar/cmd/ack stop
+ 31274 18:27:07.813 MQTT: command "stop".
+ 31335 18:27:20.599 inf2004/aai14/supercar/cmd ft1111
+ 31337 18:27:23.003 inf2004/aai14/supercar/cmd/ack ft1111
+ 31338 18:27:23.003 MQTT: command "ft1111".
+ 31379 18:27:30.432 inf2004/aai14/supercar/cmd stop
+ 31381 18:27:30.542 inf2004/aai14/supercar/cmd/ack stop
+ 31382 18:27:30.542 MQTT: command "stop".
+ 31553 18:28:09.636 inf2004/aai14/supercar/cmd ft1111
+ 31554 18:28:09.719 inf2004/aai14/supercar/cmd/ack ft1111
+ 31555 18:28:09.781 MQTT: command "ft1111".
+ 31650 18:28:24.220 inf2004/aai14/supercar/cmd stop
+ 31651 18:28:24.252 inf2004/aai14/supercar/cmd/ack stop
+ 31652 18:28:24.298 MQTT: command "stop".
+ 36275 18:46:02.315 inf2004/aai14/supercar/online 0
+ 36276 18:52:36.267 inf2004/aai14/supercar/online 1
+ 36285 18:52:36.331 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 36294 18:52:36.443 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 36295 18:52:36.451 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 36297 18:52:36.454 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 36300 18:52:36.548 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 36301 18:52:36.548 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 36356 18:52:48.585 inf2004/aai14/supercar/cmd calibrate
+ 36358 18:52:53.697 inf2004/aai14/supercar/cmd/ack calibrate
+ 36359 18:52:53.697 MQTT: command "calibrate".
+ 36449 18:53:13.225 inf2004/aai14/supercar/cmd ft1111
+ 36450 18:53:13.260 inf2004/aai14/supercar/cmd/ack ft1111
+ 36451 18:53:13.319 MQTT: command "ft1111".
+ 36473 18:53:18.320 inf2004/aai14/supercar/cmd stop
+ 36485 18:53:19.055 MQTT: command "stop".
+ 36536 18:53:30.207 inf2004/aai14/supercar/cmd ft0011
+ 36537 18:53:30.223 inf2004/aai14/supercar/cmd/ack ft0011
+ 36538 18:53:30.368 MQTT: command "ft0011".
+ 36603 18:53:41.384 inf2004/aai14/supercar/cmd stop
+ 36611 18:53:41.501 inf2004/aai14/supercar/cmd/ack stop
+ 36613 18:53:41.508 MQTT: command "stop".
+ 36638 18:53:46.488 inf2004/aai14/supercar/cmd ft0011
+ 36639 18:53:46.534 inf2004/aai14/supercar/cmd/ack ft0011
+ 36640 18:53:46.552 MQTT: command "ft0011".
+ 36692 18:53:55.481 inf2004/aai14/supercar/cmd stopp
+ 36693 18:53:55.498 inf2004/aai14/supercar/cmd/ack stopp
+ 36694 18:53:55.545 MQTT: command "stopp".
+ 36695 18:53:55.550 Web: unknown command "stopp" ignored.
+ 36712 18:53:58.715 inf2004/aai14/supercar/cmd stop
+ 36713 18:53:58.747 inf2004/aai14/supercar/cmd/ack stop
+ 36714 18:53:58.795 MQTT: command "stop".
+ 36745 18:54:04.466 inf2004/aai14/supercar/cmd ft0011
+ 36746 18:54:04.529 inf2004/aai14/supercar/cmd/ack ft0011
+ 36747 18:54:04.545 MQTT: command "ft0011".
+ 36807 18:54:14.480 inf2004/aai14/supercar/cmd stop
+ 36808 18:54:14.495 inf2004/aai14/supercar/cmd/ack stop
+ 36809 18:54:14.511 MQTT: command "stop".
+ 36837 18:54:20.164 inf2004/aai14/supercar/cmd ft0011
+ 36839 18:54:20.304 inf2004/aai14/supercar/cmd/ack ft0011
+ 36840 18:54:20.304 MQTT: command "ft0011".
+ 36899 18:54:30.772 inf2004/aai14/supercar/cmd stop
+ 36900 18:54:30.788 inf2004/aai14/supercar/cmd/ack stop
+ 36901 18:54:30.837 MQTT: command "stop".
+ 36929 18:54:36.307 inf2004/aai14/supercar/cmd ft0011
+ 36930 18:54:36.336 inf2004/aai14/supercar/cmd/ack ft0011
+ 36931 18:54:36.368 MQTT: command "ft0011".
+ 36997 18:54:47.582 inf2004/aai14/supercar/cmd stop
+ 36998 18:54:47.617 inf2004/aai14/supercar/cmd/ack stop
+ 36999 18:54:47.757 MQTT: command "stop".
+ 37075 18:55:03.772 inf2004/aai14/supercar/cmd ft0011
+ 37076 18:55:03.802 inf2004/aai14/supercar/cmd/ack ft0011
+ 37077 18:55:03.818 MQTT: command "ft0011".
+ 37124 18:55:12.928 inf2004/aai14/supercar/cmd stop
+ 37125 18:55:12.956 inf2004/aai14/supercar/cmd/ack stop
+ 37126 18:55:12.971 MQTT: command "stop".
+ 37159 18:55:19.650 inf2004/aai14/supercar/cmd ft0011
+ 37160 18:55:19.713 inf2004/aai14/supercar/cmd/ack ft0011
+ 37161 18:55:19.841 MQTT: command "ft0011".
+ 37208 18:55:29.499 inf2004/aai14/supercar/cmd stop
+ 37214 18:55:29.576 inf2004/aai14/supercar/cmd/ack stop
+ 37215 18:55:29.576 MQTT: command "stop".
+ 37274 18:55:41.837 inf2004/aai14/supercar/cmd ft0011
+ 37275 18:55:41.854 inf2004/aai14/supercar/cmd/ack ft0011
+ 37276 18:55:41.889 MQTT: command "ft0011".
+ 37580 18:56:47.132 inf2004/aai14/supercar/cmd ft0001
+ 37582 18:56:47.244 inf2004/aai14/supercar/cmd/ack ft0001
+ 37583 18:56:47.244 MQTT: command "ft0001".
+ 37625 18:56:54.411 inf2004/aai14/supercar/cmd sotp
+ 37626 18:56:54.423 inf2004/aai14/supercar/cmd/ack sotp
+ 37627 18:56:54.442 MQTT: command "sotp".
+ 37628 18:56:54.446 Web: unknown command "sotp" ignored.
+ 37639 18:56:56.477 inf2004/aai14/supercar/cmd stop
+ 37640 18:56:56.540 inf2004/aai14/supercar/cmd/ack stop
+ 37641 18:56:56.573 MQTT: command "stop".
+ 37652 18:56:58.541 inf2004/aai14/supercar/cmd st
+ 37653 18:56:58.602 inf2004/aai14/supercar/cmd/ack st
+ 37654 18:56:58.621 MQTT: command "st".
+ 37655 18:56:58.633 Web: unknown command "st" ignored.
+ 37685 18:57:04.963 inf2004/aai14/supercar/cmd ft1111
+ 37686 18:57:04.990 inf2004/aai14/supercar/cmd/ack ft1111
+ 37687 18:57:04.996 MQTT: command "ft1111".
+ 37752 18:57:14.965 inf2004/aai14/supercar/cmd stop
+ 37753 18:57:14.979 inf2004/aai14/supercar/cmd/ack stop
+ 37754 18:57:15.037 MQTT: command "stop".
+ 37903 18:57:47.760 inf2004/aai14/supercar/cmd ft1111
+ 37905 18:57:47.857 inf2004/aai14/supercar/cmd/ack ft1111
+ 37906 18:57:47.862 MQTT: command "ft1111".
+ 37972 18:57:57.806 inf2004/aai14/supercar/cmd stop
+ 37975 18:57:57.952 inf2004/aai14/supercar/cmd/ack stop
+ 37976 18:57:57.961 MQTT: command "stop".
+ 38043 18:58:12.365 inf2004/aai14/supercar/cmd ft1111
+ 38045 18:58:12.474 inf2004/aai14/supercar/cmd/ack ft1111
+ 38046 18:58:12.475 MQTT: command "ft1111".
+ 38105 18:58:22.300 inf2004/aai14/supercar/cmd stop
+ 38106 18:58:22.316 inf2004/aai14/supercar/cmd/ack stop
+ 38107 18:58:22.364 MQTT: command "stop".
+ 38141 18:58:29.248 inf2004/aai14/supercar/cmd ft1111
+ 38142 18:58:29.326 inf2004/aai14/supercar/cmd/ack ft1111
+ 38143 18:58:29.344 MQTT: command "ft1111".
+ 38204 18:58:38.517 inf2004/aai14/supercar/cmd sto
+ 38205 18:58:38.564 inf2004/aai14/supercar/cmd/ack sto
+ 38206 18:58:38.580 MQTT: command "sto".
+ 38207 18:58:38.580 Web: unknown command "sto" ignored.
+ 38221 18:58:41.008 inf2004/aai14/supercar/cmd stop
+ 38223 18:58:41.102 inf2004/aai14/supercar/cmd/ack stop
+ 38224 18:58:41.102 MQTT: command "stop".
+ 38274 18:58:50.991 inf2004/aai14/supercar/cmd ft1111
+ 38275 18:58:51.049 inf2004/aai14/supercar/cmd/ack ft1111
+ 38276 18:58:51.057 MQTT: command "ft1111".
+ 38333 18:58:59.279 inf2004/aai14/supercar/cmd stop
+ 38334 18:58:59.327 inf2004/aai14/supercar/cmd/ack stop
+ 38335 18:58:59.375 MQTT: command "stop".
+ 38384 18:59:09.649 inf2004/aai14/supercar/cmd ft1111
+ 38385 18:59:09.680 inf2004/aai14/supercar/cmd/ack ft1111
+ 38386 18:59:09.693 MQTT: command "ft1111".
+ 38446 18:59:17.935 inf2004/aai14/supercar/cmd stop
+ 38447 18:59:17.981 inf2004/aai14/supercar/cmd/ack stop
+ 38448 18:59:17.999 MQTT: command "stop".
+ 38622 18:59:57.442 inf2004/aai14/supercar/cmd ft1111
+ 38629 18:59:57.530 inf2004/aai14/supercar/cmd/ack ft1111
+ 38630 18:59:57.534 MQTT: command "ft1111".
+ 38679 19:00:07.025 inf2004/aai14/supercar/cmd stop
+ 38688 19:00:07.248 MQTT: command "stop".
+ 38827 19:00:37.558 inf2004/aai14/supercar/cmd ft1111
+ 38828 19:00:37.572 inf2004/aai14/supercar/cmd/ack ft1111
+ 38829 19:00:37.604 MQTT: command "ft1111".
+ 38937 19:00:58.245 inf2004/aai14/supercar/cmd stop
+ 38938 19:00:58.251 inf2004/aai14/supercar/cmd/ack stop
+ 38939 19:00:58.267 MQTT: command "stop".
+ 38973 19:01:05.504 inf2004/aai14/supercar/cmd ft1111
+ 38974 19:01:05.566 inf2004/aai14/supercar/cmd/ack ft1111
+ 38975 19:01:05.649 MQTT: command "ft1111".
+ 39026 19:01:14.512 inf2004/aai14/supercar/cmd stop
+ 39027 19:01:14.602 inf2004/aai14/supercar/cmd/ack stop
+ 39028 19:01:14.634 MQTT: command "stop".
+ 39080 19:01:26.329 inf2004/aai14/supercar/cmd ft1111
+ 39081 19:01:26.377 inf2004/aai14/supercar/cmd/ack ft1111
+ 39082 19:01:26.422 MQTT: command "ft1111".
+ 39145 19:01:34.740 inf2004/aai14/supercar/cmd stop
+ 39147 19:01:34.788 inf2004/aai14/supercar/cmd/ack stop
+ 39148 19:01:34.788 MQTT: command "stop".
+ 39198 19:01:45.340 inf2004/aai14/supercar/cmd ft1111
+ 39199 19:01:45.368 inf2004/aai14/supercar/cmd/ack ft1111
+ 39200 19:01:45.384 MQTT: command "ft1111".
+ 39239 19:01:54.432 inf2004/aai14/supercar/cmd stop
+ 39248 19:01:55.852 inf2004/aai14/supercar/cmd/ack stop
+ 39249 19:01:55.913 MQTT: command "stop".
+ 40242 19:05:54.355 inf2004/aai14/supercar/online 0
+ 40243 19:06:31.531 inf2004/aai14/supercar/online 1
+ 40467 19:07:22.596 inf2004/aai14/supercar/cmd calibrate
+ 40469 19:07:27.678 inf2004/aai14/supercar/cmd/ack calibrate
+ 40488 19:07:31.566 inf2004/aai14/supercar/cmd start
+ 40489 19:07:31.679 inf2004/aai14/supercar/cmd/ack start
+ 40645 19:08:08.383 inf2004/aai14/supercar/cmd stop
+ 40651 19:08:08.571 inf2004/aai14/supercar/cmd/ack stop
+ 40727 19:08:25.349 inf2004/aai14/supercar/cmd start
+ 40729 19:08:25.469 inf2004/aai14/supercar/cmd/ack start
+ 40895 19:09:03.389 inf2004/aai14/supercar/cmd stop
+ 40899 19:09:04.268 inf2004/aai14/supercar/cmd/ack stop
+ 41281 19:10:30.095 inf2004/aai14/supercar/cmd start
+ 41290 19:10:30.695 inf2004/aai14/supercar/cmd/ack start
+ 41803 19:12:27.800 inf2004/aai14/supercar/cmd start
+ 41805 19:12:27.912 inf2004/aai14/supercar/cmd/ack start
+ 42225 19:14:08.390 inf2004/aai14/supercar/cmd stop
+ 42226 19:14:08.411 inf2004/aai14/supercar/cmd/ack stop
+ 43617 19:19:33.605 inf2004/aai14/supercar/cmd ft1011
+ 43618 19:19:33.657 inf2004/aai14/supercar/cmd/ack ft1011
+ 43674 19:19:45.939 inf2004/aai14/supercar/cmd stop
+ 43676 19:19:46.085 inf2004/aai14/supercar/cmd/ack stop
+ 43743 19:20:01.321 inf2004/aai14/supercar/cmd ft1011
+ 43745 19:20:01.452 inf2004/aai14/supercar/cmd/ack ft1011
+ 43796 19:20:12.601 inf2004/aai14/supercar/cmd stop
+ 43798 19:20:14.523 inf2004/aai14/supercar/cmd/ack stop
+ 43953 19:20:48.377 inf2004/aai14/supercar/cmd ft1111
+ 43954 19:20:48.396 inf2004/aai14/supercar/cmd/ack ft1111
+ 44254 19:21:55.291 inf2004/aai14/supercar/cmd stop
+ 44257 19:21:55.469 inf2004/aai14/supercar/cmd/ack stop
+ 44299 19:22:04.267 inf2004/aai14/supercar/cmd start
+ 44300 19:22:04.283 inf2004/aai14/supercar/cmd/ack start
+ 44349 19:22:14.939 inf2004/aai14/supercar/cmd stop
+ 44350 19:22:15.072 inf2004/aai14/supercar/cmd/ack stop
+ 44423 19:22:30.963 inf2004/aai14/supercar/cmd start
+ 44424 19:22:30.979 inf2004/aai14/supercar/cmd/ack start
+ 44467 19:22:41.211 inf2004/aai14/supercar/cmd stop
+ 44472 19:22:42.884 inf2004/aai14/supercar/cmd/ack stop
+ 44565 19:23:02.823 inf2004/aai14/supercar/cmd start
+ 44566 19:23:02.859 inf2004/aai14/supercar/cmd/ack start
+ 44702 19:23:32.933 inf2004/aai14/supercar/cmd start
+ 44703 19:23:32.955 inf2004/aai14/supercar/cmd/ack start
+ 44777 19:23:48.588 inf2004/aai14/supercar/cmd stop
+ 44778 19:23:48.638 inf2004/aai14/supercar/cmd/ack stop
+ 44840 19:24:02.408 inf2004/aai14/supercar/cmd start
+ 44841 19:24:02.456 inf2004/aai14/supercar/cmd/ack start
+ 44919 19:24:19.228 inf2004/aai14/supercar/cmd stop
+ 44921 19:24:19.435 inf2004/aai14/supercar/cmd/ack stop
+ 44983 19:24:33.143 inf2004/aai14/supercar/cmd start
+ 44985 19:24:33.239 inf2004/aai14/supercar/cmd/ack start
+ 45023 19:24:41.609 inf2004/aai14/supercar/cmd stop
+ 45025 19:24:41.981 inf2004/aai14/supercar/cmd/ack stop
+ 45233 19:25:28.876 inf2004/aai14/supercar/cmd start
+ 45238 19:25:29.035 inf2004/aai14/supercar/cmd/ack start
+ 45320 19:25:48.864 inf2004/aai14/supercar/cmd stop
+ 45355 19:25:55.244 inf2004/aai14/supercar/cmd calibrate
+ 45356 19:25:58.710 inf2004/aai14/supercar/cmd start
+ 45358 19:26:01.712 inf2004/aai14/supercar/cmd/ack calibrate
+ 45361 19:26:01.712 inf2004/aai14/supercar/cmd/ack start
+ 45430 19:26:16.405 inf2004/aai14/supercar/cmd stop
+ 45433 19:26:16.859 inf2004/aai14/supercar/cmd/ack stop
+ 45515 19:26:36.684 inf2004/aai14/supercar/cmd start
+ 45523 19:26:38.157 inf2004/aai14/supercar/cmd/ack start
+ 45573 19:26:49.275 inf2004/aai14/supercar/cmd stop
+ 45576 19:26:49.437 inf2004/aai14/supercar/cmd/ack stop
+ 45652 19:27:06.226 inf2004/aai14/supercar/cmd start
+ 45654 19:27:06.343 inf2004/aai14/supercar/cmd/ack start
+ 45696 19:27:15.167 inf2004/aai14/supercar/cmd stop
+ 45697 19:27:15.183 inf2004/aai14/supercar/cmd/ack stop
+ 45755 19:27:27.819 inf2004/aai14/supercar/cmd start
+ 45756 19:27:27.835 inf2004/aai14/supercar/cmd/ack start
+ 45801 19:27:37.406 inf2004/aai14/supercar/cmd stop
+ 45802 19:27:37.438 inf2004/aai14/supercar/cmd/ack stop
+ 45876 19:27:53.661 inf2004/aai14/supercar/cmd start
+ 45877 19:27:53.661 inf2004/aai14/supercar/cmd/ack start
+ 45924 19:28:04.192 inf2004/aai14/supercar/cmd stop
+ 45926 19:28:04.338 inf2004/aai14/supercar/cmd/ack stop
+ 45996 19:28:19.367 inf2004/aai14/supercar/cmd start
+ 45997 19:28:19.376 inf2004/aai14/supercar/cmd/ack start
+ 46059 19:28:32.797 inf2004/aai14/supercar/cmd stop
+ 46060 19:28:32.861 inf2004/aai14/supercar/cmd/ack stop
+ 46195 19:29:19.425 inf2004/aai14/supercar/online 0
+ 46196 19:29:42.133 inf2004/aai14/supercar/online 1
+ 46403 19:30:28.399 inf2004/aai14/supercar/cmd start
+ 46404 19:30:28.415 inf2004/aai14/supercar/cmd/ack start

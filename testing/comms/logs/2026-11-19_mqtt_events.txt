@@ -1,0 +1,26 @@
+# comms: MQTT log events, 2026-11-19
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+     1 13:48:47.470 inf2004/aai14/supercar/online 1
+   987 13:53:01.648 inf2004/aai14/supercar/online 0
+   988 13:53:54.175 inf2004/aai14/supercar/online 1
+  4041 14:06:12.636 inf2004/aai14/supercar/online 0
+  4042 14:08:31.271 inf2004/aai14/supercar/online 1
+  4796 14:12:09.585 inf2004/aai14/supercar/online 0
+  4797 14:16:51.574 inf2004/aai14/supercar/online 1
+  5413 14:20:03.657 inf2004/aai14/supercar/online 0
+  5414 14:20:09.046 inf2004/aai14/supercar/online 1
+  5813 14:22:36.662 inf2004/aai14/supercar/online 0
+  5814 14:22:41.828 inf2004/aai14/supercar/online 1
+  6803 14:28:20.683 inf2004/aai14/supercar/online 0
+  6804 14:28:25.926 inf2004/aai14/supercar/online 1
+  7161 14:30:24.771 inf2004/aai14/supercar/online 0
+  7162 14:38:31.752 inf2004/aai14/supercar/online 1
+  7247 14:38:50.770 inf2004/aai14/supercar/cmd start
+  7248 14:38:52.120 inf2004/aai14/supercar/cmd/ack start
+  7260 14:38:53.644 inf2004/aai14/supercar/cmd stop
+  7264 14:38:58.001 inf2004/aai14/supercar/cmd/ack stop
+  7327 14:39:09.144 inf2004/aai14/supercar/cmd ft0000
+  7329 14:39:09.305 inf2004/aai14/supercar/cmd/ack ft0000
+  7341 14:39:12.023 inf2004/aai14/supercar/cmd stop
+  7343 14:39:13.631 inf2004/aai14/supercar/cmd/ack stop

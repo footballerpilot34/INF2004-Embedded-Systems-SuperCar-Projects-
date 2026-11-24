@@ -1,0 +1,592 @@
+# comms: MQTT log events, 2026-11-23
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 47245 15:40:42.258 inf2004/aai14/supercar/online 1
+ 47252 15:40:59.186 inf2004/aai14/supercar/online 0
+ 47253 15:41:01.457 inf2004/aai14/supercar/online 1
+ 47262 15:41:01.707 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 47270 15:41:01.980 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 47271 15:41:01.996 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 47273 15:41:01.996 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 47276 15:41:02.077 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 47277 15:41:02.091 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 47443 15:41:41.589 inf2004/aai14/supercar/cmd start
+ 47452 15:41:41.836 inf2004/aai14/supercar/cmd/ack start
+ 47453 15:41:41.848 MQTT: command "start".
+ 47525 15:41:53.714 inf2004/aai14/supercar/cmd stop
+ 47526 15:41:53.832 inf2004/aai14/supercar/cmd/ack stop
+ 47527 15:41:53.922 MQTT: command "stop".
+ 47625 15:42:16.004 inf2004/aai14/supercar/cmd start
+ 47631 15:42:16.185 inf2004/aai14/supercar/cmd/ack start
+ 47632 15:42:16.189 MQTT: command "start".
+ 47690 15:42:27.999 inf2004/aai14/supercar/cmd stop
+ 47698 15:42:28.095 inf2004/aai14/supercar/cmd/ack stop
+ 47699 15:42:28.095 MQTT: command "stop".
+ 47743 15:42:37.811 inf2004/aai14/supercar/cmd bcar
+ 47745 15:42:37.922 inf2004/aai14/supercar/cmd/ack bcar
+ 47746 15:42:37.924 MQTT: command "bcar".
+ 47780 15:42:45.256 inf2004/aai14/supercar/cmd start
+ 47781 15:42:45.301 inf2004/aai14/supercar/cmd/ack start
+ 47782 15:42:45.311 MQTT: command "start".
+ 47836 15:42:55.004 inf2004/aai14/supercar/cmd stop
+ 47838 15:42:55.261 inf2004/aai14/supercar/cmd/ack stop
+ 47839 15:42:55.263 MQTT: command "stop".
+ 48338 15:44:57.081 inf2004/aai14/supercar/cmd calibrate
+ 48340 15:45:02.205 inf2004/aai14/supercar/cmd start
+ 48343 15:45:02.684 inf2004/aai14/supercar/cmd/ack calibrate
+ 48344 15:45:02.687 MQTT: command "calibrate".
+ 48350 15:45:02.817 inf2004/aai14/supercar/cmd/ack start
+ 48351 15:45:02.821 MQTT: command "start".
+ 48408 15:45:14.188 inf2004/aai14/supercar/cmd stop
+ 48411 15:45:14.381 inf2004/aai14/supercar/cmd/ack stop
+ 48412 15:45:14.381 MQTT: command "stop".
+ 48529 15:45:40.914 inf2004/aai14/supercar/cmd start
+ 48530 15:45:40.950 inf2004/aai14/supercar/cmd/ack start
+ 48531 15:45:42.203 MQTT: command "start".
+ 48597 15:45:53.023 inf2004/aai14/supercar/cmd stop
+ 48615 15:45:55.258 MQTT: command "stop".
+ 48810 15:46:39.187 inf2004/aai14/supercar/cmd start
+ 48814 15:46:39.393 inf2004/aai14/supercar/cmd/ack start
+ 48815 15:46:39.393 MQTT: command "start".
+ 49643 15:49:44.203 inf2004/aai14/supercar/cmd stop
+ 49645 15:49:44.252 inf2004/aai14/supercar/cmd/ack stop
+ 49646 15:49:44.253 MQTT: command "stop".
+ 50672 15:54:13.722 inf2004/aai14/supercar/cmd calibrate
+ 50684 15:54:20.100 MQTT: command "calibrate".
+ 50702 15:54:24.283 inf2004/aai14/supercar/cmd start
+ 50704 15:54:24.458 inf2004/aai14/supercar/cmd/ack start
+ 50705 15:54:24.458 MQTT: command "start".
+ 51214 15:56:00.926 inf2004/aai14/supercar/cmd start
+ 51218 15:56:01.782 inf2004/aai14/supercar/cmd/ack start
+ 51219 15:56:01.782 MQTT: command "start".
+ 53846 16:06:32.262 inf2004/aai14/supercar/online 0
+ 53847 16:07:04.717 inf2004/aai14/supercar/online 1
+ 53856 16:07:04.830 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 53864 16:07:04.950 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 53865 16:07:04.950 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 53867 16:07:04.952 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 53869 16:07:05.051 inf2004/aai14/supercar/cmd start
+ 53871 16:07:05.099 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 53872 16:07:05.099 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 53873 16:07:05.213 inf2004/aai14/supercar/cmd/ack start
+ 53874 16:07:05.213 MQTT: command "start".
+ 53956 16:07:22.867 inf2004/aai14/supercar/cmd start
+ 53957 16:07:23.044 inf2004/aai14/supercar/cmd/ack start
+ 53958 16:07:23.065 MQTT: command "start".
+ 54213 16:08:19.544 inf2004/aai14/supercar/cmd start
+ 54219 16:08:22.433 inf2004/aai14/supercar/cmd/ack start
+ 54220 16:08:22.435 MQTT: command "start".
+ 54264 16:08:30.975 inf2004/aai14/supercar/cmd start
+ 54266 16:08:31.105 inf2004/aai14/supercar/cmd/ack start
+ 54267 16:08:31.134 MQTT: command "start".
+ 54301 16:08:37.044 inf2004/aai14/supercar/cmd stop
+ 54304 16:08:37.127 inf2004/aai14/supercar/cmd/ack stop
+ 54305 16:08:37.127 MQTT: command "stop".
+ 57283 16:20:01.521 inf2004/aai14/supercar/cmd start
+ 57285 16:20:01.705 inf2004/aai14/supercar/cmd/ack start
+ 57286 16:20:01.707 MQTT: command "start".
+ 57318 16:20:08.444 inf2004/aai14/supercar/cmd start
+ 57320 16:20:08.620 inf2004/aai14/supercar/cmd/ack start
+ 57321 16:20:08.620 MQTT: command "start".
+ 57834 16:21:40.943 inf2004/aai14/supercar/cmd start
+ 57837 16:21:41.053 inf2004/aai14/supercar/cmd/ack start
+ 57838 16:21:41.053 MQTT: command "start".
+ 57939 16:21:49.737 inf2004/aai14/supercar/cmd stop
+ 57941 16:21:49.947 inf2004/aai14/supercar/cmd/ack stop
+ 57942 16:21:49.949 MQTT: command "stop".
+ 57994 16:21:59.562 inf2004/aai14/supercar/cmd start
+ 57995 16:21:59.581 inf2004/aai14/supercar/cmd/ack start
+ 57996 16:21:59.675 MQTT: command "start".
+ 58041 16:22:08.256 inf2004/aai14/supercar/cmd stop
+ 58059 16:22:08.501 MQTT: command "stop".
+ 58137 16:22:25.306 inf2004/aai14/supercar/cmd start
+ 58139 16:22:25.435 inf2004/aai14/supercar/cmd/ack start
+ 58140 16:22:25.435 MQTT: command "start".
+ 58300 16:22:52.282 inf2004/aai14/supercar/cmd start
+ 58301 16:22:52.312 inf2004/aai14/supercar/cmd/ack start
+ 58302 16:22:52.604 MQTT: command "start".
+ 58558 16:23:22.493 inf2004/aai14/supercar/cmd stop
+ 58560 16:23:22.724 inf2004/aai14/supercar/cmd/ack stop
+ 58561 16:23:22.726 MQTT: command "stop".
+ 58793 16:24:15.695 inf2004/aai14/supercar/cmd start
+ 58797 16:24:15.987 inf2004/aai14/supercar/cmd/ack start
+ 58798 16:24:15.987 MQTT: command "start".
+ 58972 16:24:35.796 inf2004/aai14/supercar/cmd stop
+ 58976 16:24:37.179 inf2004/aai14/supercar/cmd/ack stop
+ 58977 16:24:37.179 MQTT: command "stop".
+ 59065 16:24:54.972 inf2004/aai14/supercar/cmd start
+ 59067 16:24:55.103 inf2004/aai14/supercar/cmd/ack start
+ 59068 16:24:55.103 MQTT: command "start".
+ 59262 16:25:23.072 inf2004/aai14/supercar/cmd stop
+ 59264 16:25:23.329 inf2004/aai14/supercar/cmd/ack stop
+ 59265 16:25:23.329 MQTT: command "stop".
+ 59454 16:26:04.919 inf2004/aai14/supercar/cmd start
+ 59455 16:26:05.011 inf2004/aai14/supercar/cmd/ack start
+ 59456 16:26:05.022 MQTT: command "start".
+ 59543 16:26:15.649 inf2004/aai14/supercar/cmd stop
+ 59548 16:26:16.328 inf2004/aai14/supercar/cmd/ack stop
+ 59549 16:26:16.335 MQTT: command "stop".
+ 59626 16:26:32.350 inf2004/aai14/supercar/cmd start
+ 59627 16:26:32.380 inf2004/aai14/supercar/cmd/ack start
+ 59628 16:26:32.477 MQTT: command "start".
+ 59691 16:26:41.044 inf2004/aai14/supercar/cmd stop
+ 59693 16:26:41.315 inf2004/aai14/supercar/cmd/ack stop
+ 59694 16:26:41.315 MQTT: command "stop".
+ 59737 16:26:50.578 inf2004/aai14/supercar/cmd start
+ 59739 16:26:50.686 inf2004/aai14/supercar/cmd/ack start
+ 59740 16:26:50.686 MQTT: command "start".
+ 59812 16:26:58.841 inf2004/aai14/supercar/cmd stop
+ 59820 16:26:58.937 inf2004/aai14/supercar/cmd/ack stop
+ 59821 16:26:58.937 MQTT: command "stop".
+ 59938 16:27:24.268 inf2004/aai14/supercar/cmd start
+ 59939 16:27:24.367 inf2004/aai14/supercar/cmd/ack start
+ 59940 16:27:24.468 MQTT: command "start".
+ 60005 16:27:33.122 inf2004/aai14/supercar/cmd stop
+ 60008 16:27:33.515 inf2004/aai14/supercar/cmd/ack stop
+ 60009 16:27:33.519 MQTT: command "stop".
+ 60262 16:28:30.814 inf2004/aai14/supercar/cmd start
+ 60265 16:28:31.087 inf2004/aai14/supercar/cmd/ack start
+ 60266 16:28:31.087 MQTT: command "start".
+ 60322 16:28:38.579 inf2004/aai14/supercar/cmd stop
+ 60326 16:28:38.663 inf2004/aai14/supercar/cmd/ack stop
+ 60327 16:28:38.667 MQTT: command "stop".
+ 61218 16:31:56.973 inf2004/aai14/supercar/cmd start
+ 61220 16:31:57.149 inf2004/aai14/supercar/cmd/ack start
+ 61221 16:31:57.248 MQTT: command "start".
+ 61663 16:32:34.965 inf2004/aai14/supercar/cmd stop
+ 61664 16:32:34.997 inf2004/aai14/supercar/cmd/ack stop
+ 61665 16:32:35.498 MQTT: command "stop".
+ 61793 16:33:02.853 inf2004/aai14/supercar/cmd start
+ 61795 16:33:03.161 inf2004/aai14/supercar/cmd/ack start
+ 61796 16:33:03.163 MQTT: command "start".
+ 61863 16:33:11.211 inf2004/aai14/supercar/cmd stop
+ 61873 16:33:12.642 MQTT: command "stop".
+ 62083 16:34:01.313 inf2004/aai14/supercar/cmd start
+ 62085 16:34:01.679 inf2004/aai14/supercar/cmd/ack start
+ 62086 16:34:01.687 MQTT: command "start".
+ 62152 16:34:08.367 inf2004/aai14/supercar/cmd stop
+ 62154 16:34:08.847 inf2004/aai14/supercar/cmd/ack stop
+ 62155 16:34:08.848 MQTT: command "stop".
+ 62203 16:34:18.990 inf2004/aai14/supercar/cmd start
+ 62204 16:34:19.074 inf2004/aai14/supercar/cmd/ack start
+ 62205 16:34:19.086 MQTT: command "start".
+ 62272 16:34:27.988 inf2004/aai14/supercar/cmd stop
+ 62273 16:34:28.088 inf2004/aai14/supercar/cmd/ack stop
+ 62274 16:34:28.248 MQTT: command "stop".
+ 62325 16:34:39.216 inf2004/aai14/supercar/cmd start
+ 62327 16:34:39.442 inf2004/aai14/supercar/cmd/ack start
+ 62328 16:34:39.448 MQTT: command "start".
+ 62414 16:34:50.017 inf2004/aai14/supercar/cmd stop
+ 62415 16:34:50.046 inf2004/aai14/supercar/cmd/ack stop
+ 62416 16:34:50.204 MQTT: command "stop".
+ 62569 16:35:24.987 inf2004/aai14/supercar/cmd start
+ 62572 16:35:25.161 inf2004/aai14/supercar/cmd/ack start
+ 62573 16:35:25.161 MQTT: command "start".
+ 62610 16:35:33.946 inf2004/aai14/supercar/cmd stop
+ 62622 16:35:34.348 MQTT: command "stop".
+ 62682 16:35:46.905 inf2004/aai14/supercar/cmd start
+ 62683 16:35:46.937 inf2004/aai14/supercar/cmd/ack start
+ 62684 16:35:46.985 MQTT: command "start".
+ 62767 16:35:55.054 inf2004/aai14/supercar/cmd stop
+ 62768 16:35:55.105 inf2004/aai14/supercar/cmd/ack stop
+ 62769 16:35:55.312 MQTT: command "stop".
+ 62886 16:36:20.932 inf2004/aai14/supercar/cmd start
+ 62887 16:36:20.959 inf2004/aai14/supercar/cmd/ack start
+ 62888 16:36:21.098 MQTT: command "start".
+ 62920 16:36:26.866 inf2004/aai14/supercar/cmd stop
+ 62921 16:36:27.084 inf2004/aai14/supercar/cmd/ack stop
+ 62922 16:36:27.093 MQTT: command "stop".
+ 63331 16:38:02.158 inf2004/aai14/supercar/cmd start
+ 63333 16:38:02.367 inf2004/aai14/supercar/cmd/ack start
+ 63334 16:38:02.367 MQTT: command "start".
+ 63479 16:38:17.515 inf2004/aai14/supercar/cmd stop
+ 63480 16:38:17.547 inf2004/aai14/supercar/cmd/ack stop
+ 63481 16:38:17.595 MQTT: command "stop".
+ 63502 16:38:24.293 inf2004/aai14/supercar/cmd start
+ 63510 16:38:25.274 inf2004/aai14/supercar/cmd/ack start
+ 63511 16:38:25.278 MQTT: command "start".
+ 63579 16:38:36.042 inf2004/aai14/supercar/cmd stop
+ 63584 16:38:36.413 inf2004/aai14/supercar/cmd/ack stop
+ 63585 16:38:36.417 MQTT: command "stop".
+ 63678 16:38:56.163 inf2004/aai14/supercar/cmd start
+ 63679 16:38:56.230 inf2004/aai14/supercar/cmd/ack start
+ 63680 16:38:56.300 MQTT: command "start".
+ 63719 16:39:02.651 inf2004/aai14/supercar/cmd start
+ 63722 16:39:02.920 inf2004/aai14/supercar/cmd/ack start
+ 63723 16:39:02.925 MQTT: command "start".
+ 63822 16:39:24.360 inf2004/aai14/supercar/cmd start
+ 63825 16:39:24.462 inf2004/aai14/supercar/cmd/ack start
+ 63826 16:39:24.463 MQTT: command "start".
+ 63865 16:39:30.396 inf2004/aai14/supercar/cmd start
+ 63866 16:39:30.436 inf2004/aai14/supercar/cmd/ack start
+ 63867 16:39:30.678 MQTT: command "start".
+ 63961 16:39:48.989 inf2004/aai14/supercar/cmd start
+ 63962 16:39:49.037 inf2004/aai14/supercar/cmd/ack start
+ 63963 16:39:49.102 MQTT: command "start".
+ 64026 16:39:59.582 inf2004/aai14/supercar/cmd stop
+ 64028 16:40:00.051 inf2004/aai14/supercar/cmd/ack stop
+ 64029 16:40:00.051 MQTT: command "stop".
+ 64139 16:40:23.674 inf2004/aai14/supercar/cmd start
+ 64141 16:40:23.925 inf2004/aai14/supercar/cmd/ack start
+ 64142 16:40:23.927 MQTT: command "start".
+ 64760 16:42:09.900 inf2004/aai14/supercar/cmd start
+ 64762 16:42:10.010 inf2004/aai14/supercar/cmd/ack start
+ 64763 16:42:10.010 MQTT: command "start".
+ 64800 16:42:17.110 inf2004/aai14/supercar/cmd stop
+ 64802 16:42:17.272 inf2004/aai14/supercar/cmd/ack stop
+ 64803 16:42:17.272 MQTT: command "stop".
+ 64855 16:42:27.804 inf2004/aai14/supercar/cmd start
+ 64856 16:42:27.837 inf2004/aai14/supercar/cmd/ack start
+ 64857 16:42:27.889 MQTT: command "start".
+ 64921 16:42:38.879 inf2004/aai14/supercar/cmd stop
+ 64929 16:42:39.974 inf2004/aai14/supercar/cmd/ack stop
+ 64930 16:42:39.976 MQTT: command "stop".
+ 64966 16:42:47.417 inf2004/aai14/supercar/cmd start
+ 64969 16:42:47.900 inf2004/aai14/supercar/cmd/ack start
+ 64970 16:42:47.902 MQTT: command "start".
+ 65044 16:42:54.680 inf2004/aai14/supercar/cmd stop
+ 65049 16:42:54.802 inf2004/aai14/supercar/cmd/ack stop
+ 65050 16:42:54.804 MQTT: command "stop".
+ 65102 16:43:06.284 inf2004/aai14/supercar/cmd start
+ 65104 16:43:06.482 inf2004/aai14/supercar/cmd/ack start
+ 65105 16:43:06.482 MQTT: command "start".
+ 65336 16:43:49.778 inf2004/aai14/supercar/cmd start
+ 65338 16:43:49.956 inf2004/aai14/supercar/cmd/ack start
+ 65339 16:43:49.956 MQTT: command "start".
+ 65584 16:44:41.872 inf2004/aai14/supercar/cmd start
+ 65586 16:44:42.064 inf2004/aai14/supercar/cmd/ack start
+ 65587 16:44:42.064 MQTT: command "start".
+ 65659 16:44:52.817 inf2004/aai14/supercar/cmd stop
+ 65667 16:44:53.446 inf2004/aai14/supercar/cmd/ack stop
+ 65669 16:44:53.446 MQTT: command "stop".
+ 65815 16:45:25.084 inf2004/aai14/supercar/cmd start
+ 65817 16:45:25.394 inf2004/aai14/supercar/cmd/ack start
+ 65818 16:45:25.400 MQTT: command "start".
+ 65902 16:45:37.106 inf2004/aai14/supercar/cmd stop
+ 65903 16:45:37.153 inf2004/aai14/supercar/cmd/ack stop
+ 65904 16:45:37.332 MQTT: command "stop".
+ 66216 16:46:45.944 inf2004/aai14/supercar/cmd start
+ 66217 16:46:45.976 inf2004/aai14/supercar/cmd/ack start
+ 66218 16:46:46.105 MQTT: command "start".
+ 66247 16:46:51.487 inf2004/aai14/supercar/cmd start
+ 66253 16:46:51.802 inf2004/aai14/supercar/cmd/ack start
+ 66254 16:46:51.802 MQTT: command "start".
+ 66289 16:46:56.029 inf2004/aai14/supercar/cmd stop
+ 66291 16:46:56.210 inf2004/aai14/supercar/cmd/ack stop
+ 66292 16:46:56.210 MQTT: command "stop".
+ 66361 16:47:14.462 inf2004/aai14/supercar/cmd start
+ 66362 16:47:14.486 inf2004/aai14/supercar/cmd/ack start
+ 66363 16:47:14.569 MQTT: command "start".
+ 66450 16:47:25.319 inf2004/aai14/supercar/cmd stop
+ 66452 16:47:26.724 inf2004/aai14/supercar/cmd/ack stop
+ 66453 16:47:26.730 MQTT: command "stop".
+ 66529 16:47:42.343 inf2004/aai14/supercar/cmd start
+ 66530 16:47:42.356 inf2004/aai14/supercar/cmd/ack start
+ 66531 16:47:42.389 MQTT: command "start".
+ 66606 16:47:53.289 inf2004/aai14/supercar/cmd stop
+ 66609 16:47:53.536 inf2004/aai14/supercar/cmd/ack stop
+ 66610 16:47:53.536 MQTT: command "stop".
+ 66692 16:48:11.383 inf2004/aai14/supercar/cmd start
+ 66694 16:48:11.497 inf2004/aai14/supercar/cmd/ack start
+ 66695 16:48:11.497 MQTT: command "start".
+ 66759 16:48:20.575 inf2004/aai14/supercar/cmd stop
+ 66760 16:48:20.591 inf2004/aai14/supercar/cmd/ack stop
+ 66761 16:48:20.696 MQTT: command "stop".
+ 67009 16:49:33.203 inf2004/aai14/supercar/online 0
+ 67010 16:49:49.953 inf2004/aai14/supercar/online 1
+ 67019 16:49:50.050 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 67027 16:49:50.146 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 67028 16:49:50.146 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 67030 16:49:50.162 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 67033 16:49:50.227 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 67034 16:49:50.227 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 67809 16:52:53.292 inf2004/aai14/supercar/cmd start
+ 67816 16:52:54.170 inf2004/aai14/supercar/cmd/ack start
+ 67817 16:52:54.172 MQTT: command "start".
+ 68111 16:53:33.591 inf2004/aai14/supercar/cmd stop
+ 68130 16:53:44.645 MQTT: command "stop".
+ 68293 16:54:19.734 inf2004/aai14/supercar/cmd start
+ 68294 16:54:19.783 inf2004/aai14/supercar/cmd/ack start
+ 68295 16:54:19.876 MQTT: command "start".
+ 68623 16:55:12.995 inf2004/aai14/supercar/cmd start
+ 68625 16:55:15.736 inf2004/aai14/supercar/cmd/ack start
+ 68626 16:55:15.736 MQTT: command "start".
+ 68895 16:56:08.220 inf2004/aai14/supercar/online 0
+ 68896 16:56:13.397 inf2004/aai14/supercar/online 1
+ 68899 16:56:13.466 MQTT: disconnected by the broker; trying again in 5 s.
+ 68900 16:56:13.470 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 68901 16:56:13.470 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 68978 16:56:49.245 inf2004/aai14/supercar/online 0
+ 68979 17:12:52.905 inf2004/aai14/supercar/online 0
+ 68981 17:13:03.335 inf2004/aai14/supercar/cmd start
+ 68982 17:13:26.978 inf2004/aai14/supercar/cmd start
+ 68983 17:13:27.383 inf2004/aai14/supercar/online 1
+ 68992 17:13:27.513 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 69000 17:13:27.601 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 69001 17:13:27.601 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 69003 17:13:27.617 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 69006 17:13:27.681 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 69007 17:13:27.681 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 69067 17:13:40.742 inf2004/aai14/supercar/cmd start
+ 69068 17:13:40.758 inf2004/aai14/supercar/cmd/ack start
+ 69069 17:13:40.846 MQTT: command "start".
+ 69128 17:13:49.668 inf2004/aai14/supercar/cmd stop
+ 69130 17:13:49.909 inf2004/aai14/supercar/cmd/ack stop
+ 69131 17:13:49.909 MQTT: command "stop".
+ 69234 17:14:12.433 inf2004/aai14/supercar/cmd start
+ 69235 17:14:12.560 inf2004/aai14/supercar/cmd/ack start
+ 69236 17:14:12.592 MQTT: command "start".
+ 69309 17:14:21.854 inf2004/aai14/supercar/cmd start
+ 69311 17:14:22.016 inf2004/aai14/supercar/cmd/ack start
+ 69312 17:14:22.016 MQTT: command "start".
+ 69356 17:14:26.078 inf2004/aai14/supercar/cmd stop
+ 69357 17:14:26.275 inf2004/aai14/supercar/cmd/ack stop
+ 69358 17:14:26.367 MQTT: command "stop".
+ 69832 17:16:11.843 inf2004/aai14/supercar/cmd start
+ 69833 17:16:11.875 inf2004/aai14/supercar/cmd/ack start
+ 69834 17:16:11.923 MQTT: command "start".
+ 69891 17:16:21.141 inf2004/aai14/supercar/cmd stop
+ 69894 17:16:21.209 inf2004/aai14/supercar/cmd/ack stop
+ 69895 17:16:21.220 MQTT: command "stop".
+ 69935 17:16:29.599 inf2004/aai14/supercar/cmd start
+ 69937 17:16:29.708 inf2004/aai14/supercar/cmd/ack start
+ 69938 17:16:29.709 MQTT: command "start".
+ 69997 17:16:40.579 inf2004/aai14/supercar/cmd stop
+ 69998 17:16:40.630 inf2004/aai14/supercar/cmd/ack stop
+ 69999 17:16:40.659 MQTT: command "stop".
+ 70053 17:16:52.004 inf2004/aai14/supercar/cmd start
+ 70055 17:16:52.252 inf2004/aai14/supercar/cmd/ack start
+ 70056 17:16:52.252 MQTT: command "start".
+ 70095 17:16:59.441 inf2004/aai14/supercar/cmd stop
+ 70098 17:16:59.516 inf2004/aai14/supercar/cmd/ack stop
+ 70099 17:16:59.516 MQTT: command "stop".
+ 70134 17:17:06.836 inf2004/aai14/supercar/cmd start
+ 70135 17:17:06.873 inf2004/aai14/supercar/cmd/ack start
+ 70136 17:17:06.909 MQTT: command "start".
+ 70192 17:17:16.464 inf2004/aai14/supercar/cmd stop
+ 70194 17:17:16.609 inf2004/aai14/supercar/cmd/ack stop
+ 70195 17:17:16.616 MQTT: command "stop".
+ 70519 17:18:28.210 inf2004/aai14/supercar/cmd start
+ 70521 17:18:28.313 inf2004/aai14/supercar/cmd/ack start
+ 70522 17:18:28.423 MQTT: command "start".
+ 70610 17:18:38.786 inf2004/aai14/supercar/cmd stop
+ 70612 17:18:38.948 inf2004/aai14/supercar/cmd/ack stop
+ 70613 17:18:38.948 MQTT: command "stop".
+ 70748 17:19:08.331 inf2004/aai14/supercar/cmd start
+ 70755 17:19:09.871 inf2004/aai14/supercar/cmd/ack start
+ 70756 17:19:09.873 MQTT: command "start".
+ 70874 17:19:33.391 inf2004/aai14/supercar/cmd stop
+ 70875 17:19:33.407 inf2004/aai14/supercar/cmd/ack stop
+ 70876 17:19:33.455 MQTT: command "stop".
+ 70928 17:19:45.085 inf2004/aai14/supercar/cmd calibrate
+ 70929 17:19:45.106 inf2004/aai14/supercar/cmd/ack calibrate
+ 70930 17:19:50.221 MQTT: command "calibrate".
+ 71001 17:20:06.225 inf2004/aai14/supercar/cmd start
+ 71005 17:20:06.339 inf2004/aai14/supercar/cmd/ack start
+ 71006 17:20:06.343 MQTT: command "start".
+ 71086 17:20:15.215 inf2004/aai14/supercar/cmd stop
+ 71088 17:20:15.296 inf2004/aai14/supercar/cmd/ack stop
+ 71089 17:20:15.296 MQTT: command "stop".
+ 71453 17:21:34.490 inf2004/aai14/supercar/cmd start
+ 71456 17:21:34.583 inf2004/aai14/supercar/cmd/ack start
+ 71457 17:21:34.598 MQTT: command "start".
+ 71510 17:21:44.350 inf2004/aai14/supercar/cmd stop
+ 71511 17:21:44.382 inf2004/aai14/supercar/cmd/ack stop
+ 71512 17:21:44.398 MQTT: command "stop".
+ 71571 17:21:57.333 inf2004/aai14/supercar/cmd start
+ 71572 17:21:57.369 inf2004/aai14/supercar/cmd/ack start
+ 71573 17:21:57.401 MQTT: command "start".
+ 71618 17:22:05.633 inf2004/aai14/supercar/cmd stop
+ 71620 17:22:05.770 inf2004/aai14/supercar/cmd/ack stop
+ 71621 17:22:05.770 MQTT: command "stop".
+ 71680 17:22:17.198 inf2004/aai14/supercar/cmd start
+ 71682 17:22:17.344 inf2004/aai14/supercar/cmd/ack start
+ 71683 17:22:17.344 MQTT: command "start".
+ 71742 17:22:27.151 inf2004/aai14/supercar/cmd stop
+ 71744 17:22:27.330 inf2004/aai14/supercar/cmd/ack stop
+ 71745 17:22:27.330 MQTT: command "stop".
+ 71829 17:22:45.243 inf2004/aai14/supercar/cmd start
+ 71830 17:22:45.418 inf2004/aai14/supercar/cmd/ack start
+ 71831 17:22:45.435 MQTT: command "start".
+ 71896 17:22:54.320 inf2004/aai14/supercar/cmd stop
+ 71898 17:22:54.433 inf2004/aai14/supercar/cmd/ack stop
+ 71899 17:22:54.433 MQTT: command "stop".
+ 71954 17:23:07.345 inf2004/aai14/supercar/cmd start
+ 71955 17:23:07.355 inf2004/aai14/supercar/cmd/ack start
+ 71956 17:23:07.427 MQTT: command "start".
+ 72021 17:23:18.113 inf2004/aai14/supercar/cmd stop
+ 72022 17:23:18.149 inf2004/aai14/supercar/cmd/ack stop
+ 72023 17:23:18.209 MQTT: command "stop".
+ 72060 17:23:25.856 inf2004/aai14/supercar/cmd start
+ 72061 17:23:25.872 inf2004/aai14/supercar/cmd/ack start
+ 72062 17:23:25.905 MQTT: command "start".
+ 72146 17:23:37.945 inf2004/aai14/supercar/cmd stop
+ 72147 17:23:38.015 inf2004/aai14/supercar/cmd/ack stop
+ 72148 17:23:38.043 MQTT: command "stop".
+ 72270 17:24:04.820 inf2004/aai14/supercar/cmd start
+ 72271 17:24:04.850 inf2004/aai14/supercar/cmd/ack start
+ 72272 17:24:04.871 MQTT: command "start".
+ 72343 17:24:11.973 inf2004/aai14/supercar/cmd stop
+ 72345 17:24:12.054 inf2004/aai14/supercar/cmd/ack stop
+ 72346 17:24:12.054 MQTT: command "stop".
+ 72367 17:24:16.123 inf2004/aai14/supercar/cmd start
+ 72368 17:24:16.161 inf2004/aai14/supercar/cmd/ack start
+ 72369 17:24:16.180 MQTT: command "start".
+ 72441 17:24:28.651 inf2004/aai14/supercar/cmd stop
+ 72448 17:24:29.987 inf2004/aai14/supercar/cmd/ack stop
+ 72449 17:24:29.987 MQTT: command "stop".
+ 72542 17:24:50.215 inf2004/aai14/supercar/cmd start
+ 72544 17:24:50.324 inf2004/aai14/supercar/cmd/ack start
+ 72545 17:24:50.324 MQTT: command "start".
+ 72605 17:25:00.735 inf2004/aai14/supercar/cmd stop
+ 72607 17:25:00.884 inf2004/aai14/supercar/cmd/ack stop
+ 72608 17:25:00.884 MQTT: command "stop".
+ 72676 17:25:15.308 inf2004/aai14/supercar/cmd start
+ 72677 17:25:15.358 inf2004/aai14/supercar/cmd/ack start
+ 72678 17:25:15.390 MQTT: command "start".
+ 72767 17:25:22.514 inf2004/aai14/supercar/cmd sto
+ 72772 17:25:24.540 inf2004/aai14/supercar/cmd/ack sto
+ 72773 17:25:24.552 MQTT: command "sto".
+ 72774 17:25:24.552 Web: unknown command "sto" ignored.
+ 72835 17:25:28.824 inf2004/aai14/supercar/cmd stop
+ 72836 17:25:28.842 inf2004/aai14/supercar/cmd/ack stop
+ 72840 17:25:28.889 MQTT: command "stop".
+ 72935 17:26:05.247 inf2004/aai14/supercar/online 0
+ 72936 17:26:34.568 inf2004/aai14/supercar/online 1
+ 72945 17:26:34.706 Wi-Fi: trying hotspot 1 of 1: "<hotspot>"...
+ 72953 17:26:34.776 Wi-Fi: waiting for DHCP on "<hotspot>".
+ 72954 17:26:34.776 Wi-Fi: DHCP ready on "<hotspot>". IPv4 172.20.10.6.
+ 72956 17:26:34.776 Wi-Fi: mDNS registered as supercar-aai14.local.
+ 72959 17:26:34.954 MQTT: connecting to 172.20.10.3 (172.20.10.3:1883)...
+ 72960 17:26:34.954 MQTT: connected to 172.20.10.3; topics inf2004/aai14/supercar/...
+ 72984 17:26:39.986 inf2004/aai14/supercar/cmd start
+ 72985 17:26:40.010 inf2004/aai14/supercar/cmd/ack start
+ 72986 17:26:40.084 MQTT: command "start".
+ 73052 17:26:51.249 inf2004/aai14/supercar/cmd stop
+ 73053 17:26:51.272 inf2004/aai14/supercar/cmd/ack stop
+ 73054 17:26:51.339 MQTT: command "stop".
+ 73094 17:26:59.449 inf2004/aai14/supercar/cmd start
+ 73095 17:26:59.480 inf2004/aai14/supercar/cmd/ack start
+ 73096 17:26:59.519 MQTT: command "start".
+ 73208 17:27:13.149 inf2004/aai14/supercar/cmd stop
+ 73210 17:27:13.243 inf2004/aai14/supercar/cmd/ack stop
+ 73211 17:27:13.244 MQTT: command "stop".
+ 73246 17:27:20.509 inf2004/aai14/supercar/cmd start
+ 73249 17:27:20.774 inf2004/aai14/supercar/cmd/ack start
+ 73250 17:27:20.774 MQTT: command "start".
+ 73311 17:27:31.215 inf2004/aai14/supercar/cmd stop
+ 73314 17:27:31.509 inf2004/aai14/supercar/cmd/ack stop
+ 73315 17:27:31.509 MQTT: command "stop".
+ 73399 17:27:50.399 inf2004/aai14/supercar/cmd start
+ 73402 17:27:50.554 inf2004/aai14/supercar/cmd/ack start
+ 73403 17:27:50.554 MQTT: command "start".
+ 73464 17:28:01.486 inf2004/aai14/supercar/cmd stop
+ 73472 17:28:01.634 inf2004/aai14/supercar/cmd/ack stop
+ 73473 17:28:01.634 MQTT: command "stop".
+ 73549 17:28:17.987 inf2004/aai14/supercar/cmd start
+ 73550 17:28:18.014 inf2004/aai14/supercar/cmd/ack start
+ 73551 17:28:18.062 MQTT: command "start".
+ 73597 17:28:23.817 inf2004/aai14/supercar/cmd stop
+ 73598 17:28:23.934 inf2004/aai14/supercar/cmd/ack stop
+ 73599 17:28:23.964 MQTT: command "stop".
+ 73650 17:28:34.753 inf2004/aai14/supercar/cmd start
+ 73651 17:28:34.800 inf2004/aai14/supercar/cmd/ack start
+ 73652 17:28:34.816 MQTT: command "start".
+ 73716 17:28:45.554 inf2004/aai14/supercar/cmd stop
+ 73717 17:28:45.571 inf2004/aai14/supercar/cmd/ack stop
+ 73718 17:28:45.623 MQTT: command "stop".
+ 73817 17:29:07.583 inf2004/aai14/supercar/cmd start
+ 73819 17:29:07.769 inf2004/aai14/supercar/cmd/ack start
+ 73820 17:29:07.775 MQTT: command "start".
+ 73875 17:29:17.498 inf2004/aai14/supercar/cmd stop
+ 73876 17:29:17.578 inf2004/aai14/supercar/cmd/ack stop
+ 73877 17:29:17.610 MQTT: command "stop".
+ 73953 17:29:34.830 inf2004/aai14/supercar/cmd start
+ 73957 17:29:37.490 inf2004/aai14/supercar/cmd/ack start
+ 73958 17:29:37.492 MQTT: command "start".
+ 74001 17:29:44.118 inf2004/aai14/supercar/cmd stop
+ 74005 17:29:44.295 inf2004/aai14/supercar/cmd/ack stop
+ 74006 17:29:44.295 MQTT: command "stop".
+ 74201 17:30:27.883 inf2004/aai14/supercar/cmd start
+ 74203 17:30:28.048 inf2004/aai14/supercar/cmd/ack start
+ 74204 17:30:28.049 MQTT: command "start".
+ 74268 17:30:38.962 inf2004/aai14/supercar/cmd stop
+ 74277 17:30:39.224 MQTT: command "stop".
+ 74338 17:30:52.880 inf2004/aai14/supercar/cmd start
+ 74343 17:30:53.040 inf2004/aai14/supercar/cmd/ack start
+ 74344 17:30:53.040 MQTT: command "start".
+ 74386 17:31:00.920 inf2004/aai14/supercar/cmd stop
+ 74387 17:31:01.080 inf2004/aai14/supercar/cmd/ack stop
+ 74388 17:31:01.143 MQTT: command "stop".
+ 74590 17:31:45.161 inf2004/aai14/supercar/cmd start
+ 74592 17:31:45.269 inf2004/aai14/supercar/cmd/ack start
+ 74593 17:31:45.269 MQTT: command "start".
+ 74671 17:31:57.181 inf2004/aai14/supercar/cmd stop
+ 74673 17:31:59.165 inf2004/aai14/supercar/cmd/ack stop
+ 74674 17:31:59.177 MQTT: command "stop".
+ 74718 17:32:08.015 inf2004/aai14/supercar/cmd start
+ 74721 17:32:10.345 inf2004/aai14/supercar/cmd/ack start
+ 74722 17:32:10.345 MQTT: command "start".
+ 74771 17:32:17.627 inf2004/aai14/supercar/cmd stop
+ 74774 17:32:17.714 inf2004/aai14/supercar/cmd/ack stop
+ 74775 17:32:17.714 MQTT: command "stop".
+ 74838 17:32:31.532 inf2004/aai14/supercar/cmd start
+ 74839 17:32:31.561 inf2004/aai14/supercar/cmd/ack start
+ 74840 17:32:31.587 MQTT: command "start".
+ 74925 17:32:43.179 inf2004/aai14/supercar/cmd stop
+ 74926 17:32:43.209 inf2004/aai14/supercar/cmd/ack stop
+ 74927 17:32:43.242 MQTT: command "stop".
+ 75002 17:32:59.121 inf2004/aai14/supercar/cmd start
+ 75003 17:32:59.199 inf2004/aai14/supercar/cmd/ack start
+ 75004 17:32:59.362 MQTT: command "start".
+ 75063 17:33:09.030 inf2004/aai14/supercar/cmd stop
+ 75065 17:33:09.221 inf2004/aai14/supercar/cmd/ack stop
+ 75066 17:33:09.221 MQTT: command "stop".
+ 75123 17:33:21.083 inf2004/aai14/supercar/cmd start
+ 75124 17:33:21.097 inf2004/aai14/supercar/cmd/ack start
+ 75125 17:33:21.113 MQTT: command "start".
+ 75250 17:33:31.587 inf2004/aai14/supercar/cmd stop
+ 75251 17:33:31.604 inf2004/aai14/supercar/cmd/ack stop
+ 75252 17:33:31.694 MQTT: command "stop".
+ 75291 17:33:40.468 inf2004/aai14/supercar/cmd start
+ 75295 17:33:41.712 inf2004/aai14/supercar/cmd/ack start
+ 75296 17:33:41.716 MQTT: command "start".
+ 75376 17:33:51.382 inf2004/aai14/supercar/cmd stop
+ 75377 17:33:51.412 inf2004/aai14/supercar/cmd/ack stop
+ 75378 17:33:51.415 MQTT: command "stop".
+ 75438 17:34:04.433 inf2004/aai14/supercar/cmd start
+ 75440 17:34:04.609 inf2004/aai14/supercar/cmd/ack start
+ 75441 17:34:04.613 MQTT: command "start".
+ 75484 17:34:09.497 inf2004/aai14/supercar/cmd start
+ 75485 17:34:09.538 inf2004/aai14/supercar/cmd/ack start
+ 75486 17:34:09.597 MQTT: command "start".
+ 75513 17:34:12.680 inf2004/aai14/supercar/cmd stop
+ 75515 17:34:12.805 inf2004/aai14/supercar/cmd/ack stop
+ 75516 17:34:12.805 MQTT: command "stop".
+ 75543 17:34:18.464 inf2004/aai14/supercar/cmd start
+ 75544 17:34:18.533 inf2004/aai14/supercar/cmd/ack start
+ 75545 17:34:18.545 MQTT: command "start".
+ 75612 17:34:26.072 inf2004/aai14/supercar/cmd stop
+ 75613 17:34:26.118 inf2004/aai14/supercar/cmd/ack stop
+ 75614 17:34:26.139 MQTT: command "stop".
+ 75639 17:34:31.530 inf2004/aai14/supercar/cmd start
+ 75642 17:34:31.656 inf2004/aai14/supercar/cmd/ack start
+ 75643 17:34:31.656 MQTT: command "start".
+ 75686 17:34:37.355 inf2004/aai14/supercar/cmd stop
+ 75689 17:34:37.506 inf2004/aai14/supercar/cmd/ack stop
+ 75690 17:34:37.506 MQTT: command "stop".
+ 75726 17:34:44.778 inf2004/aai14/supercar/cmd start
+ 75727 17:34:44.789 inf2004/aai14/supercar/cmd/ack start
+ 75728 17:34:44.834 MQTT: command "start".
+ 75772 17:34:52.632 inf2004/aai14/supercar/cmd stop
+ 75775 17:34:52.984 inf2004/aai14/supercar/cmd/ack stop
+ 75776 17:34:52.984 MQTT: command "stop".
+ 75819 17:35:02.326 inf2004/aai14/supercar/cmd start
+ 75822 17:35:02.462 inf2004/aai14/supercar/cmd/ack start
+ 75823 17:35:02.462 MQTT: command "start".
+ 75880 17:35:12.458 inf2004/aai14/supercar/cmd stop
+ 75883 17:35:12.517 inf2004/aai14/supercar/cmd/ack stop
+ 75884 17:35:12.517 MQTT: command "stop".
+ 76321 17:36:56.971 inf2004/aai14/supercar/cmd start
+ 76322 17:36:56.971 inf2004/aai14/supercar/cmd/ack start
+ 76323 17:36:57.007 MQTT: command "start".

@@ -25,29 +25,66 @@ running Windows, macOS or Linux.
 
 1. Install VS Code, then the **Raspberry Pi Pico** extension (publisher:
    Raspberry Pi).
-2. Open this folder. The top of `CMakeLists.txt` tells the extension which
-   versions to use: **Pico SDK 2.3.1**, **Arm toolchain 15_2_Rel1**,
-   picotool 2.3.1. It downloads them into `~/.pico-sdk/` the first time
-   (a few minutes).
+2. Open this folder. The top of `CMakeLists.txt` asks the extension for
+   **Pico SDK 2.3.1**, **Arm toolchain 15_2_Rel1** and picotool 2.3.1, which
+   it downloads into `~/.pico-sdk/` the first time (a few minutes).
 3. Install **Python 3** if you do not have it: the build runs a coding
    standard check (`tools/check_barr.py`) before it compiles.
 
-**Without VS Code:** install `cmake`, `ninja`, Python 3, the Arm GNU
-Toolchain (`arm-none-eabi-gcc`, on your `PATH`) and the Pico SDK 2.3.1
-(`git clone --branch 2.3.1 https://github.com/raspberrypi/pico-sdk.git`,
-then `git submodule update --init` inside it), and set `PICO_SDK_PATH` to
-the SDK folder.
+**Which compiler is actually used.** If another `arm-none-eabi-gcc` is
+earlier on your `PATH` (for example from an older "Pico SDK v1.5.1"
+Windows installer), CMake may pick that one instead of 15_2_Rel1: check
+`CMAKE_C_COMPILER` in `build/CMakeCache.txt`. The firmware in this
+repository has been built with GNU Arm 10.3-2021.10 found that way, against
+Pico SDK 2.3.1.
+
+**Without VS Code:** install `cmake` (3.13 or later), `ninja`, Python 3 and
+the Arm GNU Toolchain (`arm-none-eabi-gcc` on your `PATH`), and get Pico SDK
+2.3.1 with the submodules this project uses (USB serial, Wi-Fi, lwIP):
+
+```sh
+git clone --branch 2.3.1 https://github.com/raspberrypi/pico-sdk.git
+cd pico-sdk
+git submodule update --init lib/tinyusb lib/cyw43-driver lib/lwip
+```
+
+Then set `PICO_SDK_PATH` to that folder. **Note:** if
+`~/.pico-sdk/cmake/pico-vscode.cmake` exists (the VS Code extension has
+been installed), `CMakeLists.txt` uses `~/.pico-sdk/sdk/2.3.1` and
+**ignores** your `PICO_SDK_PATH`.
 
 ---
 
 ## 2. Build the `.uf2` file
 
-**2.1 Wi-Fi hotspots (once)**
+**2.1 Fill in your Wi-Fi hotspot and MQTT broker (required, once)**
 
-Copy `config/wifi_secrets.example.h` to `config/wifi_secrets.h` and list
-the hotspots the car may join. `config/wifi_secrets.h` is git-ignored:
-never commit real passwords. Without it the car makes its own network
-(section 4).
+> ⚠️ **The repository contains no Wi-Fi credentials.** Before you build,
+> tell the car which hotspot to join, or it cannot reach your laptop.
+
+1. Copy `config/wifi_secrets.example.h` to **`config/wifi_secrets.h`**.
+2. In `config/wifi_secrets.h`, replace the example entries in
+   `HOTSPOT_LIST` with your own hotspot's name and password:
+
+   ```c
+   #define HOTSPOT_LIST                                                  \
+       {"Your Hotspot Name", "your-password"}
+   ```
+
+   For more than one hotspot, separate the entries with commas:
+   `{"Phone A", "passwordA"}, {"Phone B", "passwordB"}`. The car tries them
+   in that order. The name must match exactly; an iPhone's name uses a
+   curly apostrophe (`Name’s iPhone`). Use a 2.4 GHz hotspot; on an iPhone
+   turn on **Maximise Compatibility**.
+3. In `config/config.h`, set **`MQTT_BROKER_HOST`** to the IP address of
+   the laptop running the MQTT broker on that hotspot (see section 6). It
+   can also be changed later from the dashboard.
+4. Build (2.2). If you add or change `wifi_secrets.h` after a build, save
+   `config/config.h` too or do a clean build, so the change is picked up.
+
+`config/wifi_secrets.h` is git-ignored: **never commit it** or put real
+passwords in any other file. Without it, the car makes its own network
+instead (section 4).
 
 **2.2 Build**
 
@@ -87,7 +124,7 @@ section 5.
 |---|---|
 | `app_program/app_main.c` | `main()`: initialises every module, then runs the 10 ms control loop that calls each module's `*_task()` step (order in `TEAM.md` section 4) |
 | `app_program/vehicle.c` | The vehicle state machine that ties the subsystems together |
-| `app_program/<subsystem>/` | One folder per subsystem: `line_barcode/` (S1), `motion/` (S2), `obstacle/` (S3), `comms/` (S4), `imu_hump/` (S5). Each `.h` file is that module's public interface |
+| `app_program/<subsystem>/` | One folder per subsystem: `line_barcode/` (S1), `motion/` (S2), `obstacle/` (S3), `comms/` (S4), `imu_hump/` (S5). Headers used by other folders are that subsystem's public interface; `obstacle/bypass_geometry.h` is private to `bypass.c`, and `obstacle/scan_plot.h` (the dashboard's scan plot) is used only by `comms/web.c` |
 | `app_program/*.c` (others) | Shared helpers: GPIO interrupt dispatch, battery voltage, buzzer |
 | `config/config.h` | Every pin, threshold, speed and network setting, shared by the team |
 | `config/lwipopts.h` | Network stack settings |
@@ -100,8 +137,9 @@ section 5.
   folder.
 - **CMake lists every source file.** A new `.c` file must be added to
   `add_executable(supercar …)` in `CMakeLists.txt`, and a new folder to
-  `target_include_directories`. Keep folders at most one level below
-  `app_program/`.
+  `target_include_directories`. Keep code in `app_program/` itself or one
+  subsystem folder below it. This is a team convention from the course
+  template; CMake itself compiles whatever is listed, at any depth.
 - Each peripheral is driven by one module; record pins, owners and
   interfaces in **`TEAM.md`** before wiring or coding them, and record every
   test in **`testing/`**. Videos are shared as unlisted YouTube links listed
@@ -119,7 +157,7 @@ After editing, build again and copy the new `.uf2`.
 | Option | Where | Values | What it does |
 |---|---|---|---|
 | `PICO_BOARD` | `CMakeLists.txt` / `-DPICO_BOARD=` | **`pico_w`**, `pico2_w` | Which Pico is on the Robo Pico |
-| `CMAKE_BUILD_TYPE` | `-DCMAKE_BUILD_TYPE=` | `Debug`, `Release` | Debug is what VS Code uses; Release is smaller |
+| `CMAKE_BUILD_TYPE` | `-DCMAKE_BUILD_TYPE=` | `Debug`, `Release` | Debug is what the VS Code extension uses. With no build type given, the Pico SDK defaults to Release, which is optimised for speed and was about 30 KB *larger* here (478,452 vs 447,408 bytes for `supercar.bin`, measured once with GNU Arm 10.3-2021.10; other toolchains may differ) |
 | `MQTT_ENABLED` | `config/config.h` | **`true`**, `false` | MQTT telemetry and commands |
 | `MQTT_BROKER_HOST` | `config/config.h` | `"172.20.10.3"` | Default broker (the laptop on the phone hotspot); can be changed at run time |
 | `BYPASS_ENABLED` | `config/config.h` | **`true`**, `false` | Drive round obstacles; `false` stays BLOCKED |
@@ -233,9 +271,10 @@ Latest notes from the obstacle work (24 November 2026):
 - Genuine full-angle scans keep the raw and calibrated width and measured
   range; a separate corrected width uses a labelled 150 mm fallback when
   needed. Planning width is at least 150 mm, depth 150 mm.
-- After alignment, one low-speed forward-only correction is allowed (at
-  most 60 mm / 3 s, ±5° steering). Missing-line recovery searches up to
-  240 mm / 8 s with ±25° heading targets.
+- If the line is not confirmed after alignment, one low-speed,
+  forward-only correction is allowed, up to 240 mm / 8 s with ±25° heading
+  targets (`BYPASS_NUDGE_MAX_MM`, `BYPASS_NUDGE_MAX_MSEC`,
+  `BYPASS_NUDGE_HEADING_DEG`).
 
 Before relying on the bypass, check forward clearance, encoder distance,
 pivot angles and final line alignment on the real surface. Full BARR-C

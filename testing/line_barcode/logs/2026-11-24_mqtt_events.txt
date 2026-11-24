@@ -1,0 +1,2961 @@
+# line_barcode: MQTT log events, 2026-11-24
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 77805 10:35:02.021 State: READY -> LINE_CAL
+ 77806 10:35:02.021 LINE_CAL: right sensor on black -> forward, arcing right.
+ 77808 10:35:02.233 LINE_CAL OK: both sensors on the line -> following.
+ 77809 10:35:02.236 State: LINE_CAL -> FOLLOW_LINE
+ 77810 10:35:02.236 Barcode reader ON; IRQ edges=129
+ 77835 10:35:09.999 Barcode capture started; IRQ edges=166
+ 77836 10:35:09.999 Barcode capture started; IRQ edges=166
+ 77837 10:35:09.999 Barcode capture started; IRQ edges=166
+ 77838 10:35:10.006 Barcode capture started; IRQ edges=166
+ 77839 10:35:10.006 Barcode capture started; IRQ edges=166
+ 77840 10:35:10.006 Barcode capture started; IRQ edges=166
+ 77841 10:35:10.006 Barcode capture started; IRQ edges=166
+ 77842 10:35:10.115 Barcode capture started; IRQ edges=166
+ 77843 10:35:10.115 Barcode capture started; IRQ edges=166
+ 77844 10:35:10.125 Barcode capture started; IRQ edges=166
+ 77845 10:35:10.125 Barcode capture started; IRQ edges=166
+ 77846 10:35:10.125 Barcode capture started; IRQ edges=166
+ 77847 10:35:10.125 Barcode capture started; IRQ edges=166
+ 77858 10:35:11.804 Barcode lenient: 19 bars+spaces cannot be "*X*" with at most 8 missing.
+ 77859 10:35:11.859 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 77862 10:35:11.862 Barcode NOT decoded: 19 bars+spaces seen (valid: 10 per character - 1).
+ 77882 10:35:16.204 Barcode capture started; IRQ edges=531
+ 77883 10:35:16.266 Barcode capture started; IRQ edges=531
+ 77884 10:35:16.268 Barcode capture started; IRQ edges=531
+ 77885 10:35:16.268 Barcode capture started; IRQ edges=531
+ 77886 10:35:16.268 Barcode capture started; IRQ edges=531
+ 77887 10:35:16.268 Barcode capture started; IRQ edges=531
+ 77888 10:35:16.268 Barcode capture started; IRQ edges=531
+ 77889 10:35:16.278 Barcode capture started; IRQ edges=531
+ 77890 10:35:16.351 Barcode capture started; IRQ edges=531
+ 77891 10:35:16.353 Barcode capture started; IRQ edges=531
+ 77892 10:35:16.353 Barcode capture started; IRQ edges=531
+ 77893 10:35:16.358 Barcode capture started; IRQ edges=531
+ 77894 10:35:16.358 Barcode capture started; IRQ edges=531
+ 77895 10:35:16.358 Barcode capture started; IRQ edges=531
+ 77896 10:35:16.358 Barcode capture started; IRQ edges=531
+ 77897 10:35:16.358 Barcode capture started; IRQ edges=531
+ 77898 10:35:16.436 Barcode capture started; IRQ edges=531
+ 77899 10:35:16.444 Barcode capture started; IRQ edges=531
+ 77900 10:35:16.444 Barcode capture started; IRQ edges=531
+ 77901 10:35:16.444 Barcode capture started; IRQ edges=531
+ 77902 10:35:16.444 Barcode capture started; IRQ edges=531
+ 77903 10:35:16.452 Barcode capture started; IRQ edges=531
+ 77904 10:35:16.452 Barcode capture started; IRQ edges=531
+ 77905 10:35:16.452 Barcode capture started; IRQ edges=531
+ 77906 10:35:16.513 Barcode capture started; IRQ edges=531
+ 77911 10:35:16.518 Barcode reader OFF; IRQ edges=531
+ 77912 10:35:16.518 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 77913 10:35:16.518 Barcode: only 0 bars+spaces seen, ignored.
+ 77991 10:35:32.321 State: PICKED_UP -> LINE_CAL
+ 77992 10:35:32.321 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 77993 10:35:32.321 State: LINE_CAL -> FOLLOW_LINE
+ 77994 10:35:32.321 Barcode reader ON; IRQ edges=581
+ 77997 10:35:32.781 Barcode capture started; IRQ edges=588
+ 77998 10:35:32.908 Barcode capture started; IRQ edges=588
+ 78026 10:35:38.784 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":346316}
+ 78027 10:35:38.863 Barcode COMMAND: "Z" = TURN RIGHT
+ 78028 10:35:38.878 Pending: TURN RIGHT at the next crossroad.
+ 78033 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78034 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78035 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78036 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78037 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78038 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78039 10:35:39.702 Barcode capture started; IRQ edges=995
+ 78040 10:35:39.750 Barcode capture started; IRQ edges=995
+ 78046 10:35:40.336 Barcode reader OFF; IRQ edges=995
+ 78047 10:35:40.336 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 78048 10:35:40.347 Barcode: only 0 bars+spaces seen, ignored.
+ 81452 10:49:12.997 === SuperCar AAI14: line + barcode + hump/wall ===
+ 81459 10:49:13.061 Barcode reader OFF; IRQ edges=0
+ 81508 10:49:38.964 === SuperCar AAI14: line + barcode + hump/wall ===
+ 81515 10:49:38.986 Barcode reader OFF; IRQ edges=0
+ 81592 10:49:56.363 State: READY -> LINE_CAL
+ 81593 10:49:56.365 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 81594 10:49:56.365 State: LINE_CAL -> FOLLOW_LINE
+ 81595 10:49:56.365 Barcode reader ON; IRQ edges=0
+ 81614 10:49:59.455 Barcode reader OFF; IRQ edges=0
+ 81641 10:50:04.459 Barcode reader ON; IRQ edges=0
+ 81644 10:50:04.550 Barcode capture started; IRQ edges=32
+ 81645 10:50:04.564 Barcode capture started; IRQ edges=32
+ 81646 10:50:04.565 Barcode capture started; IRQ edges=32
+ 81647 10:50:04.565 Barcode capture started; IRQ edges=32
+ 81648 10:50:04.565 Barcode capture started; IRQ edges=32
+ 81649 10:50:04.565 Barcode capture started; IRQ edges=32
+ 81650 10:50:04.565 Barcode capture started; IRQ edges=32
+ 81651 10:50:04.565 Barcode capture started; IRQ edges=32
+ 81652 10:50:04.644 Barcode capture started; IRQ edges=32
+ 81653 10:50:04.646 Barcode capture started; IRQ edges=32
+ 81654 10:50:04.646 Barcode capture started; IRQ edges=32
+ 81655 10:50:04.646 Barcode capture started; IRQ edges=32
+ 81658 10:50:04.994 Barcode initial mark 432 ms: treated as junction, scan dropped.
+ 81675 10:50:07.660 Barcode reader OFF; IRQ edges=33
+ 81769 10:50:25.058 State: STOPPED -> LINE_CAL
+ 81770 10:50:25.074 LINE_CAL: right sensor on black -> forward, arcing right.
+ 81771 10:50:25.235 LINE_CAL OK: both sensors on the line -> following.
+ 81772 10:50:25.300 State: LINE_CAL -> FOLLOW_LINE
+ 81773 10:50:25.300 Barcode reader ON; IRQ edges=474
+ 81792 10:50:28.343 Barcode reader OFF; IRQ edges=474
+ 81816 10:50:32.575 Barcode reader ON; IRQ edges=494
+ 81825 10:50:34.091 Line lost: reversing 330 ms of path to where both sensors were on it.
+ 81826 10:50:34.263 Reverse done (a sensor found black).
+ 81828 10:50:34.355 Barcode capture started; IRQ edges=527
+ 81829 10:50:34.355 Barcode capture started; IRQ edges=527
+ 81830 10:50:34.355 Barcode capture started; IRQ edges=527
+ 81831 10:50:34.355 Barcode capture started; IRQ edges=527
+ 81832 10:50:34.355 Barcode capture started; IRQ edges=527
+ 81833 10:50:34.355 Barcode capture started; IRQ edges=527
+ 81834 10:50:34.419 Barcode capture started; IRQ edges=527
+ 81835 10:50:34.422 Barcode capture started; IRQ edges=527
+ 81836 10:50:34.422 Barcode capture started; IRQ edges=527
+ 81837 10:50:34.422 Barcode capture started; IRQ edges=527
+ 81838 10:50:34.422 Barcode capture started; IRQ edges=527
+ 81844 10:50:34.884 Barcode reader OFF; IRQ edges=527
+ 81845 10:50:34.884 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 81846 10:50:34.884 Barcode: only 0 bars+spaces seen, ignored.
+ 81973 10:50:58.862 State: STOPPED -> LINE_CAL
+ 81974 10:50:58.862 LINE_CAL: right sensor on black -> forward, arcing right.
+ 81977 10:50:59.204 LINE_CAL OK: both sensors on the line -> following.
+ 81978 10:50:59.315 State: LINE_CAL -> FOLLOW_LINE
+ 81979 10:50:59.319 Barcode reader ON; IRQ edges=839
+ 82000 10:51:02.625 Barcode reader OFF; IRQ edges=839
+ 82019 10:51:05.820 Barcode reader ON; IRQ edges=852
+ 82030 10:51:07.741 Barcode capture started; IRQ edges=869
+ 82031 10:51:07.947 Barcode capture started; IRQ edges=869
+ 82032 10:51:07.947 Barcode capture started; IRQ edges=869
+ 82033 10:51:07.947 Barcode capture started; IRQ edges=869
+ 82034 10:51:07.947 Barcode capture started; IRQ edges=869
+ 82035 10:51:07.957 Barcode capture started; IRQ edges=869
+ 82042 10:51:08.275 Barcode reader OFF; IRQ edges=869
+ 82043 10:51:08.275 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 82044 10:51:08.275 Barcode: only 0 bars+spaces seen, ignored.
+ 85136 13:09:44.260 === SuperCar AAI14: line + barcode + hump/wall ===
+ 85143 13:09:44.316 Barcode reader OFF; IRQ edges=0
+ 85279 13:10:14.603 State: READY -> LINE_CAL
+ 85280 13:10:14.603 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 85281 13:10:14.603 State: LINE_CAL -> FOLLOW_LINE
+ 85282 13:10:14.603 Barcode reader ON; IRQ edges=0
+ 85305 13:10:18.841 Barcode reader OFF; IRQ edges=2
+ 85321 13:10:21.099 Barcode reader ON; IRQ edges=21
+ 85334 13:10:23.089 Barcode reader OFF; IRQ edges=23
+ 88241 13:20:59.584 State: STOPPED -> LINE_CAL
+ 88242 13:20:59.591 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 88243 13:20:59.591 State: LINE_CAL -> FOLLOW_LINE
+ 88244 13:20:59.591 Barcode reader ON; IRQ edges=303
+ 88262 13:21:02.932 Barcode reader OFF; IRQ edges=303
+ 88557 13:21:40.229 State: STOPPED -> LINE_CAL
+ 88558 13:21:40.425 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 88559 13:21:40.425 State: LINE_CAL -> FOLLOW_LINE
+ 88560 13:21:40.425 Barcode reader ON; IRQ edges=460
+ 88577 13:21:43.168 Barcode reader OFF; IRQ edges=461
+ 89019 13:23:45.079 === SuperCar AAI14: line + barcode + hump/wall ===
+ 89026 13:23:45.240 Barcode reader OFF; IRQ edges=0
+ 89551 13:25:43.207 State: READY -> LINE_CAL
+ 89552 13:25:43.223 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 89553 13:25:43.223 State: LINE_CAL -> FOLLOW_LINE
+ 89554 13:25:43.223 Barcode reader ON; IRQ edges=3234
+ 89572 13:25:55.841 Barcode reader OFF; IRQ edges=3234
+ 89921 13:26:47.527 State: STOPPED -> LINE_CAL
+ 89922 13:26:47.527 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 89923 13:26:47.527 State: LINE_CAL -> FOLLOW_LINE
+ 89924 13:26:47.527 Barcode reader ON; IRQ edges=3331
+ 89977 13:26:59.896 Barcode reader OFF; IRQ edges=3333
+ 90367 13:27:57.549 State: STOPPED -> LINE_CAL
+ 90368 13:27:57.549 LINE_CAL: right sensor on black -> forward, arcing right.
+ 90370 13:27:58.352 LINE_CAL OK: both sensors on the line -> following.
+ 90371 13:27:58.354 State: LINE_CAL -> FOLLOW_LINE
+ 90372 13:27:58.354 Barcode reader ON; IRQ edges=3658
+ 90481 13:28:23.601 Line lost: reversing 310 ms of path to where both sensors were on it.
+ 90482 13:28:23.601 Reverse done (a sensor found black).
+ 90483 13:28:23.605 Barcode capture started; IRQ edges=3660
+ 90492 13:28:25.411 Barcode: only 3 bars+spaces seen, ignored.
+ 90506 13:28:28.301 Barcode capture started; IRQ edges=3844
+ 90507 13:28:28.301 Barcode capture started; IRQ edges=3844
+ 90515 13:28:31.784 Barcode: only 1 bars+spaces seen, ignored.
+ 90561 13:28:41.253 Barcode reader OFF; IRQ edges=3846
+ 90607 13:28:50.912 State: STOPPED -> LINE_CAL
+ 90608 13:28:50.912 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 90609 13:28:50.916 State: LINE_CAL -> FOLLOW_LINE
+ 90610 13:28:50.916 Barcode reader ON; IRQ edges=3846
+ 90651 13:29:20.826 Barcode reader OFF; IRQ edges=3846
+ 90681 13:29:25.296 State: STOPPED -> LINE_CAL
+ 90682 13:29:25.296 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 90683 13:29:25.296 State: LINE_CAL -> FOLLOW_LINE
+ 90684 13:29:25.296 Barcode reader ON; IRQ edges=3856
+ 90685 13:29:25.526 Barcode capture started; IRQ edges=3862
+ 90686 13:29:25.526 Barcode capture started; IRQ edges=3862
+ 90687 13:29:25.526 Barcode capture started; IRQ edges=3862
+ 90699 13:29:27.966 Barcode: only 1 bars+spaces seen, ignored.
+ 90783 13:30:08.532 === SuperCar AAI14: line + barcode + hump/wall ===
+ 90790 13:30:08.738 Barcode reader OFF; IRQ edges=0
+ 90877 13:30:24.578 State: READY -> LINE_CAL
+ 90878 13:30:24.594 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 90879 13:30:24.594 State: LINE_CAL -> FOLLOW_LINE
+ 90880 13:30:24.594 Barcode reader ON; IRQ edges=222
+ 90892 13:30:25.949 Barcode reader OFF; IRQ edges=222
+ 91000 13:30:47.719 State: STOPPED -> LINE_CAL
+ 91001 13:30:47.719 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 91002 13:30:47.735 State: LINE_CAL -> FOLLOW_LINE
+ 91003 13:30:47.735 Barcode reader ON; IRQ edges=612
+ 91014 13:30:49.165 Barcode reader OFF; IRQ edges=613
+ 91211 13:31:35.374 State: STOPPED -> LINE_CAL
+ 91212 13:31:35.374 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 91213 13:31:35.374 State: LINE_CAL -> FOLLOW_LINE
+ 91214 13:31:35.374 Barcode reader ON; IRQ edges=1177
+ 91219 13:31:36.600 Line lost: reversing 1450 ms of path to where both sensors were on it.
+ 91221 13:31:36.602 Reverse done (a sensor found black).
+ 91264 13:31:47.053 Barcode reader OFF; IRQ edges=1177
+ 94738 13:44:33.165 State: STOPPED -> LINE_CAL
+ 94739 13:44:33.165 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 94740 13:44:33.165 State: LINE_CAL -> FOLLOW_LINE
+ 94741 13:44:33.165 Barcode reader ON; IRQ edges=1607
+ 94763 13:44:37.979 Line lost: reversing 4830 ms of path to where both sensors were on it.
+ 94769 13:44:38.403 Barcode reader OFF; IRQ edges=1607
+ 94813 13:44:49.945 State: PICKED_UP -> LINE_CAL
+ 94814 13:44:49.945 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 94815 13:44:49.945 State: LINE_CAL -> FOLLOW_LINE
+ 94816 13:44:49.945 Barcode reader ON; IRQ edges=2255
+ 94841 13:44:54.420 Barcode reader OFF; IRQ edges=2256
+ 94875 13:45:13.764 State: PICKED_UP -> LINE_CAL
+ 94876 13:45:13.764 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 94877 13:45:13.764 State: LINE_CAL -> FOLLOW_LINE
+ 94878 13:45:13.764 Barcode reader ON; IRQ edges=2878
+ 94892 13:45:18.763 Barcode reader OFF; IRQ edges=2880
+ 94901 13:45:18.874 Barcode reader ON; IRQ edges=2925
+ 94902 13:45:18.944 Barcode capture started; IRQ edges=2928
+ 94909 13:45:20.505 Barcode: only 0 bars+spaces seen, ignored.
+ 94920 13:45:22.651 Barcode capture started; IRQ edges=3026
+ 94921 13:45:22.651 Barcode capture started; IRQ edges=3026
+ 94922 13:45:22.651 Barcode capture started; IRQ edges=3026
+ 94923 13:45:22.651 Barcode capture started; IRQ edges=3026
+ 94924 13:45:22.651 Barcode capture started; IRQ edges=3026
+ 94925 13:45:22.651 Barcode capture started; IRQ edges=3026
+ 94926 13:45:22.661 Barcode capture started; IRQ edges=3026
+ 94927 13:45:22.826 Barcode capture started; IRQ edges=3026
+ 94928 13:45:22.826 Barcode capture started; IRQ edges=3026
+ 94929 13:45:22.831 Barcode capture started; IRQ edges=3026
+ 94930 13:45:22.831 Barcode capture started; IRQ edges=3026
+ 94931 13:45:22.831 Barcode capture started; IRQ edges=3026
+ 94932 13:45:22.831 Barcode capture started; IRQ edges=3026
+ 94933 13:45:22.831 Barcode capture started; IRQ edges=3026
+ 94934 13:45:22.831 Barcode capture started; IRQ edges=3026
+ 94935 13:45:22.926 Barcode capture started; IRQ edges=3026
+ 94936 13:45:22.936 Barcode capture started; IRQ edges=3026
+ 94937 13:45:22.939 Barcode capture started; IRQ edges=3026
+ 94938 13:45:22.941 Barcode capture started; IRQ edges=3026
+ 94939 13:45:22.943 Barcode capture started; IRQ edges=3026
+ 94940 13:45:22.945 Barcode capture started; IRQ edges=3026
+ 94941 13:45:22.945 Barcode capture started; IRQ edges=3026
+ 94942 13:45:22.947 Barcode capture started; IRQ edges=3026
+ 94944 13:45:24.439 Barcode capture started; IRQ edges=3026
+ 94945 13:45:24.441 Barcode capture started; IRQ edges=3026
+ 94946 13:45:24.445 Barcode capture started; IRQ edges=3026
+ 94947 13:45:24.445 Barcode capture started; IRQ edges=3026
+ 94948 13:45:24.445 Barcode capture started; IRQ edges=3026
+ 94949 13:45:24.445 Barcode capture started; IRQ edges=3026
+ 94950 13:45:24.445 Barcode capture started; IRQ edges=3026
+ 94951 13:45:24.445 Barcode capture started; IRQ edges=3026
+ 94952 13:45:24.643 Barcode capture started; IRQ edges=3026
+ 94953 13:45:24.643 Barcode capture started; IRQ edges=3026
+ 94954 13:45:24.643 Barcode capture started; IRQ edges=3026
+ 94955 13:45:24.652 Barcode capture started; IRQ edges=3026
+ 94956 13:45:24.652 Barcode capture started; IRQ edges=3026
+ 94957 13:45:24.652 Barcode capture started; IRQ edges=3026
+ 94958 13:45:24.656 Barcode capture started; IRQ edges=3026
+ 94963 13:45:24.721 Barcode reader OFF; IRQ edges=3049
+ 94964 13:45:24.721 Barcode: reading switched off after 5 bars+spaces -> decoding what was read.
+ 94965 13:45:24.736 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+ 94966 13:45:24.736 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 94968 13:45:24.883 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+ 95073 13:45:45.991 State: STOPPED -> LINE_CAL
+ 95074 13:45:45.991 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 95075 13:45:45.991 State: LINE_CAL -> FOLLOW_LINE
+ 95076 13:45:45.991 Barcode reader ON; IRQ edges=3886
+ 95095 13:45:52.244 Barcode capture started; IRQ edges=3910
+ 95096 13:45:52.247 Barcode capture started; IRQ edges=3910
+ 95097 13:45:52.249 Barcode capture started; IRQ edges=3910
+ 95098 13:45:52.249 Barcode capture started; IRQ edges=3910
+ 95099 13:45:52.249 Barcode capture started; IRQ edges=3910
+ 95100 13:45:52.255 Barcode capture started; IRQ edges=3910
+ 95101 13:45:52.255 Barcode capture started; IRQ edges=3910
+ 95102 13:45:52.549 Barcode capture started; IRQ edges=3910
+ 95103 13:45:52.551 Barcode capture started; IRQ edges=3910
+ 95104 13:45:52.553 Barcode capture started; IRQ edges=3910
+ 95105 13:45:52.555 Barcode capture started; IRQ edges=3910
+ 95116 13:45:54.437 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"TURN RIGHT","t":963644}
+ 95117 13:45:54.437 Barcode COMMAND: "Z" = TURN RIGHT
+ 95118 13:45:54.437 Pending: TURN RIGHT at the next crossroad.
+ 95131 13:45:56.252 Barcode reader OFF; IRQ edges=4400
+ 96850 13:52:17.211 State: PICKED_UP -> LINE_CAL
+ 96851 13:52:17.211 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 96852 13:52:17.211 State: LINE_CAL -> FOLLOW_LINE
+ 96853 13:52:17.211 Barcode reader ON; IRQ edges=5485
+ 96854 13:52:17.354 Barcode capture started; IRQ edges=5551
+ 96855 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96856 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96857 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96858 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96859 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96860 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96861 13:52:17.355 Barcode capture started; IRQ edges=5551
+ 96862 13:52:17.500 Barcode capture started; IRQ edges=5551
+ 96863 13:52:17.500 Barcode capture started; IRQ edges=5551
+ 96864 13:52:17.500 Barcode capture started; IRQ edges=5551
+ 96865 13:52:17.506 Barcode capture started; IRQ edges=5551
+ 96866 13:52:17.506 Barcode capture started; IRQ edges=5551
+ 96867 13:52:17.506 Barcode capture started; IRQ edges=5551
+ 96868 13:52:17.506 Barcode capture started; IRQ edges=5551
+ 96869 13:52:17.513 Barcode capture started; IRQ edges=5551
+ 96870 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96871 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96872 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96873 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96874 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96875 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96876 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96877 13:52:17.631 Barcode capture started; IRQ edges=5551
+ 96878 13:52:17.777 Barcode capture started; IRQ edges=5551
+ 96879 13:52:17.777 Barcode capture started; IRQ edges=5551
+ 96880 13:52:17.777 Barcode capture started; IRQ edges=5551
+ 96881 13:52:17.777 Barcode capture started; IRQ edges=5551
+ 96907 13:52:23.900 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":1352315}
+ 96908 13:52:23.900 Barcode: read leniently (25 of 29 bars+spaces, 0+4 missing, 4 stray left out).
+ 96909 13:52:23.972 Barcode COMMAND: "F" = U-TURN
+ 96910 13:52:23.972 Pending: U-TURN at the next crossroad.
+ 96921 13:52:27.881 Line lost: reversing 2570 ms of path to where both sensors were on it.
+ 96923 13:52:27.885 Reverse done (a sensor found black).
+ 96928 13:52:27.978 Barcode reader OFF; IRQ edges=5992
+ 97822 13:56:02.130 State: STOPPED -> LINE_CAL
+ 97823 13:56:02.130 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 97824 13:56:02.130 State: LINE_CAL -> FOLLOW_LINE
+ 97825 13:56:02.130 Barcode reader ON; IRQ edges=6155
+ 97842 13:56:05.096 Barcode reader OFF; IRQ edges=6155
+ 97861 13:56:07.883 Barcode reader ON; IRQ edges=6155
+ 97868 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97869 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97870 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97871 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97872 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97873 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97874 13:56:09.066 Barcode capture started; IRQ edges=6270
+ 97875 13:56:09.192 Barcode capture started; IRQ edges=6270
+ 97876 13:56:09.194 Barcode capture started; IRQ edges=6270
+ 97877 13:56:09.196 Barcode capture started; IRQ edges=6270
+ 97878 13:56:09.198 Barcode capture started; IRQ edges=6270
+ 97879 13:56:09.200 Barcode capture started; IRQ edges=6270
+ 97880 13:56:09.200 Barcode capture started; IRQ edges=6270
+ 97881 13:56:09.202 Barcode capture started; IRQ edges=6270
+ 97882 13:56:09.202 Barcode capture started; IRQ edges=6270
+ 97883 13:56:09.318 Barcode capture started; IRQ edges=6270
+ 97884 13:56:09.321 Barcode capture started; IRQ edges=6270
+ 97885 13:56:09.321 Barcode capture started; IRQ edges=6270
+ 97886 13:56:09.326 Barcode capture started; IRQ edges=6270
+ 97887 13:56:09.326 Barcode capture started; IRQ edges=6270
+ 97888 13:56:09.326 Barcode capture started; IRQ edges=6270
+ 97889 13:56:09.326 Barcode capture started; IRQ edges=6270
+ 97890 13:56:09.326 Barcode capture started; IRQ edges=6270
+ 97891 13:56:09.464 Barcode capture started; IRQ edges=6270
+ 97892 13:56:09.464 Barcode capture started; IRQ edges=6270
+ 97893 13:56:09.474 Barcode capture started; IRQ edges=6270
+ 97894 13:56:09.474 Barcode capture started; IRQ edges=6270
+ 97895 13:56:09.474 Barcode capture started; IRQ edges=6270
+ 97896 13:56:09.474 Barcode capture started; IRQ edges=6270
+ 97897 13:56:09.480 Barcode capture started; IRQ edges=6270
+ 97898 13:56:09.480 Barcode capture started; IRQ edges=6270
+ 97899 13:56:09.585 Barcode capture started; IRQ edges=6270
+ 97900 13:56:09.585 Barcode capture started; IRQ edges=6270
+ 97901 13:56:09.585 Barcode capture started; IRQ edges=6270
+ 97902 13:56:09.585 Barcode capture started; IRQ edges=6270
+ 97903 13:56:09.593 Barcode capture started; IRQ edges=6270
+ 97904 13:56:09.593 Barcode capture started; IRQ edges=6270
+ 97905 13:56:09.593 Barcode capture started; IRQ edges=6270
+ 97906 13:56:09.593 Barcode capture started; IRQ edges=6270
+ 97907 13:56:09.673 Barcode capture started; IRQ edges=6270
+ 97908 13:56:09.676 Barcode capture started; IRQ edges=6270
+ 97909 13:56:09.676 Barcode capture started; IRQ edges=6270
+ 97910 13:56:09.676 Barcode capture started; IRQ edges=6270
+ 97911 13:56:09.682 Barcode capture started; IRQ edges=6270
+ 97912 13:56:09.682 Barcode capture started; IRQ edges=6270
+ 97913 13:56:09.682 Barcode capture started; IRQ edges=6270
+ 97914 13:56:09.682 Barcode capture started; IRQ edges=6270
+ 97915 13:56:09.769 Barcode capture started; IRQ edges=6270
+ 97916 13:56:09.769 Barcode capture started; IRQ edges=6270
+ 97917 13:56:09.769 Barcode capture started; IRQ edges=6270
+ 97922 13:56:10.697 Barcode: only 1 bars+spaces seen, ignored.
+ 97929 13:56:11.220 Barcode reader OFF; IRQ edges=6272
+ 98234 13:57:24.981 State: STOPPED -> LINE_CAL
+ 98235 13:57:24.981 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 98236 13:57:24.981 State: LINE_CAL -> FOLLOW_LINE
+ 98237 13:57:24.981 Barcode reader ON; IRQ edges=6302
+ 98253 13:57:27.517 Barcode reader OFF; IRQ edges=6604
+ 98273 13:57:31.047 Barcode reader ON; IRQ edges=6604
+ 98282 13:57:32.031 Barcode capture started; IRQ edges=6776
+ 98283 13:57:32.033 Barcode capture started; IRQ edges=6776
+ 98284 13:57:32.033 Barcode capture started; IRQ edges=6776
+ 98285 13:57:32.033 Barcode capture started; IRQ edges=6776
+ 98286 13:57:32.033 Barcode capture started; IRQ edges=6776
+ 98287 13:57:32.033 Barcode capture started; IRQ edges=6776
+ 98288 13:57:32.033 Barcode capture started; IRQ edges=6776
+ 98289 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98290 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98291 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98292 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98293 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98294 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98295 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98296 13:57:32.127 Barcode capture started; IRQ edges=6776
+ 98297 13:57:32.240 Barcode capture started; IRQ edges=6776
+ 98298 13:57:32.240 Barcode capture started; IRQ edges=6776
+ 98299 13:57:32.240 Barcode capture started; IRQ edges=6776
+ 98300 13:57:32.240 Barcode capture started; IRQ edges=6776
+ 98301 13:57:32.240 Barcode capture started; IRQ edges=6776
+ 98302 13:57:32.256 Barcode capture started; IRQ edges=6776
+ 98303 13:57:32.256 Barcode capture started; IRQ edges=6776
+ 98304 13:57:32.256 Barcode capture started; IRQ edges=6776
+ 98305 13:57:32.542 Barcode capture started; IRQ edges=6776
+ 98306 13:57:32.544 Barcode capture started; IRQ edges=6776
+ 98307 13:57:32.548 Barcode capture started; IRQ edges=6776
+ 98308 13:57:32.548 Barcode capture started; IRQ edges=6776
+ 98309 13:57:32.552 Barcode capture started; IRQ edges=6776
+ 98310 13:57:32.552 Barcode capture started; IRQ edges=6776
+ 98311 13:57:32.552 Barcode capture started; IRQ edges=6776
+ 98312 13:57:32.557 Barcode capture started; IRQ edges=6776
+ 98313 13:57:32.624 Barcode capture started; IRQ edges=6776
+ 98314 13:57:32.624 Barcode capture started; IRQ edges=6776
+ 98315 13:57:32.624 Barcode capture started; IRQ edges=6776
+ 98316 13:57:32.624 Barcode capture started; IRQ edges=6776
+ 98317 13:57:32.633 Barcode capture started; IRQ edges=6776
+ 98318 13:57:32.633 Barcode capture started; IRQ edges=6776
+ 98319 13:57:32.633 Barcode capture started; IRQ edges=6776
+ 98320 13:57:32.633 Barcode capture started; IRQ edges=6776
+ 98321 13:57:32.784 Barcode capture started; IRQ edges=6776
+ 98322 13:57:32.784 Barcode capture started; IRQ edges=6776
+ 98323 13:57:32.784 Barcode capture started; IRQ edges=6776
+ 98324 13:57:32.795 Barcode capture started; IRQ edges=6776
+ 98325 13:57:32.795 Barcode capture started; IRQ edges=6776
+ 98326 13:57:32.795 Barcode capture started; IRQ edges=6776
+ 98327 13:57:32.795 Barcode capture started; IRQ edges=6776
+ 98328 13:57:32.800 Barcode capture started; IRQ edges=6776
+ 98329 13:57:32.880 Barcode capture started; IRQ edges=6776
+ 98330 13:57:32.893 Barcode capture started; IRQ edges=6776
+ 98331 13:57:32.893 Barcode capture started; IRQ edges=6776
+ 98332 13:57:32.893 Barcode capture started; IRQ edges=6776
+ 98333 13:57:32.893 Barcode capture started; IRQ edges=6776
+ 98334 13:57:32.893 Barcode capture started; IRQ edges=6776
+ 98335 13:57:32.893 Barcode capture started; IRQ edges=6776
+ 98336 13:57:32.900 Barcode capture started; IRQ edges=6776
+ 98337 13:57:33.023 Barcode capture started; IRQ edges=6776
+ 98338 13:57:33.023 Barcode capture started; IRQ edges=6776
+ 98339 13:57:33.039 Barcode capture started; IRQ edges=6776
+ 98340 13:57:33.039 Barcode capture started; IRQ edges=6776
+ 98341 13:57:33.039 Barcode capture started; IRQ edges=6776
+ 98342 13:57:33.039 Barcode capture started; IRQ edges=6776
+ 98343 13:57:33.039 Barcode capture started; IRQ edges=6776
+ 98344 13:57:33.039 Barcode capture started; IRQ edges=6776
+ 98345 13:57:33.109 Barcode capture started; IRQ edges=6776
+ 98347 13:57:33.330 Barcode: only 1 bars+spaces seen, ignored.
+ 98349 13:57:33.460 Barcode capture started; IRQ edges=6817
+ 98350 13:57:33.476 Barcode capture started; IRQ edges=6817
+ 98351 13:57:33.476 Barcode capture started; IRQ edges=6817
+ 98352 13:57:33.476 Barcode capture started; IRQ edges=6817
+ 98353 13:57:33.476 Barcode capture started; IRQ edges=6817
+ 98354 13:57:33.481 Barcode capture started; IRQ edges=6817
+ 98355 13:57:33.682 Barcode capture started; IRQ edges=6817
+ 98356 13:57:33.682 Barcode capture started; IRQ edges=6817
+ 98357 13:57:33.686 Barcode capture started; IRQ edges=6817
+ 98358 13:57:33.686 Barcode capture started; IRQ edges=6817
+ 98359 13:57:33.686 Barcode capture started; IRQ edges=6817
+ 98360 13:57:33.686 Barcode capture started; IRQ edges=6817
+ 98361 13:57:33.686 Barcode capture started; IRQ edges=6817
+ 98362 13:57:33.686 Barcode capture started; IRQ edges=6817
+ 98363 13:57:33.772 Barcode capture started; IRQ edges=6817
+ 98364 13:57:33.772 Barcode capture started; IRQ edges=6817
+ 98365 13:57:33.772 Barcode capture started; IRQ edges=6817
+ 98370 13:57:34.018 Barcode reader OFF; IRQ edges=6817
+ 98371 13:57:34.018 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 98372 13:57:34.018 Barcode: only 0 bars+spaces seen, ignored.
+ 98552 13:58:13.407 Barcode A -> GO STRAIGHT.
+ 98664 13:58:36.347 Barcode D -> U-TURN.
+ 98815 13:59:09.254 Barcode A -> U-TURN.
+ 98834 13:59:12.521 State: PICKED_UP -> LINE_CAL
+ 98835 13:59:12.523 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 98836 13:59:12.525 State: LINE_CAL -> FOLLOW_LINE
+ 98837 13:59:12.525 Barcode reader ON; IRQ edges=7996
+ 98844 13:59:13.734 Barcode capture started; IRQ edges=8049
+ 98845 13:59:13.746 Barcode capture started; IRQ edges=8049
+ 98846 13:59:13.749 Barcode capture started; IRQ edges=8049
+ 98847 13:59:13.749 Barcode capture started; IRQ edges=8049
+ 98848 13:59:15.178 Barcode capture started; IRQ edges=8049
+ 98849 13:59:15.185 Barcode capture started; IRQ edges=8049
+ 98850 13:59:15.185 Barcode capture started; IRQ edges=8049
+ 98851 13:59:15.190 Barcode capture started; IRQ edges=8049
+ 98852 13:59:15.190 Barcode capture started; IRQ edges=8049
+ 98853 13:59:15.190 Barcode capture started; IRQ edges=8049
+ 98854 13:59:15.190 Barcode capture started; IRQ edges=8049
+ 98855 13:59:15.194 Barcode capture started; IRQ edges=8049
+ 98856 13:59:15.259 Barcode capture started; IRQ edges=8049
+ 98857 13:59:15.259 Barcode capture started; IRQ edges=8049
+ 98858 13:59:15.259 Barcode capture started; IRQ edges=8049
+ 98859 13:59:15.259 Barcode capture started; IRQ edges=8049
+ 98860 13:59:15.259 Barcode capture started; IRQ edges=8049
+ 98861 13:59:15.274 Barcode capture started; IRQ edges=8049
+ 98862 13:59:15.274 Barcode capture started; IRQ edges=8049
+ 98863 13:59:15.274 Barcode capture started; IRQ edges=8049
+ 98864 13:59:15.339 Barcode capture started; IRQ edges=8049
+ 98865 13:59:15.355 Barcode capture started; IRQ edges=8049
+ 98866 13:59:15.355 Barcode capture started; IRQ edges=8049
+ 98867 13:59:15.355 Barcode capture started; IRQ edges=8049
+ 98869 13:59:15.355 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+ 98870 13:59:15.355 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 98873 13:59:15.466 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+ 98874 13:59:15.481 Barcode capture started; IRQ edges=8374
+ 98875 13:59:15.481 Barcode capture started; IRQ edges=8374
+ 98876 13:59:15.481 Barcode capture started; IRQ edges=8374
+ 98877 13:59:15.481 Barcode capture started; IRQ edges=8374
+ 98878 13:59:15.481 Barcode capture started; IRQ edges=8374
+ 98879 13:59:15.481 Barcode capture started; IRQ edges=8374
+ 98880 13:59:15.708 Barcode capture started; IRQ edges=8374
+ 98881 13:59:15.711 Barcode capture started; IRQ edges=8374
+ 98882 13:59:15.711 Barcode capture started; IRQ edges=8374
+ 98883 13:59:15.711 Barcode capture started; IRQ edges=8374
+ 98884 13:59:15.711 Barcode capture started; IRQ edges=8374
+ 98885 13:59:15.719 Barcode capture started; IRQ edges=8374
+ 98886 13:59:15.719 Barcode capture started; IRQ edges=8374
+ 98887 13:59:15.719 Barcode capture started; IRQ edges=8374
+ 98889 13:59:15.770 Barcode capture started; IRQ edges=8374
+ 98890 13:59:15.770 Barcode capture started; IRQ edges=8374
+ 98891 13:59:15.770 Barcode capture started; IRQ edges=8374
+ 98892 13:59:15.770 Barcode capture started; IRQ edges=8374
+ 98893 13:59:15.770 Barcode capture started; IRQ edges=8374
+ 98894 13:59:15.786 Barcode capture started; IRQ edges=8374
+ 98895 13:59:15.786 Barcode capture started; IRQ edges=8374
+ 98902 13:59:17.420 Barcode lenient: 13 bars+spaces cannot be "*X*" with at most 8 missing.
+ 98903 13:59:17.422 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 98906 13:59:17.427 Barcode NOT decoded: 13 bars+spaces seen (valid: 10 per character - 1).
+ 98914 13:59:19.054 Barcode capture started; IRQ edges=8498
+ 98915 13:59:19.054 Barcode capture started; IRQ edges=8498
+ 98916 13:59:19.057 Barcode capture started; IRQ edges=8498
+ 98917 13:59:19.059 Barcode capture started; IRQ edges=8498
+ 98918 13:59:19.059 Barcode capture started; IRQ edges=8498
+ 98919 13:59:19.061 Barcode capture started; IRQ edges=8498
+ 98920 13:59:19.061 Barcode capture started; IRQ edges=8498
+ 98921 13:59:19.139 Barcode capture started; IRQ edges=8498
+ 98922 13:59:19.147 Barcode capture started; IRQ edges=8498
+ 98923 13:59:19.151 Barcode capture started; IRQ edges=8498
+ 98924 13:59:19.151 Barcode capture started; IRQ edges=8498
+ 98925 13:59:19.154 Barcode capture started; IRQ edges=8498
+ 98927 13:59:19.214 Barcode initial mark 418 ms: treated as junction, scan dropped.
+ 98936 13:59:21.296 Barcode capture started; IRQ edges=8534
+ 98937 13:59:21.296 Barcode capture started; IRQ edges=8534
+ 98938 13:59:21.312 Barcode capture started; IRQ edges=8534
+ 98939 13:59:21.312 Barcode capture started; IRQ edges=8534
+ 98940 13:59:21.312 Barcode capture started; IRQ edges=8534
+ 98941 13:59:21.312 Barcode capture started; IRQ edges=8534
+ 98942 13:59:21.312 Barcode capture started; IRQ edges=8534
+ 98943 13:59:21.455 Barcode capture started; IRQ edges=8534
+ 98944 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98945 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98946 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98947 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98948 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98949 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98950 13:59:21.470 Barcode capture started; IRQ edges=8534
+ 98955 13:59:21.623 Barcode reader OFF; IRQ edges=8534
+ 98956 13:59:21.623 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 98957 13:59:21.623 Barcode: only 0 bars+spaces seen, ignored.
+ 99004 13:59:30.951 State: PICKED_UP -> LINE_CAL
+ 99005 13:59:30.955 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 99006 13:59:30.955 State: LINE_CAL -> FOLLOW_LINE
+ 99007 13:59:30.955 Barcode reader ON; IRQ edges=8644
+ 99009 13:59:30.955 Barcode capture started; IRQ edges=8677
+ 99010 13:59:31.115 Barcode capture started; IRQ edges=8677
+ 99011 13:59:31.115 Barcode capture started; IRQ edges=8677
+ 99012 13:59:31.115 Barcode capture started; IRQ edges=8677
+ 99013 13:59:31.115 Barcode capture started; IRQ edges=8677
+ 99014 13:59:31.115 Barcode capture started; IRQ edges=8677
+ 99015 13:59:31.130 Barcode capture started; IRQ edges=8677
+ 99016 13:59:31.132 Barcode capture started; IRQ edges=8677
+ 99017 13:59:31.132 Barcode capture started; IRQ edges=8677
+ 99018 13:59:31.195 Barcode capture started; IRQ edges=8677
+ 99019 13:59:31.198 Barcode capture started; IRQ edges=8677
+ 99020 13:59:31.198 Barcode capture started; IRQ edges=8677
+ 99021 13:59:31.198 Barcode capture started; IRQ edges=8677
+ 99022 13:59:31.198 Barcode capture started; IRQ edges=8677
+ 99023 13:59:31.198 Barcode capture started; IRQ edges=8677
+ 99024 13:59:31.198 Barcode: only 1 bars+spaces seen, ignored.
+ 99030 13:59:32.218 Barcode capture started; IRQ edges=8727
+ 99031 13:59:32.368 Barcode capture started; IRQ edges=8727
+ 99032 13:59:32.368 Barcode capture started; IRQ edges=8727
+ 99033 13:59:32.368 Barcode capture started; IRQ edges=8727
+ 99034 13:59:32.368 Barcode capture started; IRQ edges=8727
+ 99035 13:59:32.377 Barcode capture started; IRQ edges=8727
+ 99036 13:59:32.377 Barcode capture started; IRQ edges=8727
+ 99037 13:59:32.377 Barcode capture started; IRQ edges=8727
+ 99038 13:59:32.560 Barcode capture started; IRQ edges=8727
+ 99039 13:59:32.560 Barcode capture started; IRQ edges=8727
+ 99040 13:59:32.560 Barcode capture started; IRQ edges=8727
+ 99041 13:59:32.560 Barcode capture started; IRQ edges=8727
+ 99042 13:59:32.560 Barcode capture started; IRQ edges=8727
+ 99043 13:59:32.560 Barcode capture started; IRQ edges=8727
+ 99044 13:59:32.571 Barcode capture started; IRQ edges=8727
+ 99045 13:59:32.571 Barcode capture started; IRQ edges=8727
+ 99046 13:59:32.716 Barcode capture started; IRQ edges=8727
+ 99047 13:59:32.716 Barcode capture started; IRQ edges=8727
+ 99048 13:59:32.720 Barcode capture started; IRQ edges=8727
+ 99049 13:59:32.720 Barcode capture started; IRQ edges=8727
+ 99050 13:59:32.720 Barcode capture started; IRQ edges=8727
+ 99051 13:59:32.725 Barcode capture started; IRQ edges=8727
+ 99052 13:59:32.725 Barcode: only 1 bars+spaces seen, ignored.
+ 99054 13:59:32.878 Barcode capture started; IRQ edges=8821
+ 99055 13:59:32.887 Barcode capture started; IRQ edges=8821
+ 99056 13:59:32.888 Barcode capture started; IRQ edges=8821
+ 99057 13:59:32.888 Barcode capture started; IRQ edges=8821
+ 99058 13:59:32.888 Barcode capture started; IRQ edges=8821
+ 99059 13:59:32.888 Barcode capture started; IRQ edges=8821
+ 99060 13:59:32.888 Barcode capture started; IRQ edges=8821
+ 99061 13:59:32.888 Barcode capture started; IRQ edges=8821
+ 99063 13:59:32.970 Barcode capture started; IRQ edges=8821
+ 99064 13:59:32.982 Barcode capture started; IRQ edges=8821
+ 99065 13:59:32.984 Barcode capture started; IRQ edges=8821
+ 99066 13:59:32.984 Barcode capture started; IRQ edges=8821
+ 99067 13:59:32.984 Barcode capture started; IRQ edges=8821
+ 99068 13:59:32.984 Barcode capture started; IRQ edges=8821
+ 99069 13:59:32.984 Barcode capture started; IRQ edges=8821
+ 99070 13:59:33.115 Barcode capture started; IRQ edges=8821
+ 99071 13:59:33.127 Barcode capture started; IRQ edges=8821
+ 99072 13:59:33.127 Barcode capture started; IRQ edges=8821
+ 99073 13:59:33.131 Barcode capture started; IRQ edges=8821
+ 99074 13:59:33.131 Barcode capture started; IRQ edges=8821
+ 99075 13:59:33.131 Barcode capture started; IRQ edges=8821
+ 99076 13:59:33.131 Barcode capture started; IRQ edges=8821
+ 99077 13:59:33.131 Barcode capture started; IRQ edges=8821
+ 99078 13:59:33.224 Barcode capture started; IRQ edges=8821
+ 99079 13:59:33.230 Barcode capture started; IRQ edges=8821
+ 99080 13:59:33.230 Barcode capture started; IRQ edges=8821
+ 99081 13:59:33.230 Barcode capture started; IRQ edges=8821
+ 99082 13:59:33.230 Barcode capture started; IRQ edges=8821
+ 99083 13:59:33.230 Barcode capture started; IRQ edges=8821
+ 99084 13:59:33.230 Barcode capture started; IRQ edges=8821
+ 99085 13:59:33.239 Barcode capture started; IRQ edges=8821
+ 99086 13:59:33.337 Barcode capture started; IRQ edges=8821
+ 99087 13:59:33.337 Barcode capture started; IRQ edges=8821
+ 99088 13:59:33.337 Barcode capture started; IRQ edges=8821
+ 99089 13:59:33.353 Barcode capture started; IRQ edges=8821
+ 99090 13:59:33.353 Barcode capture started; IRQ edges=8821
+ 99091 13:59:33.353 Barcode capture started; IRQ edges=8821
+ 99092 13:59:33.353 Barcode capture started; IRQ edges=8821
+ 99093 13:59:33.353 Barcode capture started; IRQ edges=8821
+ 99095 13:59:33.608 Barcode capture started; IRQ edges=8821
+ 99096 13:59:33.610 Barcode capture started; IRQ edges=8821
+ 99108 13:59:35.022 Barcode reader OFF; IRQ edges=8931
+ 99109 13:59:35.022 Barcode: reading switched off after 6 bars+spaces -> decoding what was read.
+ 99110 13:59:35.038 Barcode lenient: 6 bars+spaces cannot be "*X*" with at most 8 missing.
+ 99111 13:59:35.118 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99113 13:59:35.118 Barcode NOT decoded: 6 bars+spaces seen (valid: 10 per character - 1).
+ 99194 13:59:51.521 State: PICKED_UP -> LINE_CAL
+ 99195 13:59:51.521 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 99196 13:59:51.537 State: LINE_CAL -> FOLLOW_LINE
+ 99197 13:59:51.537 Barcode reader ON; IRQ edges=9100
+ 99198 13:59:51.537 Barcode capture started; IRQ edges=9127
+ 99199 13:59:51.585 Barcode capture started; IRQ edges=9127
+ 99200 13:59:51.590 Barcode capture started; IRQ edges=9127
+ 99201 13:59:51.590 Barcode capture started; IRQ edges=9127
+ 99202 13:59:51.590 Barcode capture started; IRQ edges=9127
+ 99203 13:59:51.590 Barcode capture started; IRQ edges=9127
+ 99204 13:59:51.590 Barcode capture started; IRQ edges=9127
+ 99205 13:59:51.590 Barcode capture started; IRQ edges=9127
+ 99206 13:59:51.719 Barcode capture started; IRQ edges=9127
+ 99207 13:59:51.730 Barcode capture started; IRQ edges=9127
+ 99208 13:59:51.732 Barcode capture started; IRQ edges=9127
+ 99211 13:59:51.833 Barcode: only 1 bars+spaces seen, ignored.
+ 99214 13:59:52.377 Barcode capture started; IRQ edges=9136
+ 99215 13:59:52.643 Barcode capture started; IRQ edges=9136
+ 99216 13:59:52.645 Barcode capture started; IRQ edges=9136
+ 99220 13:59:52.991 Barcode: only 3 bars+spaces seen, ignored.
+ 99226 13:59:54.183 Barcode capture started; IRQ edges=9298
+ 99227 13:59:54.192 Barcode capture started; IRQ edges=9298
+ 99228 13:59:54.198 Barcode capture started; IRQ edges=9298
+ 99229 13:59:54.198 Barcode capture started; IRQ edges=9298
+ 99230 13:59:54.200 Barcode capture started; IRQ edges=9298
+ 99231 13:59:54.202 Barcode capture started; IRQ edges=9298
+ 99232 13:59:54.202 Barcode capture started; IRQ edges=9298
+ 99234 13:59:54.278 Barcode capture started; IRQ edges=9298
+ 99235 13:59:54.278 Barcode capture started; IRQ edges=9298
+ 99236 13:59:54.285 Barcode capture started; IRQ edges=9298
+ 99237 13:59:54.285 Barcode capture started; IRQ edges=9298
+ 99238 13:59:54.285 Barcode capture started; IRQ edges=9298
+ 99239 13:59:54.290 Barcode capture started; IRQ edges=9298
+ 99240 13:59:54.290 Barcode capture started; IRQ edges=9298
+ 99241 13:59:54.487 Barcode capture started; IRQ edges=9298
+ 99242 13:59:54.500 Barcode capture started; IRQ edges=9298
+ 99243 13:59:54.504 Barcode capture started; IRQ edges=9298
+ 99244 13:59:54.504 Barcode capture started; IRQ edges=9298
+ 99245 13:59:54.504 Barcode capture started; IRQ edges=9298
+ 99246 13:59:54.504 Barcode capture started; IRQ edges=9298
+ 99247 13:59:54.504 Barcode capture started; IRQ edges=9298
+ 99248 13:59:54.504 Barcode capture started; IRQ edges=9298
+ 99249 13:59:54.557 Barcode capture started; IRQ edges=9298
+ 99250 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99251 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99252 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99253 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99254 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99255 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99256 13:59:54.573 Barcode capture started; IRQ edges=9298
+ 99257 13:59:54.638 Barcode capture started; IRQ edges=9298
+ 99258 13:59:54.638 Barcode capture started; IRQ edges=9298
+ 99259 13:59:54.638 Barcode capture started; IRQ edges=9298
+ 99260 13:59:54.653 Barcode capture started; IRQ edges=9298
+ 99271 13:59:56.738 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+ 99272 13:59:56.743 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99275 13:59:56.747 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+ 99277 13:59:57.149 Barcode capture started; IRQ edges=9512
+ 99278 13:59:57.247 Barcode capture started; IRQ edges=9512
+ 99279 13:59:57.252 Barcode capture started; IRQ edges=9512
+ 99280 13:59:57.252 Barcode capture started; IRQ edges=9512
+ 99281 13:59:57.252 Barcode capture started; IRQ edges=9512
+ 99282 13:59:57.252 Barcode capture started; IRQ edges=9512
+ 99283 13:59:57.252 Barcode capture started; IRQ edges=9512
+ 99284 13:59:57.252 Barcode capture started; IRQ edges=9512
+ 99285 13:59:57.356 Barcode capture started; IRQ edges=9512
+ 99286 13:59:57.359 Barcode capture started; IRQ edges=9512
+ 99287 13:59:57.359 Barcode capture started; IRQ edges=9512
+ 99294 13:59:58.155 Barcode reader OFF; IRQ edges=9512
+ 99295 13:59:58.155 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+ 99296 13:59:58.155 Barcode: only 0 bars+spaces seen, ignored.
+ 99587 14:01:03.734 State: PICKED_UP -> LINE_CAL
+ 99588 14:01:03.734 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 99589 14:01:03.734 State: LINE_CAL -> FOLLOW_LINE
+ 99590 14:01:03.734 Barcode reader ON; IRQ edges=10652
+ 99591 14:01:03.743 Barcode capture started; IRQ edges=10801
+ 99592 14:01:03.766 Barcode capture started; IRQ edges=10801
+ 99593 14:01:03.782 Barcode capture started; IRQ edges=10801
+ 99594 14:01:03.782 Barcode capture started; IRQ edges=10801
+ 99595 14:01:03.782 Barcode capture started; IRQ edges=10801
+ 99596 14:01:03.782 Barcode capture started; IRQ edges=10801
+ 99597 14:01:03.782 Barcode capture started; IRQ edges=10801
+ 99598 14:01:03.782 Barcode capture started; IRQ edges=10801
+ 99599 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99600 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99601 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99602 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99603 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99604 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99605 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99606 14:01:03.862 Barcode capture started; IRQ edges=10801
+ 99607 14:01:04.171 Barcode capture started; IRQ edges=10801
+ 99608 14:01:04.173 Barcode capture started; IRQ edges=10801
+ 99609 14:01:04.175 Barcode capture started; IRQ edges=10801
+ 99610 14:01:04.177 Barcode capture started; IRQ edges=10801
+ 99611 14:01:04.177 Barcode capture started; IRQ edges=10801
+ 99612 14:01:04.179 Barcode capture started; IRQ edges=10801
+ 99613 14:01:04.179 Barcode capture started; IRQ edges=10801
+ 99614 14:01:04.181 Barcode capture started; IRQ edges=10801
+ 99615 14:01:04.433 Barcode capture started; IRQ edges=10801
+ 99616 14:01:04.433 Barcode capture started; IRQ edges=10801
+ 99617 14:01:04.446 Barcode capture started; IRQ edges=10801
+ 99618 14:01:04.446 Barcode capture started; IRQ edges=10801
+ 99619 14:01:04.446 Barcode capture started; IRQ edges=10801
+ 99620 14:01:04.446 Barcode capture started; IRQ edges=10801
+ 99621 14:01:04.446 Barcode capture started; IRQ edges=10801
+ 99622 14:01:04.453 Barcode capture started; IRQ edges=10801
+ 99623 14:01:04.787 Barcode capture started; IRQ edges=10801
+ 99624 14:01:04.790 Barcode capture started; IRQ edges=10801
+ 99625 14:01:04.792 Barcode capture started; IRQ edges=10801
+ 99626 14:01:04.792 Barcode capture started; IRQ edges=10801
+ 99627 14:01:04.794 Barcode capture started; IRQ edges=10801
+ 99628 14:01:04.796 Barcode capture started; IRQ edges=10801
+ 99629 14:01:04.796 Barcode capture started; IRQ edges=10801
+ 99630 14:01:04.798 Barcode capture started; IRQ edges=10801
+ 99631 14:01:05.360 Barcode capture started; IRQ edges=10801
+ 99632 14:01:05.362 Barcode capture started; IRQ edges=10801
+ 99633 14:01:05.362 Barcode capture started; IRQ edges=10801
+ 99634 14:01:05.367 Barcode capture started; IRQ edges=10801
+ 99635 14:01:05.367 Barcode capture started; IRQ edges=10801
+ 99636 14:01:05.370 Barcode capture started; IRQ edges=10801
+ 99637 14:01:05.370 Barcode capture started; IRQ edges=10801
+ 99638 14:01:05.370 Barcode capture started; IRQ edges=10801
+ 99639 14:01:05.520 Barcode capture started; IRQ edges=10801
+ 99640 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99641 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99642 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99643 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99644 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99645 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99646 14:01:05.522 Barcode capture started; IRQ edges=10801
+ 99647 14:01:05.653 Barcode capture started; IRQ edges=10801
+ 99648 14:01:05.665 Barcode capture started; IRQ edges=10801
+ 99649 14:01:05.665 Barcode capture started; IRQ edges=10801
+ 99650 14:01:05.670 Barcode capture started; IRQ edges=10801
+ 99651 14:01:05.670 Barcode capture started; IRQ edges=10801
+ 99652 14:01:05.670 Barcode capture started; IRQ edges=10801
+ 99653 14:01:05.670 Barcode capture started; IRQ edges=10801
+ 99654 14:01:05.670 Barcode capture started; IRQ edges=10801
+ 99655 14:01:05.867 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 99657 14:01:05.867 Barcode NOT decoded: 1 bars+spaces seen (valid: 10 per character - 1).
+ 99664 14:01:05.963 Barcode reader OFF; IRQ edges=11316
+ 99721 14:01:16.616 State: PICKED_UP -> LINE_CAL
+ 99722 14:01:16.627 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 99723 14:01:16.627 State: LINE_CAL -> FOLLOW_LINE
+ 99724 14:01:16.632 Barcode reader ON; IRQ edges=12029
+ 99726 14:01:16.917 Line lost: reversing 190 ms of path to where both sensors were on it.
+ 99728 14:01:17.114 Reverse done (back where both were on it).
+ 99729 14:01:17.334 Barcode capture started; IRQ edges=12054
+ 99730 14:01:17.334 Barcode capture started; IRQ edges=12054
+ 99731 14:01:17.334 Barcode capture started; IRQ edges=12054
+ 99732 14:01:17.348 Barcode capture started; IRQ edges=12054
+ 99733 14:01:17.348 Barcode capture started; IRQ edges=12054
+ 99734 14:01:17.348 Barcode capture started; IRQ edges=12054
+ 99735 14:01:17.348 Barcode capture started; IRQ edges=12054
+ 99736 14:01:17.348 Barcode capture started; IRQ edges=12054
+ 99737 14:01:17.430 Barcode capture started; IRQ edges=12054
+ 99738 14:01:17.629 Barcode: only 1 bars+spaces seen, ignored.
+ 99751 14:01:20.714 Barcode reader OFF; IRQ edges=12055
+ 99896 14:01:52.792 Barcode Z -> U-TURN.
+ 99939 14:02:01.695 State: PICKED_UP -> LINE_CAL
+ 99940 14:02:01.695 LINE_CAL: both sensors already on the line -> skipping calibration.
+ 99941 14:02:01.695 State: LINE_CAL -> FOLLOW_LINE
+ 99942 14:02:01.695 Barcode reader ON; IRQ edges=13070
+ 99944 14:02:01.770 Barcode capture started; IRQ edges=13218
+ 99945 14:02:01.855 Barcode capture started; IRQ edges=13218
+ 99946 14:02:01.855 Barcode capture started; IRQ edges=13218
+ 99947 14:02:01.855 Barcode capture started; IRQ edges=13218
+ 99948 14:02:01.855 Barcode capture started; IRQ edges=13218
+ 99949 14:02:01.855 Barcode capture started; IRQ edges=13218
+ 99950 14:02:01.867 Barcode capture started; IRQ edges=13218
+ 99951 14:02:01.867 Barcode capture started; IRQ edges=13218
+ 99952 14:02:02.001 Barcode capture started; IRQ edges=13218
+ 99953 14:02:02.001 Barcode capture started; IRQ edges=13218
+ 99954 14:02:02.007 Barcode capture started; IRQ edges=13218
+ 99955 14:02:02.010 Barcode capture started; IRQ edges=13218
+ 99956 14:02:02.012 Barcode capture started; IRQ edges=13218
+ 99957 14:02:02.012 Barcode capture started; IRQ edges=13218
+ 99958 14:02:02.012 Barcode capture started; IRQ edges=13218
+ 99959 14:02:02.012 Barcode capture started; IRQ edges=13218
+ 99960 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99961 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99962 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99963 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99965 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99966 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99967 14:02:02.078 Barcode capture started; IRQ edges=13218
+ 99968 14:02:02.160 Barcode capture started; IRQ edges=13218
+ 99969 14:02:02.160 Barcode capture started; IRQ edges=13218
+ 99970 14:02:02.160 Barcode capture started; IRQ edges=13218
+ 99971 14:02:02.172 Barcode capture started; IRQ edges=13218
+ 99972 14:02:02.172 Barcode capture started; IRQ edges=13218
+ 99973 14:02:02.177 Barcode capture started; IRQ edges=13218
+ 99974 14:02:02.177 Barcode capture started; IRQ edges=13218
+ 99975 14:02:02.177 Barcode capture started; IRQ edges=13218
+ 99976 14:02:02.285 Barcode capture started; IRQ edges=13218
+ 99977 14:02:02.299 Barcode capture started; IRQ edges=13218
+ 99978 14:02:02.301 Barcode capture started; IRQ edges=13218
+ 99979 14:02:02.301 Barcode capture started; IRQ edges=13218
+ 99980 14:02:02.301 Barcode capture started; IRQ edges=13218
+ 99981 14:02:02.301 Barcode capture started; IRQ edges=13218
+ 99982 14:02:02.301 Barcode capture started; IRQ edges=13218
+ 99983 14:02:02.301 Barcode capture started; IRQ edges=13218
+ 99984 14:02:02.594 Barcode capture started; IRQ edges=13218
+ 99985 14:02:02.606 Barcode capture started; IRQ edges=13218
+ 99986 14:02:02.608 Barcode capture started; IRQ edges=13218
+ 99987 14:02:02.610 Barcode capture started; IRQ edges=13218
+ 99988 14:02:02.612 Barcode capture started; IRQ edges=13218
+ 99989 14:02:02.612 Barcode capture started; IRQ edges=13218
+ 99990 14:02:02.612 Barcode capture started; IRQ edges=13218
+ 99991 14:02:02.615 Barcode capture started; IRQ edges=13218
+ 99992 14:02:02.689 Barcode capture started; IRQ edges=13218
+ 99993 14:02:02.694 Barcode capture started; IRQ edges=13218
+ 99994 14:02:02.696 Barcode capture started; IRQ edges=13218
+ 99995 14:02:02.698 Barcode capture started; IRQ edges=13218
+ 99996 14:02:02.698 Barcode capture started; IRQ edges=13218
+ 99997 14:02:02.700 Barcode capture started; IRQ edges=13218
+ 99998 14:02:02.700 Barcode capture started; IRQ edges=13218
+ 99999 14:02:02.702 Barcode capture started; IRQ edges=13218
+100000 14:02:02.872 Barcode capture started; IRQ edges=13218
+100001 14:02:02.884 Barcode capture started; IRQ edges=13218
+100002 14:02:02.890 Barcode capture started; IRQ edges=13218
+100003 14:02:02.890 Barcode capture started; IRQ edges=13218
+100004 14:02:02.894 Barcode capture started; IRQ edges=13218
+100005 14:02:02.894 Barcode capture started; IRQ edges=13218
+100006 14:02:02.894 Barcode capture started; IRQ edges=13218
+100007 14:02:02.894 Barcode capture started; IRQ edges=13218
+100008 14:02:02.970 Barcode capture started; IRQ edges=13218
+100009 14:02:02.970 Barcode: only 1 bars+spaces seen, ignored.
+100010 14:02:02.978 Barcode capture started; IRQ edges=13236
+100011 14:02:02.978 Barcode capture started; IRQ edges=13236
+100012 14:02:02.978 Barcode capture started; IRQ edges=13236
+100013 14:02:02.982 Barcode capture started; IRQ edges=13236
+100014 14:02:02.982 Barcode capture started; IRQ edges=13236
+100015 14:02:02.982 Barcode capture started; IRQ edges=13236
+100016 14:02:03.050 Barcode capture started; IRQ edges=13236
+100019 14:02:05.182 Barcode: only 3 bars+spaces seen, ignored.
+100023 14:02:05.310 Barcode capture started; IRQ edges=13421
+100024 14:02:05.312 Barcode capture started; IRQ edges=13421
+100025 14:02:05.312 Barcode capture started; IRQ edges=13421
+100026 14:02:05.312 Barcode capture started; IRQ edges=13421
+100027 14:02:05.375 Barcode capture started; IRQ edges=13421
+100028 14:02:05.375 Barcode capture started; IRQ edges=13421
+100029 14:02:05.375 Barcode capture started; IRQ edges=13421
+100030 14:02:05.375 Barcode capture started; IRQ edges=13421
+100031 14:02:05.375 Barcode capture started; IRQ edges=13421
+100032 14:02:05.375 Barcode capture started; IRQ edges=13421
+100033 14:02:05.390 Barcode capture started; IRQ edges=13421
+100034 14:02:05.390 Barcode capture started; IRQ edges=13421
+100035 14:02:05.988 Barcode capture started; IRQ edges=13421
+100036 14:02:05.988 Barcode capture started; IRQ edges=13421
+100037 14:02:05.988 Barcode capture started; IRQ edges=13421
+100038 14:02:05.988 Barcode capture started; IRQ edges=13421
+100039 14:02:05.988 Barcode capture started; IRQ edges=13421
+100040 14:02:05.988 Barcode capture started; IRQ edges=13421
+100041 14:02:05.988 Barcode capture started; IRQ edges=13421
+100042 14:02:05.988 Barcode capture started; IRQ edges=13421
+100043 14:02:08.008 Barcode capture started; IRQ edges=13421
+100044 14:02:08.024 Barcode capture started; IRQ edges=13421
+100045 14:02:08.024 Barcode capture started; IRQ edges=13421
+100046 14:02:08.024 Barcode capture started; IRQ edges=13421
+100047 14:02:08.024 Barcode capture started; IRQ edges=13421
+100048 14:02:08.024 Barcode capture started; IRQ edges=13421
+100049 14:02:08.024 Barcode capture started; IRQ edges=13421
+100050 14:02:08.024 Barcode capture started; IRQ edges=13421
+100051 14:02:08.121 Barcode capture started; IRQ edges=13421
+100052 14:02:08.121 Barcode capture started; IRQ edges=13421
+100053 14:02:08.121 Barcode capture started; IRQ edges=13421
+100054 14:02:08.121 Barcode capture started; IRQ edges=13421
+100055 14:02:08.121 Barcode capture started; IRQ edges=13421
+100056 14:02:08.121 Barcode capture started; IRQ edges=13421
+100057 14:02:08.121 Barcode capture started; IRQ edges=13421
+100058 14:02:08.121 Barcode capture started; IRQ edges=13421
+100059 14:02:08.235 Barcode capture started; IRQ edges=13421
+100060 14:02:08.251 Barcode capture started; IRQ edges=13421
+100061 14:02:08.253 Barcode capture started; IRQ edges=13421
+100062 14:02:08.255 Barcode capture started; IRQ edges=13421
+100063 14:02:08.255 Barcode capture started; IRQ edges=13421
+100064 14:02:08.255 Barcode capture started; IRQ edges=13421
+100065 14:02:08.255 Barcode capture started; IRQ edges=13421
+100066 14:02:08.255 Barcode capture started; IRQ edges=13421
+100067 14:02:08.315 Barcode capture started; IRQ edges=13421
+100068 14:02:08.328 Barcode capture started; IRQ edges=13421
+100069 14:02:08.331 Barcode capture started; IRQ edges=13421
+100070 14:02:08.331 Barcode capture started; IRQ edges=13421
+100071 14:02:08.331 Barcode capture started; IRQ edges=13421
+100072 14:02:08.331 Barcode capture started; IRQ edges=13421
+100073 14:02:08.331 Barcode capture started; IRQ edges=13421
+100074 14:02:08.331 Barcode capture started; IRQ edges=13421
+100075 14:02:08.655 Barcode capture started; IRQ edges=13421
+100076 14:02:08.655 Barcode capture started; IRQ edges=13421
+100077 14:02:08.655 Barcode capture started; IRQ edges=13421
+100078 14:02:08.655 Barcode capture started; IRQ edges=13421
+100079 14:02:08.655 Barcode capture started; IRQ edges=13421
+100080 14:02:08.671 Barcode capture started; IRQ edges=13421
+100081 14:02:08.671 Barcode capture started; IRQ edges=13421
+100082 14:02:08.671 Barcode capture started; IRQ edges=13421
+100083 14:02:08.947 Barcode capture started; IRQ edges=13421
+100084 14:02:08.947 Barcode capture started; IRQ edges=13421
+100085 14:02:08.947 Barcode: only 1 bars+spaces seen, ignored.
+100086 14:02:08.960 Barcode capture started; IRQ edges=13433
+100087 14:02:08.960 Barcode capture started; IRQ edges=13433
+100088 14:02:08.960 Barcode capture started; IRQ edges=13433
+100089 14:02:08.965 Barcode capture started; IRQ edges=13433
+100090 14:02:08.965 Barcode capture started; IRQ edges=13433
+100091 14:02:09.048 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+100092 14:02:09.056 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+100094 14:02:09.060 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+100095 14:02:09.060 Barcode capture started; IRQ edges=13621
+100096 14:02:09.060 Barcode capture started; IRQ edges=13621
+100097 14:02:09.060 Barcode capture started; IRQ edges=13621
+100098 14:02:09.060 Barcode initial mark 351 ms: treated as junction, scan dropped.
+100115 14:02:12.586 Barcode reader OFF; IRQ edges=13622
+100154 14:02:20.108 State: STOPPED -> LINE_CAL
+100155 14:02:20.108 LINE_CAL: both sensors already on the line -> skipping calibration.
+100156 14:02:20.108 State: LINE_CAL -> FOLLOW_LINE
+100157 14:02:20.108 Barcode reader ON; IRQ edges=14304
+100159 14:02:20.521 Line lost: reversing 360 ms of path to where both sensors were on it.
+100160 14:02:20.971 Reverse done (a sensor found black).
+100162 14:02:20.981 Barcode capture started; IRQ edges=14329
+100163 14:02:20.984 Barcode capture started; IRQ edges=14329
+100164 14:02:20.987 Barcode capture started; IRQ edges=14329
+100165 14:02:20.987 Barcode capture started; IRQ edges=14329
+100166 14:02:20.987 Barcode capture started; IRQ edges=14329
+100167 14:02:21.213 Barcode capture started; IRQ edges=14329
+100168 14:02:21.215 Barcode capture started; IRQ edges=14329
+100169 14:02:21.219 Barcode capture started; IRQ edges=14329
+100170 14:02:21.219 Barcode capture started; IRQ edges=14329
+100171 14:02:21.224 Barcode capture started; IRQ edges=14329
+100172 14:02:21.227 Barcode capture started; IRQ edges=14329
+100177 14:02:23.655 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+100178 14:02:23.660 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+100180 14:02:23.664 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+100182 14:02:23.665 Barcode capture started; IRQ edges=14496
+100183 14:02:23.665 Barcode capture started; IRQ edges=14496
+100184 14:02:24.298 Barcode capture started; IRQ edges=14496
+100185 14:02:24.305 Barcode capture started; IRQ edges=14496
+100186 14:02:24.305 Barcode capture started; IRQ edges=14496
+100187 14:02:24.305 Barcode capture started; IRQ edges=14496
+100188 14:02:24.311 Barcode capture started; IRQ edges=14496
+100189 14:02:24.311 Barcode capture started; IRQ edges=14496
+100190 14:02:24.311 Barcode capture started; IRQ edges=14496
+100191 14:02:24.311 Barcode capture started; IRQ edges=14496
+100192 14:02:24.511 Barcode capture started; IRQ edges=14496
+100193 14:02:24.511 Barcode capture started; IRQ edges=14496
+100194 14:02:24.511 Barcode capture started; IRQ edges=14496
+100195 14:02:24.511 Barcode capture started; IRQ edges=14496
+100196 14:02:24.527 Barcode capture started; IRQ edges=14496
+100197 14:02:24.527 Barcode capture started; IRQ edges=14496
+100198 14:02:24.527 Barcode capture started; IRQ edges=14496
+100199 14:02:24.527 Barcode capture started; IRQ edges=14496
+100200 14:02:24.607 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+100201 14:02:24.607 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+100204 14:02:24.607 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+100211 14:02:25.691 Barcode capture started; IRQ edges=14812
+100212 14:02:25.692 Barcode capture started; IRQ edges=14812
+100213 14:02:25.695 Barcode capture started; IRQ edges=14812
+100214 14:02:25.695 Barcode capture started; IRQ edges=14812
+100215 14:02:25.695 Barcode capture started; IRQ edges=14812
+100216 14:02:25.695 Barcode capture started; IRQ edges=14812
+100219 14:02:26.259 Barcode initial mark 399 ms: treated as junction, scan dropped.
+100224 14:02:27.217 Barcode capture started; IRQ edges=14819
+100225 14:02:27.365 Barcode capture started; IRQ edges=14819
+100226 14:02:27.365 Barcode capture started; IRQ edges=14819
+100232 14:02:27.492 Barcode reader OFF; IRQ edges=14907
+100233 14:02:27.492 Barcode: reading switched off after 2 bars+spaces -> decoding what was read.
+100234 14:02:27.492 Barcode: only 2 bars+spaces seen, ignored.
+100319 14:02:44.738 State: PICKED_UP -> LINE_CAL
+100320 14:02:44.738 LINE_CAL: left sensor on black -> forward, arcing left.
+100322 14:02:44.996 LINE_CAL: right sensor on black -> forward, arcing right.
+100323 14:02:44.996 LINE_CAL: left sensor on black -> forward, arcing left.
+100324 14:02:45.187 LINE_CAL: right sensor on black -> forward, arcing right.
+100326 14:02:45.284 LINE_CAL: left sensor on black -> forward, arcing left.
+100327 14:02:45.297 LINE_CAL OK: both sensors on the line -> following.
+100328 14:02:45.297 State: LINE_CAL -> FOLLOW_LINE
+100329 14:02:45.303 Barcode reader ON; IRQ edges=15006
+100330 14:02:45.303 Barcode capture started; IRQ edges=15017
+100331 14:02:45.303 Barcode capture started; IRQ edges=15017
+100332 14:02:45.303 Barcode capture started; IRQ edges=15017
+100333 14:02:45.303 Barcode capture started; IRQ edges=15017
+100334 14:02:45.491 Barcode capture started; IRQ edges=15017
+100350 14:02:50.139 inf2004/aai14/supercar/barcode {"msg":"Z","cmd":"U-TURN","t":1977721}
+100351 14:02:50.143 Barcode COMMAND: "Z" = U-TURN
+100352 14:02:50.231 Pending: U-TURN at the next crossroad.
+100358 14:02:51.552 Barcode capture started; IRQ edges=15280
+100359 14:02:51.552 Barcode capture started; IRQ edges=15280
+100360 14:02:51.552 Barcode capture started; IRQ edges=15280
+100364 14:02:51.953 Barcode initial mark 424 ms: treated as junction, scan dropped.
+100365 14:02:52.066 Side sensor: 420 ms black mark -> crossroad.
+100366 14:02:52.069 Crossroad: U-TURN now.
+100367 14:02:52.069 State: FOLLOW_LINE -> TURN
+100368 14:02:52.069 Barcode reader OFF; IRQ edges=15281
+100394 14:02:57.640 U-TURN done (line found, 5400 ms).
+100395 14:02:57.642 State: TURN -> FOLLOW_LINE
+100396 14:02:57.645 Barcode reader ON; IRQ edges=15288
+100406 14:02:59.560 Barcode capture started; IRQ edges=15312
+100407 14:02:59.560 Barcode capture started; IRQ edges=15312
+100408 14:02:59.566 Barcode capture started; IRQ edges=15312
+100409 14:02:59.568 Barcode capture started; IRQ edges=15312
+100410 14:02:59.571 Barcode capture started; IRQ edges=15312
+100411 14:02:59.572 Barcode capture started; IRQ edges=15312
+100412 14:02:59.574 Barcode capture started; IRQ edges=15312
+100413 14:02:59.646 Barcode capture started; IRQ edges=15312
+100414 14:02:59.646 Barcode capture started; IRQ edges=15312
+100415 14:02:59.646 Barcode capture started; IRQ edges=15312
+100418 14:02:59.874 Barcode initial mark 357 ms: treated as junction, scan dropped.
+100428 14:03:03.305 Barcode capture started; IRQ edges=15364
+100429 14:03:03.308 Barcode capture started; IRQ edges=15364
+100430 14:03:03.311 Barcode capture started; IRQ edges=15364
+100431 14:03:03.311 Barcode capture started; IRQ edges=15364
+100432 14:03:03.311 Barcode capture started; IRQ edges=15364
+100433 14:03:03.374 Barcode capture started; IRQ edges=15364
+100434 14:03:03.374 Barcode capture started; IRQ edges=15364
+100435 14:03:03.374 Barcode capture started; IRQ edges=15364
+100436 14:03:03.382 Barcode capture started; IRQ edges=15364
+100437 14:03:03.382 Barcode capture started; IRQ edges=15364
+100438 14:03:03.382 Barcode capture started; IRQ edges=15364
+100439 14:03:03.382 Barcode capture started; IRQ edges=15364
+100440 14:03:03.382 Barcode capture started; IRQ edges=15364
+100441 14:03:03.447 Barcode capture started; IRQ edges=15364
+100442 14:03:03.447 Barcode capture started; IRQ edges=15364
+100443 14:03:03.447 Barcode capture started; IRQ edges=15364
+100444 14:03:03.447 Barcode capture started; IRQ edges=15364
+100445 14:03:03.447 Barcode capture started; IRQ edges=15364
+100446 14:03:03.447 Barcode capture started; IRQ edges=15364
+100447 14:03:03.447 Barcode capture started; IRQ edges=15364
+100448 14:03:03.447 Barcode capture started; IRQ edges=15364
+100449 14:03:05.243 Barcode capture started; IRQ edges=15364
+100454 14:03:05.250 Barcode reader OFF; IRQ edges=15364
+100455 14:03:05.250 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+100456 14:03:05.250 Barcode: only 0 bars+spaces seen, ignored.
+101603 14:08:03.201 === SuperCar AAI14: line + barcode + hump/wall ===
+101610 14:08:03.241 Barcode reader OFF; IRQ edges=0
+102015 14:09:32.831 State: READY -> LINE_CAL
+102016 14:09:32.831 LINE_CAL: both sensors already on the line -> skipping calibration.
+102017 14:09:32.831 State: LINE_CAL -> FOLLOW_LINE
+102018 14:09:32.831 Barcode reader ON; IRQ edges=255
+102077 14:09:45.570 Barcode reader OFF; IRQ edges=255
+102559 14:11:38.376 === SuperCar AAI14: line + barcode + hump/wall ===
+102566 14:11:38.450 Barcode reader OFF; IRQ edges=0
+102615 14:11:45.545 State: READY -> LINE_CAL
+102616 14:11:45.545 LINE_CAL: both sensors already on the line -> skipping calibration.
+102617 14:11:45.545 State: LINE_CAL -> FOLLOW_LINE
+102618 14:11:45.553 Barcode reader ON; IRQ edges=913
+102747 14:12:13.904 Barcode reader OFF; IRQ edges=914
+103220 14:13:28.793 State: STOPPED -> LINE_CAL
+103221 14:13:28.793 LINE_CAL: both sensors already on the line -> skipping calibration.
+103222 14:13:28.793 State: LINE_CAL -> FOLLOW_LINE
+103223 14:13:28.802 Barcode reader ON; IRQ edges=954
+103284 14:13:41.939 Barcode reader OFF; IRQ edges=954
+103734 14:14:51.069 State: STOPPED -> LINE_CAL
+103735 14:14:51.069 LINE_CAL: both sensors already on the line -> skipping calibration.
+103736 14:14:51.069 State: LINE_CAL -> FOLLOW_LINE
+103737 14:14:51.069 Barcode reader ON; IRQ edges=975
+103746 14:14:52.714 Barcode capture started; IRQ edges=1059
+103747 14:14:52.820 Barcode capture started; IRQ edges=1059
+103748 14:14:52.824 Barcode capture started; IRQ edges=1059
+103749 14:14:52.828 Barcode capture started; IRQ edges=1059
+103750 14:14:52.829 Barcode capture started; IRQ edges=1059
+103751 14:14:52.829 Barcode capture started; IRQ edges=1059
+103752 14:14:52.832 Barcode capture started; IRQ edges=1059
+103753 14:14:52.832 Barcode capture started; IRQ edges=1059
+103754 14:14:52.910 Barcode capture started; IRQ edges=1059
+103755 14:14:52.910 Barcode capture started; IRQ edges=1059
+103756 14:14:52.910 Barcode capture started; IRQ edges=1059
+103757 14:14:52.922 Barcode capture started; IRQ edges=1059
+103759 14:14:52.922 Barcode capture started; IRQ edges=1059
+103760 14:14:52.922 Barcode capture started; IRQ edges=1059
+103761 14:14:52.922 Barcode capture started; IRQ edges=1059
+103762 14:14:53.127 Barcode capture started; IRQ edges=1059
+103763 14:14:53.127 Barcode capture started; IRQ edges=1059
+103764 14:14:53.132 Barcode capture started; IRQ edges=1059
+103765 14:14:53.132 Barcode capture started; IRQ edges=1059
+103766 14:14:53.132 Barcode capture started; IRQ edges=1059
+103767 14:14:53.132 Barcode capture started; IRQ edges=1059
+103768 14:14:53.132 Barcode capture started; IRQ edges=1059
+103769 14:14:53.132 Barcode capture started; IRQ edges=1059
+103770 14:14:53.211 Barcode capture started; IRQ edges=1059
+103771 14:14:53.212 Barcode capture started; IRQ edges=1059
+103772 14:14:53.212 Barcode capture started; IRQ edges=1059
+103773 14:14:53.212 Barcode capture started; IRQ edges=1059
+103774 14:14:53.212 Barcode capture started; IRQ edges=1059
+103775 14:14:53.212 Barcode capture started; IRQ edges=1059
+103776 14:14:53.212 Barcode capture started; IRQ edges=1059
+103777 14:14:53.212 Barcode capture started; IRQ edges=1059
+103778 14:14:53.307 Barcode capture started; IRQ edges=1059
+103779 14:14:53.307 Barcode capture started; IRQ edges=1059
+103780 14:14:53.311 Barcode capture started; IRQ edges=1059
+103781 14:14:53.311 Barcode capture started; IRQ edges=1059
+103782 14:14:53.311 Barcode capture started; IRQ edges=1059
+103783 14:14:53.311 Barcode capture started; IRQ edges=1059
+103784 14:14:53.311 Barcode capture started; IRQ edges=1059
+103785 14:14:53.311 Barcode capture started; IRQ edges=1059
+103793 14:14:54.762 Barcode: only 1 bars+spaces seen, ignored.
+103811 14:14:58.813 Barcode capture started; IRQ edges=1137
+103812 14:14:58.906 Barcode capture started; IRQ edges=1137
+103813 14:14:58.908 Barcode capture started; IRQ edges=1137
+103814 14:14:58.908 Barcode capture started; IRQ edges=1137
+103815 14:14:58.908 Barcode capture started; IRQ edges=1137
+103816 14:14:58.908 Barcode capture started; IRQ edges=1137
+103817 14:14:58.908 Barcode capture started; IRQ edges=1137
+103818 14:14:58.908 Barcode capture started; IRQ edges=1137
+103819 14:14:58.908 Barcode capture started; IRQ edges=1137
+103820 14:14:58.977 Barcode capture started; IRQ edges=1137
+103821 14:14:58.977 Barcode capture started; IRQ edges=1137
+103822 14:14:58.988 Barcode capture started; IRQ edges=1137
+103823 14:14:58.988 Barcode capture started; IRQ edges=1137
+103824 14:14:58.988 Barcode capture started; IRQ edges=1137
+103825 14:14:58.988 Barcode capture started; IRQ edges=1137
+103826 14:14:58.988 Barcode capture started; IRQ edges=1137
+103827 14:14:58.988 Barcode capture started; IRQ edges=1137
+103828 14:14:59.086 Barcode capture started; IRQ edges=1137
+103829 14:14:59.086 Barcode capture started; IRQ edges=1137
+103830 14:14:59.086 Barcode capture started; IRQ edges=1137
+103831 14:14:59.102 Barcode capture started; IRQ edges=1137
+103832 14:14:59.102 Barcode capture started; IRQ edges=1137
+103833 14:14:59.102 Barcode capture started; IRQ edges=1137
+103834 14:14:59.102 Barcode capture started; IRQ edges=1137
+103835 14:14:59.102 Barcode capture started; IRQ edges=1137
+103836 14:14:59.188 Barcode capture started; IRQ edges=1137
+103837 14:14:59.188 Barcode capture started; IRQ edges=1137
+103838 14:14:59.188 Barcode capture started; IRQ edges=1137
+103839 14:14:59.188 Barcode capture started; IRQ edges=1137
+103840 14:14:59.188 Barcode capture started; IRQ edges=1137
+103841 14:14:59.198 Barcode capture started; IRQ edges=1137
+103842 14:14:59.198 Barcode capture started; IRQ edges=1137
+103843 14:14:59.198 Barcode capture started; IRQ edges=1137
+103844 14:14:59.266 Barcode capture started; IRQ edges=1137
+103848 14:14:59.552 Barcode reader OFF; IRQ edges=1174
+103849 14:14:59.552 Barcode: reading switched off after 2 bars+spaces -> decoding what was read.
+103850 14:14:59.568 Barcode: only 2 bars+spaces seen, ignored.
+103903 14:15:10.559 State: PICKED_UP -> LINE_CAL
+103904 14:15:10.559 LINE_CAL: right sensor on black -> forward, arcing right.
+103908 14:15:11.164 LINE_CAL OK: both sensors on the line -> following.
+103909 14:15:11.241 State: LINE_CAL -> FOLLOW_LINE
+103910 14:15:11.241 Barcode reader ON; IRQ edges=1443
+103931 14:15:15.421 Line lost: reversing 1260 ms of path to where both sensors were on it.
+103932 14:15:15.605 Reverse done (a sensor found black).
+103952 14:15:19.887 Barcode capture started; IRQ edges=1541
+103953 14:15:19.887 Barcode capture started; IRQ edges=1541
+103954 14:15:19.894 Barcode capture started; IRQ edges=1541
+103955 14:15:19.896 Barcode capture started; IRQ edges=1541
+103956 14:15:19.896 Barcode capture started; IRQ edges=1541
+103957 14:15:19.896 Barcode capture started; IRQ edges=1541
+103958 14:15:19.896 Barcode capture started; IRQ edges=1541
+103959 14:15:19.960 Barcode capture started; IRQ edges=1541
+103960 14:15:19.960 Barcode capture started; IRQ edges=1541
+103961 14:15:19.960 Barcode capture started; IRQ edges=1541
+103962 14:15:19.960 Barcode capture started; IRQ edges=1541
+103963 14:15:19.960 Barcode capture started; IRQ edges=1541
+103964 14:15:19.960 Barcode capture started; IRQ edges=1541
+103965 14:15:19.960 Barcode capture started; IRQ edges=1541
+103966 14:15:19.960 Barcode capture started; IRQ edges=1541
+103967 14:15:20.086 Barcode capture started; IRQ edges=1541
+103968 14:15:20.090 Barcode capture started; IRQ edges=1541
+103969 14:15:20.090 Barcode capture started; IRQ edges=1541
+103970 14:15:20.090 Barcode capture started; IRQ edges=1541
+103971 14:15:20.090 Barcode capture started; IRQ edges=1541
+103972 14:15:20.090 Barcode capture started; IRQ edges=1541
+103973 14:15:20.090 Barcode capture started; IRQ edges=1541
+103974 14:15:20.090 Barcode capture started; IRQ edges=1541
+103975 14:15:20.160 Barcode capture started; IRQ edges=1541
+103976 14:15:20.160 Barcode capture started; IRQ edges=1541
+103977 14:15:20.160 Barcode capture started; IRQ edges=1541
+103978 14:15:20.167 Barcode capture started; IRQ edges=1541
+103979 14:15:20.167 Barcode capture started; IRQ edges=1541
+103980 14:15:20.167 Barcode capture started; IRQ edges=1541
+103981 14:15:20.167 Barcode capture started; IRQ edges=1541
+103982 14:15:20.167 Barcode capture started; IRQ edges=1541
+103983 14:15:20.268 Barcode capture started; IRQ edges=1541
+103984 14:15:20.268 Barcode capture started; IRQ edges=1541
+103985 14:15:20.268 Barcode capture started; IRQ edges=1541
+103986 14:15:20.268 Barcode capture started; IRQ edges=1541
+103987 14:15:20.268 Barcode capture started; IRQ edges=1541
+103988 14:15:20.268 Barcode capture started; IRQ edges=1541
+103989 14:15:20.279 Barcode capture started; IRQ edges=1541
+103990 14:15:20.279 Barcode capture started; IRQ edges=1541
+103991 14:15:20.388 Barcode capture started; IRQ edges=1541
+103992 14:15:20.388 Barcode capture started; IRQ edges=1541
+103993 14:15:20.388 Barcode capture started; IRQ edges=1541
+103994 14:15:20.388 Barcode capture started; IRQ edges=1541
+103995 14:15:20.395 Barcode capture started; IRQ edges=1541
+103996 14:15:20.395 Barcode capture started; IRQ edges=1541
+103997 14:15:20.395 Barcode capture started; IRQ edges=1541
+103998 14:15:20.395 Barcode initial mark 407 ms: treated as junction, scan dropped.
+104032 14:15:27.132 Barcode reader OFF; IRQ edges=1542
+104462 14:16:30.061 State: STOPPED -> LINE_CAL
+104463 14:16:30.071 LINE_CAL: right sensor on black -> forward, arcing right.
+104469 14:16:30.909 LINE_CAL OK: both sensors on the line -> following.
+104470 14:16:30.909 State: LINE_CAL -> FOLLOW_LINE
+104471 14:16:30.916 Barcode reader ON; IRQ edges=1757
+104485 14:16:34.180 Barcode capture started; IRQ edges=1893
+104486 14:16:34.180 Barcode capture started; IRQ edges=1893
+104487 14:16:34.180 Barcode capture started; IRQ edges=1893
+104488 14:16:34.180 Barcode capture started; IRQ edges=1893
+104490 14:16:34.192 Barcode capture started; IRQ edges=1893
+104491 14:16:34.192 Barcode capture started; IRQ edges=1893
+104492 14:16:34.244 Barcode capture started; IRQ edges=1893
+104493 14:16:34.244 Barcode capture started; IRQ edges=1893
+104494 14:16:34.244 Barcode capture started; IRQ edges=1893
+104495 14:16:34.244 Barcode capture started; IRQ edges=1893
+104496 14:16:34.244 Barcode capture started; IRQ edges=1893
+104497 14:16:34.244 Barcode capture started; IRQ edges=1893
+104498 14:16:34.244 Barcode capture started; IRQ edges=1893
+104499 14:16:34.244 Barcode capture started; IRQ edges=1893
+104500 14:16:34.329 Barcode capture started; IRQ edges=1893
+104501 14:16:34.335 Barcode capture started; IRQ edges=1893
+104502 14:16:34.335 Barcode capture started; IRQ edges=1893
+104503 14:16:34.335 Barcode capture started; IRQ edges=1893
+104504 14:16:34.340 Barcode capture started; IRQ edges=1893
+104505 14:16:34.342 Barcode capture started; IRQ edges=1893
+104506 14:16:34.342 Barcode capture started; IRQ edges=1893
+104507 14:16:34.342 Barcode capture started; IRQ edges=1893
+104508 14:16:34.392 Barcode capture started; IRQ edges=1893
+104509 14:16:34.392 Barcode capture started; IRQ edges=1893
+104510 14:16:34.396 Barcode capture started; IRQ edges=1893
+104511 14:16:34.396 Barcode capture started; IRQ edges=1893
+104512 14:16:34.396 Barcode capture started; IRQ edges=1893
+104513 14:16:34.396 Barcode capture started; IRQ edges=1893
+104514 14:16:34.396 Barcode capture started; IRQ edges=1893
+104515 14:16:34.405 Barcode capture started; IRQ edges=1893
+104516 14:16:34.485 Barcode capture started; IRQ edges=1893
+104517 14:16:34.501 Barcode capture started; IRQ edges=1893
+104518 14:16:34.501 Barcode capture started; IRQ edges=1893
+104519 14:16:34.501 Barcode capture started; IRQ edges=1893
+104520 14:16:34.501 Barcode capture started; IRQ edges=1893
+104521 14:16:34.501 Barcode capture started; IRQ edges=1893
+104522 14:16:34.501 Barcode capture started; IRQ edges=1893
+104523 14:16:34.501 Barcode capture started; IRQ edges=1893
+104524 14:16:34.642 Barcode capture started; IRQ edges=1893
+104525 14:16:34.642 Barcode capture started; IRQ edges=1893
+104526 14:16:34.642 Barcode capture started; IRQ edges=1893
+104527 14:16:34.642 Barcode capture started; IRQ edges=1893
+104528 14:16:34.642 Barcode capture started; IRQ edges=1893
+104529 14:16:34.642 Barcode capture started; IRQ edges=1893
+104530 14:16:34.642 Barcode capture started; IRQ edges=1893
+104531 14:16:34.642 Barcode capture started; IRQ edges=1893
+104532 14:16:34.699 Barcode capture started; IRQ edges=1893
+104533 14:16:34.699 Barcode capture started; IRQ edges=1893
+104534 14:16:34.699 Barcode capture started; IRQ edges=1893
+104535 14:16:34.699 Barcode capture started; IRQ edges=1893
+104536 14:16:34.699 Barcode capture started; IRQ edges=1893
+104537 14:16:34.715 Barcode capture started; IRQ edges=1893
+104538 14:16:34.715 Barcode capture started; IRQ edges=1893
+104539 14:16:34.715 Barcode capture started; IRQ edges=1893
+104540 14:16:34.796 Barcode capture started; IRQ edges=1893
+104541 14:16:34.796 Barcode capture started; IRQ edges=1893
+104542 14:16:34.796 Barcode capture started; IRQ edges=1893
+104543 14:16:34.796 Barcode capture started; IRQ edges=1893
+104544 14:16:34.796 Barcode capture started; IRQ edges=1893
+104545 14:16:34.796 Barcode capture started; IRQ edges=1893
+104546 14:16:34.796 Barcode capture started; IRQ edges=1893
+104552 14:16:36.169 Barcode: only 1 bars+spaces seen, ignored.
+104573 14:16:39.932 Barcode reader OFF; IRQ edges=1894
+105287 14:18:52.540 State: STOPPED -> LINE_CAL
+105288 14:18:52.540 LINE_CAL: right sensor on black -> forward, arcing right.
+105291 14:18:52.779 LINE_CAL: left sensor on black -> forward, arcing left.
+105292 14:18:52.779 LINE_CAL: right sensor on black -> forward, arcing right.
+105294 14:18:52.991 LINE_CAL: left sensor on black -> forward, arcing left.
+105295 14:18:53.000 LINE_CAL: right sensor on black -> forward, arcing right.
+105297 14:18:53.003 LINE_CAL: left sensor on black -> forward, arcing left.
+105298 14:18:53.091 LINE_CAL: right sensor on black -> forward, arcing right.
+105299 14:18:53.091 LINE_CAL: left sensor on black -> forward, arcing left.
+105300 14:18:53.295 LINE_CAL: right sensor on black -> forward, arcing right.
+105302 14:18:53.295 LINE_CAL: left sensor on black -> forward, arcing left.
+105303 14:18:53.295 LINE_CAL: right sensor on black -> forward, arcing right.
+105304 14:18:53.356 LINE_CAL: left sensor on black -> forward, arcing left.
+105305 14:18:53.372 LINE_CAL: right sensor on black -> forward, arcing right.
+105307 14:18:53.593 LINE_CAL: left sensor on black -> forward, arcing left.
+105308 14:18:53.595 LINE_CAL: right sensor on black -> forward, arcing right.
+105309 14:18:53.596 LINE_CAL: left sensor on black -> forward, arcing left.
+105310 14:18:53.704 LINE_CAL: right sensor on black -> forward, arcing right.
+105312 14:18:53.708 LINE_CAL: left sensor on black -> forward, arcing left.
+105313 14:18:53.909 LINE_CAL: right sensor on black -> forward, arcing right.
+105314 14:18:53.909 LINE_CAL: left sensor on black -> forward, arcing left.
+105315 14:18:54.006 LINE_CAL: right sensor on black -> forward, arcing right.
+105317 14:18:54.017 LINE_CAL: left sensor on black -> forward, arcing left.
+105318 14:18:54.217 LINE_CAL: right sensor on black -> forward, arcing right.
+105319 14:18:54.220 LINE_CAL: left sensor on black -> forward, arcing left.
+105320 14:18:54.426 LINE_CAL: right sensor on black -> forward, arcing right.
+105322 14:18:54.429 LINE_CAL: left sensor on black -> forward, arcing left.
+105323 14:18:54.431 LINE_CAL: right sensor on black -> forward, arcing right.
+105324 14:18:54.432 LINE_CAL: left sensor on black -> forward, arcing left.
+105325 14:18:54.501 LINE_CAL: right sensor on black -> forward, arcing right.
+105327 14:18:54.501 LINE_CAL: left sensor on black -> forward, arcing left.
+105328 14:18:54.628 LINE_CAL: right sensor on black -> forward, arcing right.
+105329 14:18:54.630 LINE_CAL: left sensor on black -> forward, arcing left.
+105330 14:18:54.630 LINE_CAL: right sensor on black -> forward, arcing right.
+105332 14:18:54.722 LINE_CAL: left sensor on black -> forward, arcing left.
+105334 14:18:54.819 LINE_CAL: right sensor on black -> forward, arcing right.
+105335 14:18:55.021 LINE_CAL: left sensor on black -> forward, arcing left.
+105337 14:18:55.024 LINE_CAL: right sensor on black -> forward, arcing right.
+105338 14:18:55.147 LINE_CAL: left sensor on black -> forward, arcing left.
+105339 14:18:55.149 LINE_CAL: right sensor on black -> forward, arcing right.
+105340 14:18:55.152 LINE_CAL: left sensor on black -> forward, arcing left.
+105342 14:18:55.250 LINE_CAL: right sensor on black -> forward, arcing right.
+105343 14:18:55.252 LINE_CAL: left sensor on black -> forward, arcing left.
+105344 14:18:55.321 LINE_CAL: right sensor on black -> forward, arcing right.
+105345 14:18:55.647 LINE_CAL: left sensor on black -> forward, arcing left.
+105347 14:18:55.756 LINE_CAL: right sensor on black -> forward, arcing right.
+105348 14:18:55.756 LINE_CAL: left sensor on black -> forward, arcing left.
+105349 14:18:55.756 LINE_CAL: right sensor on black -> forward, arcing right.
+105351 14:18:55.761 LINE_CAL: left sensor on black -> forward, arcing left.
+105352 14:18:55.857 LINE_CAL: right sensor on black -> forward, arcing right.
+105353 14:18:55.857 LINE_CAL: left sensor on black -> forward, arcing left.
+105354 14:18:55.960 LINE_CAL: right sensor on black -> forward, arcing right.
+105356 14:18:56.058 LINE_CAL: left sensor on black -> forward, arcing left.
+105357 14:18:56.058 LINE_CAL: right sensor on black -> forward, arcing right.
+105358 14:18:56.144 LINE_CAL: left sensor on black -> forward, arcing left.
+105360 14:18:56.247 LINE_CAL: right sensor on black -> forward, arcing right.
+105361 14:18:56.247 LINE_CAL: left sensor on black -> forward, arcing left.
+105362 14:18:56.373 LINE_CAL: right sensor on black -> forward, arcing right.
+105363 14:18:56.375 LINE_CAL: left sensor on black -> forward, arcing left.
+105365 14:18:56.576 LINE_CAL: right sensor on black -> forward, arcing right.
+105366 14:18:56.839 LINE_CAL: left sensor on black -> forward, arcing left.
+105368 14:18:56.951 LINE_CAL: right sensor on black -> forward, arcing right.
+105370 14:18:56.955 LINE_CAL: left sensor on black -> forward, arcing left.
+105371 14:18:56.955 LINE_CAL: right sensor on black -> forward, arcing right.
+105373 14:18:56.958 LINE_CAL: left sensor on black -> forward, arcing left.
+105374 14:18:57.173 LINE_CAL: right sensor on black -> forward, arcing right.
+105375 14:18:57.290 LINE_CAL: left sensor on black -> forward, arcing left.
+105377 14:18:57.290 LINE_CAL: right sensor on black -> forward, arcing right.
+105378 14:18:57.549 LINE_CAL: left sensor on black -> forward, arcing left.
+105380 14:18:57.549 LINE_CAL: right sensor on black -> forward, arcing right.
+105381 14:18:57.794 LINE_CAL: left sensor on black -> forward, arcing left.
+105382 14:18:57.806 LINE_CAL: right sensor on black -> forward, arcing right.
+105384 14:18:57.907 LINE_CAL: left sensor on black -> forward, arcing left.
+105385 14:18:57.907 LINE_CAL: right sensor on black -> forward, arcing right.
+105386 14:18:57.907 LINE_CAL: left sensor on black -> forward, arcing left.
+105388 14:18:58.101 LINE_CAL: right sensor on black -> forward, arcing right.
+105389 14:18:58.101 LINE_CAL: left sensor on black -> forward, arcing left.
+105390 14:18:58.202 LINE_CAL: right sensor on black -> forward, arcing right.
+105391 14:18:58.213 LINE_CAL: left sensor on black -> forward, arcing left.
+105393 14:18:58.419 LINE_CAL: right sensor on black -> forward, arcing right.
+105394 14:18:58.420 LINE_CAL: left sensor on black -> forward, arcing left.
+105395 14:18:58.422 LINE_CAL: right sensor on black -> forward, arcing right.
+105397 14:18:58.624 LINE_CAL: left sensor on black -> forward, arcing left.
+105398 14:18:58.626 LINE_CAL: right sensor on black -> forward, arcing right.
+105399 14:18:58.721 LINE_CAL: left sensor on black -> forward, arcing left.
+105400 14:18:58.721 LINE_CAL: right sensor on black -> forward, arcing right.
+105403 14:18:58.912 LINE_CAL: left sensor on black -> forward, arcing left.
+105404 14:18:58.912 LINE_CAL: right sensor on black -> forward, arcing right.
+105405 14:18:58.992 LINE_CAL: left sensor on black -> forward, arcing left.
+105407 14:18:58.992 LINE_CAL: right sensor on black -> forward, arcing right.
+105408 14:18:59.205 LINE_CAL: left sensor on black -> forward, arcing left.
+105409 14:18:59.211 LINE_CAL: right sensor on black -> forward, arcing right.
+105410 14:18:59.328 LINE_CAL: left sensor on black -> forward, arcing left.
+105412 14:18:59.328 LINE_CAL: right sensor on black -> forward, arcing right.
+105413 14:18:59.328 LINE_CAL: left sensor on black -> forward, arcing left.
+105414 14:18:59.441 LINE_CAL: right sensor on black -> forward, arcing right.
+105415 14:18:59.441 LINE_CAL: left sensor on black -> forward, arcing left.
+105417 14:18:59.552 LINE_CAL: right sensor on black -> forward, arcing right.
+105418 14:18:59.554 LINE_CAL: left sensor on black -> forward, arcing left.
+105419 14:19:00.940 LINE_CAL: right sensor on black -> forward, arcing right.
+105420 14:19:01.037 LINE_CAL: left sensor on black -> forward, arcing left.
+105422 14:19:01.037 LINE_CAL: right sensor on black -> forward, arcing right.
+105423 14:19:01.037 LINE_CAL: left sensor on black -> forward, arcing left.
+105424 14:19:01.037 LINE_CAL: right sensor on black -> forward, arcing right.
+105425 14:19:01.037 LINE_CAL: left sensor on black -> forward, arcing left.
+105427 14:19:01.053 LINE_CAL OK: both sensors on the line -> following.
+105428 14:19:01.164 State: LINE_CAL -> FOLLOW_LINE
+105429 14:19:01.164 Barcode reader ON; IRQ edges=2321
+105440 14:19:03.445 Barcode capture started; IRQ edges=2342
+105441 14:19:03.550 Barcode capture started; IRQ edges=2342
+105442 14:19:03.554 Barcode capture started; IRQ edges=2342
+105443 14:19:03.556 Barcode capture started; IRQ edges=2342
+105445 14:19:03.556 Barcode capture started; IRQ edges=2342
+105446 14:19:03.556 Barcode capture started; IRQ edges=2342
+105447 14:19:03.556 Barcode capture started; IRQ edges=2342
+105448 14:19:03.620 Barcode capture started; IRQ edges=2342
+105449 14:19:03.621 Barcode capture started; IRQ edges=2342
+105461 14:19:06.794 Barcode reader OFF; IRQ edges=2343
+105462 14:19:06.794 Barcode: reading switched off after 1 bars+spaces -> decoding what was read.
+105463 14:19:06.797 Barcode: only 1 bars+spaces seen, ignored.
+106276 14:22:14.025 State: STOPPED -> LINE_CAL
+106277 14:22:14.025 LINE_CAL: right sensor on black -> forward, arcing right.
+106278 14:22:14.025 LINE_CAL OK: both sensors on the line -> following.
+106279 14:22:14.025 State: LINE_CAL -> FOLLOW_LINE
+106280 14:22:14.025 Barcode reader ON; IRQ edges=2710
+106283 14:22:14.344 Barcode capture started; IRQ edges=2716
+106315 14:22:21.176 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":659485}
+106316 14:22:21.184 Barcode COMMAND: "F" = U-TURN
+106317 14:22:21.184 Pending: U-TURN at the next crossroad.
+106328 14:22:23.525 Line lost: reversing 320 ms of path to where both sensors were on it.
+106329 14:22:23.527 Reverse done (a sensor found black).
+106339 14:22:27.324 Barcode reader OFF; IRQ edges=2890
+108902 14:32:16.165 State: STOPPED -> LINE_CAL
+108903 14:32:16.168 LINE_CAL: both sensors already on the line -> skipping calibration.
+108904 14:32:16.168 State: LINE_CAL -> FOLLOW_LINE
+108905 14:32:16.356 Barcode reader ON; IRQ edges=3456
+108906 14:32:16.356 Barcode capture started; IRQ edges=3466
+108907 14:32:16.356 Barcode capture started; IRQ edges=3466
+108908 14:32:16.370 Barcode capture started; IRQ edges=3466
+108909 14:32:16.370 Barcode capture started; IRQ edges=3466
+108910 14:32:16.370 Barcode capture started; IRQ edges=3466
+108938 14:32:23.012 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":1261413}
+108939 14:32:23.452 Barcode COMMAND: "F" = U-TURN
+108940 14:32:23.456 Pending: U-TURN at the next crossroad.
+108952 14:32:25.277 Line lost: reversing 240 ms of path to where both sensors were on it.
+108953 14:32:25.277 Reverse done (a sensor found black).
+108958 14:32:25.777 Barcode reader OFF; IRQ edges=3648
+109274 14:33:38.905 State: PICKED_UP -> LINE_CAL
+109275 14:33:38.907 LINE_CAL: right sensor on black -> forward, arcing right.
+109276 14:33:38.907 LINE_CAL OK: both sensors on the line -> following.
+109277 14:33:38.907 State: LINE_CAL -> FOLLOW_LINE
+109278 14:33:38.907 Barcode reader ON; IRQ edges=3781
+109279 14:33:38.907 Barcode capture started; IRQ edges=3796
+109280 14:33:38.907 Barcode capture started; IRQ edges=3796
+109281 14:33:39.059 Barcode capture started; IRQ edges=3796
+109282 14:33:39.059 Barcode capture started; IRQ edges=3796
+109283 14:33:39.059 Barcode capture started; IRQ edges=3796
+109284 14:33:39.059 Barcode capture started; IRQ edges=3796
+109285 14:33:39.059 Barcode capture started; IRQ edges=3796
+109313 14:33:47.494 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":1343205}
+109314 14:33:47.494 Barcode COMMAND: "F" = U-TURN
+109315 14:33:47.498 Pending: U-TURN at the next crossroad.
+109318 14:33:47.666 Barcode capture started; IRQ edges=3993
+109319 14:33:47.670 Barcode capture started; IRQ edges=3993
+109322 14:33:47.670 Barcode initial mark 443 ms: treated as junction, scan dropped.
+109323 14:33:47.670 Side sensor: 440 ms black mark -> crossroad.
+109324 14:33:47.670 Crossroad: U-TURN now.
+109325 14:33:47.760 State: FOLLOW_LINE -> TURN
+109326 14:33:47.760 Barcode reader OFF; IRQ edges=3994
+109333 14:33:49.199 U-TURN done (on the line, 2881 ms).
+109334 14:33:49.206 State: TURN -> FOLLOW_LINE
+109335 14:33:49.208 Barcode reader ON; IRQ edges=4012
+109336 14:33:49.208 Barcode capture started; IRQ edges=4029
+109337 14:33:49.208 Barcode capture started; IRQ edges=4029
+109338 14:33:49.208 Barcode capture started; IRQ edges=4029
+109339 14:33:49.208 Barcode capture started; IRQ edges=4029
+109340 14:33:51.601 Barcode capture started; IRQ edges=4029
+109341 14:33:51.604 Barcode capture started; IRQ edges=4029
+109342 14:33:51.606 Barcode capture started; IRQ edges=4029
+109359 14:33:52.856 Barcode reader OFF; IRQ edges=4378
+109360 14:33:52.856 Barcode: reading switched off after 12 bars+spaces -> decoding what was read.
+109361 14:33:52.856 Barcode lenient: 12 bars+spaces cannot be "*X*" with at most 8 missing.
+109362 14:33:52.856 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+109365 14:33:53.438 Barcode NOT decoded: 12 bars+spaces seen (valid: 10 per character - 1).
+109449 14:34:19.482 State: PICKED_UP -> LINE_CAL
+109450 14:34:19.486 LINE_CAL: left sensor on black -> forward, arcing left.
+109451 14:34:19.486 LINE_CAL: right sensor on black -> forward, arcing right.
+109452 14:34:19.488 LINE_CAL: left sensor on black -> forward, arcing left.
+109453 14:34:19.490 LINE_CAL OK: both sensors on the line -> following.
+109454 14:34:19.494 State: LINE_CAL -> FOLLOW_LINE
+109455 14:34:19.496 Barcode reader ON; IRQ edges=4379
+109459 14:34:20.264 Barcode capture started; IRQ edges=4392
+109460 14:34:20.344 Barcode capture started; IRQ edges=4392
+109461 14:34:20.344 Barcode capture started; IRQ edges=4392
+109462 14:34:20.344 Barcode capture started; IRQ edges=4392
+109463 14:34:20.344 Barcode capture started; IRQ edges=4392
+109465 14:34:22.529 Barcode: only 1 bars+spaces seen, ignored.
+109473 14:34:22.832 Barcode capture started; IRQ edges=4437
+109474 14:34:22.832 Barcode capture started; IRQ edges=4437
+109475 14:34:22.832 Barcode capture started; IRQ edges=4437
+109476 14:34:22.832 Barcode capture started; IRQ edges=4437
+109477 14:34:22.832 Barcode capture started; IRQ edges=4437
+109478 14:34:22.832 Barcode capture started; IRQ edges=4437
+109479 14:34:22.832 Barcode capture started; IRQ edges=4437
+109480 14:34:22.848 Barcode capture started; IRQ edges=4437
+109481 14:34:22.958 Barcode capture started; IRQ edges=4437
+109482 14:34:22.958 Barcode capture started; IRQ edges=4437
+109483 14:34:22.961 Barcode capture started; IRQ edges=4437
+109484 14:34:22.961 Barcode capture started; IRQ edges=4437
+109485 14:34:22.961 Barcode capture started; IRQ edges=4437
+109486 14:34:22.961 Barcode capture started; IRQ edges=4437
+109487 14:34:22.961 Barcode capture started; IRQ edges=4437
+109488 14:34:22.961 Barcode capture started; IRQ edges=4437
+109489 14:34:23.195 Barcode capture started; IRQ edges=4437
+109490 14:34:23.206 Barcode capture started; IRQ edges=4437
+109491 14:34:23.208 Barcode capture started; IRQ edges=4437
+109492 14:34:23.210 Barcode capture started; IRQ edges=4437
+109493 14:34:23.212 Barcode capture started; IRQ edges=4437
+109494 14:34:23.212 Barcode initial mark 344 ms: treated as junction, scan dropped.
+109513 14:34:26.377 Barcode reader OFF; IRQ edges=4439
+109656 14:34:51.286 State: PICKED_UP -> LINE_CAL
+109657 14:34:51.288 LINE_CAL: left sensor on black -> forward, arcing left.
+109661 14:34:51.357 LINE_CAL: right sensor on black -> forward, arcing right.
+109663 14:34:51.782 LINE_CAL: left sensor on black -> forward, arcing left.
+109664 14:34:51.906 LINE_CAL: right sensor on black -> forward, arcing right.
+109666 14:34:52.086 LINE_CAL: left sensor on black -> forward, arcing left.
+109668 14:34:52.228 LINE_CAL: right sensor on black -> forward, arcing right.
+109670 14:34:52.492 LINE_CAL: left sensor on black -> forward, arcing left.
+109671 14:34:52.572 LINE_CAL: right sensor on black -> forward, arcing right.
+109673 14:34:52.789 LINE_CAL: left sensor on black -> forward, arcing left.
+109675 14:34:52.900 LINE_CAL: right sensor on black -> forward, arcing right.
+109676 14:34:54.586 LINE_CAL OK: both sensors on the line -> following.
+109677 14:34:54.682 State: LINE_CAL -> FOLLOW_LINE
+109678 14:34:54.682 Barcode reader ON; IRQ edges=4680
+109681 14:34:54.691 Barcode capture started; IRQ edges=4690
+109682 14:34:54.691 Barcode capture started; IRQ edges=4690
+109683 14:34:54.693 Barcode capture started; IRQ edges=4690
+109684 14:34:54.804 Barcode capture started; IRQ edges=4690
+109685 14:34:54.806 Barcode capture started; IRQ edges=4690
+109704 14:34:59.413 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":1417624}
+109705 14:34:59.419 Barcode: read leniently (23 of 29 bars+spaces, 6+0 missing, 4 stray left out).
+109706 14:34:59.419 Barcode COMMAND: "F" = U-TURN
+109707 14:34:59.419 Pending: U-TURN at the next crossroad.
+109709 14:34:59.602 Barcode capture started; IRQ edges=4967
+109710 14:34:59.700 Barcode capture started; IRQ edges=4967
+109711 14:34:59.706 Barcode capture started; IRQ edges=4967
+109712 14:34:59.708 Barcode capture started; IRQ edges=4967
+109713 14:34:59.708 Barcode capture started; IRQ edges=4967
+109714 14:34:59.708 Barcode capture started; IRQ edges=4967
+109717 14:35:00.008 Barcode initial mark 425 ms: treated as junction, scan dropped.
+109718 14:35:00.008 Side sensor: 431 ms black mark -> crossroad.
+109719 14:35:00.008 Crossroad: U-TURN now.
+109720 14:35:00.008 State: FOLLOW_LINE -> TURN
+109721 14:35:00.024 Barcode reader OFF; IRQ edges=4968
+109739 14:35:03.491 U-TURN done (on the line, 3429 ms).
+109740 14:35:03.491 State: TURN -> FOLLOW_LINE
+109741 14:35:03.491 Barcode reader ON; IRQ edges=5007
+109744 14:35:04.049 Line lost: reversing 210 ms of path to where both sensors were on it.
+109745 14:35:04.067 Reverse done (a sensor found black).
+109750 14:35:05.131 Barcode capture started; IRQ edges=5023
+109751 14:35:05.133 Barcode capture started; IRQ edges=5023
+109752 14:35:05.133 Barcode capture started; IRQ edges=5023
+109753 14:35:05.133 Barcode capture started; IRQ edges=5023
+109754 14:35:05.133 Barcode capture started; IRQ edges=5023
+109755 14:35:05.133 Barcode capture started; IRQ edges=5023
+109756 14:35:05.133 Barcode capture started; IRQ edges=5023
+109757 14:35:05.288 Barcode capture started; IRQ edges=5023
+109761 14:35:05.643 Barcode initial mark 373 ms: treated as junction, scan dropped.
+109764 14:35:05.949 Barcode capture started; IRQ edges=5043
+109765 14:35:05.949 Barcode capture started; IRQ edges=5043
+109766 14:35:05.949 Barcode capture started; IRQ edges=5043
+109767 14:35:05.949 Barcode capture started; IRQ edges=5043
+109768 14:35:05.949 Barcode capture started; IRQ edges=5043
+109769 14:35:05.949 Barcode capture started; IRQ edges=5043
+109770 14:35:05.949 Barcode capture started; IRQ edges=5043
+109771 14:35:06.087 Barcode capture started; IRQ edges=5043
+109774 14:35:06.667 Barcode initial mark 618 ms: treated as junction, scan dropped.
+109777 14:35:07.137 Barcode capture started; IRQ edges=5078
+109778 14:35:07.145 Barcode capture started; IRQ edges=5078
+109779 14:35:07.147 Barcode capture started; IRQ edges=5078
+109780 14:35:07.149 Barcode capture started; IRQ edges=5078
+109781 14:35:07.149 Barcode capture started; IRQ edges=5078
+109782 14:35:07.149 Barcode capture started; IRQ edges=5078
+109783 14:35:07.149 Barcode capture started; IRQ edges=5078
+109784 14:35:07.237 Barcode capture started; IRQ edges=5078
+109785 14:35:07.241 Barcode capture started; IRQ edges=5078
+109786 14:35:07.241 Barcode capture started; IRQ edges=5078
+109787 14:35:07.245 Barcode capture started; IRQ edges=5078
+109789 14:35:07.246 Barcode capture started; IRQ edges=5078
+109790 14:35:07.246 Barcode capture started; IRQ edges=5078
+109791 14:35:07.246 Barcode capture started; IRQ edges=5078
+109792 14:35:09.183 Barcode capture started; IRQ edges=5078
+109797 14:35:09.191 Barcode reader OFF; IRQ edges=5078
+109798 14:35:09.192 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+109799 14:35:09.192 Barcode: only 0 bars+spaces seen, ignored.
+109999 14:36:03.114 Barcode F -> U-TURN.
+110092 14:36:23.020 State: PICKED_UP -> LINE_CAL
+110093 14:36:23.022 LINE_CAL: right sensor on black -> forward, arcing right.
+110096 14:36:23.314 LINE_CAL OK: both sensors on the line -> following.
+110097 14:36:23.325 State: LINE_CAL -> FOLLOW_LINE
+110098 14:36:23.330 Barcode reader ON; IRQ edges=6079
+110099 14:36:23.330 Barcode capture started; IRQ edges=6087
+110100 14:36:23.330 Barcode capture started; IRQ edges=6087
+110101 14:36:23.334 Barcode capture started; IRQ edges=6087
+110135 14:36:30.776 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":1508925}
+110136 14:36:30.780 Barcode COMMAND: "F" = U-TURN
+110137 14:36:30.784 Pending: U-TURN at the next crossroad.
+110139 14:36:31.104 Barcode capture started; IRQ edges=6298
+110140 14:36:31.110 Barcode capture started; IRQ edges=6298
+110141 14:36:31.115 Barcode capture started; IRQ edges=6298
+110145 14:36:31.427 Barcode initial mark 447 ms: treated as junction, scan dropped.
+110146 14:36:31.427 Side sensor: 441 ms black mark -> crossroad.
+110147 14:36:31.427 Crossroad: U-TURN now.
+110148 14:36:31.427 State: FOLLOW_LINE -> TURN
+110149 14:36:31.427 Barcode reader OFF; IRQ edges=6300
+110165 14:36:34.727 U-TURN done (line found, 3259 ms).
+110166 14:36:34.727 State: TURN -> FOLLOW_LINE
+110167 14:36:34.727 Barcode reader ON; IRQ edges=6325
+110168 14:36:35.010 Barcode capture started; IRQ edges=6344
+110169 14:36:35.010 Barcode capture started; IRQ edges=6344
+110170 14:36:35.010 Barcode capture started; IRQ edges=6344
+110171 14:36:35.010 Barcode capture started; IRQ edges=6344
+110172 14:36:35.010 Barcode capture started; IRQ edges=6344
+110173 14:36:35.010 Barcode capture started; IRQ edges=6344
+110174 14:36:35.010 Barcode capture started; IRQ edges=6344
+110175 14:36:35.010 Barcode capture started; IRQ edges=6344
+110176 14:36:35.197 Barcode capture started; IRQ edges=6344
+110195 14:36:38.790 Barcode reader OFF; IRQ edges=6621
+110196 14:36:38.794 Barcode: reading switched off after 11 bars+spaces -> decoding what was read.
+110197 14:36:38.795 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+110198 14:36:38.795 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+110203 14:36:38.941 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+110343 14:37:00.039 Barcode F -> TURN RIGHT.
+110384 14:37:08.425 State: PICKED_UP -> LINE_CAL
+110385 14:37:08.425 LINE_CAL: left sensor on black -> forward, arcing left.
+110386 14:37:08.425 LINE_CAL: right sensor on black -> forward, arcing right.
+110388 14:37:08.573 LINE_CAL OK: both sensors on the line -> following.
+110389 14:37:08.573 State: LINE_CAL -> FOLLOW_LINE
+110390 14:37:08.573 Barcode reader ON; IRQ edges=6771
+110392 14:37:08.957 Barcode capture started; IRQ edges=6787
+110393 14:37:09.037 Barcode capture started; IRQ edges=6787
+110394 14:37:09.044 Barcode capture started; IRQ edges=6787
+110395 14:37:09.046 Barcode capture started; IRQ edges=6787
+110397 14:37:09.046 Barcode capture started; IRQ edges=6787
+110398 14:37:09.046 Barcode capture started; IRQ edges=6787
+110399 14:37:09.046 Barcode capture started; IRQ edges=6787
+110431 14:37:15.970 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"TURN RIGHT","t":1554345}
+110432 14:37:16.067 Barcode COMMAND: "F" = TURN RIGHT
+110433 14:37:16.067 Pending: TURN RIGHT at the next crossroad.
+110435 14:37:16.296 Barcode capture started; IRQ edges=7029
+110436 14:37:16.298 Barcode capture started; IRQ edges=7029
+110439 14:37:16.677 Barcode initial mark 437 ms: treated as junction, scan dropped.
+110440 14:37:16.679 Side sensor: 429 ms black mark -> crossroad.
+110441 14:37:16.681 Crossroad: TURN RIGHT now.
+110442 14:37:16.682 State: FOLLOW_LINE -> TURN
+110443 14:37:16.684 Barcode reader OFF; IRQ edges=7030
+110457 14:37:19.552 TURN RIGHT done (on the line, 2881 ms).
+110458 14:37:19.772 State: TURN -> FOLLOW_LINE
+110459 14:37:19.774 Barcode reader ON; IRQ edges=7034
+110463 14:37:20.175 Line lost: reversing 340 ms of path to where both sensors were on it.
+110464 14:37:20.415 Reverse done (a sensor found black).
+110469 14:37:22.598 Barcode reader OFF; IRQ edges=7034
+110602 14:37:47.520 Barcode F -> TURN LEFT.
+110619 14:37:49.672 State: PICKED_UP -> LINE_CAL
+110620 14:37:49.672 LINE_CAL: both sensors already on the line -> skipping calibration.
+110621 14:37:49.672 State: LINE_CAL -> FOLLOW_LINE
+110622 14:37:49.672 Barcode reader ON; IRQ edges=7094
+110624 14:37:49.896 Barcode capture started; IRQ edges=7098
+110660 14:37:58.440 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"TURN LEFT","t":1596813}
+110661 14:37:58.464 Barcode: read leniently (27 of 29 bars+spaces, 2+0 missing, 4 stray left out).
+110662 14:37:58.464 Barcode COMMAND: "F" = TURN LEFT
+110663 14:37:58.472 Pending: TURN LEFT at the next crossroad.
+110673 14:38:02.896 Line lost: reversing 760 ms of path to where both sensors were on it.
+110674 14:38:02.912 Reverse done (a sensor found black).
+110687 14:38:03.071 Barcode reader OFF; IRQ edges=7350
+110736 14:38:12.883 State: STOPPED -> LINE_CAL
+110737 14:38:12.899 LINE_CAL: left sensor on black -> forward, arcing left.
+110739 14:38:12.994 LINE_CAL OK: both sensors on the line -> following.
+110740 14:38:13.122 State: LINE_CAL -> FOLLOW_LINE
+110741 14:38:13.122 Barcode reader ON; IRQ edges=7387
+110745 14:38:13.561 Barcode capture started; IRQ edges=7394
+110746 14:38:13.561 Barcode capture started; IRQ edges=7394
+110747 14:38:13.561 Barcode capture started; IRQ edges=7394
+110748 14:38:13.561 Barcode capture started; IRQ edges=7394
+110788 14:38:23.378 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"TURN LEFT","t":1621553}
+110789 14:38:23.389 Barcode: read leniently (27 of 29 bars+spaces, 2+0 missing, 4 stray left out).
+110790 14:38:23.391 Barcode COMMAND: "F" = TURN LEFT
+110791 14:38:23.391 Pending: TURN LEFT at the next crossroad.
+110797 14:38:24.482 Line lost: reversing 890 ms of path to where both sensors were on it.
+110799 14:38:24.706 Reverse done (a sensor found black).
+110819 14:38:29.073 Barcode capture started; IRQ edges=7699
+110820 14:38:29.073 Barcode capture started; IRQ edges=7699
+110821 14:38:29.073 Barcode capture started; IRQ edges=7699
+110822 14:38:29.073 Barcode capture started; IRQ edges=7699
+110823 14:38:29.073 Barcode capture started; IRQ edges=7699
+110824 14:38:29.073 Barcode capture started; IRQ edges=7699
+110825 14:38:29.073 Barcode capture started; IRQ edges=7699
+110826 14:38:29.073 Barcode capture started; IRQ edges=7699
+110827 14:38:29.221 Barcode capture started; IRQ edges=7699
+110835 14:38:31.845 Barcode reader OFF; IRQ edges=7699
+110836 14:38:31.845 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+110837 14:38:31.845 Barcode: only 0 bars+spaces seen, ignored.
+110899 14:38:44.331 State: STOPPED -> LINE_CAL
+110900 14:38:44.340 LINE_CAL: left sensor on black -> forward, arcing left.
+110908 14:38:45.579 LINE_CAL: right sensor on black -> forward, arcing right.
+110910 14:38:45.971 LINE_CAL: left sensor on black -> forward, arcing left.
+110912 14:38:46.215 LINE_CAL: right sensor on black -> forward, arcing right.
+110913 14:38:46.223 LINE_CAL: left sensor on black -> forward, arcing left.
+110915 14:38:46.324 LINE_CAL: right sensor on black -> forward, arcing right.
+110916 14:38:46.326 LINE_CAL OK: both sensors on the line -> following.
+110917 14:38:46.328 State: LINE_CAL -> FOLLOW_LINE
+110918 14:38:46.328 Barcode reader ON; IRQ edges=7700
+110920 14:38:46.544 Barcode capture started; IRQ edges=7711
+110921 14:38:46.688 Barcode capture started; IRQ edges=7711
+110922 14:38:46.690 Barcode capture started; IRQ edges=7711
+110923 14:38:46.692 Barcode capture started; IRQ edges=7711
+110924 14:38:46.694 Barcode capture started; IRQ edges=7711
+110959 14:38:54.424 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"TURN LEFT","t":1652653}
+110960 14:38:54.432 Barcode COMMAND: "F" = TURN LEFT
+110961 14:38:54.434 Pending: TURN LEFT at the next crossroad.
+110963 14:38:54.581 Barcode capture started; IRQ edges=7933
+110964 14:38:54.592 Barcode capture started; IRQ edges=7933
+110965 14:38:54.594 Barcode capture started; IRQ edges=7933
+110966 14:38:54.598 Barcode capture started; IRQ edges=7933
+110967 14:38:54.600 Barcode capture started; IRQ edges=7933
+110968 14:38:54.600 Barcode capture started; IRQ edges=7933
+110969 14:38:54.600 Barcode capture started; IRQ edges=7933
+110972 14:38:55.131 Barcode initial mark 561 ms: treated as junction, scan dropped.
+110973 14:38:55.210 Side sensor: 558 ms black mark -> crossroad.
+110974 14:38:55.217 Crossroad: TURN LEFT now.
+110975 14:38:55.217 State: FOLLOW_LINE -> TURN
+110976 14:38:55.217 Barcode reader OFF; IRQ edges=7934
+110989 14:38:58.185 TURN LEFT done (on the line, 2571 ms).
+110990 14:38:58.189 State: TURN -> FOLLOW_LINE
+110991 14:38:58.302 Barcode reader ON; IRQ edges=7951
+110992 14:38:58.305 Line lost: reversing 400 ms of path to where both sensors were on it.
+110994 14:38:58.410 Reverse done (a sensor found black).
+111000 14:38:59.441 Barcode capture started; IRQ edges=7986
+111001 14:38:59.446 Barcode capture started; IRQ edges=7986
+111002 14:38:59.453 Barcode capture started; IRQ edges=7986
+111003 14:38:59.455 Barcode capture started; IRQ edges=7986
+111004 14:38:59.455 Barcode capture started; IRQ edges=7986
+111005 14:38:59.457 Barcode capture started; IRQ edges=7986
+111006 14:38:59.459 Barcode capture started; IRQ edges=7986
+111007 14:38:59.461 Barcode capture started; IRQ edges=7986
+111008 14:38:59.700 Barcode capture started; IRQ edges=7986
+111009 14:38:59.716 Barcode capture started; IRQ edges=7986
+111010 14:38:59.716 Barcode capture started; IRQ edges=7986
+111012 14:38:59.716 Barcode capture started; IRQ edges=8045
+111013 14:38:59.716 Barcode capture started; IRQ edges=8045
+111014 14:38:59.723 Barcode capture started; IRQ edges=8045
+111015 14:38:59.723 Barcode capture started; IRQ edges=8045
+111016 14:38:59.924 Barcode capture started; IRQ edges=8045
+111017 14:38:59.924 Barcode capture started; IRQ edges=8045
+111018 14:38:59.924 Barcode capture started; IRQ edges=8045
+111019 14:38:59.924 Barcode capture started; IRQ edges=8045
+111020 14:38:59.924 Barcode capture started; IRQ edges=8045
+111021 14:38:59.924 Barcode capture started; IRQ edges=8045
+111022 14:38:59.924 Barcode capture started; IRQ edges=8045
+111023 14:38:59.924 Barcode capture started; IRQ edges=8045
+111024 14:39:00.026 Barcode capture started; IRQ edges=8045
+111025 14:39:00.030 Barcode capture started; IRQ edges=8045
+111026 14:39:00.030 Barcode capture started; IRQ edges=8045
+111027 14:39:00.030 Barcode capture started; IRQ edges=8045
+111028 14:39:00.030 Barcode capture started; IRQ edges=8045
+111029 14:39:00.036 Barcode capture started; IRQ edges=8045
+111030 14:39:00.039 Barcode capture started; IRQ edges=8045
+111031 14:39:00.039 Barcode capture started; IRQ edges=8045
+111032 14:39:00.198 Barcode capture started; IRQ edges=8045
+111033 14:39:00.198 Barcode capture started; IRQ edges=8045
+111034 14:39:00.211 Barcode capture started; IRQ edges=8045
+111035 14:39:00.211 Barcode capture started; IRQ edges=8045
+111036 14:39:00.211 Barcode capture started; IRQ edges=8045
+111037 14:39:00.211 Barcode capture started; IRQ edges=8045
+111041 14:39:00.518 Barcode reader OFF; IRQ edges=8045
+111042 14:39:00.518 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+111043 14:39:00.518 Barcode: only 0 bars+spaces seen, ignored.
+111105 14:39:13.319 Barcode F -> U-TURN.
+111201 14:39:33.865 START: both line sensors on white -> not moving. Put the car on the line, or with one sensor on
+111326 14:40:46.440 === SuperCar AAI14: line + barcode + hump/wall ===
+111333 14:40:46.571 Barcode reader OFF; IRQ edges=0
+112420 14:44:56.800 State: READY -> LINE_CAL
+112421 14:44:56.800 LINE_CAL: left sensor on black -> forward, arcing left.
+112422 14:44:56.990 LINE_CAL: right sensor on black -> forward, arcing right.
+112424 14:44:57.071 LINE_CAL: left sensor on black -> forward, arcing left.
+112425 14:44:57.184 LINE_CAL: right sensor on black -> forward, arcing right.
+112426 14:44:57.283 LINE_CAL: left sensor on black -> forward, arcing left.
+112428 14:44:57.283 LINE_CAL: right sensor on black -> forward, arcing right.
+112429 14:44:57.344 LINE_CAL OK: both sensors on the line -> following.
+112430 14:44:57.344 State: LINE_CAL -> FOLLOW_LINE
+112431 14:44:57.344 Barcode reader ON; IRQ edges=66
+112483 14:45:08.379 Barcode reader OFF; IRQ edges=67
+112891 14:46:09.009 State: STOPPED -> LINE_CAL
+112892 14:46:09.009 LINE_CAL: right sensor on black -> forward, arcing right.
+112893 14:46:09.421 LINE_CAL OK: both sensors on the line -> following.
+112894 14:46:09.525 State: LINE_CAL -> FOLLOW_LINE
+112895 14:46:09.533 Barcode reader ON; IRQ edges=302
+112896 14:46:09.533 Barcode capture started; IRQ edges=349
+112897 14:46:09.538 Barcode capture started; IRQ edges=349
+112898 14:46:09.538 Barcode capture started; IRQ edges=349
+112899 14:46:09.538 Barcode capture started; IRQ edges=349
+112900 14:46:09.538 Barcode capture started; IRQ edges=349
+112901 14:46:09.648 Barcode capture started; IRQ edges=349
+112902 14:46:09.648 Barcode capture started; IRQ edges=349
+112903 14:46:09.648 Barcode capture started; IRQ edges=349
+112904 14:46:09.648 Barcode capture started; IRQ edges=349
+112905 14:46:09.648 Barcode capture started; IRQ edges=349
+112906 14:46:09.661 Barcode capture started; IRQ edges=349
+112907 14:46:09.662 Barcode capture started; IRQ edges=349
+112908 14:46:09.662 Barcode capture started; IRQ edges=349
+112909 14:46:09.742 Barcode capture started; IRQ edges=349
+112910 14:46:09.742 Barcode capture started; IRQ edges=349
+112911 14:46:09.742 Barcode capture started; IRQ edges=349
+112912 14:46:09.742 Barcode capture started; IRQ edges=349
+112914 14:46:09.742 Barcode capture started; IRQ edges=349
+112915 14:46:09.753 Barcode capture started; IRQ edges=349
+112916 14:46:09.753 Barcode capture started; IRQ edges=349
+112917 14:46:09.800 Barcode capture started; IRQ edges=349
+112918 14:46:09.802 Barcode initial mark 353 ms: treated as junction, scan dropped.
+112957 14:46:17.914 Barcode reader OFF; IRQ edges=351
+113231 14:46:50.439 Barcode reader ON; IRQ edges=465
+113245 14:46:53.451 Barcode capture started; IRQ edges=502
+113246 14:46:53.455 Barcode capture started; IRQ edges=502
+113247 14:46:53.529 Barcode capture started; IRQ edges=502
+113248 14:46:53.529 Barcode capture started; IRQ edges=502
+113249 14:46:53.529 Barcode capture started; IRQ edges=502
+113250 14:46:53.539 Barcode capture started; IRQ edges=502
+113251 14:46:53.540 Barcode capture started; IRQ edges=502
+113252 14:46:53.540 Barcode capture started; IRQ edges=502
+113253 14:46:53.540 Barcode capture started; IRQ edges=502
+113254 14:46:53.540 Barcode capture started; IRQ edges=502
+113255 14:46:53.659 Barcode capture started; IRQ edges=502
+113256 14:46:53.661 Barcode capture started; IRQ edges=502
+113257 14:46:53.661 Barcode capture started; IRQ edges=502
+113258 14:46:53.661 Barcode capture started; IRQ edges=502
+113259 14:46:53.661 Barcode capture started; IRQ edges=502
+113260 14:46:53.669 Barcode capture started; IRQ edges=502
+113261 14:46:53.669 Barcode capture started; IRQ edges=502
+113263 14:46:53.727 Barcode initial mark 356 ms: treated as junction, scan dropped.
+113299 14:47:01.396 Line lost: reversing 2540 ms of path to where both sensors were on it.
+113300 14:47:01.542 Reverse done (a sensor found black).
+113314 14:47:04.378 Barcode capture started; IRQ edges=523
+113315 14:47:04.383 Barcode capture started; IRQ edges=523
+113316 14:47:04.383 Barcode capture started; IRQ edges=523
+113317 14:47:04.383 Barcode capture started; IRQ edges=523
+113318 14:47:04.383 Barcode capture started; IRQ edges=523
+113319 14:47:04.383 Barcode capture started; IRQ edges=523
+113320 14:47:04.383 Barcode capture started; IRQ edges=523
+113321 14:47:04.480 Barcode capture started; IRQ edges=523
+113328 14:47:05.325 Barcode reader OFF; IRQ edges=523
+113329 14:47:05.325 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+113330 14:47:05.325 Barcode: only 0 bars+spaces seen, ignored.
+113377 14:47:15.650 State: PICKED_UP -> LINE_CAL
+113378 14:47:15.650 LINE_CAL: right sensor on black -> forward, arcing right.
+113384 14:47:16.661 LINE_CAL OK: both sensors on the line -> following.
+113385 14:47:16.661 State: LINE_CAL -> FOLLOW_LINE
+113386 14:47:16.661 Barcode reader ON; IRQ edges=525
+113451 14:47:31.459 Barcode capture started; IRQ edges=532
+113452 14:47:31.521 Barcode capture started; IRQ edges=532
+113453 14:47:31.534 Barcode capture started; IRQ edges=532
+113464 14:47:33.269 Barcode: only 1 bars+spaces seen, ignored.
+113478 14:47:36.010 Barcode reader OFF; IRQ edges=534
+113908 14:48:44.741 State: STOPPED -> LINE_CAL
+113909 14:48:44.741 LINE_CAL: both sensors already on the line -> skipping calibration.
+113910 14:48:44.741 State: LINE_CAL -> FOLLOW_LINE
+113911 14:48:44.741 Barcode reader ON; IRQ edges=698
+113938 14:48:50.561 Barcode capture started; IRQ edges=703
+113939 14:48:50.620 Barcode capture started; IRQ edges=703
+113974 14:48:58.491 inf2004/aai14/supercar/barcode {"msg":"F","cmd":"U-TURN","t":506861}
+113975 14:48:58.491 Barcode COMMAND: "F" = U-TURN
+113976 14:48:58.496 Pending: U-TURN at the next crossroad.
+114002 14:49:04.018 Barcode capture started; IRQ edges=874
+114003 14:49:04.100 Barcode capture started; IRQ edges=874
+114006 14:49:04.620 Barcode initial mark 413 ms: treated as junction, scan dropped.
+114007 14:49:04.620 Side sensor: 409 ms black mark -> crossroad.
+114008 14:49:04.620 Crossroad: U-TURN now.
+114009 14:49:04.633 State: FOLLOW_LINE -> TURN
+114010 14:49:04.633 Barcode reader OFF; IRQ edges=876
+114035 14:49:09.772 U-TURN done (on the line, 5250 ms).
+114036 14:49:09.772 State: TURN -> FOLLOW_LINE
+114037 14:49:09.777 Barcode reader ON; IRQ edges=934
+114080 14:49:18.587 Barcode reader OFF; IRQ edges=934
+114194 14:49:42.685 State: PICKED_UP -> LINE_CAL
+114195 14:49:42.685 LINE_CAL: right sensor on black -> forward, arcing right.
+114199 14:49:42.719 LINE_CAL OK: both sensors on the line -> following.
+114200 14:49:42.719 State: LINE_CAL -> FOLLOW_LINE
+114201 14:49:42.719 Barcode reader ON; IRQ edges=988
+114207 14:49:43.866 Barcode capture started; IRQ edges=1009
+114208 14:49:43.870 Barcode capture started; IRQ edges=1009
+114209 14:49:43.870 Barcode capture started; IRQ edges=1009
+114210 14:49:43.874 Barcode capture started; IRQ edges=1009
+114211 14:49:43.874 Barcode capture started; IRQ edges=1009
+114212 14:49:43.878 Barcode capture started; IRQ edges=1009
+114213 14:49:43.878 Barcode capture started; IRQ edges=1009
+114214 14:49:46.474 Barcode capture started; IRQ edges=1009
+114217 14:49:46.582 Barcode initial mark 529 ms: treated as junction, scan dropped.
+114247 14:49:51.611 Barcode reader OFF; IRQ edges=1010
+114517 14:50:24.276 Barcode reader ON; IRQ edges=1581
+114527 14:50:26.242 Barcode capture started; IRQ edges=1603
+114528 14:50:26.242 Barcode capture started; IRQ edges=1603
+114529 14:50:26.242 Barcode capture started; IRQ edges=1603
+114530 14:50:26.242 Barcode capture started; IRQ edges=1603
+114531 14:50:26.242 Barcode capture started; IRQ edges=1603
+114532 14:50:26.242 Barcode capture started; IRQ edges=1603
+114533 14:50:26.257 Barcode capture started; IRQ edges=1603
+114534 14:50:26.332 Barcode capture started; IRQ edges=1603
+114537 14:50:26.660 Barcode initial mark 436 ms: treated as junction, scan dropped.
+114572 14:50:34.373 Line lost: reversing 2720 ms of path to where both sensors were on it.
+114575 14:50:37.219 Reverse done (a sensor found black).
+114607 14:50:43.842 Barcode capture started; IRQ edges=1625
+114608 14:50:43.842 Barcode capture started; IRQ edges=1625
+114609 14:50:45.357 Barcode capture started; IRQ edges=1625
+114610 14:50:45.366 Barcode capture started; IRQ edges=1625
+114611 14:50:45.369 Barcode capture started; IRQ edges=1625
+114612 14:50:45.369 Barcode capture started; IRQ edges=1625
+114613 14:50:45.371 Barcode capture started; IRQ edges=1625
+114614 14:50:45.373 Barcode capture started; IRQ edges=1625
+114615 14:50:45.373 Barcode capture started; IRQ edges=1625
+114616 14:50:45.375 Barcode initial mark 340 ms: treated as junction, scan dropped.
+114624 14:50:46.961 Barcode capture started; IRQ edges=1629
+114633 14:50:47.360 Barcode: only 1 bars+spaces seen, ignored.
+114698 14:51:06.715 Barcode capture started; IRQ edges=1637
+114699 14:51:06.715 Barcode capture started; IRQ edges=1637
+114700 14:51:06.719 Barcode capture started; IRQ edges=1637
+114701 14:51:06.719 Barcode: only 3 bars+spaces seen, ignored.
+114724 14:51:13.131 Barcode capture started; IRQ edges=1706
+114725 14:51:13.131 Barcode capture started; IRQ edges=1706
+114726 14:51:13.131 Barcode capture started; IRQ edges=1706
+114727 14:51:13.131 Barcode capture started; IRQ edges=1706
+114728 14:51:13.131 Barcode capture started; IRQ edges=1706
+114729 14:51:13.131 Barcode capture started; IRQ edges=1706
+114730 14:51:13.131 Barcode capture started; IRQ edges=1706
+114731 14:51:13.233 Barcode capture started; IRQ edges=1706
+114732 14:51:13.243 Barcode capture started; IRQ edges=1706
+114733 14:51:13.247 Barcode capture started; IRQ edges=1706
+114734 14:51:13.247 Barcode capture started; IRQ edges=1706
+114735 14:51:13.247 Barcode capture started; IRQ edges=1706
+114736 14:51:13.247 Barcode capture started; IRQ edges=1706
+114737 14:51:13.247 Barcode capture started; IRQ edges=1706
+114738 14:51:13.254 Barcode capture started; IRQ edges=1706
+114739 14:51:13.333 Barcode initial mark 522 ms: treated as junction, scan dropped.
+114740 14:51:13.333 Line lost: reversing 110 ms of path to where both sensors were on it.
+114741 14:51:13.339 Reverse done (back where both were on it).
+114746 14:51:14.341 Barcode capture started; IRQ edges=1716
+114747 14:51:14.404 Barcode capture started; IRQ edges=1716
+114748 14:51:14.406 Barcode capture started; IRQ edges=1716
+114749 14:51:14.406 Barcode capture started; IRQ edges=1716
+114752 14:51:14.692 Barcode initial mark 380 ms: treated as junction, scan dropped.
+114906 14:51:48.570 Barcode capture started; IRQ edges=1730
+114907 14:51:48.570 Barcode capture started; IRQ edges=1730
+114908 14:51:48.587 Barcode capture started; IRQ edges=1730
+114909 14:51:48.587 Barcode capture started; IRQ edges=1730
+114910 14:51:48.587 Barcode capture started; IRQ edges=1730
+114911 14:51:48.587 Barcode capture started; IRQ edges=1730
+114919 14:51:50.711 Barcode: only 1 bars+spaces seen, ignored.
+114948 14:51:57.652 Line lost: reversing 3600 ms of path to where both sensors were on it.
+114950 14:51:57.652 Reverse done (a sensor found black).
+114986 14:52:05.686 Barcode capture started; IRQ edges=1751
+114987 14:52:05.686 Barcode capture started; IRQ edges=1751
+114988 14:52:05.686 Barcode capture started; IRQ edges=1751
+114989 14:52:05.686 Barcode capture started; IRQ edges=1751
+114990 14:52:05.686 Barcode capture started; IRQ edges=1751
+114991 14:52:05.686 Barcode capture started; IRQ edges=1751
+114992 14:52:05.783 Barcode capture started; IRQ edges=1751
+114993 14:52:05.783 Barcode capture started; IRQ edges=1751
+114995 14:52:05.867 Barcode initial mark 462 ms: treated as junction, scan dropped.
+115026 14:52:12.208 Barcode reader OFF; IRQ edges=1753
+115312 14:52:44.777 Barcode reader ON; IRQ edges=1979
+115319 14:52:46.536 Barcode capture started; IRQ edges=2008
+115320 14:52:46.616 Barcode capture started; IRQ edges=2008
+115321 14:52:46.631 Barcode capture started; IRQ edges=2008
+115322 14:52:46.632 Barcode capture started; IRQ edges=2008
+115323 14:52:46.632 Barcode capture started; IRQ edges=2008
+115324 14:52:46.632 Barcode capture started; IRQ edges=2008
+115325 14:52:46.632 Barcode capture started; IRQ edges=2008
+115326 14:52:46.632 Barcode capture started; IRQ edges=2008
+115328 14:52:46.731 Barcode capture started; IRQ edges=2008
+115329 14:52:46.731 Barcode capture started; IRQ edges=2008
+115330 14:52:46.731 Barcode capture started; IRQ edges=2008
+115331 14:52:46.731 Barcode capture started; IRQ edges=2008
+115332 14:52:46.740 Barcode capture started; IRQ edges=2008
+115333 14:52:46.814 Barcode initial mark 454 ms: treated as junction, scan dropped.
+115345 14:52:49.235 Barcode capture started; IRQ edges=2046
+115346 14:52:49.246 Barcode capture started; IRQ edges=2046
+115347 14:52:49.248 Barcode capture started; IRQ edges=2046
+115348 14:52:49.250 Barcode capture started; IRQ edges=2046
+115349 14:52:49.250 Barcode capture started; IRQ edges=2046
+115350 14:52:49.252 Barcode capture started; IRQ edges=2046
+115351 14:52:49.252 Barcode capture started; IRQ edges=2046
+115352 14:52:49.318 Barcode capture started; IRQ edges=2046
+115353 14:52:49.326 Barcode capture started; IRQ edges=2046
+115354 14:52:49.331 Barcode capture started; IRQ edges=2046
+115355 14:52:49.331 Barcode capture started; IRQ edges=2046
+115356 14:52:49.331 Barcode capture started; IRQ edges=2046
+115357 14:52:49.331 Barcode capture started; IRQ edges=2046
+115358 14:52:49.331 Barcode capture started; IRQ edges=2046
+115359 14:52:49.331 Barcode capture started; IRQ edges=2046
+115360 14:52:49.384 Barcode capture started; IRQ edges=2046
+115367 14:52:50.410 Barcode reader OFF; IRQ edges=2100
+115368 14:52:50.410 Barcode: reading switched off after 2 bars+spaces -> decoding what was read.
+115369 14:52:50.410 Barcode: only 2 bars+spaces seen, ignored.
+117762 15:03:59.195 === SuperCar AAI14: line + barcode + hump/wall ===
+117769 15:03:59.339 Barcode reader OFF; IRQ edges=0
+118368 15:06:21.681 State: READY -> LINE_CAL
+118369 15:06:21.681 LINE_CAL: both sensors already on the line -> skipping calibration.
+118370 15:06:21.681 State: LINE_CAL -> FOLLOW_LINE
+118371 15:06:21.681 Barcode reader ON; IRQ edges=179
+118422 15:06:33.099 Barcode reader OFF; IRQ edges=179
+118655 15:07:47.281 === SuperCar AAI14: line + barcode + hump/wall ===
+118663 15:07:49.405 Barcode reader OFF; IRQ edges=0
+118679 15:07:49.700 State: READY -> LINE_CAL
+118680 15:07:49.700 LINE_CAL: both sensors already on the line -> skipping calibration.
+118681 15:07:49.706 State: LINE_CAL -> FOLLOW_LINE
+118682 15:07:49.706 Barcode reader ON; IRQ edges=0
+118743 15:08:09.557 Barcode reader OFF; IRQ edges=0
+118759 15:08:12.534 State: STOPPED -> LINE_CAL
+118760 15:08:12.536 LINE_CAL: right sensor on black -> forward, arcing right.
+118761 15:08:12.539 LINE_CAL OK: both sensors on the line -> following.
+118762 15:08:12.539 State: LINE_CAL -> FOLLOW_LINE
+118763 15:08:12.539 Barcode reader ON; IRQ edges=243
+118810 15:08:22.628 Barcode reader OFF; IRQ edges=245
+119067 15:16:47.608 === SuperCar AAI14: line + barcode + hump/wall ===
+119074 15:16:47.625 Barcode reader OFF; IRQ edges=0
+119188 15:17:06.997 State: READY -> LINE_CAL
+119189 15:17:06.997 LINE_CAL: right sensor on black -> forward, arcing right.
+119191 15:17:07.366 LINE_CAL OK: both sensors on the line -> following.
+119192 15:17:07.518 State: LINE_CAL -> FOLLOW_LINE
+119193 15:17:07.518 Barcode reader ON; IRQ edges=68
+119217 15:17:12.371 Barcode capture started; IRQ edges=158
+119218 15:17:12.455 Barcode capture started; IRQ edges=158
+119219 15:17:12.455 Barcode capture started; IRQ edges=158
+119220 15:17:12.455 Barcode capture started; IRQ edges=158
+119221 15:17:12.467 Barcode capture started; IRQ edges=158
+119222 15:17:12.467 Barcode capture started; IRQ edges=158
+119223 15:17:12.467 Barcode capture started; IRQ edges=158
+119224 15:17:12.467 Barcode capture started; IRQ edges=158
+119225 15:17:12.532 Barcode capture started; IRQ edges=158
+119226 15:17:12.532 Barcode capture started; IRQ edges=158
+119227 15:17:12.532 Barcode capture started; IRQ edges=158
+119228 15:17:12.532 Barcode capture started; IRQ edges=158
+119229 15:17:12.542 Barcode capture started; IRQ edges=158
+119230 15:17:12.542 Barcode capture started; IRQ edges=158
+119231 15:17:12.542 Barcode capture started; IRQ edges=158
+119232 15:17:12.547 Barcode capture started; IRQ edges=158
+119233 15:17:12.643 Barcode capture started; IRQ edges=158
+119234 15:17:12.643 Barcode capture started; IRQ edges=158
+119235 15:17:12.643 Barcode capture started; IRQ edges=158
+119236 15:17:12.643 Barcode capture started; IRQ edges=158
+119237 15:17:12.643 Barcode capture started; IRQ edges=158
+119238 15:17:12.643 Barcode capture started; IRQ edges=158
+119239 15:17:12.643 Barcode capture started; IRQ edges=158
+119240 15:17:12.643 Barcode capture started; IRQ edges=158
+119241 15:17:12.723 Barcode capture started; IRQ edges=158
+119242 15:17:12.727 Barcode capture started; IRQ edges=158
+119243 15:17:12.731 Barcode capture started; IRQ edges=158
+119244 15:17:12.731 Barcode capture started; IRQ edges=158
+119245 15:17:12.731 Barcode capture started; IRQ edges=158
+119246 15:17:12.731 Barcode capture started; IRQ edges=158
+119247 15:17:12.731 Barcode capture started; IRQ edges=158
+119257 15:17:14.210 Barcode reader OFF; IRQ edges=160
+119258 15:17:14.212 Barcode: reading switched off after 1 bars+spaces -> decoding what was read.
+119259 15:17:14.212 Barcode: only 1 bars+spaces seen, ignored.
+119647 15:18:08.965 State: STOPPED -> LINE_CAL
+119648 15:18:08.967 LINE_CAL: right sensor on black -> forward, arcing right.
+119651 15:18:09.452 LINE_CAL OK: both sensors on the line -> following.
+119652 15:18:09.544 State: LINE_CAL -> FOLLOW_LINE
+119653 15:18:09.554 Barcode reader ON; IRQ edges=232
+119679 15:18:14.939 Barcode capture started; IRQ edges=716
+119680 15:18:15.056 Barcode capture started; IRQ edges=716
+119681 15:18:15.069 Barcode capture started; IRQ edges=716
+119682 15:18:15.069 Barcode capture started; IRQ edges=738
+119683 15:18:15.069 Barcode capture started; IRQ edges=738
+119684 15:18:15.076 Barcode capture started; IRQ edges=738
+119685 15:18:15.076 Barcode capture started; IRQ edges=738
+119686 15:18:15.078 Barcode capture started; IRQ edges=738
+119687 15:18:15.166 Barcode capture started; IRQ edges=738
+119688 15:18:15.166 Barcode capture started; IRQ edges=738
+119720 15:18:21.863 Barcode capture started; IRQ edges=748
+119721 15:18:21.863 Barcode capture started; IRQ edges=748
+119725 15:18:22.632 Barcode capture started; IRQ edges=755
+119726 15:18:22.733 Barcode capture started; IRQ edges=759
+119729 15:18:23.141 Barcode capture started; IRQ edges=778
+119730 15:18:23.141 Barcode capture started; IRQ edges=778
+119731 15:18:23.234 Barcode capture started; IRQ edges=787
+119732 15:18:23.249 Barcode capture started; IRQ edges=808
+119733 15:18:23.249 Barcode capture started; IRQ edges=808
+119734 15:18:23.253 Barcode capture started; IRQ edges=808
+119735 15:18:23.253 Barcode capture started; IRQ edges=808
+119736 15:18:23.253 Barcode capture started; IRQ edges=808
+119737 15:18:23.253 Barcode capture started; IRQ edges=808
+119738 15:18:23.364 Barcode capture started; IRQ edges=845
+119739 15:18:23.364 Barcode capture started; IRQ edges=845
+119740 15:18:23.364 Barcode capture started; IRQ edges=845
+119741 15:18:23.364 Barcode capture started; IRQ edges=845
+119742 15:18:23.364 Barcode capture started; IRQ edges=845
+119743 15:18:23.364 Barcode capture started; IRQ edges=845
+119744 15:18:23.364 Barcode capture started; IRQ edges=845
+119745 15:18:23.379 Barcode capture started; IRQ edges=845
+119747 15:18:23.656 Barcode capture started; IRQ edges=861
+119748 15:18:23.656 Barcode capture started; IRQ edges=861
+119749 15:18:23.656 Barcode capture started; IRQ edges=861
+119750 15:18:23.656 Barcode capture started; IRQ edges=872
+119751 15:18:23.656 Barcode capture started; IRQ edges=872
+119752 15:18:23.656 Barcode capture started; IRQ edges=890
+119753 15:18:23.671 Barcode capture started; IRQ edges=890
+119755 15:18:23.751 Barcode capture started; IRQ edges=890
+119756 15:18:23.767 Barcode capture started; IRQ edges=902
+119757 15:18:23.769 Barcode capture started; IRQ edges=903
+119758 15:18:23.773 Barcode capture started; IRQ edges=903
+119759 15:18:23.777 Barcode capture started; IRQ edges=907
+119760 15:18:23.894 Barcode capture started; IRQ edges=913
+119762 15:18:23.894 Barcode capture started; IRQ edges=922
+119763 15:18:23.894 Barcode capture started; IRQ edges=922
+119764 15:18:23.972 Barcode capture started; IRQ edges=936
+119765 15:18:23.972 Barcode capture started; IRQ edges=936
+119766 15:18:23.972 Barcode capture started; IRQ edges=936
+119768 15:18:24.141 Barcode capture started; IRQ edges=948
+119769 15:18:24.145 Barcode capture started; IRQ edges=969
+119770 15:18:24.148 Barcode capture started; IRQ edges=969
+119771 15:18:24.149 Barcode capture started; IRQ edges=969
+119772 15:18:24.149 Barcode capture started; IRQ edges=969
+119773 15:18:24.149 Barcode capture started; IRQ edges=969
+119774 15:18:24.149 Barcode capture started; IRQ edges=969
+119775 15:18:24.210 Barcode capture started; IRQ edges=971
+119776 15:18:24.210 Barcode capture started; IRQ edges=979
+119777 15:18:24.210 Barcode capture started; IRQ edges=979
+119778 15:18:24.210 Barcode capture started; IRQ edges=982
+119779 15:18:24.297 Barcode capture started; IRQ edges=995
+119780 15:18:24.297 Barcode capture started; IRQ edges=995
+119781 15:18:24.297 Barcode capture started; IRQ edges=995
+119782 15:18:24.297 Barcode capture started; IRQ edges=995
+119783 15:18:24.297 Barcode capture started; IRQ edges=1003
+119785 15:18:24.306 Barcode capture started; IRQ edges=1005
+119786 15:18:24.403 Barcode capture started; IRQ edges=1021
+119787 15:18:24.403 Barcode capture started; IRQ edges=1021
+119789 15:18:24.618 Barcode capture started; IRQ edges=1036
+119790 15:18:24.625 Barcode capture started; IRQ edges=1036
+119791 15:18:24.625 Barcode capture started; IRQ edges=1041
+119792 15:18:24.625 Barcode capture started; IRQ edges=1056
+119793 15:18:24.625 Barcode capture started; IRQ edges=1056
+119794 15:18:24.625 Barcode capture started; IRQ edges=1056
+119795 15:18:24.690 Barcode capture started; IRQ edges=1077
+119796 15:18:24.690 Barcode capture started; IRQ edges=1077
+119797 15:18:24.690 Barcode capture started; IRQ edges=1077
+119798 15:18:24.690 Barcode capture started; IRQ edges=1077
+119799 15:18:24.704 Barcode capture started; IRQ edges=1077
+119800 15:18:24.835 Barcode capture started; IRQ edges=1101
+119801 15:18:24.835 Barcode capture started; IRQ edges=1103
+119802 15:18:24.838 Barcode capture started; IRQ edges=1103
+119803 15:18:24.838 Barcode capture started; IRQ edges=1103
+119804 15:18:24.838 Barcode capture started; IRQ edges=1103
+119805 15:18:24.838 Barcode capture started; IRQ edges=1121
+119806 15:18:24.838 Barcode capture started; IRQ edges=1121
+119807 15:18:24.838 Barcode capture started; IRQ edges=1121
+119808 15:18:24.899 Barcode capture started; IRQ edges=1121
+119810 15:18:24.899 Barcode capture started; IRQ edges=1136
+119811 15:18:24.899 Barcode capture started; IRQ edges=1136
+119812 15:18:24.899 Barcode capture started; IRQ edges=1136
+119813 15:18:24.899 Barcode capture started; IRQ edges=1138
+119814 15:18:24.899 Barcode capture started; IRQ edges=1168
+119815 15:18:24.899 Barcode capture started; IRQ edges=1168
+119816 15:18:24.984 Barcode capture started; IRQ edges=1168
+119817 15:18:24.984 Barcode capture started; IRQ edges=1168
+119818 15:18:24.995 Barcode capture started; IRQ edges=1168
+119819 15:18:24.995 Barcode capture started; IRQ edges=1168
+119820 15:18:24.995 Barcode capture started; IRQ edges=1168
+119821 15:18:24.995 Barcode capture started; IRQ edges=1168
+119822 15:18:24.995 Barcode capture started; IRQ edges=1188
+119823 15:18:24.995 Barcode capture started; IRQ edges=1188
+119824 15:18:25.096 Barcode capture started; IRQ edges=1188
+119825 15:18:25.096 Barcode capture started; IRQ edges=1188
+119826 15:18:25.096 Barcode capture started; IRQ edges=1188
+119827 15:18:25.096 Barcode capture started; IRQ edges=1188
+119828 15:18:25.096 Barcode capture started; IRQ edges=1198
+119829 15:18:25.096 Barcode capture started; IRQ edges=1198
+119831 15:18:25.140 Barcode capture started; IRQ edges=1218
+119832 15:18:25.140 Barcode capture started; IRQ edges=1218
+119833 15:18:25.156 Barcode capture started; IRQ edges=1218
+119834 15:18:25.158 Barcode capture started; IRQ edges=1218
+119835 15:18:25.160 Barcode capture started; IRQ edges=1218
+119836 15:18:25.241 Barcode capture started; IRQ edges=1231
+119837 15:18:25.301 Barcode capture started; IRQ edges=1233
+119839 15:18:25.398 Barcode capture started; IRQ edges=1237
+119841 15:18:25.623 Barcode capture started; IRQ edges=1247
+119842 15:18:25.704 Barcode capture started; IRQ edges=1263
+119843 15:18:25.704 Barcode capture started; IRQ edges=1265
+119844 15:18:25.704 Barcode capture started; IRQ edges=1265
+119845 15:18:25.704 Barcode capture started; IRQ edges=1293
+119846 15:18:25.704 Barcode capture started; IRQ edges=1293
+119847 15:18:25.720 Barcode capture started; IRQ edges=1293
+119848 15:18:25.720 Barcode capture started; IRQ edges=1293
+119849 15:18:25.754 Barcode capture started; IRQ edges=1293
+119850 15:18:25.769 Barcode capture started; IRQ edges=1293
+119851 15:18:25.769 Barcode capture started; IRQ edges=1293
+119852 15:18:25.769 Barcode capture started; IRQ edges=1295
+119853 15:18:25.769 Barcode capture started; IRQ edges=1302
+119854 15:18:25.769 Barcode capture started; IRQ edges=1302
+119856 15:18:25.918 Barcode capture started; IRQ edges=1325
+119857 15:18:26.042 Barcode capture started; IRQ edges=1327
+119859 15:18:26.347 Barcode capture started; IRQ edges=1337
+119861 15:18:26.672 Barcode capture started; IRQ edges=1357
+119862 15:18:26.688 Barcode capture started; IRQ edges=1357
+119863 15:18:26.688 Barcode capture started; IRQ edges=1357
+119864 15:18:26.688 Barcode capture started; IRQ edges=1357
+119865 15:18:26.688 Barcode capture started; IRQ edges=1357
+119867 15:18:26.688 Barcode capture started; IRQ edges=1370
+119868 15:18:26.688 Barcode capture started; IRQ edges=1370
+119869 15:18:26.753 Barcode capture started; IRQ edges=1370
+119870 15:18:26.846 Barcode capture started; IRQ edges=1381
+119871 15:18:26.852 Barcode capture started; IRQ edges=1381
+119872 15:18:26.852 Barcode capture started; IRQ edges=1397
+119873 15:18:26.852 Barcode capture started; IRQ edges=1397
+119874 15:18:26.852 Barcode capture started; IRQ edges=1397
+119875 15:18:26.852 Barcode capture started; IRQ edges=1397
+119877 15:18:26.862 Barcode capture started; IRQ edges=1447
+119878 15:18:26.926 Barcode capture started; IRQ edges=1447
+119879 15:18:26.942 Barcode capture started; IRQ edges=1447
+119880 15:18:26.945 Barcode capture started; IRQ edges=1447
+119881 15:18:26.945 Barcode capture started; IRQ edges=1447
+119882 15:18:26.945 Barcode capture started; IRQ edges=1447
+119883 15:18:26.945 Barcode capture started; IRQ edges=1447
+119884 15:18:26.945 Barcode capture started; IRQ edges=1447
+119885 15:18:26.945 Barcode capture started; IRQ edges=1447
+119886 15:18:27.038 Barcode capture started; IRQ edges=1447
+119887 15:18:27.045 Barcode capture started; IRQ edges=1447
+119888 15:18:27.045 Barcode capture started; IRQ edges=1447
+119889 15:18:27.045 Barcode capture started; IRQ edges=1447
+119890 15:18:27.045 Barcode capture started; IRQ edges=1466
+119891 15:18:27.045 Barcode capture started; IRQ edges=1466
+119892 15:18:27.054 Barcode capture started; IRQ edges=1466
+119893 15:18:27.054 Barcode capture started; IRQ edges=1466
+119894 15:18:27.101 Barcode capture started; IRQ edges=1466
+119895 15:18:27.101 Barcode capture started; IRQ edges=1487
+119896 15:18:27.101 Barcode capture started; IRQ edges=1487
+119897 15:18:27.107 Barcode capture started; IRQ edges=1491
+119898 15:18:27.109 Barcode capture started; IRQ edges=1491
+119899 15:18:27.109 Barcode capture started; IRQ edges=1491
+119900 15:18:27.109 Barcode capture started; IRQ edges=1491
+119901 15:18:27.113 Barcode capture started; IRQ edges=1503
+119902 15:18:27.200 Barcode capture started; IRQ edges=1503
+119903 15:18:27.200 Barcode capture started; IRQ edges=1503
+119904 15:18:27.200 Barcode capture started; IRQ edges=1522
+119905 15:18:27.200 Barcode capture started; IRQ edges=1522
+119906 15:18:27.208 Barcode capture started; IRQ edges=1522
+119907 15:18:27.210 Barcode capture started; IRQ edges=1522
+119908 15:18:27.210 Barcode capture started; IRQ edges=1542
+119909 15:18:27.210 Barcode capture started; IRQ edges=1542
+119910 15:18:27.246 Barcode capture started; IRQ edges=1542
+119911 15:18:27.246 Barcode capture started; IRQ edges=1542
+119912 15:18:27.246 Barcode capture started; IRQ edges=1542
+119913 15:18:27.246 Barcode capture started; IRQ edges=1542
+119914 15:18:27.257 Barcode capture started; IRQ edges=1556
+119915 15:18:27.257 Barcode capture started; IRQ edges=1556
+119916 15:18:27.257 Barcode capture started; IRQ edges=1556
+119917 15:18:27.257 Barcode capture started; IRQ edges=1556
+119918 15:18:27.446 Barcode capture started; IRQ edges=1573
+119919 15:18:27.446 Barcode capture started; IRQ edges=1573
+119920 15:18:27.450 Barcode capture started; IRQ edges=1573
+119921 15:18:27.450 Barcode capture started; IRQ edges=1573
+119922 15:18:27.450 Barcode capture started; IRQ edges=1582
+119923 15:18:27.450 Barcode capture started; IRQ edges=1582
+119924 15:18:27.450 Barcode capture started; IRQ edges=1582
+119925 15:18:27.450 Barcode capture started; IRQ edges=1590
+119926 15:18:27.521 Barcode capture started; IRQ edges=1610
+119927 15:18:27.521 Barcode capture started; IRQ edges=1610
+119928 15:18:27.521 Barcode capture started; IRQ edges=1610
+119929 15:18:27.521 Barcode capture started; IRQ edges=1610
+119930 15:18:27.521 Barcode capture started; IRQ edges=1610
+119931 15:18:27.521 Barcode capture started; IRQ edges=1620
+119932 15:18:27.530 Barcode capture started; IRQ edges=1636
+119933 15:18:27.530 Barcode capture started; IRQ edges=1636
+119934 15:18:27.595 Barcode capture started; IRQ edges=1636
+119935 15:18:27.599 Barcode capture started; IRQ edges=1636
+119936 15:18:27.599 Barcode capture started; IRQ edges=1636
+119937 15:18:27.599 Barcode capture started; IRQ edges=1654
+119939 15:18:27.599 Barcode capture started; IRQ edges=1654
+119940 15:18:27.599 Barcode capture started; IRQ edges=1654
+119941 15:18:27.599 Barcode capture started; IRQ edges=1666
+119942 15:18:27.665 Barcode capture started; IRQ edges=1666
+119943 15:18:27.667 Barcode capture started; IRQ edges=1681
+119944 15:18:27.667 Barcode capture started; IRQ edges=1681
+119945 15:18:27.667 Barcode capture started; IRQ edges=1681
+119947 15:18:27.800 Barcode capture started; IRQ edges=1704
+119948 15:18:27.802 Barcode capture started; IRQ edges=1704
+119949 15:18:27.804 Barcode capture started; IRQ edges=1704
+119950 15:18:27.807 Barcode capture started; IRQ edges=1704
+119952 15:18:27.884 Barcode capture started; IRQ edges=1719
+119953 15:18:27.884 Barcode capture started; IRQ edges=1719
+119954 15:18:27.884 Barcode capture started; IRQ edges=1719
+119955 15:18:27.964 Barcode capture started; IRQ edges=1739
+119956 15:18:27.975 Barcode capture started; IRQ edges=1739
+119957 15:18:27.975 Barcode capture started; IRQ edges=1739
+119958 15:18:27.975 Barcode capture started; IRQ edges=1739
+119959 15:18:28.108 Barcode capture started; IRQ edges=1743
+119961 15:18:28.156 Barcode capture started; IRQ edges=1754
+119962 15:18:28.172 Barcode capture started; IRQ edges=1774
+119963 15:18:28.175 Barcode capture started; IRQ edges=1774
+119964 15:18:28.177 Barcode capture started; IRQ edges=1774
+119965 15:18:28.177 Barcode capture started; IRQ edges=1774
+119966 15:18:28.177 Barcode capture started; IRQ edges=1774
+119967 15:18:28.181 Barcode capture started; IRQ edges=1774
+119968 15:18:28.181 Barcode capture started; IRQ edges=1774
+119969 15:18:28.268 Barcode capture started; IRQ edges=1781
+119970 15:18:28.268 Barcode capture started; IRQ edges=1820
+119971 15:18:28.268 Barcode capture started; IRQ edges=1820
+119972 15:18:28.268 Barcode capture started; IRQ edges=1820
+119973 15:18:28.268 Barcode capture started; IRQ edges=1820
+119974 15:18:28.268 Barcode capture started; IRQ edges=1820
+119975 15:18:28.268 Barcode capture started; IRQ edges=1820
+119976 15:18:28.268 Barcode capture started; IRQ edges=1820
+119977 15:18:28.396 Barcode capture started; IRQ edges=1820
+119978 15:18:28.396 Barcode capture started; IRQ edges=1820
+119979 15:18:28.396 Barcode capture started; IRQ edges=1820
+119980 15:18:28.396 Barcode capture started; IRQ edges=1842
+119981 15:18:28.396 Barcode capture started; IRQ edges=1842
+119982 15:18:28.396 Barcode capture started; IRQ edges=1842
+119983 15:18:28.396 Barcode capture started; IRQ edges=1842
+119984 15:18:28.396 Barcode capture started; IRQ edges=1842
+119985 15:18:28.493 Barcode capture started; IRQ edges=1865
+119986 15:18:28.502 Barcode capture started; IRQ edges=1865
+119987 15:18:28.504 Barcode capture started; IRQ edges=1865
+119988 15:18:28.506 Barcode capture started; IRQ edges=1865
+119989 15:18:28.508 Barcode capture started; IRQ edges=1865
+119990 15:18:28.509 Barcode capture started; IRQ edges=1865
+119991 15:18:28.509 Barcode capture started; IRQ edges=1865
+119992 15:18:28.511 Barcode capture started; IRQ edges=1865
+119993 15:18:28.579 Barcode capture started; IRQ edges=1890
+119994 15:18:28.579 Barcode capture started; IRQ edges=1890
+119995 15:18:28.588 Barcode capture started; IRQ edges=1890
+119996 15:18:28.588 Barcode capture started; IRQ edges=1890
+119997 15:18:28.588 Barcode capture started; IRQ edges=1890
+119998 15:18:28.588 Barcode capture started; IRQ edges=1910
+119999 15:18:28.588 Barcode capture started; IRQ edges=1910
+120000 15:18:28.588 Barcode capture started; IRQ edges=1910
+120001 15:18:28.702 Barcode capture started; IRQ edges=1910
+120002 15:18:28.704 Barcode capture started; IRQ edges=1910
+120003 15:18:28.704 Barcode capture started; IRQ edges=1915
+120004 15:18:28.704 Barcode capture started; IRQ edges=1915
+120005 15:18:28.704 Barcode capture started; IRQ edges=1942
+120006 15:18:28.704 Barcode capture started; IRQ edges=1946
+120007 15:18:28.704 Barcode capture started; IRQ edges=1946
+120008 15:18:28.704 Barcode capture started; IRQ edges=1946
+120009 15:18:28.783 Barcode capture started; IRQ edges=1946
+120010 15:18:28.785 Barcode capture started; IRQ edges=1946
+120011 15:18:28.785 Barcode capture started; IRQ edges=1946
+120012 15:18:28.785 Barcode capture started; IRQ edges=1946
+120013 15:18:28.791 Barcode capture started; IRQ edges=1971
+120014 15:18:28.791 Barcode capture started; IRQ edges=1971
+120015 15:18:28.791 Barcode capture started; IRQ edges=1971
+120016 15:18:28.791 Barcode capture started; IRQ edges=1971
+120017 15:18:28.900 Barcode capture started; IRQ edges=1971
+120018 15:18:28.912 Barcode capture started; IRQ edges=1987
+120019 15:18:28.912 Barcode capture started; IRQ edges=1987
+120020 15:18:28.916 Barcode capture started; IRQ edges=1987
+120021 15:18:28.916 Barcode capture started; IRQ edges=1987
+120022 15:18:28.916 Barcode capture started; IRQ edges=2032
+120023 15:18:28.916 Barcode capture started; IRQ edges=2032
+120024 15:18:28.916 Barcode capture started; IRQ edges=2032
+120025 15:18:29.009 Barcode capture started; IRQ edges=2032
+120026 15:18:29.011 Barcode capture started; IRQ edges=2032
+120027 15:18:29.013 Barcode capture started; IRQ edges=2032
+120028 15:18:29.013 Barcode capture started; IRQ edges=2032
+120029 15:18:29.013 Barcode capture started; IRQ edges=2032
+120030 15:18:29.013 Barcode capture started; IRQ edges=2032
+120031 15:18:29.013 Barcode capture started; IRQ edges=2032
+120032 15:18:29.013 Barcode capture started; IRQ edges=2032
+120033 15:18:29.089 Barcode capture started; IRQ edges=2032
+120034 15:18:29.089 Barcode capture started; IRQ edges=2032
+120035 15:18:29.089 Barcode capture started; IRQ edges=2032
+120036 15:18:29.089 Barcode capture started; IRQ edges=2032
+120037 15:18:29.089 Barcode capture started; IRQ edges=2049
+120038 15:18:29.089 Barcode capture started; IRQ edges=2049
+120039 15:18:29.089 Barcode capture started; IRQ edges=2067
+120040 15:18:29.104 Barcode capture started; IRQ edges=2067
+120041 15:18:29.152 Barcode capture started; IRQ edges=2067
+120042 15:18:29.152 Barcode capture started; IRQ edges=2067
+120043 15:18:29.152 Barcode capture started; IRQ edges=2067
+120044 15:18:29.152 Barcode capture started; IRQ edges=2067
+120045 15:18:29.152 Barcode capture started; IRQ edges=2067
+120046 15:18:29.152 Barcode capture started; IRQ edges=2072
+120047 15:18:29.168 Barcode capture started; IRQ edges=2080
+120048 15:18:29.221 Barcode capture started; IRQ edges=2106
+120049 15:18:29.221 Barcode capture started; IRQ edges=2106
+120050 15:18:29.221 Barcode capture started; IRQ edges=2106
+120051 15:18:29.233 Barcode capture started; IRQ edges=2106
+120052 15:18:29.233 Barcode capture started; IRQ edges=2116
+120053 15:18:29.233 Barcode capture started; IRQ edges=2116
+120054 15:18:29.233 Barcode capture started; IRQ edges=2116
+120055 15:18:29.306 Barcode capture started; IRQ edges=2121
+120056 15:18:29.306 Barcode capture started; IRQ edges=2134
+120057 15:18:29.314 Barcode capture started; IRQ edges=2134
+120058 15:18:29.314 Barcode capture started; IRQ edges=2134
+120060 15:18:29.395 Barcode capture started; IRQ edges=2138
+120061 15:18:29.492 Barcode capture started; IRQ edges=2143
+120062 15:18:29.540 Barcode capture started; IRQ edges=2156
+120063 15:18:29.553 Barcode capture started; IRQ edges=2156
+120064 15:18:29.556 Barcode capture started; IRQ edges=2159
+120066 15:18:29.622 Barcode capture started; IRQ edges=2166
+120067 15:18:29.748 Barcode capture started; IRQ edges=2175
+120068 15:18:29.751 Barcode capture started; IRQ edges=2184
+120069 15:18:29.753 Barcode capture started; IRQ edges=2184
+120070 15:18:29.755 Barcode capture started; IRQ edges=2256
+120071 15:18:29.757 Barcode capture started; IRQ edges=2256
+120072 15:18:29.757 Barcode capture started; IRQ edges=2256
+120073 15:18:29.757 Barcode capture started; IRQ edges=2256
+120074 15:18:29.757 Barcode capture started; IRQ edges=2256
+120075 15:18:29.823 Barcode capture started; IRQ edges=2256
+120076 15:18:29.823 Barcode capture started; IRQ edges=2256
+120077 15:18:29.823 Barcode capture started; IRQ edges=2256
+120078 15:18:29.823 Barcode capture started; IRQ edges=2256
+120079 15:18:29.823 Barcode capture started; IRQ edges=2256
+120080 15:18:29.837 Barcode capture started; IRQ edges=2256
+120081 15:18:29.837 Barcode capture started; IRQ edges=2256
+120082 15:18:29.837 Barcode capture started; IRQ edges=2256
+120083 15:18:29.934 Barcode capture started; IRQ edges=2256
+120084 15:18:29.934 Barcode capture started; IRQ edges=2256
+120085 15:18:29.934 Barcode capture started; IRQ edges=2256
+120086 15:18:29.934 Barcode capture started; IRQ edges=2256
+120087 15:18:29.941 Barcode capture started; IRQ edges=2256
+120088 15:18:29.941 Barcode capture started; IRQ edges=2256
+120089 15:18:29.941 Barcode capture started; IRQ edges=2256
+120090 15:18:29.941 Barcode capture started; IRQ edges=2256
+120091 15:18:30.031 Barcode capture started; IRQ edges=2286
+120092 15:18:30.031 Barcode capture started; IRQ edges=2286
+120093 15:18:30.041 Barcode capture started; IRQ edges=2286
+120094 15:18:30.041 Barcode capture started; IRQ edges=2286
+120095 15:18:30.041 Barcode capture started; IRQ edges=2286
+120096 15:18:30.041 Barcode capture started; IRQ edges=2286
+120097 15:18:30.041 Barcode capture started; IRQ edges=2286
+120098 15:18:30.046 Barcode capture started; IRQ edges=2286
+120100 15:18:30.111 Barcode capture started; IRQ edges=2286
+120101 15:18:30.111 Barcode capture started; IRQ edges=2298
+120102 15:18:30.111 Barcode capture started; IRQ edges=2301
+120103 15:18:30.119 Barcode capture started; IRQ edges=2301
+120104 15:18:30.119 Barcode capture started; IRQ edges=2304
+120105 15:18:30.122 Barcode capture started; IRQ edges=2304
+120106 15:18:30.122 Barcode capture started; IRQ edges=2313
+120107 15:18:30.227 Barcode capture started; IRQ edges=2321
+120109 15:18:30.319 Barcode capture started; IRQ edges=2332
+120110 15:18:30.319 Barcode capture started; IRQ edges=2332
+120111 15:18:30.327 Barcode capture started; IRQ edges=2332
+120112 15:18:30.327 Barcode capture started; IRQ edges=2336
+120114 15:18:30.327 Barcode capture started; IRQ edges=2344
+120115 15:18:30.327 Barcode capture started; IRQ edges=2347
+120116 15:18:30.327 Barcode capture started; IRQ edges=2354
+120118 15:18:30.415 Barcode capture started; IRQ edges=2354
+120121 15:18:30.420 Barcode reader OFF; IRQ edges=2379
+120175 15:18:41.167 State: STOPPED -> LINE_CAL
+120176 15:18:41.167 LINE_CAL: right sensor on black -> forward, arcing right.
+120179 15:18:41.789 LINE_CAL: left sensor on black -> forward, arcing left.
+120181 15:18:41.789 LINE_CAL: right sensor on black -> forward, arcing right.
+120182 15:18:41.856 LINE_CAL OK: both sensors on the line -> following.
+120183 15:18:41.856 State: LINE_CAL -> FOLLOW_LINE
+120184 15:18:41.856 Barcode reader ON; IRQ edges=6297
+120247 15:18:55.988 Barcode capture started; IRQ edges=6308
+120248 15:18:55.988 Barcode capture started; IRQ edges=6308
+120249 15:18:55.988 Barcode capture started; IRQ edges=6308
+120284 15:19:02.796 Barcode reader OFF; IRQ edges=9366
+120577 15:19:35.878 Barcode reader ON; IRQ edges=10095
+120611 15:19:43.525 Line lost: reversing 540 ms of path to where both sensors were on it.
+120615 15:19:43.885 Barcode capture started; IRQ edges=10139
+120616 15:19:43.885 Barcode capture started; IRQ edges=10139
+120617 15:19:43.893 Barcode capture started; IRQ edges=10139
+120618 15:19:43.893 Barcode capture started; IRQ edges=10139
+120619 15:19:43.893 Barcode capture started; IRQ edges=10139
+120620 15:19:43.893 Barcode capture started; IRQ edges=10139
+120621 15:19:43.893 Barcode capture started; IRQ edges=10139
+120622 15:19:43.977 Barcode capture started; IRQ edges=10139
+120623 15:19:43.977 Barcode capture started; IRQ edges=10139
+120624 15:19:43.977 Barcode capture started; IRQ edges=10139
+120625 15:19:43.977 Barcode capture started; IRQ edges=10139
+120626 15:19:43.977 Barcode capture started; IRQ edges=10139
+120627 15:19:43.977 Barcode capture started; IRQ edges=10139
+120628 15:19:43.990 Barcode capture started; IRQ edges=10139
+120629 15:19:43.990 Barcode capture started; IRQ edges=10139
+120630 15:19:44.039 Barcode capture started; IRQ edges=10139
+120636 15:19:44.148 Barcode reader OFF; IRQ edges=10139
+120637 15:19:44.148 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+120638 15:19:44.158 Barcode: only 0 bars+spaces seen, ignored.
+121063 15:21:44.455 === SuperCar AAI14: line + barcode + hump/wall ===
+121070 15:21:44.479 Barcode reader OFF; IRQ edges=0
+121144 15:21:57.069 State: READY -> LINE_CAL
+121145 15:21:57.069 LINE_CAL: right sensor on black -> forward, arcing right.
+121147 15:21:57.488 LINE_CAL: left sensor on black -> forward, arcing left.
+121149 15:21:57.598 LINE_CAL: right sensor on black -> forward, arcing right.
+121150 15:21:57.678 LINE_CAL: left sensor on black -> forward, arcing left.
+121151 15:21:57.775 LINE_CAL: right sensor on black -> forward, arcing right.
+121153 15:21:57.838 LINE_CAL: left sensor on black -> forward, arcing left.
+121154 15:21:57.841 LINE_CAL: right sensor on black -> forward, arcing right.
+121156 15:21:58.040 LINE_CAL: left sensor on black -> forward, arcing left.
+121157 15:21:58.043 LINE_CAL: right sensor on black -> forward, arcing right.
+121158 15:21:58.106 LINE_CAL: left sensor on black -> forward, arcing left.
+121159 15:21:58.598 LINE_CAL: right sensor on black -> forward, arcing right.
+121161 15:21:58.697 LINE_CAL: left sensor on black -> forward, arcing left.
+121162 15:21:58.697 LINE_CAL: right sensor on black -> forward, arcing right.
+121165 15:21:58.709 LINE_CAL: left sensor on black -> forward, arcing left.
+121166 15:21:58.709 LINE_CAL: right sensor on black -> forward, arcing right.
+121168 15:21:58.797 LINE_CAL OK: both sensors on the line -> following.
+121169 15:21:58.797 State: LINE_CAL -> FOLLOW_LINE
+121170 15:21:58.809 Barcode reader ON; IRQ edges=100
+121187 15:22:03.464 Line lost: reversing 3420 ms of path to where both sensors were on it.
+121189 15:22:03.760 Reverse done (a sensor found black).
+121231 15:22:13.815 Barcode capture started; IRQ edges=3209
+121255 15:22:17.791 Barcode reader OFF; IRQ edges=3797
+121466 15:22:50.622 Barcode reader ON; IRQ edges=3998
+121477 15:22:52.772 Barcode capture started; IRQ edges=4052
+121478 15:22:52.772 Barcode capture started; IRQ edges=4052
+121479 15:22:52.772 Barcode capture started; IRQ edges=4052
+121480 15:22:52.772 Barcode capture started; IRQ edges=4052
+121481 15:22:52.772 Barcode capture started; IRQ edges=4052
+121482 15:22:52.772 Barcode capture started; IRQ edges=4052
+121483 15:22:52.772 Barcode capture started; IRQ edges=4052
+121484 15:22:52.772 Barcode capture started; IRQ edges=4052
+121485 15:22:52.883 Barcode capture started; IRQ edges=4052
+121486 15:22:52.883 Barcode capture started; IRQ edges=4052
+121487 15:22:52.891 Barcode capture started; IRQ edges=4052
+121488 15:22:52.891 Barcode capture started; IRQ edges=4052
+121489 15:22:52.891 Barcode capture started; IRQ edges=4052
+121490 15:22:52.891 Barcode capture started; IRQ edges=4052
+121491 15:22:52.891 Barcode capture started; IRQ edges=4052
+121492 15:22:52.891 Barcode capture started; IRQ edges=4052
+121493 15:22:52.963 Barcode capture started; IRQ edges=4052
+121494 15:22:52.979 Barcode capture started; IRQ edges=4052
+121495 15:22:52.979 Barcode capture started; IRQ edges=4052
+121496 15:22:52.979 Barcode capture started; IRQ edges=4052
+121497 15:22:52.979 Barcode capture started; IRQ edges=4052
+121498 15:22:52.979 Barcode capture started; IRQ edges=4052
+121499 15:22:52.979 Barcode capture started; IRQ edges=4052
+121500 15:22:52.979 Barcode capture started; IRQ edges=4052
+121501 15:22:53.076 Barcode capture started; IRQ edges=4052
+121505 15:22:53.898 Barcode: only 1 bars+spaces seen, ignored.
+121511 15:22:56.611 Barcode capture started; IRQ edges=4083
+121512 15:22:56.611 Barcode capture started; IRQ edges=4083
+121513 15:22:56.611 Barcode capture started; IRQ edges=4083
+121514 15:22:56.611 Barcode capture started; IRQ edges=4083
+121515 15:22:56.611 Barcode capture started; IRQ edges=4083
+121516 15:22:56.731 Barcode capture started; IRQ edges=4083
+121517 15:22:56.739 Barcode capture started; IRQ edges=4083
+121518 15:22:56.739 Barcode capture started; IRQ edges=4083
+121519 15:22:56.739 Barcode capture started; IRQ edges=4083
+121520 15:22:56.739 Barcode capture started; IRQ edges=4083
+121521 15:22:56.739 Barcode capture started; IRQ edges=4083
+121522 15:22:56.739 Barcode capture started; IRQ edges=4083
+121523 15:22:56.739 Barcode capture started; IRQ edges=4083
+121524 15:22:56.931 Barcode capture started; IRQ edges=4083
+121527 15:22:56.931 Barcode reader OFF; IRQ edges=4083
+121528 15:22:56.931 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+121529 15:22:56.931 Barcode: only 0 bars+spaces seen, ignored.
+124591 15:34:50.902 Barcode M -> TURN LEFT.
+124634 15:34:59.682 Barcode N -> GO STRAIGHT.
+124659 15:35:04.947 Barcode O -> TURN RIGHT.
+124680 15:35:08.953 Barcode P -> U-TURN.
+125019 15:36:27.381 State: STOPPED -> LINE_CAL
+125020 15:36:27.381 LINE_CAL: both sensors already on the line -> skipping calibration.
+125021 15:36:27.381 State: LINE_CAL -> FOLLOW_LINE
+125022 15:36:27.381 Barcode reader ON; IRQ edges=5794
+125125 15:36:50.269 Line lost: reversing 110 ms of path to where both sensors were on it.
+125126 15:36:50.269 Reverse done (a sensor found black).
+125240 15:37:17.192 Line lost: reversing 1070 ms of path to where both sensors were on it.
+125242 15:37:17.345 Reverse done (a sensor found black).
+125259 15:37:20.794 Barcode reader OFF; IRQ edges=5794
+125480 15:37:55.467 Barcode reader ON; IRQ edges=5794
+125517 15:38:03.505 Line lost: reversing 1480 ms of path to where both sensors were on it.
+125519 15:38:03.716 Reverse done (a sensor found black).
+125542 15:38:08.709 Line lost: reversing 660 ms of path to where both sensors were on it.
+125543 15:38:08.843 Reverse done (a sensor found black).
+125595 15:38:19.578 Barcode reader OFF; IRQ edges=5794
+125608 15:38:19.916 Barcode reader ON; IRQ edges=5794
+125610 15:38:20.276 Barcode capture started; IRQ edges=5804
+125611 15:38:20.385 Barcode capture started; IRQ edges=5804
+125612 15:38:20.395 Barcode capture started; IRQ edges=5804
+125613 15:38:20.397 Barcode capture started; IRQ edges=5804
+125631 15:38:23.727 Barcode reader OFF; IRQ edges=5906
+125632 15:38:23.727 Barcode: reading switched off after 18 bars+spaces -> decoding what was read.
+125633 15:38:23.727 Barcode lenient: 18 bars+spaces cannot be "*X*" with at most 8 missing.
+125634 15:38:23.727 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+125637 15:38:23.816 Barcode NOT decoded: 18 bars+spaces seen (valid: 10 per character - 1).
+126779 15:43:36.313 === SuperCar AAI14: line + barcode + hump/wall ===
+126786 15:43:36.325 Barcode reader OFF; IRQ edges=0
+126917 15:44:05.746 Barcode M -> TURN LEFT.
+126957 15:44:13.713 Barcode N -> GO STRAIGHT.
+126991 15:44:20.589 Barcode O -> TURN RIGHT.
+127018 15:44:25.545 Barcode P -> U-TURN.
+127058 15:44:35.633 State: READY -> LINE_CAL
+127059 15:44:35.633 LINE_CAL: right sensor on black -> forward, arcing right.
+127061 15:44:35.718 LINE_CAL OK: both sensors on the line -> following.
+127062 15:44:35.718 State: LINE_CAL -> FOLLOW_LINE
+127063 15:44:35.718 Barcode reader ON; IRQ edges=4771
+127086 15:44:39.230 Barcode reader OFF; IRQ edges=4771
+127097 15:44:40.291 Barcode reader ON; IRQ edges=4771
+127100 15:44:40.488 Barcode capture started; IRQ edges=4781
+127101 15:44:40.556 Barcode capture started; IRQ edges=4781
+127102 15:44:40.556 Barcode capture started; IRQ edges=4781
+127103 15:44:40.556 Barcode capture started; IRQ edges=4781
+127137 15:44:47.802 inf2004/aai14/supercar/barcode {"msg":"M","cmd":"TURN LEFT","t":88009}
+127138 15:44:47.918 Barcode COMMAND: "M" = TURN LEFT
+127139 15:44:47.928 Pending: TURN LEFT at the next crossroad.
+127147 15:44:48.591 Barcode reader OFF; IRQ edges=4998
+127153 15:44:49.049 Barcode reader ON; IRQ edges=4998
+127174 15:44:52.471 Barcode reader OFF; IRQ edges=4998
+127182 15:44:53.192 Barcode reader ON; IRQ edges=4998
+127200 15:44:55.740 Barcode reader OFF; IRQ edges=4998
+127206 15:44:56.120 Barcode reader ON; IRQ edges=4998
+127242 15:45:02.950 Barcode reader OFF; IRQ edges=4998
+127250 15:45:03.482 Barcode reader ON; IRQ edges=4998
+127261 15:45:04.766 Barcode reader OFF; IRQ edges=4998
+127267 15:45:05.312 Barcode reader ON; IRQ edges=4998
+127278 15:45:06.307 Barcode reader OFF; IRQ edges=4998
+127299 15:45:09.333 Barcode reader ON; IRQ edges=4998
+127320 15:45:12.755 Barcode reader OFF; IRQ edges=4998
+127326 15:45:13.122 Barcode reader ON; IRQ edges=4998
+127341 15:45:15.641 Barcode reader OFF; IRQ edges=4998
+127350 15:45:15.866 Barcode reader ON; IRQ edges=4998
+127412 15:45:29.833 Barcode reader OFF; IRQ edges=4998
+127418 15:45:29.949 Barcode reader ON; IRQ edges=4998
+127433 15:45:31.724 Barcode reader OFF; IRQ edges=4998
+127444 15:45:32.964 Barcode reader ON; IRQ edges=4998
+127450 15:45:33.726 Line lost: reversing 750 ms of path to where both sensors were on it.
+127451 15:45:33.823 Reverse done (a sensor found black).
+127464 15:45:35.854 Barcode reader OFF; IRQ edges=4998
+127470 15:45:36.138 Barcode reader ON; IRQ edges=4998
+127476 15:45:36.634 Barcode reader OFF; IRQ edges=4998
+127690 15:46:11.791 Barcode reader ON; IRQ edges=5029
+127697 15:46:13.086 Line lost: reversing 640 ms of path to where both sensors were on it.
+127700 15:46:13.297 Reverse done (a sensor found black).
+127706 15:46:13.769 Barcode reader OFF; IRQ edges=5029
+127715 15:46:14.557 Barcode reader ON; IRQ edges=5029
+127737 15:46:19.313 Barcode reader OFF; IRQ edges=5029
+127749 15:46:20.781 Barcode reader ON; IRQ edges=5029
+127761 15:46:22.000 Barcode reader OFF; IRQ edges=5029
+127768 15:46:22.619 Barcode reader ON; IRQ edges=5029
+127783 15:46:24.691 Barcode reader OFF; IRQ edges=5029
+127792 15:46:25.765 Barcode reader ON; IRQ edges=5029
+127799 15:46:26.482 Barcode capture started; IRQ edges=5068
+127800 15:46:26.726 Barcode capture started; IRQ edges=5068
+127801 15:46:26.742 Barcode capture started; IRQ edges=5068
+127802 15:46:26.742 Barcode capture started; IRQ edges=5068
+127803 15:46:26.742 Barcode capture started; IRQ edges=5068
+127804 15:46:26.742 Barcode capture started; IRQ edges=5068
+127805 15:46:26.742 Barcode capture started; IRQ edges=5068
+127806 15:46:26.742 Barcode capture started; IRQ edges=5068
+127807 15:46:26.838 Barcode capture started; IRQ edges=5068
+127808 15:46:26.838 Barcode capture started; IRQ edges=5068
+127809 15:46:26.838 Barcode capture started; IRQ edges=5068
+127810 15:46:26.851 Barcode capture started; IRQ edges=5068
+127811 15:46:26.854 Barcode capture started; IRQ edges=5068
+127812 15:46:26.854 Barcode capture started; IRQ edges=5068
+127814 15:46:26.982 Barcode initial mark 455 ms: treated as junction, scan dropped.
+127815 15:46:26.982 Side sensor: 460 ms black mark -> crossroad.
+127816 15:46:26.982 Crossroad: TURN LEFT now.
+127817 15:46:26.998 State: FOLLOW_LINE -> TURN
+127818 15:46:26.998 Barcode reader OFF; IRQ edges=5069
+127832 15:46:29.772 TURN LEFT done (on the line, 2762 ms).
+127833 15:46:29.772 State: TURN -> FOLLOW_LINE
+127834 15:46:29.788 Barcode reader ON; IRQ edges=5078
+127847 15:46:31.642 Barcode reader OFF; IRQ edges=5078
+127854 15:46:32.315 Barcode reader ON; IRQ edges=5078
+127870 15:46:34.526 Barcode reader OFF; IRQ edges=5078
+127876 15:46:35.188 Barcode reader ON; IRQ edges=5078
+127893 15:46:37.474 Barcode reader OFF; IRQ edges=5078
+127899 15:46:37.980 Barcode reader ON; IRQ edges=5078
+127911 15:46:39.212 Barcode reader OFF; IRQ edges=5078
+127923 15:46:40.945 Barcode reader ON; IRQ edges=5078
+127931 15:46:42.203 Barcode capture started; IRQ edges=5088
+127932 15:46:42.208 Barcode capture started; IRQ edges=5088
+127933 15:46:42.211 Barcode capture started; IRQ edges=5088
+127934 15:46:42.211 Barcode capture started; IRQ edges=5088
+127937 15:46:42.482 Barcode initial mark 464 ms: treated as junction, scan dropped.
+127963 15:46:48.012 Barcode reader OFF; IRQ edges=5090
+127977 15:46:49.756 Barcode reader ON; IRQ edges=5162
+127980 15:46:50.021 Barcode capture started; IRQ edges=5173
+127981 15:46:50.092 Barcode capture started; IRQ edges=5173
+127982 15:46:50.092 Barcode capture started; IRQ edges=5173
+127983 15:46:50.092 Barcode capture started; IRQ edges=5173
+127997 15:46:52.077 Barcode reader OFF; IRQ edges=5237
+127998 15:46:52.077 Barcode: reading switched off after 11 bars+spaces -> decoding what was read.
+127999 15:46:52.077 Barcode lenient: 11 bars+spaces cannot be "*X*" with at most 8 missing.
+128000 15:46:52.077 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+128003 15:46:52.183 Barcode NOT decoded: 11 bars+spaces seen (valid: 10 per character - 1).
+128012 15:46:53.132 Barcode reader ON; IRQ edges=5340
+128015 15:46:53.229 Barcode capture started; IRQ edges=5347
+128016 15:46:53.341 Barcode capture started; IRQ edges=5347
+128017 15:46:53.341 Barcode capture started; IRQ edges=5347
+128021 15:46:53.776 Barcode: only 1 bars+spaces seen, ignored.
+128040 15:46:57.033 Barcode reader OFF; IRQ edges=5348
+128047 15:46:57.470 Barcode reader ON; IRQ edges=5348
+128091 15:47:09.096 Barcode reader OFF; IRQ edges=5348
+128095 15:47:09.112 Barcode reader ON; IRQ edges=5348
+128096 15:47:09.112 Line lost: reversing 340 ms of path to where both sensors were on it.
+128097 15:47:09.112 Reverse done (a sensor found black).
+128104 15:47:09.485 Barcode reader OFF; IRQ edges=5348
+128122 15:47:14.094 Barcode reader ON; IRQ edges=5348
+128149 15:47:25.659 Line lost: reversing 1880 ms of path to where both sensors were on it.
+128155 15:47:25.661 Barcode reader OFF; IRQ edges=5348
+128224 15:47:40.470 State: STOPPED -> LINE_CAL
+128225 15:47:40.473 LINE_CAL: both sensors already on the line -> skipping calibration.
+128226 15:47:40.473 State: LINE_CAL -> FOLLOW_LINE
+128227 15:47:40.473 Barcode reader ON; IRQ edges=6760
+128244 15:47:43.162 Barcode reader OFF; IRQ edges=6760
+128251 15:47:43.648 Barcode reader ON; IRQ edges=6760
+128261 15:47:45.457 Barcode capture started; IRQ edges=6769
+128262 15:47:45.538 Barcode capture started; IRQ edges=6769
+128263 15:47:45.538 Barcode capture started; IRQ edges=6769
+128298 15:47:53.238 inf2004/aai14/supercar/barcode {"msg":"M","cmd":"TURN LEFT","t":273441}
+128299 15:47:53.271 Barcode COMMAND: "M" = TURN LEFT
+128300 15:47:53.271 Pending: TURN LEFT at the next crossroad.
+128339 15:48:00.759 Barcode reader OFF; IRQ edges=6959
+128345 15:48:01.313 Barcode reader ON; IRQ edges=6959
+128366 15:48:04.737 Barcode reader OFF; IRQ edges=6959
+128373 15:48:05.095 Barcode reader ON; IRQ edges=6959
+128395 15:48:08.568 Barcode reader OFF; IRQ edges=6959
+128402 15:48:09.244 Barcode reader ON; IRQ edges=6959
+128414 15:48:10.756 Barcode reader OFF; IRQ edges=6959
+128420 15:48:10.990 Barcode reader ON; IRQ edges=6959
+128431 15:48:12.049 Barcode reader OFF; IRQ edges=6959
+128449 15:48:14.903 Barcode reader ON; IRQ edges=6959
+128492 15:48:23.211 Barcode reader OFF; IRQ edges=6959
+128502 15:48:24.177 Barcode reader ON; IRQ edges=6959
+128532 15:48:29.925 Barcode reader OFF; IRQ edges=6959
+128538 15:48:30.387 Barcode reader ON; IRQ edges=6959
+128589 15:48:40.220 Barcode reader OFF; IRQ edges=6959
+128595 15:48:40.689 Barcode reader ON; IRQ edges=6959
+128627 15:48:48.019 Barcode reader OFF; IRQ edges=6959
+128631 15:48:48.035 Barcode reader ON; IRQ edges=6959
+128665 15:48:54.722 Barcode reader OFF; IRQ edges=6959
+128673 15:48:55.375 Barcode reader ON; IRQ edges=6959
+128684 15:48:57.247 Barcode capture started; IRQ edges=6972
+128685 15:48:57.247 Barcode capture started; IRQ edges=6972
+128686 15:48:57.247 Barcode capture started; IRQ edges=6972
+128687 15:48:57.247 Barcode capture started; IRQ edges=6972
+128691 15:48:57.764 Barcode initial mark 543 ms: treated as junction, scan dropped.
+128692 15:48:57.856 Side sensor: 540 ms black mark -> crossroad.
+128693 15:48:57.859 Crossroad: TURN LEFT now.
+128694 15:48:57.859 State: FOLLOW_LINE -> TURN
+128695 15:48:57.859 Barcode reader OFF; IRQ edges=6974
+128702 15:48:59.526 TURN LEFT done (line found, 1416 ms).
+128703 15:48:59.528 State: TURN -> FOLLOW_LINE
+128704 15:48:59.532 Barcode reader ON; IRQ edges=6974
+128736 15:49:05.442 Barcode reader OFF; IRQ edges=6974
+128743 15:49:05.814 Barcode reader ON; IRQ edges=6974
+128755 15:49:07.622 Barcode reader OFF; IRQ edges=6974
+128762 15:49:07.796 Barcode reader ON; IRQ edges=6974
+128773 15:49:09.067 Barcode reader OFF; IRQ edges=6974
+128780 15:49:09.642 Barcode reader ON; IRQ edges=6974
+128803 15:49:13.492 Barcode reader OFF; IRQ edges=6974
+128811 15:49:14.062 Barcode reader ON; IRQ edges=6974
+128820 15:49:15.733 Barcode capture started; IRQ edges=6986
+128821 15:49:15.736 Barcode capture started; IRQ edges=6986
+128822 15:49:15.739 Barcode capture started; IRQ edges=6986
+128823 15:49:15.742 Barcode capture started; IRQ edges=6986
+128826 15:49:16.142 Barcode initial mark 467 ms: treated as junction, scan dropped.
+128842 15:49:19.018 Barcode reader OFF; IRQ edges=6987
+128847 15:49:19.192 Barcode reader ON; IRQ edges=6987
+128859 15:49:20.594 Barcode reader OFF; IRQ edges=6987
+128868 15:49:21.486 Barcode reader ON; IRQ edges=6987
+128875 15:49:22.594 Barcode capture started; IRQ edges=6994
+128876 15:49:22.662 Barcode capture started; IRQ edges=6994
+128877 15:49:22.666 Barcode capture started; IRQ edges=6994
+128905 15:49:27.748 Barcode reader OFF; IRQ edges=7127
+128906 15:49:27.748 Barcode: reading switched off after 24 bars+spaces -> decoding what was read.
+128907 15:49:27.752 Barcode lenient: 24 bars+spaces cannot be "*X*" with at most 8 missing.
+128908 15:49:27.752 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+128912 15:49:27.822 Barcode NOT decoded: 24 bars+spaces seen (valid: 10 per character - 1).
+128920 15:49:28.505 Barcode reader ON; IRQ edges=7139
+128982 15:49:40.964 Barcode reader OFF; IRQ edges=7139
+128989 15:49:41.345 Barcode reader ON; IRQ edges=7139
+129011 15:49:45.415 Barcode reader OFF; IRQ edges=7139
+129020 15:49:45.850 Barcode reader ON; IRQ edges=7139
+129032 15:49:48.552 Barcode reader OFF; IRQ edges=7139
+129044 15:49:49.736 Barcode reader ON; IRQ edges=7139
+129081 15:49:56.979 Barcode reader OFF; IRQ edges=7139
+129091 15:49:58.775 Barcode reader ON; IRQ edges=7139
+129150 15:50:12.171 Barcode reader OFF; IRQ edges=7139
+129157 15:50:12.358 Barcode reader ON; IRQ edges=7139
+129193 15:50:19.378 Barcode reader OFF; IRQ edges=7139
+129200 15:50:19.896 Barcode reader ON; IRQ edges=7139
+129222 15:50:26.917 Barcode reader OFF; IRQ edges=7139
+129227 15:50:27.001 Barcode reader ON; IRQ edges=7139
+129244 15:50:29.507 Barcode reader OFF; IRQ edges=7139
+129252 15:50:30.357 Barcode reader ON; IRQ edges=7145
+129293 15:50:38.029 Barcode reader OFF; IRQ edges=7146
+129299 15:50:38.703 Barcode reader ON; IRQ edges=7146
+129313 15:50:40.286 Barcode reader OFF; IRQ edges=7146
+129319 15:50:40.791 Barcode reader ON; IRQ edges=7146
+129336 15:50:43.305 Barcode reader OFF; IRQ edges=7146
+129343 15:50:43.789 Barcode reader ON; IRQ edges=7146
+129357 15:50:45.543 Barcode reader OFF; IRQ edges=7146
+129365 15:50:46.259 Barcode reader ON; IRQ edges=7146
+129378 15:50:47.942 Barcode reader OFF; IRQ edges=7146
+129387 15:50:48.817 Barcode reader ON; IRQ edges=7273
+129419 15:50:54.733 Barcode reader OFF; IRQ edges=7273
+129425 15:50:55.303 Barcode reader ON; IRQ edges=7273
+129431 15:50:55.818 Barcode capture started; IRQ edges=7276
+129452 15:50:59.541 Barcode reader OFF; IRQ edges=7391
+129453 15:50:59.541 Barcode: reading switched off after 17 bars+spaces -> decoding what was read.
+129454 15:50:59.541 Barcode lenient: 17 bars+spaces cannot be "*X*" with at most 8 missing.
+129455 15:50:59.541 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129458 15:50:59.616 Barcode NOT decoded: 17 bars+spaces seen (valid: 10 per character - 1).
+129465 15:51:00.123 Barcode reader ON; IRQ edges=7412
+129468 15:51:00.318 Barcode capture started; IRQ edges=7423
+129469 15:51:00.318 Barcode capture started; IRQ edges=7423
+129470 15:51:00.318 Barcode capture started; IRQ edges=7423
+129471 15:51:00.318 Barcode capture started; IRQ edges=7423
+129480 15:51:02.144 Barcode lenient: 5 bars+spaces cannot be "*X*" with at most 8 missing.
+129481 15:51:02.144 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129483 15:51:02.149 Barcode NOT decoded: 5 bars+spaces seen (valid: 10 per character - 1).
+129497 15:51:04.322 Barcode reader OFF; IRQ edges=7452
+129509 15:51:05.592 Barcode reader ON; IRQ edges=7452
+129541 15:51:11.605 Barcode reader OFF; IRQ edges=7452
+129551 15:51:12.618 Barcode reader ON; IRQ edges=7452
+129564 15:51:15.199 Barcode reader OFF; IRQ edges=7452
+129722 15:51:51.072 State: STOPPED -> LINE_CAL
+129723 15:51:51.072 LINE_CAL: both sensors already on the line -> skipping calibration.
+129724 15:51:51.072 State: LINE_CAL -> FOLLOW_LINE
+129725 15:51:51.078 Barcode reader ON; IRQ edges=7748
+129740 15:51:53.405 Barcode reader OFF; IRQ edges=7748
+129745 15:51:53.412 Barcode reader ON; IRQ edges=7748
+129756 15:51:55.292 Barcode reader OFF; IRQ edges=7748
+129763 15:51:56.960 Barcode reader ON; IRQ edges=7763
+129765 15:51:56.960 Barcode capture started; IRQ edges=7765
+129773 15:51:57.275 Barcode reader OFF; IRQ edges=7804
+129774 15:51:57.277 Barcode: reading switched off after 7 bars+spaces -> decoding what was read.
+129775 15:51:57.280 Barcode lenient: 7 bars+spaces cannot be "*X*" with at most 8 missing.
+129776 15:51:57.333 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129778 15:51:57.333 Barcode NOT decoded: 7 bars+spaces seen (valid: 10 per character - 1).
+129785 15:51:57.764 Barcode reader ON; IRQ edges=7828
+129788 15:51:58.039 Barcode capture started; IRQ edges=7841
+129789 15:51:58.055 Barcode capture started; IRQ edges=7841
+129790 15:51:58.055 Barcode capture started; IRQ edges=7841
+129791 15:51:58.055 Barcode capture started; IRQ edges=7841
+129792 15:51:58.202 Barcode capture started; IRQ edges=7841
+129808 15:52:00.576 Barcode reader OFF; IRQ edges=7915
+129809 15:52:00.576 Barcode: reading switched off after 10 bars+spaces -> decoding what was read.
+129810 15:52:00.576 Barcode lenient: 10 bars+spaces cannot be "*X*" with at most 8 missing.
+129811 15:52:00.576 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+129813 15:52:00.647 Barcode NOT decoded: 10 bars+spaces seen (valid: 10 per character - 1).
+129819 15:52:01.077 Barcode reader ON; IRQ edges=7916
+129841 15:52:04.715 Barcode reader OFF; IRQ edges=7916
+129851 15:52:05.574 Barcode reader ON; IRQ edges=7916
+129887 15:52:13.994 Barcode reader OFF; IRQ edges=7916
+129893 15:52:14.155 Barcode reader ON; IRQ edges=7916
+129913 15:52:17.409 Barcode reader OFF; IRQ edges=7916
+129919 15:52:18.023 Barcode reader ON; IRQ edges=7916
+129930 15:52:19.196 Barcode reader OFF; IRQ edges=7916
+129948 15:52:21.575 Barcode reader ON; IRQ edges=7916
+130017 15:52:36.621 Barcode reader OFF; IRQ edges=7916
+130023 15:52:37.130 Barcode reader ON; IRQ edges=7916
+130055 15:52:43.031 Barcode reader OFF; IRQ edges=7916
+130064 15:52:43.692 Barcode reader ON; IRQ edges=7916
+130081 15:52:46.383 Barcode reader OFF; IRQ edges=7916
+130089 15:52:46.954 Barcode reader ON; IRQ edges=7916
+130135 15:52:55.841 Barcode reader OFF; IRQ edges=7916
+130141 15:52:56.369 Barcode reader ON; IRQ edges=7916
+130189 15:53:06.482 Barcode capture started; IRQ edges=7934
+130190 15:53:06.547 Barcode capture started; IRQ edges=7934
+130191 15:53:06.558 Barcode capture started; IRQ edges=7934
+130192 15:53:06.558 Barcode capture started; IRQ edges=7934
+130193 15:53:06.558 Barcode capture started; IRQ edges=7934
+130194 15:53:06.563 Barcode capture started; IRQ edges=7934
+130195 15:53:06.563 Barcode capture started; IRQ edges=7934
+130200 15:53:06.774 Barcode reader OFF; IRQ edges=7934
+130201 15:53:06.774 Barcode: reading switched off after 0 bars+spaces -> decoding what was read.
+130202 15:53:06.774 Barcode: only 0 bars+spaces seen, ignored.
+130208 15:53:07.304 Barcode reader ON; IRQ edges=7936
+130222 15:53:09.646 Line lost: reversing 600 ms of path to where both sensors were on it.
+130223 15:53:09.727 Reverse done (a sensor found black).
+130248 15:53:14.037 Barcode reader OFF; IRQ edges=7936
+130259 15:53:15.483 Barcode reader ON; IRQ edges=7936
+130276 15:53:18.864 Line lost: reversing 1400 ms of path to where both sensors were on it.
+130278 15:53:21.651 Reverse done (a sensor found black).
+130284 15:53:21.671 Barcode reader OFF; IRQ edges=7936
+130290 15:53:21.776 Barcode reader ON; IRQ edges=7936
+130295 15:53:21.874 Barcode reader OFF; IRQ edges=7936
+130304 15:53:22.627 Barcode reader ON; IRQ edges=7936
+130310 15:53:23.693 Barcode capture started; IRQ edges=7966
+130311 15:53:23.811 Barcode capture started; IRQ edges=7966
+130312 15:53:23.811 Barcode capture started; IRQ edges=7966
+130313 15:53:23.811 Barcode capture started; IRQ edges=7966
+130314 15:53:23.811 Barcode capture started; IRQ edges=7966
+130315 15:53:23.811 Barcode capture started; IRQ edges=7966
+130316 15:53:23.811 Barcode capture started; IRQ edges=7966
+130317 15:53:23.811 Barcode capture started; IRQ edges=7966
+130318 15:53:23.892 Barcode capture started; IRQ edges=7966
+130319 15:53:23.893 Barcode capture started; IRQ edges=7966
+130321 15:53:24.197 Barcode initial mark 509 ms: treated as junction, scan dropped.
+130337 15:53:26.858 Barcode reader OFF; IRQ edges=7967
+130347 15:53:27.600 Barcode reader ON; IRQ edges=7967
+130367 15:53:30.960 Barcode reader OFF; IRQ edges=7967
+130376 15:53:31.774 Barcode reader ON; IRQ edges=8028
+130379 15:53:31.805 Barcode capture started; IRQ edges=8040
+130380 15:53:31.805 Barcode capture started; IRQ edges=8040
+130381 15:53:31.805 Barcode capture started; IRQ edges=8040
+130382 15:53:31.805 Barcode capture started; IRQ edges=8040
+130410 15:53:38.008 inf2004/aai14/supercar/barcode {"msg":"M","cmd":"TURN LEFT","t":618213}
+130412 15:53:38.046 Barcode: read leniently (21 of 29 bars+spaces, 0+8 missing, 4 stray left out).
+130413 15:53:38.046 Barcode COMMAND: "M" = TURN LEFT
+130414 15:53:38.046 Pending: TURN LEFT at the next crossroad.
+130470 15:53:49.687 Barcode reader OFF; IRQ edges=8240
+130476 15:53:50.067 Barcode reader ON; IRQ edges=8240
+130498 15:53:53.464 Barcode reader OFF; IRQ edges=8240
+130505 15:53:53.917 Barcode reader ON; IRQ edges=8240
+130509 15:53:54.509 Line lost: reversing 280 ms of path to where both sensors were on it.
+130510 15:53:54.511 Reverse done (a sensor found black).
+130518 15:53:55.497 Barcode reader OFF; IRQ edges=8240
+130537 15:53:58.132 Barcode reader ON; IRQ edges=8240
+130563 15:54:02.869 Barcode reader OFF; IRQ edges=8240
+130569 15:54:03.443 Barcode reader ON; IRQ edges=8240
+130583 15:54:06.625 Barcode reader OFF; IRQ edges=8240
+130591 15:54:06.677 Barcode reader ON; IRQ edges=8240
+130635 15:54:16.658 Barcode reader OFF; IRQ edges=8240
+130642 15:54:16.766 Barcode reader ON; IRQ edges=8240
+130668 15:54:21.705 Barcode reader OFF; IRQ edges=8240
+130677 15:54:21.946 Barcode reader ON; IRQ edges=8240
+130694 15:54:24.510 Barcode reader OFF; IRQ edges=8240
+130700 15:54:25.011 Barcode reader ON; IRQ edges=8240
+130721 15:54:28.072 Barcode reader OFF; IRQ edges=8240
+130727 15:54:31.294 Barcode reader ON; IRQ edges=8240
+130766 15:54:39.974 Barcode capture started; IRQ edges=8264
+130767 15:54:39.978 Barcode capture started; IRQ edges=8264
+130768 15:54:39.981 Barcode capture started; IRQ edges=8264
+130769 15:54:39.983 Barcode capture started; IRQ edges=8264
+130770 15:54:39.985 Barcode capture started; IRQ edges=8264
+130771 15:54:39.985 Barcode capture started; IRQ edges=8264
+130772 15:54:39.986 Barcode capture started; IRQ edges=8264
+130773 15:54:40.088 Barcode capture started; IRQ edges=8264
+130774 15:54:40.101 Barcode capture started; IRQ edges=8264
+130775 15:54:40.101 Barcode initial mark 454 ms: treated as junction, scan dropped.
+130776 15:54:40.105 Side sensor: 462 ms black mark -> crossroad.
+130777 15:54:40.106 Crossroad: TURN LEFT now.
+130778 15:54:40.107 State: FOLLOW_LINE -> TURN
+130779 15:54:40.107 Barcode reader OFF; IRQ edges=8266
+130788 15:54:42.090 TURN LEFT done (on the line, 2579 ms).
+130789 15:54:42.368 State: TURN -> FOLLOW_LINE
+130790 15:54:42.370 Barcode reader ON; IRQ edges=8285
+130808 15:54:46.149 Barcode reader OFF; IRQ edges=8285
+130813 15:54:46.241 Barcode reader ON; IRQ edges=8285
+130826 15:54:48.065 Barcode reader OFF; IRQ edges=8285
+130832 15:54:48.478 Barcode reader ON; IRQ edges=8285
+130871 15:54:56.154 Barcode reader OFF; IRQ edges=8285
+130877 15:54:56.569 Barcode reader ON; IRQ edges=8285
+130891 15:54:58.245 Barcode reader OFF; IRQ edges=8285
+130897 15:54:58.843 Barcode reader ON; IRQ edges=8297
+130914 15:55:01.175 Barcode reader OFF; IRQ edges=8299
+130924 15:55:02.372 Barcode reader ON; IRQ edges=8299
+130937 15:55:03.648 Barcode reader OFF; IRQ edges=8299
+130944 15:55:04.164 Barcode reader ON; IRQ edges=8299
+130962 15:55:06.934 Barcode reader OFF; IRQ edges=8299
+130970 15:55:07.541 Barcode reader ON; IRQ edges=8299
+131007 15:55:14.417 Barcode reader OFF; IRQ edges=8299

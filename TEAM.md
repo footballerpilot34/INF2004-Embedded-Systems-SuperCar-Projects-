@@ -15,17 +15,15 @@ subsystem, ask its owner or open a pull request for them to review.
 
 ## 1. Members and subsystems
 
-Owners are as assigned at the Week 6 design review. **To fill in:** student
-IDs and GitHub usernames, and confirm each owner (several people worked
-across subsystems; see `git log`).
+Owners as assigned at the Week 6 design review, confirmed by each owner.
 
 | # | Subsystem (what it does) | Owner | Student ID | GitHub username | Code | Tests |
 |---|---|---|---|---|---|---|
-| 1 | Line following, crossroads, Code 39 barcodes, start-up line calibration | Ryan | | | `app_program/line_barcode/` | `testing/line_barcode/` |
-| 2 | Motors (PWM) and wheel encoders | Saketh | | | `app_program/motion/` | `testing/motion/` |
-| 3 | Ultrasonic ranging, servo scan, obstacle bypass | Aruna, Akash | | | `app_program/obstacle/` | `testing/obstacle/` |
-| 4 | Wi-Fi, MQTT, web dashboard, telemetry, log | Felix | | | `app_program/comms/` | `testing/comms/` |
-| 5 | IMU (LSM303DLHC), hump detection and height, pick-up check | Rui Feng | | | `app_program/imu_hump/` | `testing/imu_hump/` |
+| 1 | Line following, crossroads, Code 39 barcodes, start-up line calibration | Ang Jia Jun Ryan | 2503294 | ri3n | `app_program/line_barcode/` | `testing/line_barcode/` |
+| 2 | Motors (PWM) and wheel encoders | Sreekantom Sai Saketh | 2503848 | footballerpilot34 | `app_program/motion/` | `testing/motion/` |
+| 3 | Ultrasonic ranging, servo scan, obstacle bypass | Aruna Pressanna Dhevakash | 2501146 | dhevakash | `app_program/obstacle/` | `testing/obstacle/` |
+| 4 | Wi-Fi, MQTT, web dashboard, telemetry, log | Tng Qi Long Felix | 2500906 | felixxtng | `app_program/comms/` | `testing/comms/` |
+| 5 | IMU (LSM303DLHC), hump detection and height, pick-up check | Tay Rui Feng | 2500458 | sleepyrf | `app_program/imu_hump/` | `testing/imu_hump/` |
 
 The subsystem folders keep descriptive names instead of `subsystem1/` …
 `subsystem5/`; the number in this table is the subsystem number used in
@@ -36,7 +34,7 @@ the rest of this file and in test IDs.
 | File | What it is |
 |---|---|
 | `app_program/app_main.c` | Start-up, the 10 ms control loop, buttons, USB serial commands, watchdog |
-| `app_program/vehicle.c/.h` | Vehicle state machine: READY, LINE_CAL, FOLLOW_LINE, TURN, OBSTACLE_SCAN, BYPASS, HUMP, BLOCKED, STOPPED … (the Week 6 design review gave the vehicle task to Aruna/Akash) |
+| `app_program/vehicle.c/.h` | Vehicle state machine: READY, LINE_CAL, FOLLOW_LINE, TURN, OBSTACLE_SCAN, BYPASS, HUMP, BLOCKED, STOPPED … (the Week 6 design review gave the vehicle task to subsystem 3) |
 | `app_program/stage.h` | Loop stage IDs, so a watchdog restart reports where the loop froze |
 | `app_program/gpio_isr.c/.h` | The single GPIO interrupt callback, passing edges to subsystems 1, 2 and 3 |
 | `app_program/power.c/.h` | VSYS battery voltage (ADC) |
@@ -153,12 +151,16 @@ provider owns the function; the user only calls it.
 | IF-14 | shared → S1, S2, S3 | GPIO interrupt | `barcode_edge_isr()`, `encoder_edge_isr()`, `ultrasonic_echo_isr()` | Pin edges, called from `gpio_dispatch_isr()` |
 | IF-15 | shared → S4 | function call | `power_vsys_mv()` | Battery voltage for the heartbeat and dashboard |
 
-**To fill in:** the integration test that covers each interface
-(`testing/integration/TEST_LOG.md`).
+Integration tests T-INT-01 to T-INT-04 (`testing/integration/TEST_LOG.md`)
+cover IF-01 to IF-12; IF-13 to IF-15 are in use in every run but have no
+separate recorded test.
 
 ## 6. Kernel object budget
 
 Not applicable: the project does not use micro T-Kernel, so it creates no
-tasks, semaphores, mailboxes or other kernel objects. All application data
-is static (no heap allocation after start-up); lwIP uses its own fixed pool
-(`config/lwipopts.h`).
+tasks, semaphores, mailboxes or other kernel objects.
+
+Memory: the application modules use static data only. The lwIP network
+stack allocates from the C heap (`MEM_LIBC_MALLOC 1`, `MEM_SIZE 4000` in
+`config/lwipopts.h`), including one block per web connection while the car
+runs (`mem_calloc()` in `app_program/comms/web.c`).

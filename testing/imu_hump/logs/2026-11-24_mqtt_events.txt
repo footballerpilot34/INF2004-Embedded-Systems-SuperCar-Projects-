@@ -1,0 +1,1406 @@
+# imu_hump: MQTT log events, 2026-11-24
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 76877 10:31:36.496 inf2004/aai14/supercar/hump {"height_mm":13.4,"peak_tilt_x10":105,"run_height_mm":13.4,"run_peak_tilt_x10":105,"n":1,"t":1532188}
+ 77907 10:35:16.515 Tilted for 301 ms -> HUMP, climbing.
+ 77908 10:35:16.518   pitch -4.6 deg
+ 77909 10:35:16.518   roll 1.9 deg
+ 77910 10:35:16.518 State: FOLLOW_LINE -> HUMP
+ 77914 10:35:16.617 Hump: over the top after 250 ms -> easing back to cruise.
+ 77916 10:35:16.860 Picked up (no floor under any IR sensor for 810 ms) -> stopped. End of the demo.
+ 77917 10:35:17.073 State: HUMP -> PICKED_UP
+ 78044 10:35:40.336 Picked up (no floor under any IR sensor for 806 ms) -> stopped. End of the demo.
+ 81452 10:49:12.997 === SuperCar AAI14: line + barcode + hump/wall ===
+ 81460 10:49:13.061 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 81462 10:49:13.061 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 81463 10:49:13.154 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 81469 10:49:13.154 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 81470 10:49:13.154 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 81508 10:49:38.964 === SuperCar AAI14: line + barcode + hump/wall ===
+ 81516 10:49:38.986 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 81518 10:49:38.986 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 81519 10:49:39.061 IMU calibration failed. Keep it still, level and try again.
+ 81526 10:49:39.074 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 81527 10:49:39.155 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 81565 10:49:50.975 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 81610 10:49:59.389 Stalled on a slope for 205 ms -> HUMP, more power.
+ 81611 10:49:59.446   pitch -1.6 deg
+ 81612 10:49:59.451   roll 1.8 deg
+ 81613 10:49:59.455 State: FOLLOW_LINE -> HUMP
+ 81628 10:50:02.304 Hump: over the top after 2884 ms -> easing back to cruise.
+ 81638 10:50:04.453 Hump cleared after 4993 ms, 165 mm driven: peak height 11.8 mm, peak tilt 6.0 deg.
+ 81639 10:50:04.457 Highest this run: 11.8 mm (1 humps).
+ 81640 10:50:04.457 State: HUMP -> FOLLOW_LINE
+ 81642 10:50:04.461 inf2004/aai14/supercar/hump {"height_mm":11.8,"peak_tilt_x10":60,"run_height_mm":11.8,"run_peak_tilt_x10":60,"n":1,"t":44221}
+ 81692 10:50:11.127 IMU kick (STOPPED): up 404 mm/s, down -4 mm/s, accel 831..1171 mg, 589 ms.
+ 81695 10:50:11.667 IMU kick (STOPPED): up 0 mm/s, down -431 mm/s, accel 860..1096 mg, 539 ms.
+ 81698 10:50:12.111 IMU kick (STOPPED): up 280 mm/s, down 0 mm/s, accel 797..1228 mg, 368 ms.
+ 81700 10:50:12.489 IMU kick (STOPPED): up 0 mm/s, down -177 mm/s, accel 871..1240 mg, 270 ms.
+ 81707 10:50:13.655 IMU kick (STOPPED): up 442 mm/s, down 0 mm/s, accel 865..1210 mg, 1120 ms.
+ 81711 10:50:14.480 IMU kick (STOPPED): up 211 mm/s, down 0 mm/s, accel 871..1254 mg, 380 ms.
+ 81714 10:50:14.823 IMU kick (STOPPED): up 0 mm/s, down -131 mm/s, accel 957..1125 mg, 191 ms.
+ 81718 10:50:15.513 IMU kick (STOPPED): up 163 mm/s, down 0 mm/s, accel 904..1300 mg, 590 ms.
+ 81721 10:50:15.873 IMU kick (STOPPED): up 160 mm/s, down 0 mm/s, accel 875..1162 mg, 210 ms.
+ 81723 10:50:16.127 IMU kick (STOPPED): up 97 mm/s, down -116 mm/s, accel 684..2028 mg, 180 ms.
+ 81726 10:50:16.789 IMU kick (STOPPED): up 188 mm/s, down 0 mm/s, accel 991..1096 mg, 160 ms.
+ 81788 10:50:28.340 Tilted for 306 ms -> HUMP, climbing.
+ 81789 10:50:28.343   pitch -1.5 deg
+ 81790 10:50:28.343   roll 3.3 deg
+ 81791 10:50:28.343 State: FOLLOW_LINE -> HUMP
+ 81801 10:50:30.281 Hump: over the top after 1932 ms -> easing back to cruise.
+ 81813 10:50:32.571 Hump cleared after 4232 ms, 187 mm driven: peak height 13.3 mm, peak tilt 7.4 deg.
+ 81814 10:50:32.571 Highest this run: 13.3 mm (1 humps).
+ 81815 10:50:32.575 State: HUMP -> FOLLOW_LINE
+ 81817 10:50:32.575 inf2004/aai14/supercar/hump {"height_mm":13.3,"peak_tilt_x10":74,"run_height_mm":13.3,"run_peak_tilt_x10":74,"n":1,"t":72391}
+ 81840 10:50:34.724 Tilted for 300 ms -> HUMP, climbing.
+ 81841 10:50:34.878   pitch 14.1 deg
+ 81842 10:50:34.878   roll -1.6 deg
+ 81843 10:50:34.881 State: FOLLOW_LINE -> HUMP
+ 81847 10:50:34.884 Hump: over the top after 80 ms -> easing back to cruise.
+ 81848 10:50:34.999 IMU kick (HUMP): up 531 mm/s, down 0 mm/s, accel 838..1290 mg, 780 ms.
+ 81852 10:50:35.481 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 81853 10:50:35.609 State: HUMP -> STOPPED
+ 81854 10:50:35.609 IMU kick (STOPPED): up 0 mm/s, down -432 mm/s, accel 817..1096 mg, 600 ms.
+ 81861 10:50:36.948 IMU kick (STOPPED): up 0 mm/s, down -135 mm/s, accel 946..1040 mg, 500 ms.
+ 81866 10:50:37.855 IMU kick (STOPPED): up 151 mm/s, down 0 mm/s, accel 972..1074 mg, 578 ms.
+ 81874 10:50:39.228 IMU kick (STOPPED): up 130 mm/s, down 0 mm/s, accel 982..1081 mg, 591 ms.
+ 81912 10:50:47.358 IMU kick (STOPPED): up 0 mm/s, down -116 mm/s, accel 937..1165 mg, 200 ms.
+ 81915 10:50:48.195 IMU kick (STOPPED): up 85 mm/s, down 0 mm/s, accel 978..1012 mg, 50 ms.
+ 81919 10:50:48.679 IMU kick (STOPPED): up 83 mm/s, down 0 mm/s, accel 937..1008 mg, 140 ms.
+ 81924 10:50:49.418 IMU kick (STOPPED): up 150 mm/s, down 0 mm/s, accel 903..1122 mg, 221 ms.
+ 81926 10:50:49.709 IMU kick (STOPPED): up 0 mm/s, down -104 mm/s, accel 973..1078 mg, 240 ms.
+ 81930 10:50:50.388 IMU kick (STOPPED): up 214 mm/s, down 0 mm/s, accel 910..1309 mg, 500 ms.
+ 81934 10:50:51.002 IMU kick (STOPPED): up 164 mm/s, down 0 mm/s, accel 857..1140 mg, 350 ms.
+ 81981 10:50:59.672 IMU kick (FOLLOW_LINE): up 147 mm/s, down -13 mm/s, accel 966..1187 mg, 490 ms.
+ 81995 10:51:02.543 Tilted for 310 ms -> HUMP, climbing.
+ 81996 10:51:02.625   pitch -2.0 deg
+ 81997 10:51:02.625   roll 3.6 deg
+ 81998 10:51:02.625 State: FOLLOW_LINE -> HUMP
+ 82008 10:51:05.450 Hump: over the top after 1740 ms -> easing back to cruise.
+ 82016 10:51:05.723 Hump cleared after 3180 ms, 153 mm driven: peak height 13.5 mm, peak tilt 7.2 deg.
+ 82017 10:51:05.820 Highest this run: 13.5 mm (1 humps).
+ 82018 10:51:05.820 State: HUMP -> FOLLOW_LINE
+ 82020 10:51:05.820 inf2004/aai14/supercar/hump {"height_mm":13.5,"peak_tilt_x10":72,"run_height_mm":13.5,"run_peak_tilt_x10":72,"n":1,"t":105571}
+ 82038 10:51:08.205 Tilted for 309 ms -> HUMP, climbing.
+ 82039 10:51:08.275   pitch 12.9 deg
+ 82040 10:51:08.275   roll 8.2 deg
+ 82041 10:51:08.275 State: FOLLOW_LINE -> HUMP
+ 82047 10:51:09.016 IMU kick (HUMP): up 440 mm/s, down -455 mm/s, accel 845..1392 mg, 1120 ms.
+ 82049 10:51:09.021 Hump: over the top after 680 ms -> easing back to cruise.
+ 82051 10:51:09.079 Picked up (no floor under any IR sensor for 813 ms) -> stopped. End of the demo.
+ 82052 10:51:09.079 State: HUMP -> STOPPED
+ 82054 10:51:09.290 IMU kick (STOPPED): up 207 mm/s, down 0 mm/s, accel 939..1093 mg, 450 ms.
+ 82059 10:51:10.330 IMU kick (STOPPED): up 95 mm/s, down 0 mm/s, accel 937..1085 mg, 169 ms.
+ 82061 10:51:10.551 IMU kick (STOPPED): up 0 mm/s, down -100 mm/s, accel 946..1261 mg, 60 ms.
+ 82063 10:51:10.726 IMU kick (STOPPED): up 128 mm/s, down 0 mm/s, accel 900..1289 mg, 99 ms.
+ 82068 10:51:11.474 IMU kick (STOPPED): up 508 mm/s, down -41 mm/s, accel 936..2164 mg, 570 ms.
+ 82199 10:51:40.617 IMU kick (STOPPED): up 284 mm/s, down 0 mm/s, accel 685..1241 mg, 310 ms.
+ 82200 10:51:40.632 IMU kick (STOPPED): up 45 mm/s, down -99 mm/s, accel 749..1686 mg, 50 ms.
+ 82203 10:51:40.906 IMU kick (STOPPED): up 21 mm/s, down -446 mm/s, accel 803..1705 mg, 350 ms.
+ 82205 10:51:41.115 IMU kick (STOPPED): up 130 mm/s, down -7 mm/s, accel 889..986 mg, 59 ms.
+ 82208 10:51:41.433 IMU kick (STOPPED): up 283 mm/s, down 0 mm/s, accel 898..1271 mg, 350 ms.
+ 85130 11:14:57.529 inf2004/aai14/supercar/hump {"height_mm":13.5,"peak_tilt_x10":72,"run_height_mm":13.5,"run_peak_tilt_x10":72,"n":1,"t":105571}
+ 85132 13:04:18.252 inf2004/aai14/supercar/hump {"height_mm":13.5,"peak_tilt_x10":72,"run_height_mm":13.5,"run_peak_tilt_x10":72,"n":1,"t":105571}
+ 85136 13:09:44.260 === SuperCar AAI14: line + barcode + hump/wall ===
+ 85144 13:09:44.316 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 85146 13:09:44.331 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 85147 13:09:44.394 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 85154 13:09:44.444 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 85155 13:09:44.457 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 85248 13:10:08.599 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 85301 13:10:18.715 Stalled on a slope for 200 ms -> HUMP, more power.
+ 85302 13:10:18.720   pitch -1.4 deg
+ 85303 13:10:18.841   roll 2.5 deg
+ 85304 13:10:18.841 State: FOLLOW_LINE -> HUMP
+ 85307 13:10:18.922 Hump: still stalled -> power 17.
+ 85313 13:10:20.257 Hump: over the top after 1552 ms -> easing back to cruise.
+ 85318 13:10:21.006 Hump cleared after 2420 ms, 149 mm driven: peak height 10.5 mm, peak tilt 6.1 deg.
+ 85319 13:10:21.083 Highest this run: 10.5 mm (1 humps).
+ 85320 13:10:21.083 State: HUMP -> FOLLOW_LINE
+ 85322 13:10:21.102 inf2004/aai14/supercar/hump {"height_mm":10.5,"peak_tilt_x10":61,"run_height_mm":10.5,"run_peak_tilt_x10":61,"n":1,"t":52195}
+ 85410 13:10:36.147 IMU kick (STOPPED): up 264 mm/s, down 0 mm/s, accel 567..1592 mg, 511 ms.
+ 85412 13:10:36.366 IMU kick (STOPPED): up 12 mm/s, down -119 mm/s, accel 991..1008 mg, 90 ms.
+ 85417 13:10:37.229 IMU kick (STOPPED): up 128 mm/s, down 0 mm/s, accel 946..1027 mg, 381 ms.
+ 85427 13:10:39.423 IMU kick (STOPPED): up 248 mm/s, down 0 mm/s, accel 987..1265 mg, 559 ms.
+ 87931 13:20:00.263 IMU kick (STOPPED): up 211 mm/s, down 0 mm/s, accel 898..1074 mg, 590 ms.
+ 87936 13:20:00.904 IMU kick (STOPPED): up 0 mm/s, down -305 mm/s, accel 891..1226 mg, 519 ms.
+ 87939 13:20:01.536 IMU kick (STOPPED): up 232 mm/s, down 0 mm/s, accel 974..1061 mg, 540 ms.
+ 87946 13:20:02.616 IMU kick (STOPPED): up 19 mm/s, down -116 mm/s, accel 772..1476 mg, 150 ms.
+ 87949 13:20:03.122 IMU kick (STOPPED): up 280 mm/s, down 0 mm/s, accel 942..1250 mg, 520 ms.
+ 87951 13:20:03.781 IMU kick (STOPPED): up 0 mm/s, down -131 mm/s, accel 959..1082 mg, 250 ms.
+ 87954 13:20:03.947 IMU kick (STOPPED): up 91 mm/s, down 0 mm/s, accel 968..1026 mg, 260 ms.
+ 87979 13:20:09.226 IMU kick (STOPPED): up 99 mm/s, down 0 mm/s, accel 750..1182 mg, 160 ms.
+ 87982 13:20:09.780 IMU kick (STOPPED): up 188 mm/s, down 0 mm/s, accel 867..1255 mg, 510 ms.
+ 87986 13:20:10.385 IMU kick (STOPPED): up 119 mm/s, down 0 mm/s, accel 968..1071 mg, 430 ms.
+ 88023 13:20:18.431 IMU kick (STOPPED): up 412 mm/s, down -21 mm/s, accel 751..1282 mg, 350 ms.
+ 88027 13:20:18.882 IMU kick (STOPPED): up 0 mm/s, down -449 mm/s, accel 799..1111 mg, 391 ms.
+ 88029 13:20:19.206 IMU kick (STOPPED): up 164 mm/s, down 0 mm/s, accel 978..1008 mg, 300 ms.
+ 88047 13:20:22.931 IMU kick (STOPPED): up 0 mm/s, down -228 mm/s, accel 898..1041 mg, 500 ms.
+ 88062 13:20:26.268 IMU kick (STOPPED): up 0 mm/s, down -165 mm/s, accel 519..1267 mg, 430 ms.
+ 88070 13:20:27.811 IMU kick (STOPPED): up 1152 mm/s, down -1079 mm/s, accel 676..1492 mg, 1620 ms.
+ 88072 13:20:28.004 IMU kick (STOPPED): up 0 mm/s, down -250 mm/s, accel 993..1118 mg, 210 ms.
+ 88075 13:20:28.407 IMU kick (STOPPED): up 163 mm/s, down 0 mm/s, accel 892..1138 mg, 320 ms.
+ 88078 13:20:28.730 IMU kick (STOPPED): up 0 mm/s, down -117 mm/s, accel 983..1135 mg, 140 ms.
+ 88083 13:20:29.951 IMU kick (STOPPED): up 148 mm/s, down 0 mm/s, accel 797..1206 mg, 400 ms.
+ 88086 13:20:30.284 IMU kick (STOPPED): up 202 mm/s, down 0 mm/s, accel 845..1110 mg, 370 ms.
+ 88089 13:20:30.608 IMU kick (STOPPED): up 0 mm/s, down -208 mm/s, accel 957..1104 mg, 280 ms.
+ 88095 13:20:32.093 IMU kick (STOPPED): up 350 mm/s, down -273 mm/s, accel 739..1239 mg, 930 ms.
+ 88097 13:20:32.366 IMU kick (STOPPED): up 31 mm/s, down -273 mm/s, accel 996..1226 mg, 240 ms.
+ 88099 13:20:32.366 IMU kick (STOPPED): up 90 mm/s, down 0 mm/s, accel 837..1099 mg, 190 ms.
+ 88101 13:20:32.917 IMU kick (STOPPED): up 0 mm/s, down -123 mm/s, accel 1080..1139 mg, 80 ms.
+ 88105 13:20:33.121 IMU kick (STOPPED): up 260 mm/s, down 0 mm/s, accel 827..1230 mg, 300 ms.
+ 88107 13:20:34.246 IMU kick (STOPPED): up 0 mm/s, down -297 mm/s, accel 942..1111 mg, 310 ms.
+ 88112 13:20:34.246 IMU kick (STOPPED): up 151 mm/s, down 0 mm/s, accel 819..1113 mg, 330 ms.
+ 88114 13:20:34.800 IMU kick (STOPPED): up 0 mm/s, down -131 mm/s, accel 1017..1077 mg, 180 ms.
+ 88117 13:20:34.902 IMU kick (STOPPED): up 97 mm/s, down 0 mm/s, accel 871..1119 mg, 213 ms.
+ 88120 13:20:35.273 IMU kick (STOPPED): up 0 mm/s, down -197 mm/s, accel 954..1105 mg, 330 ms.
+ 88123 13:20:35.810 IMU kick (STOPPED): up 260 mm/s, down 0 mm/s, accel 924..1116 mg, 450 ms.
+ 88126 13:20:36.256 IMU kick (STOPPED): up 0 mm/s, down -217 mm/s, accel 857..1109 mg, 381 ms.
+ 88130 13:20:36.768 IMU kick (STOPPED): up 214 mm/s, down 0 mm/s, accel 911..1111 mg, 389 ms.
+ 88133 13:20:37.222 IMU kick (STOPPED): up 0 mm/s, down -111 mm/s, accel 1008..1062 mg, 231 ms.
+ 88135 13:20:37.413 IMU kick (STOPPED): up 91 mm/s, down 0 mm/s, accel 954..1002 mg, 80 ms.
+ 88139 13:20:38.260 IMU kick (STOPPED): up 0 mm/s, down -100 mm/s, accel 939..1071 mg, 170 ms.
+ 88146 13:20:39.429 IMU kick (STOPPED): up 0 mm/s, down -722 mm/s, accel 772..1346 mg, 911 ms.
+ 88150 13:20:40.227 IMU kick (STOPPED): up 1036 mm/s, down 0 mm/s, accel 730..1401 mg, 670 ms.
+ 88154 13:20:40.645 IMU kick (STOPPED): up 284 mm/s, down 0 mm/s, accel 864..1068 mg, 300 ms.
+ 88156 13:20:44.244 IMU kick (STOPPED): up 0 mm/s, down -193 mm/s, accel 912..1177 mg, 260 ms.
+ 88159 13:20:44.248 IMU kick (STOPPED): up 240 mm/s, down 0 mm/s, accel 924..1162 mg, 290 ms.
+ 88161 13:20:44.250 IMU kick (STOPPED): up 92 mm/s, down 0 mm/s, accel 993..1035 mg, 90 ms.
+ 88167 13:20:44.986 IMU kick (STOPPED): up 111 mm/s, down 0 mm/s, accel 971..1093 mg, 340 ms.
+ 88169 13:20:45.416 IMU kick (STOPPED): up 246 mm/s, down 0 mm/s, accel 751..1146 mg, 300 ms.
+ 88174 13:20:46.341 IMU kick (STOPPED): up 391 mm/s, down -439 mm/s, accel 762..1178 mg, 760 ms.
+ 88178 13:20:46.778 IMU kick (STOPPED): up 0 mm/s, down -1100 mm/s, accel 568..1434 mg, 581 ms.
+ 88184 13:20:48.172 IMU kick (STOPPED): up 1165 mm/s, down -33 mm/s, accel 470..2089 mg, 1110 ms.
+ 88186 13:20:48.290 IMU kick (STOPPED): up 128 mm/s, down 0 mm/s, accel 990..998 mg, 180 ms.
+ 88428 13:21:17.072 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 88484 13:21:24.526 IMU kick (STOPPED): up 160 mm/s, down 0 mm/s, accel 902..1175 mg, 1079 ms.
+ 88507 13:21:29.395 IMU kick (STOPPED): up 127 mm/s, down 0 mm/s, accel 810..1241 mg, 129 ms.
+ 88510 13:21:29.945 IMU kick (STOPPED): up 0 mm/s, down -84 mm/s, accel 981..1007 mg, 70 ms.
+ 88513 13:21:30.314 IMU kick (STOPPED): up 429 mm/s, down 0 mm/s, accel 850..1514 mg, 501 ms.
+ 88515 13:21:30.491 IMU kick (STOPPED): up 0 mm/s, down -301 mm/s, accel 946..1418 mg, 189 ms.
+ 88519 13:21:31.906 IMU kick (STOPPED): up 475 mm/s, down 0 mm/s, accel 823..1332 mg, 671 ms.
+ 88523 13:21:31.910 IMU kick (STOPPED): up 232 mm/s, down 0 mm/s, accel 993..1247 mg, 521 ms.
+ 88562 13:21:40.425 IMU kick (FOLLOW_LINE): up 144 mm/s, down 0 mm/s, accel 970..1122 mg, 500 ms.
+ 88743 13:21:56.999 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 88848 13:22:19.250 IMU kick (STOPPED): up 558 mm/s, down -31 mm/s, accel 840..1267 mg, 1059 ms.
+ 88852 13:22:19.954 IMU kick (STOPPED): up 0 mm/s, down -438 mm/s, accel 835..1056 mg, 800 ms.
+ 88855 13:22:20.531 IMU kick (STOPPED): up 278 mm/s, down 0 mm/s, accel 910..1096 mg, 549 ms.
+ 88860 13:22:21.486 IMU kick (STOPPED): up 0 mm/s, down -317 mm/s, accel 911..1128 mg, 619 ms.
+ 88864 13:22:23.617 IMU kick (STOPPED): up 799 mm/s, down -14 mm/s, accel 853..1308 mg, 641 ms.
+ 88870 13:22:23.625 IMU kick (STOPPED): up 332 mm/s, down -645 mm/s, accel 773..1365 mg, 991 ms.
+ 88871 13:22:23.712 IMU kick (STOPPED): up 0 mm/s, down -122 mm/s, accel 1108..1234 mg, 101 ms.
+ 88872 13:22:23.712 IMU kick (STOPPED): up 174 mm/s, down 0 mm/s, accel 846..1006 mg, 260 ms.
+ 88873 13:22:23.719 IMU kick (STOPPED): up 0 mm/s, down -84 mm/s, accel 1104..1217 mg, 80 ms.
+ 88877 13:22:24.471 IMU kick (STOPPED): up 266 mm/s, down 0 mm/s, accel 728..1294 mg, 398 ms.
+ 88881 13:22:25.042 IMU kick (STOPPED): up 0 mm/s, down -231 mm/s, accel 862..1316 mg, 282 ms.
+ 88885 13:22:25.914 IMU kick (STOPPED): up 225 mm/s, down 0 mm/s, accel 852..1192 mg, 720 ms.
+ 88891 13:22:26.812 IMU kick (STOPPED): up 147 mm/s, down 0 mm/s, accel 972..1071 mg, 629 ms.
+ 88894 13:22:27.438 IMU kick (STOPPED): up 262 mm/s, down 0 mm/s, accel 856..1194 mg, 488 ms.
+ 88896 13:22:27.515 IMU kick (STOPPED): up 0 mm/s, down -160 mm/s, accel 985..1139 mg, 171 ms.
+ 88899 13:22:27.910 IMU kick (STOPPED): up 279 mm/s, down 0 mm/s, accel 821..1236 mg, 378 ms.
+ 88901 13:22:28.151 IMU kick (STOPPED): up 0 mm/s, down -184 mm/s, accel 934..1298 mg, 192 ms.
+ 88905 13:22:28.768 IMU kick (STOPPED): up 360 mm/s, down 0 mm/s, accel 866..1213 mg, 496 ms.
+ 88908 13:22:29.247 IMU kick (STOPPED): up 140 mm/s, down 0 mm/s, accel 866..1144 mg, 320 ms.
+ 88911 13:22:29.798 IMU kick (STOPPED): up 224 mm/s, down 0 mm/s, accel 849..1301 mg, 469 ms.
+ 88915 13:22:30.474 IMU kick (STOPPED): up 173 mm/s, down -7 mm/s, accel 915..1070 mg, 470 ms.
+ 88916 13:22:30.570 IMU kick (STOPPED): up 84 mm/s, down 0 mm/s, accel 882..1024 mg, 59 ms.
+ 88921 13:22:31.212 IMU kick (STOPPED): up 7 mm/s, down -199 mm/s, accel 866..1176 mg, 349 ms.
+ 88923 13:22:31.485 IMU kick (STOPPED): up 169 mm/s, down 0 mm/s, accel 840..1003 mg, 308 ms.
+ 88925 13:22:31.795 IMU kick (STOPPED): up 0 mm/s, down -204 mm/s, accel 890..1129 mg, 280 ms.
+ 88928 13:22:32.318 IMU kick (STOPPED): up 435 mm/s, down 0 mm/s, accel 298..1259 mg, 450 ms.
+ 88932 13:22:32.635 IMU kick (STOPPED): up 0 mm/s, down -248 mm/s, accel 935..1050 mg, 119 ms.
+ 88935 13:22:33.237 IMU kick (STOPPED): up 86 mm/s, down 0 mm/s, accel 977..1027 mg, 439 ms.
+ 88979 13:22:42.904 IMU kick (STOPPED): up 119 mm/s, down 0 mm/s, accel 582..1078 mg, 149 ms.
+ 88983 13:22:43.475 IMU kick (STOPPED): up 223 mm/s, down 0 mm/s, accel 990..1215 mg, 530 ms.
+ 89019 13:23:45.079 === SuperCar AAI14: line + barcode + hump/wall ===
+ 89027 13:23:45.240 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 89029 13:23:45.240 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 89031 13:23:45.750 IMU calibration failed. Keep it still, level and try again.
+ 89038 13:23:45.752 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 89039 13:23:45.847 IMU calibration failed. Keep it still, level and try again.
+ 89737 13:26:10.326 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+ 89738 13:26:10.333 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 90141 13:27:13.812 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+ 90142 13:27:13.812 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 90783 13:30:08.532 === SuperCar AAI14: line + barcode + hump/wall ===
+ 90791 13:30:08.738 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 90793 13:30:08.738 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 90794 13:30:08.838 IMU calibration failed. Keep it still, level and try again.
+ 90801 13:30:08.851 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 90802 13:30:09.045 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 90888 13:30:25.868 Tilted for 308 ms -> HUMP, climbing.
+ 90889 13:30:25.871   pitch -7.3 deg
+ 90890 13:30:25.873   roll -11.3 deg
+ 90891 13:30:25.876 State: FOLLOW_LINE -> HUMP
+ 90898 13:30:26.956 Hump: over the top after 1202 ms -> easing back to cruise.
+ 90916 13:30:34.011 Hump: stalled again -> climbing power.
+ 90917 13:30:34.013 Hump: still stalled -> power 17.
+ 90918 13:30:34.389 Hump: over the top after 5060 ms -> easing back to cruise.
+ 90919 13:30:34.389 Hump: stalled again -> climbing power.
+ 90920 13:30:34.389 Hump: still stalled -> power 22.
+ 90921 13:30:34.389 Hump: still stalled -> power 27.
+ 90922 13:30:34.389 Hump: over the top after 5802 ms -> easing back to cruise.
+ 90923 13:30:34.389 Hump: stalled again -> climbing power.
+ 90924 13:30:34.389 Hump: over the top after 6212 ms -> easing back to cruise.
+ 90926 13:30:34.928 Hump: stalled again -> climbing power.
+ 90927 13:30:34.928 Hump: still stalled -> power 32.
+ 90928 13:30:34.928 Hump: still stalled -> power 37.
+ 90929 13:30:34.928 Hump: over the top after 6972 ms -> easing back to cruise.
+ 90930 13:30:34.928 Hump: stalled again -> climbing power.
+ 90931 13:30:34.928 Hump: over the top after 7380 ms -> easing back to cruise.
+ 90932 13:30:34.928 Hump: stalled again -> climbing power.
+ 90933 13:30:34.940 Hump: still stalled -> power 42.
+ 90935 13:30:35.505 Hump: still stuck at power 40 after 9480 ms -> BLOCKED.
+ 90936 13:30:35.509 State: HUMP -> BLOCKED
+ 91010 13:30:49.165 Tilted for 300 ms -> HUMP, climbing.
+ 91011 13:30:49.165   pitch -6.5 deg
+ 91012 13:30:49.165   roll -11.6 deg
+ 91013 13:30:49.165 State: FOLLOW_LINE -> HUMP
+ 91016 13:30:49.165 Hump: over the top after 230 ms -> easing back to cruise.
+ 91040 13:30:56.119 Hump: stalled again -> climbing power.
+ 91042 13:30:56.121 Hump: still stalled -> power 17.
+ 91045 13:30:56.266 Hump: still stalled -> power 22.
+ 91046 13:30:56.266 Hump: still stalled -> power 27.
+ 91047 13:30:56.266 Hump: still stalled -> power 32.
+ 91048 13:30:56.266 Hump: still stalled -> power 37.
+ 91050 13:30:56.266 Hump: over the top after 7340 ms -> easing back to cruise.
+ 91057 13:30:56.997 Hump: stalled again -> climbing power.
+ 91058 13:30:56.997 Hump: over the top after 7800 ms -> easing back to cruise.
+ 91060 13:30:57.324 Hump: stalled again -> climbing power.
+ 91062 13:30:57.329 Hump: still stalled -> power 42.
+ 91063 13:30:57.467 Hump: over the top after 8328 ms -> easing back to cruise.
+ 91093 13:31:03.949 Hump: still stuck at power 9 after 15008 ms -> BLOCKED.
+ 91094 13:31:03.949 State: HUMP -> BLOCKED
+ 91180 13:31:29.651 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 91414 13:31:59.655 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+ 91415 13:31:59.656 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 94765 13:44:38.403 Tilted for 300 ms -> HUMP, climbing.
+ 94766 13:44:38.403   pitch -9.7 deg
+ 94767 13:44:38.403   roll -4.6 deg
+ 94768 13:44:38.403 State: FOLLOW_LINE -> HUMP
+ 94770 13:44:38.703 Hump: over the top after 72 ms -> easing back to cruise.
+ 94776 13:44:39.098 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 94777 13:44:39.098 State: HUMP -> PICKED_UP
+ 94837 13:44:54.404 Stalled on a slope for 1330 ms -> HUMP, more power.
+ 94838 13:44:54.404   pitch 0.8 deg
+ 94839 13:44:54.420   roll -1.5 deg
+ 94840 13:44:54.420 State: FOLLOW_LINE -> HUMP
+ 94844 13:44:54.891 Hump: over the top after 410 ms -> easing back to cruise.
+ 94850 13:44:55.899 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 94851 13:44:55.903 State: HUMP -> PICKED_UP
+ 94888 13:45:18.748 Stalled on a slope for 962 ms -> HUMP, more power.
+ 94889 13:45:18.761   pitch 1.5 deg
+ 94890 13:45:18.763   roll -0.7 deg
+ 94891 13:45:18.763 State: FOLLOW_LINE -> HUMP
+ 94894 13:45:18.858 Hump: still stalled -> power 17.
+ 94895 13:45:18.858 Hump: over the top after 1030 ms -> easing back to cruise.
+ 94896 13:45:18.858 Hump: stalled again -> climbing power.
+ 94897 13:45:18.858 Hump: over the top after 1408 ms -> easing back to cruise.
+ 94898 13:45:18.858 Hump cleared after 1928 ms, 35 mm driven: peak height 4.3 mm, peak tilt 7.2 deg.
+ 94899 13:45:18.858 Highest this run: 4.3 mm (1 humps).
+ 94900 13:45:18.858 State: HUMP -> FOLLOW_LINE
+ 94959 13:45:24.656 Tilted for 308 ms -> HUMP, climbing.
+ 94960 13:45:24.721   pitch -4.9 deg
+ 94961 13:45:24.721   roll 4.3 deg
+ 94962 13:45:24.721 State: FOLLOW_LINE -> HUMP
+ 94970 13:45:24.885 State: HUMP -> STOPPED
+ 95127 13:45:56.232 Stalled on a slope for 262 ms -> HUMP, more power.
+ 95128 13:45:56.248   pitch -1.5 deg
+ 95129 13:45:56.250   roll -0.4 deg
+ 95130 13:45:56.252 State: FOLLOW_LINE -> HUMP
+ 95139 13:45:57.894 Hump: over the top after 1381 ms -> easing back to cruise.
+ 95141 13:45:57.973 Hump: stalled again -> climbing power.
+ 95143 13:45:58.216 Hump: over the top after 1930 ms -> easing back to cruise.
+ 95145 13:45:58.580 Hump: stalled again -> climbing power.
+ 95147 13:45:58.580 Hump: over the top after 2438 ms -> easing back to cruise.
+ 95160 13:46:01.256 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 95161 13:46:01.256 State: HUMP -> PICKED_UP
+ 97798 13:55:57.576 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 97838 13:56:05.085 Tilted for 310 ms -> HUMP, climbing.
+ 97839 13:56:05.089   pitch -2.2 deg
+ 97840 13:56:05.094   roll 3.3 deg
+ 97841 13:56:05.094 State: FOLLOW_LINE -> HUMP
+ 97844 13:56:05.212 Hump: still stalled -> power 17.
+ 97850 13:56:06.146 Hump: over the top after 1260 ms -> easing back to cruise.
+ 97858 13:56:07.783 Hump cleared after 2838 ms, 144 mm driven: peak height 11.5 mm, peak tilt 6.4 deg.
+ 97859 13:56:07.883 Highest this run: 11.5 mm (1 humps).
+ 97860 13:56:07.883 State: HUMP -> FOLLOW_LINE
+ 97862 13:56:07.883 inf2004/aai14/supercar/hump {"height_mm":11.5,"peak_tilt_x10":64,"run_height_mm":11.5,"run_peak_tilt_x10":64,"n":1,"t":1576880}
+ 98249 13:57:27.501 Tilted for 300 ms -> HUMP, climbing.
+ 98250 13:57:27.513   pitch -1.8 deg
+ 98251 13:57:27.513   roll 2.7 deg
+ 98252 13:57:27.513 State: FOLLOW_LINE -> HUMP
+ 98255 13:57:27.613 Hump: still stalled -> power 17.
+ 98260 13:57:28.666 Hump: over the top after 1200 ms -> easing back to cruise.
+ 98270 13:57:31.040 Hump cleared after 3140 ms, 145 mm driven: peak height 11.5 mm, peak tilt 6.5 deg.
+ 98271 13:57:31.047 Highest this run: 11.5 mm (1 humps).
+ 98272 13:57:31.047 State: HUMP -> FOLLOW_LINE
+ 98274 13:57:31.047 inf2004/aai14/supercar/hump {"height_mm":11.5,"peak_tilt_x10":65,"run_height_mm":11.5,"run_peak_tilt_x10":65,"n":1,"t":1659649}
+ 98366 13:57:34.018 Tilted for 310 ms -> HUMP, climbing.
+ 98367 13:57:34.018   pitch 18.5 deg
+ 98368 13:57:34.018   roll -0.6 deg
+ 98369 13:57:34.018 State: FOLLOW_LINE -> HUMP
+ 98375 13:57:34.322 Hump: over the top after 460 ms -> easing back to cruise.
+ 98378 13:57:34.809 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 98379 13:57:34.816 State: HUMP -> PICKED_UP
+ 98951 13:59:21.623 Tilted for 300 ms -> HUMP, climbing.
+ 98952 13:59:21.623   pitch -6.3 deg
+ 98953 13:59:21.623   roll 1.7 deg
+ 98954 13:59:21.623 State: FOLLOW_LINE -> HUMP
+ 98958 13:59:21.623 Hump: over the top after 100 ms -> easing back to cruise.
+ 98960 13:59:21.771 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 98961 13:59:21.771 State: HUMP -> PICKED_UP
+ 99104 13:59:35.022 Tilted for 300 ms -> HUMP, climbing.
+ 99105 13:59:35.022   pitch 9.7 deg
+ 99106 13:59:35.022   roll 1.3 deg
+ 99107 13:59:35.022 State: FOLLOW_LINE -> HUMP
+ 99115 13:59:35.349 Hump: over the top after 170 ms -> easing back to cruise.
+ 99133 13:59:39.050 Picked up (no floor under any IR sensor for 810 ms) -> stopped. End of the demo.
+ 99134 13:59:39.050 State: HUMP -> PICKED_UP
+ 99292 13:59:58.150 Picked up (no floor under any IR sensor for 807 ms) -> stopped. End of the demo.
+ 99660 14:01:05.963 Stalled on a slope for 210 ms -> HUMP, more power.
+ 99661 14:01:05.963   pitch -2.1 deg
+ 99662 14:01:05.963   roll -0.2 deg
+ 99663 14:01:05.963 State: FOLLOW_LINE -> HUMP
+ 99667 14:01:06.388 Hump: over the top after 450 ms -> easing back to cruise.
+ 99671 14:01:07.113 Hump: stalled again -> climbing power.
+ 99674 14:01:07.699 Hump: over the top after 1710 ms -> easing back to cruise.
+ 99682 14:01:09.145 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 99683 14:01:09.161 State: HUMP -> PICKED_UP
+ 99747 14:01:20.623 Tilted for 308 ms -> HUMP, climbing.
+ 99748 14:01:20.630   pitch -5.7 deg
+ 99749 14:01:20.635   roll 0.3 deg
+ 99750 14:01:20.637 State: FOLLOW_LINE -> HUMP
+ 99752 14:01:20.714 Hump: over the top after 432 ms -> easing back to cruise.
+ 99755 14:01:21.194 Picked up (no floor under any IR sensor for 810 ms) -> stopped. End of the demo.
+ 99756 14:01:21.206 State: HUMP -> PICKED_UP
+100228 14:02:27.476 Tilted for 300 ms -> HUMP, climbing.
+100229 14:02:27.492   pitch -17.0 deg
+100230 14:02:27.492   roll 2.0 deg
+100231 14:02:27.492 State: FOLLOW_LINE -> HUMP
+100236 14:02:27.666 Hump: over the top after 130 ms -> easing back to cruise.
+100240 14:02:28.345 Picked up (no floor under any IR sensor for 802 ms) -> stopped. End of the demo.
+100241 14:02:28.440 State: HUMP -> PICKED_UP
+100450 14:03:05.245 Tilted for 300 ms -> HUMP, climbing.
+100451 14:03:05.247   pitch -1.0 deg
+100452 14:03:05.250   roll -7.3 deg
+100453 14:03:05.250 State: FOLLOW_LINE -> HUMP
+100457 14:03:05.384 Hump: over the top after 81 ms -> easing back to cruise.
+100458 14:03:05.395 Picked up (no floor under any IR sensor for 802 ms) -> stopped. End of the demo.
+100459 14:03:05.397 State: HUMP -> PICKED_UP
+101603 14:08:03.201 === SuperCar AAI14: line + barcode + hump/wall ===
+101611 14:08:03.241 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+101613 14:08:03.257 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+101614 14:08:03.452 IMU calibration failed. Keep it still, level and try again.
+101621 14:08:03.465 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+101622 14:08:03.540 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+102242 14:09:59.816 SCAN no verified corridor; corrected width available to vehicle controller.
+102243 14:09:59.826 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+102244 14:09:59.826 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+102559 14:11:38.376 === SuperCar AAI14: line + barcode + hump/wall ===
+102567 14:11:38.450 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+102569 14:11:38.450 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+102570 14:11:38.541 IMU calibration failed. Keep it still, level and try again.
+102577 14:11:38.565 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+102578 14:11:38.626 IMU calibration failed. Keep it still, level and try again.
+102914 14:12:27.795 SCAN no verified corridor; corrected width available to vehicle controller.
+102915 14:12:27.795 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+102916 14:12:27.795 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+103447 14:13:55.998 SCAN no verified corridor; corrected width available to vehicle controller.
+103448 14:13:55.998 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+103449 14:13:55.998 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+103846 14:14:59.552 Picked up (no floor under any IR sensor for 802 ms) -> stopped. End of the demo.
+104194 14:15:41.085 SCAN no verified corridor; corrected width available to vehicle controller.
+104195 14:15:41.085 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+104196 14:15:41.148 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+104739 14:16:53.905 SCAN no verified corridor; corrected width available to vehicle controller.
+104740 14:16:53.905 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+104741 14:16:53.969 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+109026 14:32:37.271 Picked up (no floor under any IR sensor for 809 ms) -> stopped. End of the demo.
+109357 14:33:52.842 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+109569 14:34:31.765 Picked up (no floor under any IR sensor for 809 ms) -> stopped. End of the demo.
+109795 14:35:09.187 Picked up (no floor under any IR sensor for 809 ms) -> stopped. End of the demo.
+110282 14:36:46.573 Picked up (no floor under any IR sensor for 807 ms) -> stopped. End of the demo.
+110488 14:37:22.922 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+111039 14:39:00.502 Picked up (no floor under any IR sensor for 810 ms) -> stopped. End of the demo.
+111326 14:40:46.440 === SuperCar AAI14: line + barcode + hump/wall ===
+111334 14:40:46.571 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+111336 14:40:46.581 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+111337 14:40:47.059 IMU calibration failed. Keep it still, level and try again.
+111345 14:40:47.177 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+111346 14:40:47.187 IMU calibration failed. Keep it still, level and try again.
+112643 14:45:23.031 SCAN no verified corridor; corrected width available to vehicle controller.
+112644 14:45:23.031 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+112645 14:45:23.031 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+113108 14:46:33.270 SCAN no verified corridor; corrected width available to vehicle controller.
+113109 14:46:33.272 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+113110 14:46:33.272 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+113326 14:47:05.325 Picked up (no floor under any IR sensor for 805 ms) -> stopped. End of the demo.
+113634 14:47:50.064 SCAN no verified corridor; corrected width available to vehicle controller.
+113635 14:47:50.152 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+113636 14:47:50.152 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+114098 14:49:20.022 Picked up (no floor under any IR sensor for 810 ms) -> stopped. End of the demo.
+114407 14:50:07.299 SCAN no verified corridor; corrected width available to vehicle controller.
+114408 14:50:07.303 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+114409 14:50:07.305 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+115193 14:52:26.255 SCAN no verified corridor; corrected width available to vehicle controller.
+115194 14:52:26.257 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+115195 14:52:26.257 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+115365 14:52:50.333 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+116504 14:58:09.518 inf2004/aai14/supercar/hump {"height_mm":11.5,"peak_tilt_x10":65,"run_height_mm":11.5,"run_peak_tilt_x10":65,"n":1,"t":1659649}
+116587 14:58:33.596 IMU kick (READY): up 352 mm/s, down 0 mm/s, accel 813..1269 mg, 520 ms.
+116590 14:58:33.613 IMU kick (READY): up 0 mm/s, down -259 mm/s, accel 807..1105 mg, 350 ms.
+116592 14:58:33.617 IMU kick (READY): up 0 mm/s, down -106 mm/s, accel 906..992 mg, 180 ms.
+116593 14:58:33.737 IMU kick (READY): up 0 mm/s, down -89 mm/s, accel 974..1028 mg, 159 ms.
+116594 14:58:33.754 IMU kick (READY): up 121 mm/s, down 0 mm/s, accel 941..1079 mg, 339 ms.
+116595 14:58:33.755 IMU kick (READY): up 0 mm/s, down -92 mm/s, accel 929..1045 mg, 170 ms.
+116596 14:58:33.755 IMU kick (READY): up 0 mm/s, down -225 mm/s, accel 894..1093 mg, 440 ms.
+116597 14:58:33.755 IMU kick (READY): up 347 mm/s, down 0 mm/s, accel 940..1161 mg, 571 ms.
+116598 14:58:33.755 IMU kick (READY): up 404 mm/s, down 0 mm/s, accel 955..1693 mg, 690 ms.
+117414 15:01:49.025 IMU kick (READY): up 63 mm/s, down -236 mm/s, accel 376..1271 mg, 630 ms.
+117421 15:01:50.524 IMU kick (READY): up 101 mm/s, down 0 mm/s, accel 904..1104 mg, 151 ms.
+117425 15:01:50.920 IMU kick (READY): up 0 mm/s, down -139 mm/s, accel 936..1078 mg, 420 ms.
+117427 15:01:51.222 IMU kick (READY): up 88 mm/s, down 0 mm/s, accel 987..1014 mg, 220 ms.
+117515 15:02:11.941 IMU kick (READY): up 89 mm/s, down 0 mm/s, accel 990..1083 mg, 210 ms.
+117520 15:02:12.760 IMU kick (READY): up 316 mm/s, down 0 mm/s, accel 966..1752 mg, 530 ms.
+117674 15:02:48.112 IMU kick (READY): up 87 mm/s, down 0 mm/s, accel 850..1047 mg, 170 ms.
+117680 15:02:50.923 IMU kick (READY): up 95 mm/s, down 0 mm/s, accel 895..1107 mg, 90 ms.
+117683 15:02:50.933 IMU kick (READY): up 93 mm/s, down 0 mm/s, accel 997..1010 mg, 109 ms.
+117684 15:02:50.993 IMU kick (READY): up 115 mm/s, down 0 mm/s, accel 990..1003 mg, 150 ms.
+117713 15:02:58.214 IMU kick (READY): up 104 mm/s, down 0 mm/s, accel 926..1126 mg, 150 ms.
+117715 15:02:58.222 IMU kick (READY): up 122 mm/s, down 0 mm/s, accel 954..1274 mg, 50 ms.
+117734 15:03:02.209 IMU kick (READY): up 299 mm/s, down 0 mm/s, accel 932..1553 mg, 681 ms.
+117762 15:03:59.195 === SuperCar AAI14: line + barcode + hump/wall ===
+117770 15:03:59.339 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+117772 15:03:59.339 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+117773 15:03:59.437 IMU calibration failed. Keep it still, level and try again.
+117782 15:03:59.514 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+117783 15:03:59.519 IMU calibration failed. Keep it still, level and try again.
+118512 15:06:48.005 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+118513 15:06:48.005 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+118655 15:07:47.281 === SuperCar AAI14: line + barcode + hump/wall ===
+118664 15:07:49.407 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+118666 15:07:49.409 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+118667 15:07:49.409 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+118674 15:07:49.537 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+118675 15:07:49.537 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+118901 15:08:37.021 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+118902 15:08:37.021 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+119067 15:16:47.608 === SuperCar AAI14: line + barcode + hump/wall ===
+119075 15:16:47.625 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+119077 15:16:47.625 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+119078 15:16:47.752 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+119085 15:16:47.766 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+119086 15:16:47.858 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+119119 15:16:54.032 IMU kick (READY): up 940 mm/s, down 0 mm/s, accel 464..1543 mg, 1280 ms.
+119123 15:16:56.256 IMU kick (READY): up 29 mm/s, down -735 mm/s, accel 764..1409 mg, 720 ms.
+119127 15:16:56.336 IMU kick (READY): up 514 mm/s, down 0 mm/s, accel 698..1556 mg, 680 ms.
+119132 15:16:56.413 IMU kick (READY): up 212 mm/s, down 0 mm/s, accel 817..1115 mg, 430 ms.
+119135 15:16:57.046 IMU kick (READY): up 0 mm/s, down -752 mm/s, accel 745..1168 mg, 679 ms.
+119142 15:16:58.157 IMU kick (READY): up 905 mm/s, down 0 mm/s, accel 751..2265 mg, 1150 ms.
+119144 15:16:58.699 IMU kick (READY): up 118 mm/s, down 0 mm/s, accel 846..1148 mg, 120 ms.
+119148 15:16:59.313 IMU kick (READY): up 293 mm/s, down -38 mm/s, accel 775..1455 mg, 720 ms.
+119171 15:17:04.093 IMU kick (READY): up 82 mm/s, down -230 mm/s, accel 294..1105 mg, 610 ms.
+119426 15:17:28.394 SCAN no verified corridor; corrected width available to vehicle controller.
+119427 15:17:28.505 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+119428 15:17:28.507 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+119445 15:17:30.379 IMU kick (BYPASS): up 85 mm/s, down 0 mm/s, accel 979..1184 mg, 520 ms.
+119479 15:17:35.599 IMU kick (BYPASS): up 102 mm/s, down 0 mm/s, accel 965..1241 mg, 490 ms.
+119510 15:17:42.619 IMU kick (BYPASS): up 0 mm/s, down -80 mm/s, accel 981..1004 mg, 210 ms.
+119601 15:18:00.129 IMU kick (STOPPED): up 501 mm/s, down -242 mm/s, accel 541..2171 mg, 2489 ms.
+119604 15:18:00.763 IMU kick (STOPPED): up 391 mm/s, down -219 mm/s, accel 989..1037 mg, 440 ms.
+119621 15:18:04.210 IMU kick (STOPPED): up 448 mm/s, down 0 mm/s, accel 720..1755 mg, 1110 ms.
+119623 15:18:04.404 IMU kick (STOPPED): up 229 mm/s, down -18 mm/s, accel 843..1091 mg, 260 ms.
+120148 15:18:36.143 IMU kick (STOPPED): up 95 mm/s, down 0 mm/s, accel 872..1187 mg, 359 ms.
+120149 15:18:36.255 IMU kick (STOPPED): up 134 mm/s, down 0 mm/s, accel 1003..1178 mg, 50 ms.
+120155 15:18:38.954 IMU kick (STOPPED): up 419 mm/s, down 0 mm/s, accel 884..1577 mg, 1250 ms.
+120157 15:18:38.966 IMU kick (STOPPED): up 93 mm/s, down 0 mm/s, accel 992..994 mg, 30 ms.
+120251 15:18:56.322 IMU kick (FOLLOW_LINE): up 98 mm/s, down 0 mm/s, accel 943..1122 mg, 72 ms.
+120254 15:18:56.761 IMU kick (FOLLOW_LINE): up 118 mm/s, down 0 mm/s, accel 960..1273 mg, 480 ms.
+120451 15:19:17.022 SCAN no verified corridor; corrected width available to vehicle controller.
+120452 15:19:17.022 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+120453 15:19:17.064 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+120609 15:19:43.428 IMU kick (FOLLOW_LINE): up 192 mm/s, down 0 mm/s, accel 945..1206 mg, 566 ms.
+120632 15:19:44.148 Tilted for 300 ms -> HUMP, climbing.
+120633 15:19:44.148   pitch 17.9 deg
+120634 15:19:44.148   roll -6.9 deg
+120635 15:19:44.148 State: FOLLOW_LINE -> HUMP
+120641 15:19:44.723 IMU kick (HUMP): up 771 mm/s, down -37 mm/s, accel 769..1229 mg, 1032 ms.
+120643 15:19:44.869 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+120644 15:19:44.869 State: HUMP -> STOPPED
+120651 15:19:46.263 IMU kick (STOPPED): up 0 mm/s, down -783 mm/s, accel 739..1104 mg, 1270 ms.
+120653 15:19:52.573 IMU kick (STOPPED): up 458 mm/s, down 0 mm/s, accel 760..1262 mg, 430 ms.
+120656 15:19:52.697 IMU kick (STOPPED): up 0 mm/s, down -525 mm/s, accel 827..1299 mg, 340 ms.
+120659 15:19:52.703 IMU kick (STOPPED): up 374 mm/s, down -8 mm/s, accel 888..1097 mg, 350 ms.
+120661 15:19:52.705 IMU kick (STOPPED): up 0 mm/s, down -218 mm/s, accel 930..1272 mg, 230 ms.
+120663 15:19:52.745 IMU kick (STOPPED): up 550 mm/s, down -2 mm/s, accel 786..1291 mg, 470 ms.
+120664 15:19:52.745 IMU kick (STOPPED): up 0 mm/s, down -555 mm/s, accel 686..1490 mg, 691 ms.
+120665 15:19:52.745 IMU kick (STOPPED): up 1124 mm/s, down 0 mm/s, accel 894..1479 mg, 641 ms.
+120666 15:19:52.745 IMU kick (STOPPED): up 0 mm/s, down -110 mm/s, accel 936..1079 mg, 120 ms.
+120667 15:19:52.812 IMU kick (STOPPED): up 492 mm/s, down -5 mm/s, accel 672..1432 mg, 1170 ms.
+120668 15:19:52.812 IMU kick (STOPPED): up 0 mm/s, down -322 mm/s, accel 897..1199 mg, 360 ms.
+120669 15:19:52.812 IMU kick (STOPPED): up 298 mm/s, down 0 mm/s, accel 962..1113 mg, 600 ms.
+120674 15:19:53.682 IMU kick (STOPPED): up 0 mm/s, down -106 mm/s, accel 992..1015 mg, 131 ms.
+120788 15:20:19.072 IMU kick (STOPPED): up 187 mm/s, down 0 mm/s, accel 876..1168 mg, 350 ms.
+120790 15:20:19.377 IMU kick (STOPPED): up 0 mm/s, down -340 mm/s, accel 873..1342 mg, 190 ms.
+120794 15:20:19.852 IMU kick (STOPPED): up 252 mm/s, down -6 mm/s, accel 968..1023 mg, 260 ms.
+120823 15:20:26.039 IMU kick (STOPPED): up 124 mm/s, down 0 mm/s, accel 880..1087 mg, 170 ms.
+120827 15:20:26.877 IMU kick (STOPPED): up 0 mm/s, down -607 mm/s, accel 799..1132 mg, 800 ms.
+120835 15:20:28.388 IMU kick (STOPPED): up 936 mm/s, down 0 mm/s, accel 858..2465 mg, 1289 ms.
+121006 15:21:07.162 IMU kick (STOPPED): up 0 mm/s, down -123 mm/s, accel 850..1147 mg, 200 ms.
+121008 15:21:07.437 IMU kick (STOPPED): up 14 mm/s, down -133 mm/s, accel 867..1119 mg, 200 ms.
+121013 15:21:08.972 IMU kick (STOPPED): up 577 mm/s, down 0 mm/s, accel 900..1288 mg, 699 ms.
+121045 15:21:15.728 IMU kick (STOPPED): up 120 mm/s, down 0 mm/s, accel 897..1136 mg, 389 ms.
+121049 15:21:16.131 IMU kick (STOPPED): up 177 mm/s, down 0 mm/s, accel 958..1278 mg, 890 ms.
+121063 15:21:44.455 === SuperCar AAI14: line + barcode + hump/wall ===
+121071 15:21:44.479 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+121073 15:21:44.492 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+121074 15:21:44.583 IMU calibration failed. Keep it still, level and try again.
+121081 15:21:44.599 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+121082 15:21:44.792 IMU calibration failed. Keep it still, level and try again.
+121344 15:22:31.907 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+121345 15:22:31.907 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+121525 15:22:56.931 Picked up (no floor under any IR sensor for 802 ms) -> stopped. End of the demo.
+124995 15:36:22.868 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+125352 15:37:35.549 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+125353 15:37:35.549 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+125591 15:38:19.569 Stalled on a slope for 410 ms -> HUMP, more power.
+125592 15:38:19.569   pitch -0.8 deg
+125593 15:38:19.569   roll -1.4 deg
+125594 15:38:19.578 State: FOLLOW_LINE -> HUMP
+125597 15:38:19.581 Hump: still stalled -> power 17.
+125598 15:38:19.662 Hump: over the top after 300 ms -> easing back to cruise.
+125599 15:38:19.669 Hump: stalled again -> climbing power.
+125601 15:38:19.770 Hump: still stalled -> power 22.
+125602 15:38:19.900 Hump: over the top after 818 ms -> easing back to cruise.
+125603 15:38:19.900 Hump cleared after 818 ms, 3 mm driven: peak height 3.1 mm, peak tilt 3.2 deg.
+125604 15:38:19.900 Highest this run: 3.1 mm (1 humps).
+125605 15:38:19.911 State: HUMP -> FOLLOW_LINE
+125606 15:38:19.911 inf2004/aai14/supercar/hump {"height_mm":3.1,"peak_tilt_x10":32,"run_height_mm":3.1,"run_peak_tilt_x10":32,"n":1,"t":1009426}
+125643 15:38:24.622 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+126779 15:43:36.313 === SuperCar AAI14: line + barcode + hump/wall ===
+126787 15:43:36.325 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+126789 15:43:36.325 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+126790 15:43:36.440 IMU calibration failed. Keep it still, level and try again.
+126797 15:43:36.454 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+126798 15:43:36.518 IMU calibration failed. Keep it still, level and try again.
+126831 15:43:47.246 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+127082 15:44:39.115 Raised 1.3 mm for 304 ms -> HUMP, climbing.
+127083 15:44:39.230   pitch 0.9 deg
+127084 15:44:39.230   roll 0.0 deg
+127085 15:44:39.230 State: FOLLOW_LINE -> HUMP
+127091 15:44:39.830 Hump: over the top after 613 ms -> easing back to cruise.
+127094 15:44:40.286 Hump cleared after 1100 ms, 56 mm driven: peak height 2.7 mm, peak tilt 3.3 deg.
+127095 15:44:40.288 Highest this run: 2.7 mm (1 humps).
+127096 15:44:40.290 State: HUMP -> FOLLOW_LINE
+127098 15:44:40.292 inf2004/aai14/supercar/hump {"height_mm":2.7,"peak_tilt_x10":33,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":1,"t":80415}
+127143 15:44:48.519 Raised 2.0 mm for 307 ms -> HUMP, climbing.
+127144 15:44:48.519   pitch -0.4 deg
+127145 15:44:48.519   roll -0.9 deg
+127146 15:44:48.519 State: FOLLOW_LINE -> HUMP
+127150 15:44:49.049 Hump cleared after 512 ms, 27 mm driven: peak height 1.3 mm, peak tilt 0.9 deg.
+127151 15:44:49.049 Highest this run: 2.7 mm (2 humps).
+127152 15:44:49.049 State: HUMP -> FOLLOW_LINE
+127154 15:44:49.061 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":9,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":2,"t":89225}
+127170 15:44:52.471 Raised 1.5 mm for 309 ms -> HUMP, climbing.
+127171 15:44:52.471   pitch 0.2 deg
+127172 15:44:52.471   roll 0.7 deg
+127173 15:44:52.471 State: FOLLOW_LINE -> HUMP
+127178 15:44:53.110 Hump: over the top after 660 ms -> easing back to cruise.
+127179 15:44:53.192 Hump cleared after 738 ms, 44 mm driven: peak height 1.5 mm, peak tilt 1.6 deg.
+127180 15:44:53.192 Highest this run: 2.7 mm (3 humps).
+127181 15:44:53.192 State: HUMP -> FOLLOW_LINE
+127183 15:44:53.192 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":16,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":3,"t":93305}
+127196 15:44:55.731 Raised 2.8 mm for 307 ms -> HUMP, climbing.
+127197 15:44:55.738   pitch -0.7 deg
+127198 15:44:55.740   roll 1.3 deg
+127199 15:44:55.740 State: FOLLOW_LINE -> HUMP
+127203 15:44:56.101 Hump cleared after 502 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+127204 15:44:56.117 Highest this run: 2.7 mm (4 humps).
+127205 15:44:56.118 State: HUMP -> FOLLOW_LINE
+127207 15:44:56.120 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":4,"t":96245}
+127238 15:45:02.874 Raised 2.4 mm for 300 ms -> HUMP, climbing.
+127239 15:45:02.938   pitch -1.6 deg
+127240 15:45:02.950   roll 0.2 deg
+127241 15:45:02.950 State: FOLLOW_LINE -> HUMP
+127243 15:45:03.129 Hump: over the top after 130 ms -> easing back to cruise.
+127247 15:45:03.482 Hump cleared after 511 ms, 12 mm driven: peak height 1.3 mm, peak tilt 1.6 deg.
+127248 15:45:03.482 Highest this run: 2.7 mm (5 humps).
+127249 15:45:03.482 State: HUMP -> FOLLOW_LINE
+127251 15:45:03.482 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":16,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":5,"t":103545}
+127257 15:45:04.666 Raised 1.3 mm for 302 ms -> HUMP, climbing.
+127258 15:45:04.756   pitch -0.8 deg
+127259 15:45:04.756   roll 0.6 deg
+127260 15:45:04.766 State: FOLLOW_LINE -> HUMP
+127264 15:45:05.173 Hump cleared after 508 ms, 15 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+127265 15:45:05.301 Highest this run: 2.7 mm (6 humps).
+127266 15:45:05.301 State: HUMP -> FOLLOW_LINE
+127268 15:45:05.312 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":2.7,"run_peak_tilt_x10":33,"n":6,"t":105365}
+127274 15:45:06.193 Stalled on a slope for 548 ms -> HUMP, more power.
+127275 15:45:06.290   pitch -1.0 deg
+127276 15:45:06.303   roll 1.4 deg
+127277 15:45:06.305 State: FOLLOW_LINE -> HUMP
+127287 15:45:07.911 Hump: over the top after 1762 ms -> easing back to cruise.
+127291 15:45:08.635 Hump: stalled again -> climbing power.
+127292 15:45:08.755 Hump: over the top after 2590 ms -> easing back to cruise.
+127296 15:45:09.330 Hump cleared after 3090 ms, 106 mm driven: peak height 5.5 mm, peak tilt 3.5 deg.
+127297 15:45:09.333 Highest this run: 5.5 mm (7 humps).
+127298 15:45:09.333 State: HUMP -> FOLLOW_LINE
+127300 15:45:09.338 inf2004/aai14/supercar/hump {"height_mm":5.5,"peak_tilt_x10":35,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":7,"t":109456}
+127316 15:45:12.755 Raised 1.3 mm for 310 ms -> HUMP, climbing.
+127317 15:45:12.755   pitch -0.1 deg
+127318 15:45:12.755   roll -0.6 deg
+127319 15:45:12.755 State: FOLLOW_LINE -> HUMP
+127323 15:45:13.116 Hump cleared after 510 ms, 29 mm driven: peak height 1.3 mm, peak tilt 0.9 deg.
+127324 15:45:13.122 Highest this run: 5.5 mm (8 humps).
+127325 15:45:13.122 State: HUMP -> FOLLOW_LINE
+127327 15:45:13.122 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":9,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":8,"t":113285}
+127337 15:45:15.246 Raised 1.2 mm for 300 ms -> HUMP, climbing.
+127338 15:45:15.641   pitch 0.8 deg
+127339 15:45:15.641   roll 0.1 deg
+127340 15:45:15.641 State: FOLLOW_LINE -> HUMP
+127344 15:45:15.770 Hump: over the top after 262 ms -> easing back to cruise.
+127347 15:45:15.850 Hump cleared after 572 ms, 31 mm driven: peak height 1.7 mm, peak tilt 2.0 deg.
+127348 15:45:15.850 Highest this run: 5.5 mm (9 humps).
+127349 15:45:15.850 State: HUMP -> FOLLOW_LINE
+127351 15:45:15.866 inf2004/aai14/supercar/hump {"height_mm":1.7,"peak_tilt_x10":20,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":9,"t":116004}
+127408 15:45:28.520 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+127409 15:45:29.833   pitch -0.5 deg
+127410 15:45:29.833   roll -0.5 deg
+127411 15:45:29.833 State: FOLLOW_LINE -> HUMP
+127415 15:45:29.936 Hump cleared after 510 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+127416 15:45:29.936 Highest this run: 5.5 mm (10 humps).
+127417 15:45:29.936 State: HUMP -> FOLLOW_LINE
+127419 15:45:29.949 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":10,"t":129205}
+127429 15:45:31.711 Raised 1.1 mm for 307 ms -> HUMP, climbing.
+127430 15:45:31.724   pitch 0.3 deg
+127431 15:45:31.724   roll -0.5 deg
+127432 15:45:31.724 State: FOLLOW_LINE -> HUMP
+127437 15:45:32.205 Hump: over the top after 692 ms -> easing back to cruise.
+127441 15:45:32.957 Hump cleared after 1463 ms, 75 mm driven: peak height 2.6 mm, peak tilt 2.5 deg.
+127442 15:45:32.959 Highest this run: 5.5 mm (11 humps).
+127443 15:45:32.959 State: HUMP -> FOLLOW_LINE
+127445 15:45:32.964 inf2004/aai14/supercar/hump {"height_mm":2.6,"peak_tilt_x10":25,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":11,"t":133035}
+127460 15:45:35.701 Raised 1.0 mm for 310 ms -> HUMP, climbing.
+127461 15:45:35.705   pitch -0.7 deg
+127462 15:45:35.852   roll -0.3 deg
+127463 15:45:35.854 State: FOLLOW_LINE -> HUMP
+127465 15:45:35.854 Hump: over the top after 390 ms -> easing back to cruise.
+127467 15:45:36.050 Hump cleared after 710 ms, 40 mm driven: peak height 1.0 mm, peak tilt 1.7 deg.
+127468 15:45:36.126 Highest this run: 5.5 mm (12 humps).
+127469 15:45:36.126 State: HUMP -> FOLLOW_LINE
+127471 15:45:36.140 inf2004/aai14/supercar/hump {"height_mm":1.0,"peak_tilt_x10":17,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":12,"t":136245}
+127558 15:45:50.762 BYPASS: encoder heading; track zero assumes initial -10 deg. No calibrated IMU yaw.
+127559 15:45:50.773 BYPASS controlled test: depth=150 mm; empty LEFT corridor assumed by operator, NOT verified by 
+127702 15:46:13.673 Raised 2.2 mm for 300 ms -> HUMP, climbing.
+127703 15:46:13.753   pitch 1.5 deg
+127704 15:46:13.769   roll -0.4 deg
+127705 15:46:13.769 State: FOLLOW_LINE -> HUMP
+127708 15:46:13.835 Hump: over the top after 200 ms -> easing back to cruise.
+127712 15:46:14.541 Hump cleared after 870 ms, 42 mm driven: peak height 2.2 mm, peak tilt 2.0 deg.
+127713 15:46:14.557 Highest this run: 5.5 mm (13 humps).
+127714 15:46:14.557 State: HUMP -> FOLLOW_LINE
+127716 15:46:14.557 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":20,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":13,"t":174711}
+127733 15:46:19.208 Raised 1.5 mm for 310 ms -> HUMP, climbing.
+127734 15:46:19.305   pitch 0.0 deg
+127735 15:46:19.309   roll -0.7 deg
+127736 15:46:19.309 State: FOLLOW_LINE -> HUMP
+127742 15:46:19.852 Hump: over the top after 571 ms -> easing back to cruise.
+127746 15:46:20.777 Hump cleared after 1378 ms, 69 mm driven: peak height 2.8 mm, peak tilt 2.4 deg.
+127747 15:46:20.781 Highest this run: 5.5 mm (14 humps).
+127748 15:46:20.781 State: HUMP -> FOLLOW_LINE
+127750 15:46:20.781 inf2004/aai14/supercar/hump {"height_mm":2.8,"peak_tilt_x10":24,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":14,"t":180781}
+127757 15:46:21.880 Raised 2.6 mm for 301 ms -> HUMP, climbing.
+127758 15:46:21.995   pitch 0.8 deg
+127759 15:46:21.995   roll -1.2 deg
+127760 15:46:22.000 State: FOLLOW_LINE -> HUMP
+127763 15:46:22.208 Hump: over the top after 310 ms -> easing back to cruise.
+127765 15:46:22.513 Hump cleared after 630 ms, 36 mm driven: peak height 2.2 mm, peak tilt 1.6 deg.
+127766 15:46:22.616 Highest this run: 5.5 mm (15 humps).
+127767 15:46:22.619 State: HUMP -> FOLLOW_LINE
+127769 15:46:22.619 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":16,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":15,"t":182712}
+127779 15:46:24.691 Raised 1.3 mm for 310 ms -> HUMP, climbing.
+127780 15:46:24.691   pitch 0.4 deg
+127781 15:46:24.691   roll -0.6 deg
+127782 15:46:24.691 State: FOLLOW_LINE -> HUMP
+127786 15:46:24.889 Hump: over the top after 391 ms -> easing back to cruise.
+127789 15:46:25.758 Hump cleared after 800 ms, 44 mm driven: peak height 1.6 mm, peak tilt 2.8 deg.
+127790 15:46:25.765 Highest this run: 5.5 mm (16 humps).
+127791 15:46:25.765 State: HUMP -> FOLLOW_LINE
+127793 15:46:25.771 inf2004/aai14/supercar/hump {"height_mm":1.6,"peak_tilt_x10":28,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":16,"t":185481}
+127843 15:46:31.554 Raised 1.1 mm for 310 ms -> HUMP, climbing.
+127844 15:46:31.634   pitch 0.2 deg
+127845 15:46:31.639   roll 0.5 deg
+127846 15:46:31.642 State: FOLLOW_LINE -> HUMP
+127851 15:46:32.315 Hump cleared after 648 ms, 41 mm driven: peak height 2.2 mm, peak tilt 1.8 deg.
+127852 15:46:32.315 Highest this run: 5.5 mm (17 humps).
+127853 15:46:32.315 State: HUMP -> FOLLOW_LINE
+127855 15:46:32.315 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":18,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":17,"t":192401}
+127866 15:46:34.510 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+127867 15:46:34.510   pitch 0.6 deg
+127868 15:46:34.526   roll -0.6 deg
+127869 15:46:34.526 State: FOLLOW_LINE -> HUMP
+127873 15:46:35.075 Hump cleared after 578 ms, 36 mm driven: peak height 1.5 mm, peak tilt 1.6 deg.
+127874 15:46:35.182 Highest this run: 5.5 mm (18 humps).
+127875 15:46:35.186 State: HUMP -> FOLLOW_LINE
+127877 15:46:35.190 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":16,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":18,"t":195252}
+127889 15:46:37.465 Raised 1.1 mm for 309 ms -> HUMP, climbing.
+127890 15:46:37.465   pitch 0.5 deg
+127891 15:46:37.465   roll -0.5 deg
+127892 15:46:37.465 State: FOLLOW_LINE -> HUMP
+127896 15:46:37.876 Hump cleared after 510 ms, 32 mm driven: peak height 1.1 mm, peak tilt 1.3 deg.
+127897 15:46:37.976 Highest this run: 5.5 mm (19 humps).
+127898 15:46:37.976 State: HUMP -> FOLLOW_LINE
+127900 15:46:37.980 inf2004/aai14/supercar/hump {"height_mm":1.1,"peak_tilt_x10":13,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":19,"t":198032}
+127907 15:46:39.196 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+127908 15:46:39.196   pitch 0.4 deg
+127909 15:46:39.212   roll -0.5 deg
+127910 15:46:39.212 State: FOLLOW_LINE -> HUMP
+127917 15:46:40.333 Hump: over the top after 1200 ms -> easing back to cruise.
+127920 15:46:40.805 Hump cleared after 1684 ms, 101 mm driven: peak height 1.9 mm, peak tilt 2.3 deg.
+127921 15:46:40.940 Highest this run: 5.5 mm (20 humps).
+127922 15:46:40.943 State: HUMP -> FOLLOW_LINE
+127924 15:46:40.948 inf2004/aai14/supercar/hump {"height_mm":1.9,"peak_tilt_x10":23,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":20,"t":201022}
+127959 15:46:47.780 Raised 1.6 mm for 301 ms -> HUMP, climbing.
+127960 15:46:48.012   pitch 1.1 deg
+127961 15:46:48.012   roll -0.3 deg
+127962 15:46:48.012 State: FOLLOW_LINE -> HUMP
+127964 15:46:48.012 Hump: over the top after 359 ms -> easing back to cruise.
+127974 15:46:49.744 Hump cleared after 2562 ms, 110 mm driven: peak height 2.2 mm, peak tilt 2.5 deg.
+127975 15:46:49.744 Highest this run: 5.5 mm (21 humps).
+127976 15:46:49.756 State: HUMP -> FOLLOW_LINE
+127978 15:46:49.760 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":25,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":21,"t":209901}
+127993 15:46:51.969 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+127994 15:46:52.077   pitch 0.3 deg
+127995 15:46:52.077   roll -0.6 deg
+127996 15:46:52.077 State: FOLLOW_LINE -> HUMP
+128007 15:46:52.697 Hump: over the top after 701 ms -> easing back to cruise.
+128009 15:46:53.069 Hump cleared after 1109 ms, 64 mm driven: peak height 3.1 mm, peak tilt 2.7 deg.
+128010 15:46:53.132 Highest this run: 5.5 mm (22 humps).
+128011 15:46:53.132 State: HUMP -> FOLLOW_LINE
+128013 15:46:53.132 inf2004/aai14/supercar/hump {"height_mm":3.1,"peak_tilt_x10":27,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":22,"t":213262}
+128036 15:46:57.028 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+128037 15:46:57.033   pitch -0.1 deg
+128038 15:46:57.033   roll -0.6 deg
+128039 15:46:57.033 State: FOLLOW_LINE -> HUMP
+128044 15:46:57.460 Hump cleared after 508 ms, 32 mm driven: peak height 1.1 mm, peak tilt 1.3 deg.
+128045 15:46:57.460 Highest this run: 5.5 mm (23 humps).
+128046 15:46:57.470 State: HUMP -> FOLLOW_LINE
+128048 15:46:57.470 inf2004/aai14/supercar/hump {"height_mm":1.1,"peak_tilt_x10":13,"run_height_mm":5.5,"run_peak_tilt_x10":35,"n":23,"t":217611}
+128087 15:47:08.972 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+128088 15:47:08.983   pitch -0.1 deg
+128089 15:47:08.983   roll -0.5 deg
+128090 15:47:08.983 State: FOLLOW_LINE -> HUMP
+128092 15:47:09.112 Hump cleared after 510 ms, 31 mm driven: peak height 1.1 mm, peak tilt 1.0 deg.
+128093 15:47:09.112 Highest this run: 5.5 mm (24 humps).
+128094 15:47:09.112 State: HUMP -> FOLLOW_LINE
+128100 15:47:09.357 Raised 4.4 mm for 301 ms -> HUMP, climbing.
+128101 15:47:09.473   pitch 0.0 deg
+128102 15:47:09.483   roll 2.0 deg
+128103 15:47:09.485 State: FOLLOW_LINE -> HUMP
+128111 15:47:10.726 Hump: over the top after 1372 ms -> easing back to cruise.
+128119 15:47:14.094 Hump cleared after 2831 ms, 130 mm driven: peak height 5.7 mm, peak tilt 3.8 deg.
+128120 15:47:14.094 Highest this run: 5.7 mm (25 humps).
+128121 15:47:14.094 State: HUMP -> FOLLOW_LINE
+128123 15:47:14.094 inf2004/aai14/supercar/hump {"height_mm":5.7,"peak_tilt_x10":38,"run_height_mm":5.7,"run_peak_tilt_x10":38,"n":25,"t":232391}
+128151 15:47:25.661 Raised 5.3 mm for 300 ms -> HUMP, climbing.
+128152 15:47:25.661   pitch -3.6 deg
+128153 15:47:25.661   roll -0.5 deg
+128154 15:47:25.661 State: FOLLOW_LINE -> HUMP
+128157 15:47:25.715 Hump: over the top after 620 ms -> easing back to cruise.
+128158 15:47:25.715 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+128159 15:47:25.715 State: HUMP -> PICKED_UP
+128240 15:47:43.162 Raised 1.3 mm for 301 ms -> HUMP, climbing.
+128241 15:47:43.162   pitch 0.9 deg
+128242 15:47:43.162   roll 0.0 deg
+128243 15:47:43.162 State: FOLLOW_LINE -> HUMP
+128248 15:47:43.632 Hump cleared after 509 ms, 26 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+128249 15:47:43.632 Highest this run: 1.3 mm (1 humps).
+128250 15:47:43.632 State: HUMP -> FOLLOW_LINE
+128252 15:47:43.648 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":1.3,"run_peak_tilt_x10":12,"n":1,"t":263741}
+128335 15:48:00.683 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+128336 15:48:00.743   pitch -0.9 deg
+128337 15:48:00.743   roll 0.1 deg
+128338 15:48:00.743 State: FOLLOW_LINE -> HUMP
+128342 15:48:01.294 Hump cleared after 501 ms, 29 mm driven: peak height 1.0 mm, peak tilt 0.9 deg.
+128343 15:48:01.313 Highest this run: 1.3 mm (2 humps).
+128344 15:48:01.313 State: HUMP -> FOLLOW_LINE
+128346 15:48:01.313 inf2004/aai14/supercar/hump {"height_mm":1.0,"peak_tilt_x10":9,"run_height_mm":1.3,"run_peak_tilt_x10":12,"n":2,"t":281381}
+128362 15:48:04.730 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+128363 15:48:04.730   pitch -0.9 deg
+128364 15:48:04.737   roll 0.3 deg
+128365 15:48:04.737 State: FOLLOW_LINE -> HUMP
+128369 15:48:05.091 Hump: over the top after 484 ms -> easing back to cruise.
+128370 15:48:05.093 Hump cleared after 501 ms, 28 mm driven: peak height 1.3 mm, peak tilt 1.5 deg.
+128371 15:48:05.095 Highest this run: 1.3 mm (3 humps).
+128372 15:48:05.095 State: HUMP -> FOLLOW_LINE
+128374 15:48:05.095 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":15,"run_height_mm":1.3,"run_peak_tilt_x10":15,"n":3,"t":285191}
+128391 15:48:08.506 Raised 1.5 mm for 308 ms -> HUMP, climbing.
+128392 15:48:08.568   pitch -1.0 deg
+128393 15:48:08.568   roll -0.3 deg
+128394 15:48:08.568 State: FOLLOW_LINE -> HUMP
+128399 15:48:09.179 Hump cleared after 683 ms, 36 mm driven: peak height 1.5 mm, peak tilt 1.6 deg.
+128400 15:48:09.244 Highest this run: 1.5 mm (4 humps).
+128401 15:48:09.244 State: HUMP -> FOLLOW_LINE
+128403 15:48:09.244 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":16,"run_height_mm":1.5,"run_peak_tilt_x10":16,"n":4,"t":289392}
+128410 15:48:10.748 Stalled on a slope for 810 ms -> HUMP, more power.
+128411 15:48:10.748   pitch -0.9 deg
+128412 15:48:10.756   roll 1.2 deg
+128413 15:48:10.756 State: FOLLOW_LINE -> HUMP
+128417 15:48:10.977 Hump cleared after 508 ms, 16 mm driven: peak height 2.2 mm, peak tilt 1.6 deg.
+128418 15:48:10.977 Highest this run: 2.2 mm (5 humps).
+128419 15:48:10.990 State: HUMP -> FOLLOW_LINE
+128421 15:48:10.992 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":16,"run_height_mm":2.2,"run_peak_tilt_x10":16,"n":5,"t":291121}
+128427 15:48:11.945 Stalled on a slope for 627 ms -> HUMP, more power.
+128428 15:48:12.041   pitch -0.7 deg
+128429 15:48:12.041   roll 1.8 deg
+128430 15:48:12.048 State: FOLLOW_LINE -> HUMP
+128441 15:48:13.937 Hump: over the top after 1912 ms -> easing back to cruise.
+128446 15:48:14.903 Hump cleared after 2932 ms, 121 mm driven: peak height 5.7 mm, peak tilt 3.2 deg.
+128447 15:48:14.903 Highest this run: 5.7 mm (6 humps).
+128448 15:48:14.903 State: HUMP -> FOLLOW_LINE
+128450 15:48:14.903 inf2004/aai14/supercar/hump {"height_mm":5.7,"peak_tilt_x10":32,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":6,"t":295057}
+128488 15:48:23.211 Raised 1.3 mm for 310 ms -> HUMP, climbing.
+128489 15:48:23.211   pitch 0.9 deg
+128490 15:48:23.211   roll 0.3 deg
+128491 15:48:23.211 State: FOLLOW_LINE -> HUMP
+128497 15:48:24.087 Hump: over the top after 950 ms -> easing back to cruise.
+128499 15:48:24.167 Hump cleared after 988 ms, 60 mm driven: peak height 1.3 mm, peak tilt 1.6 deg.
+128500 15:48:24.169 Highest this run: 5.7 mm (7 humps).
+128501 15:48:24.173 State: HUMP -> FOLLOW_LINE
+128503 15:48:24.177 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":16,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":7,"t":304311}
+128528 15:48:29.815 Raised 1.8 mm for 300 ms -> HUMP, climbing.
+128529 15:48:29.925   pitch 1.2 deg
+128530 15:48:29.925   roll 0.4 deg
+128531 15:48:29.925 State: FOLLOW_LINE -> HUMP
+128535 15:48:30.316 Hump cleared after 508 ms, 27 mm driven: peak height 1.2 mm, peak tilt 1.3 deg.
+128536 15:48:30.377 Highest this run: 5.7 mm (8 humps).
+128537 15:48:30.387 State: HUMP -> FOLLOW_LINE
+128539 15:48:30.387 inf2004/aai14/supercar/hump {"height_mm":1.2,"peak_tilt_x10":13,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":8,"t":310522}
+128585 15:48:40.220 Raised 2.4 mm for 300 ms -> HUMP, climbing.
+128586 15:48:40.220   pitch -0.2 deg
+128587 15:48:40.220   roll -1.1 deg
+128588 15:48:40.220 State: FOLLOW_LINE -> HUMP
+128592 15:48:40.682 Hump cleared after 501 ms, 29 mm driven: peak height 2.0 mm, peak tilt 0.9 deg.
+128593 15:48:40.682 Highest this run: 5.7 mm (9 humps).
+128594 15:48:40.689 State: HUMP -> FOLLOW_LINE
+128596 15:48:40.689 inf2004/aai14/supercar/hump {"height_mm":2.0,"peak_tilt_x10":9,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":9,"t":320832}
+128623 15:48:47.957 Raised 2.7 mm for 308 ms -> HUMP, climbing.
+128624 15:48:47.961   pitch -1.8 deg
+128625 15:48:47.963   roll 0.0 deg
+128626 15:48:47.963 State: FOLLOW_LINE -> HUMP
+128628 15:48:48.019 Hump cleared after 552 ms, 30 mm driven: peak height 2.1 mm, peak tilt 1.7 deg.
+128629 15:48:48.031 Highest this run: 5.7 mm (10 humps).
+128630 15:48:48.031 State: HUMP -> FOLLOW_LINE
+128661 15:48:54.639 Raised 2.6 mm for 310 ms -> HUMP, climbing.
+128662 15:48:54.718   pitch 0.0 deg
+128663 15:48:54.718   roll -1.2 deg
+128664 15:48:54.722 State: FOLLOW_LINE -> HUMP
+128668 15:48:55.108 Hump: over the top after 320 ms -> easing back to cruise.
+128670 15:48:55.367 Hump cleared after 680 ms, 34 mm driven: peak height 1.7 mm, peak tilt 2.4 deg.
+128671 15:48:55.369 Highest this run: 5.7 mm (11 humps).
+128672 15:48:55.373 State: HUMP -> FOLLOW_LINE
+128674 15:48:55.377 inf2004/aai14/supercar/hump {"height_mm":1.7,"peak_tilt_x10":24,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":11,"t":335471}
+128732 15:49:05.435 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+128733 15:49:05.437   pitch -0.8 deg
+128734 15:49:05.437   roll 0.6 deg
+128735 15:49:05.442 State: FOLLOW_LINE -> HUMP
+128740 15:49:05.807 Hump cleared after 501 ms, 30 mm driven: peak height 1.2 mm, peak tilt 1.2 deg.
+128741 15:49:05.807 Highest this run: 5.7 mm (12 humps).
+128742 15:49:05.812 State: HUMP -> FOLLOW_LINE
+128744 15:49:05.814 inf2004/aai14/supercar/hump {"height_mm":1.2,"peak_tilt_x10":12,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":12,"t":345902}
+128751 15:49:07.612 Raised 2.6 mm for 308 ms -> HUMP, climbing.
+128752 15:49:07.612   pitch 0.5 deg
+128753 15:49:07.620   roll -1.2 deg
+128754 15:49:07.622 State: FOLLOW_LINE -> HUMP
+128759 15:49:07.782 Hump cleared after 505 ms, 29 mm driven: peak height 2.0 mm, peak tilt 1.6 deg.
+128760 15:49:07.792 Highest this run: 5.7 mm (13 humps).
+128761 15:49:07.792 State: HUMP -> FOLLOW_LINE
+128763 15:49:07.796 inf2004/aai14/supercar/hump {"height_mm":2.0,"peak_tilt_x10":16,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":13,"t":347912}
+128769 15:49:09.059 Raised 2.6 mm for 301 ms -> HUMP, climbing.
+128770 15:49:09.062   pitch 0.2 deg
+128771 15:49:09.062   roll -1.2 deg
+128772 15:49:09.062 State: FOLLOW_LINE -> HUMP
+128777 15:49:09.636 Hump cleared after 508 ms, 29 mm driven: peak height 1.5 mm, peak tilt 1.5 deg.
+128778 15:49:09.636 Highest this run: 5.7 mm (14 humps).
+128779 15:49:09.636 State: HUMP -> FOLLOW_LINE
+128781 15:49:09.642 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":15,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":14,"t":349731}
+128799 15:49:13.482 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+128800 15:49:13.482   pitch 0.2 deg
+128801 15:49:13.491   roll -0.6 deg
+128802 15:49:13.492 State: FOLLOW_LINE -> HUMP
+128805 15:49:13.693 Hump: over the top after 240 ms -> easing back to cruise.
+128808 15:49:14.056 Hump cleared after 598 ms, 26 mm driven: peak height 1.3 mm, peak tilt 2.4 deg.
+128809 15:49:14.056 Highest this run: 5.7 mm (15 humps).
+128810 15:49:14.056 State: HUMP -> FOLLOW_LINE
+128812 15:49:14.062 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":24,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":15,"t":354251}
+128838 15:49:18.917 Raised 1.5 mm for 302 ms -> HUMP, climbing.
+128839 15:49:19.014   pitch 0.0 deg
+128840 15:49:19.014   roll 0.7 deg
+128841 15:49:19.014 State: FOLLOW_LINE -> HUMP
+128844 15:49:19.182 Hump cleared after 506 ms, 27 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+128845 15:49:19.187 Highest this run: 5.7 mm (16 humps).
+128846 15:49:19.187 State: HUMP -> FOLLOW_LINE
+128848 15:49:19.192 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":16,"t":359361}
+128855 15:49:20.482 Raised 2.2 mm for 309 ms -> HUMP, climbing.
+128856 15:49:20.582   pitch 1.5 deg
+128857 15:49:20.589   roll 0.3 deg
+128858 15:49:20.594 State: FOLLOW_LINE -> HUMP
+128865 15:49:21.475 Hump cleared after 938 ms, 56 mm driven: peak height 1.6 mm, peak tilt 1.9 deg.
+128866 15:49:21.482 Highest this run: 5.7 mm (17 humps).
+128867 15:49:21.484 State: HUMP -> FOLLOW_LINE
+128869 15:49:21.486 inf2004/aai14/supercar/hump {"height_mm":1.6,"peak_tilt_x10":19,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":17,"t":361611}
+128901 15:49:27.640 Raised 1.6 mm for 300 ms -> HUMP, climbing.
+128902 15:49:27.744   pitch 1.1 deg
+128903 15:49:27.746   roll -0.2 deg
+128904 15:49:27.748 State: FOLLOW_LINE -> HUMP
+128915 15:49:28.235 Hump: over the top after 580 ms -> easing back to cruise.
+128917 15:49:28.442 Hump cleared after 809 ms, 40 mm driven: peak height 1.8 mm, peak tilt 2.0 deg.
+128918 15:49:28.505 Highest this run: 5.7 mm (18 humps).
+128919 15:49:28.505 State: HUMP -> FOLLOW_LINE
+128921 15:49:28.510 inf2004/aai14/supercar/hump {"height_mm":1.8,"peak_tilt_x10":20,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":18,"t":368642}
+128978 15:49:40.948 Raised 1.2 mm for 311 ms -> HUMP, climbing.
+128979 15:49:40.959   pitch -0.8 deg
+128980 15:49:40.962   roll -0.4 deg
+128981 15:49:40.964 State: FOLLOW_LINE -> HUMP
+128986 15:49:41.345 Hump cleared after 510 ms, 30 mm driven: peak height 1.0 mm, peak tilt 1.2 deg.
+128987 15:49:41.345 Highest this run: 5.7 mm (19 humps).
+128988 15:49:41.345 State: HUMP -> FOLLOW_LINE
+128990 15:49:41.345 inf2004/aai14/supercar/hump {"height_mm":1.0,"peak_tilt_x10":12,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":19,"t":381521}
+129007 15:49:45.251 Stalled on a slope for 221 ms -> HUMP, more power.
+129008 15:49:45.406   pitch -1.4 deg
+129009 15:49:45.409   roll 0.4 deg
+129010 15:49:45.413 State: FOLLOW_LINE -> HUMP
+129014 15:49:45.466 Hump: still stalled -> power 17.
+129015 15:49:45.466 Hump: over the top after 220 ms -> easing back to cruise.
+129017 15:49:45.765 Hump cleared after 509 ms, 14 mm driven: peak height 1.2 mm, peak tilt 1.5 deg.
+129018 15:49:45.850 Highest this run: 5.7 mm (20 humps).
+129019 15:49:45.850 State: HUMP -> FOLLOW_LINE
+129021 15:49:45.850 inf2004/aai14/supercar/hump {"height_mm":1.2,"peak_tilt_x10":15,"run_height_mm":5.7,"run_peak_tilt_x10":32,"n":20,"t":385964}
+129028 15:49:48.536 Raised 2.4 mm for 311 ms -> HUMP, climbing.
+129029 15:49:48.536   pitch -0.7 deg
+129030 15:49:48.536   roll 1.1 deg
+129031 15:49:48.550 State: FOLLOW_LINE -> HUMP
+129033 15:49:48.552 Hump: still stalled -> power 17.
+129036 15:49:48.616 Hump: over the top after 1520 ms -> easing back to cruise.
+129041 15:49:49.733 Hump cleared after 2250 ms, 152 mm driven: peak height 6.3 mm, peak tilt 3.7 deg.
+129042 15:49:49.736 Highest this run: 6.3 mm (21 humps).
+129043 15:49:49.736 State: HUMP -> FOLLOW_LINE
+129045 15:49:49.736 inf2004/aai14/supercar/hump {"height_mm":6.3,"peak_tilt_x10":37,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":21,"t":389521}
+129077 15:49:56.868 Raised 2.0 mm for 300 ms -> HUMP, climbing.
+129078 15:49:56.973   pitch 0.0 deg
+129079 15:49:56.977   roll 0.9 deg
+129080 15:49:56.979 State: FOLLOW_LINE -> HUMP
+129085 15:49:58.775 Hump: over the top after 530 ms -> easing back to cruise.
+129088 15:49:58.775 Hump cleared after 888 ms, 50 mm driven: peak height 2.0 mm, peak tilt 1.9 deg.
+129089 15:49:58.775 Highest this run: 6.3 mm (22 humps).
+129090 15:49:58.775 State: HUMP -> FOLLOW_LINE
+129146 15:50:12.064 Raised 1.5 mm for 308 ms -> HUMP, climbing.
+129147 15:50:12.160   pitch 1.0 deg
+129148 15:50:12.167   roll 0.0 deg
+129149 15:50:12.167 State: FOLLOW_LINE -> HUMP
+129154 15:50:12.337 Hump cleared after 512 ms, 29 mm driven: peak height 1.5 mm, peak tilt 1.3 deg.
+129155 15:50:12.355 Highest this run: 6.3 mm (23 humps).
+129156 15:50:12.355 State: HUMP -> FOLLOW_LINE
+129189 15:50:19.286 Raised 1.1 mm for 305 ms -> HUMP, climbing.
+129190 15:50:19.370   pitch 0.0 deg
+129191 15:50:19.374   roll 0.5 deg
+129192 15:50:19.376 State: FOLLOW_LINE -> HUMP
+129197 15:50:19.799 Hump cleared after 502 ms, 29 mm driven: peak height 1.1 mm, peak tilt 1.4 deg.
+129198 15:50:19.896 Highest this run: 6.3 mm (24 humps).
+129199 15:50:19.896 State: HUMP -> FOLLOW_LINE
+129201 15:50:19.896 inf2004/aai14/supercar/hump {"height_mm":1.1,"peak_tilt_x10":14,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":24,"t":419963}
+129218 15:50:26.773 Raised 2.6 mm for 311 ms -> HUMP, climbing.
+129219 15:50:26.914   pitch 0.3 deg
+129220 15:50:26.917   roll -1.2 deg
+129221 15:50:26.917 State: FOLLOW_LINE -> HUMP
+129223 15:50:26.917 Hump: over the top after 719 ms -> easing back to cruise.
+129224 15:50:26.917 Hump cleared after 919 ms, 53 mm driven: peak height 1.5 mm, peak tilt 1.9 deg.
+129225 15:50:26.917 Highest this run: 6.3 mm (25 humps).
+129226 15:50:26.917 State: HUMP -> FOLLOW_LINE
+129240 15:50:29.503 Raised 1.5 mm for 309 ms -> HUMP, climbing.
+129241 15:50:29.507   pitch 0.0 deg
+129242 15:50:29.507   roll -0.7 deg
+129243 15:50:29.507 State: FOLLOW_LINE -> HUMP
+129247 15:50:30.037 Hump: over the top after 581 ms -> easing back to cruise.
+129249 15:50:30.347 Hump cleared after 810 ms, 47 mm driven: peak height 1.5 mm, peak tilt 1.9 deg.
+129250 15:50:30.357 Highest this run: 6.3 mm (26 humps).
+129251 15:50:30.357 State: HUMP -> FOLLOW_LINE
+129253 15:50:30.363 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":19,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":26,"t":430451}
+129289 15:50:38.015 Raised 1.9 mm for 312 ms -> HUMP, climbing.
+129290 15:50:38.028   pitch -1.3 deg
+129291 15:50:38.029   roll -0.1 deg
+129292 15:50:38.029 State: FOLLOW_LINE -> HUMP
+129296 15:50:38.692 Hump cleared after 506 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.5 deg.
+129297 15:50:38.692 Highest this run: 6.3 mm (27 humps).
+129298 15:50:38.703 State: HUMP -> FOLLOW_LINE
+129300 15:50:38.703 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":15,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":27,"t":438691}
+129309 15:50:40.266 Raised 1.5 mm for 310 ms -> HUMP, climbing.
+129310 15:50:40.282   pitch -0.6 deg
+129311 15:50:40.282   roll -0.7 deg
+129312 15:50:40.284 State: FOLLOW_LINE -> HUMP
+129316 15:50:40.784 Hump cleared after 510 ms, 28 mm driven: peak height 1.5 mm, peak tilt 1.5 deg.
+129317 15:50:40.791 Highest this run: 6.3 mm (28 humps).
+129318 15:50:40.791 State: HUMP -> FOLLOW_LINE
+129320 15:50:40.791 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":15,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":28,"t":440887}
+129332 15:50:43.298 Raised 2.0 mm for 309 ms -> HUMP, climbing.
+129333 15:50:43.298   pitch 0.1 deg
+129334 15:50:43.298   roll -0.9 deg
+129335 15:50:43.298 State: FOLLOW_LINE -> HUMP
+129340 15:50:43.789 Hump cleared after 510 ms, 30 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+129341 15:50:43.789 Highest this run: 6.3 mm (29 humps).
+129342 15:50:43.789 State: HUMP -> FOLLOW_LINE
+129344 15:50:43.789 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":29,"t":443961}
+129353 15:50:45.543 Raised 2.4 mm for 301 ms -> HUMP, climbing.
+129354 15:50:45.543   pitch 0.2 deg
+129355 15:50:45.543   roll -1.1 deg
+129356 15:50:45.543 State: FOLLOW_LINE -> HUMP
+129359 15:50:45.938 Hump: over the top after 479 ms -> easing back to cruise.
+129362 15:50:46.259 Hump cleared after 750 ms, 39 mm driven: peak height 1.6 mm, peak tilt 2.1 deg.
+129363 15:50:46.259 Highest this run: 6.3 mm (30 humps).
+129364 15:50:46.259 State: HUMP -> FOLLOW_LINE
+129366 15:50:46.259 inf2004/aai14/supercar/hump {"height_mm":1.6,"peak_tilt_x10":21,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":30,"t":446401}
+129374 15:50:47.837 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+129375 15:50:47.936   pitch 0.3 deg
+129376 15:50:47.942   roll 0.6 deg
+129377 15:50:47.942 State: FOLLOW_LINE -> HUMP
+129381 15:50:48.369 Hump: over the top after 371 ms -> easing back to cruise.
+129384 15:50:48.817 Hump cleared after 863 ms, 41 mm driven: peak height 1.2 mm, peak tilt 2.2 deg.
+129385 15:50:48.817 Highest this run: 6.3 mm (31 humps).
+129386 15:50:48.817 State: HUMP -> FOLLOW_LINE
+129388 15:50:48.817 inf2004/aai14/supercar/hump {"height_mm":1.2,"peak_tilt_x10":22,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":31,"t":448904}
+129415 15:50:54.620 Raised 1.0 mm for 308 ms -> HUMP, climbing.
+129416 15:50:54.720   pitch 0.7 deg
+129417 15:50:54.728   roll -0.3 deg
+129418 15:50:54.732 State: FOLLOW_LINE -> HUMP
+129422 15:50:55.125 Hump cleared after 501 ms, 26 mm driven: peak height 1.0 mm, peak tilt 1.6 deg.
+129423 15:50:55.301 Highest this run: 6.3 mm (32 humps).
+129424 15:50:55.303 State: HUMP -> FOLLOW_LINE
+129426 15:50:55.303 inf2004/aai14/supercar/hump {"height_mm":1.0,"peak_tilt_x10":16,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":32,"t":455302}
+129448 15:50:59.429 Raised 2.4 mm for 310 ms -> HUMP, climbing.
+129449 15:50:59.541   pitch 1.6 deg
+129450 15:50:59.541   roll 0.0 deg
+129451 15:50:59.541 State: FOLLOW_LINE -> HUMP
+129460 15:50:59.775 Hump: over the top after 321 ms -> easing back to cruise.
+129462 15:51:00.109 Hump cleared after 610 ms, 30 mm driven: peak height 2.4 mm, peak tilt 2.0 deg.
+129463 15:51:00.109 Highest this run: 6.3 mm (33 humps).
+129464 15:51:00.123 State: HUMP -> FOLLOW_LINE
+129466 15:51:00.125 inf2004/aai14/supercar/hump {"height_mm":2.4,"peak_tilt_x10":20,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":33,"t":460232}
+129493 15:51:04.240 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+129494 15:51:04.320   pitch 0.8 deg
+129495 15:51:04.322   roll -0.6 deg
+129496 15:51:04.322 State: FOLLOW_LINE -> HUMP
+129502 15:51:05.162 Hump: over the top after 991 ms -> easing back to cruise.
+129506 15:51:05.579 Hump cleared after 1399 ms, 79 mm driven: peak height 2.5 mm, peak tilt 2.4 deg.
+129507 15:51:05.590 Highest this run: 6.3 mm (34 humps).
+129508 15:51:05.592 State: HUMP -> FOLLOW_LINE
+129510 15:51:05.594 inf2004/aai14/supercar/hump {"height_mm":2.5,"peak_tilt_x10":24,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":34,"t":465781}
+129537 15:51:11.589 Raised 1.3 mm for 308 ms -> HUMP, climbing.
+129538 15:51:11.597   pitch 0.9 deg
+129539 15:51:11.597   roll 0.5 deg
+129540 15:51:11.603 State: FOLLOW_LINE -> HUMP
+129545 15:51:12.244 Hump: over the top after 782 ms -> easing back to cruise.
+129548 15:51:12.599 Hump cleared after 1133 ms, 65 mm driven: peak height 1.3 mm, peak tilt 2.2 deg.
+129549 15:51:12.599 Highest this run: 6.3 mm (35 humps).
+129550 15:51:12.618 State: HUMP -> FOLLOW_LINE
+129552 15:51:12.622 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":22,"run_height_mm":6.3,"run_peak_tilt_x10":37,"n":35,"t":472731}
+129560 15:51:15.066 Raised 6.3 mm for 310 ms -> HUMP, climbing.
+129561 15:51:15.066   pitch -1.8 deg
+129562 15:51:15.082   roll -2.9 deg
+129563 15:51:15.199 State: FOLLOW_LINE -> HUMP
+129565 15:51:15.199 Hump: over the top after 140 ms -> easing back to cruise.
+129566 15:51:15.199 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+129567 15:51:15.206 State: HUMP -> PICKED_UP
+129735 15:51:53.332 Raised 1.1 mm for 310 ms -> HUMP, climbing.
+129736 15:51:53.332   pitch 0.1 deg
+129737 15:51:53.335   roll 0.5 deg
+129739 15:51:53.405 State: FOLLOW_LINE -> HUMP
+129741 15:51:53.405 Hump cleared after 509 ms, 25 mm driven: peak height 1.1 mm, peak tilt 1.5 deg.
+129742 15:51:53.405 Highest this run: 1.1 mm (1 humps).
+129743 15:51:53.412 inf2004/aai14/supercar/hump {"height_mm":1.1,"peak_tilt_x10":15,"run_height_mm":1.1,"run_peak_tilt_x10":15,"n":1,"t":513513}
+129744 15:51:53.412 State: HUMP -> FOLLOW_LINE
+129752 15:51:55.066 Raised 1.1 mm for 307 ms -> HUMP, climbing.
+129753 15:51:55.292   pitch 0.4 deg
+129754 15:51:55.292   roll -0.5 deg
+129755 15:51:55.292 State: FOLLOW_LINE -> HUMP
+129760 15:51:56.876 Hump cleared after 502 ms, 26 mm driven: peak height 1.2 mm, peak tilt 1.4 deg.
+129761 15:51:56.956 Highest this run: 1.2 mm (2 humps).
+129762 15:51:56.960 State: HUMP -> FOLLOW_LINE
+129764 15:51:56.960 inf2004/aai14/supercar/hump {"height_mm":1.2,"peak_tilt_x10":14,"run_height_mm":1.2,"run_peak_tilt_x10":15,"n":2,"t":515772}
+129769 15:51:57.267 Raised 2.0 mm for 300 ms -> HUMP, climbing.
+129770 15:51:57.271   pitch -0.4 deg
+129771 15:51:57.271   roll -0.9 deg
+129772 15:51:57.273 State: FOLLOW_LINE -> HUMP
+129782 15:51:57.764 Hump cleared after 510 ms, 25 mm driven: peak height 1.7 mm, peak tilt 1.1 deg.
+129783 15:51:57.764 Highest this run: 1.7 mm (3 humps).
+129784 15:51:57.764 State: HUMP -> FOLLOW_LINE
+129786 15:51:57.764 inf2004/aai14/supercar/hump {"height_mm":1.7,"peak_tilt_x10":11,"run_height_mm":1.7,"run_peak_tilt_x10":15,"n":3,"t":517851}
+129804 15:52:00.510 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+129805 15:52:00.566   pitch 0.2 deg
+129806 15:52:00.574   roll -0.6 deg
+129807 15:52:00.576 State: FOLLOW_LINE -> HUMP
+129816 15:52:01.015 Hump cleared after 511 ms, 25 mm driven: peak height 1.1 mm, peak tilt 1.1 deg.
+129817 15:52:01.077 Highest this run: 1.7 mm (4 humps).
+129818 15:52:01.077 State: HUMP -> FOLLOW_LINE
+129820 15:52:01.077 inf2004/aai14/supercar/hump {"height_mm":1.1,"peak_tilt_x10":11,"run_height_mm":1.7,"run_peak_tilt_x10":15,"n":4,"t":521222}
+129837 15:52:04.634 Raised 1.3 mm for 302 ms -> HUMP, climbing.
+129838 15:52:04.704   pitch -0.2 deg
+129839 15:52:04.704   roll -0.6 deg
+129840 15:52:04.704 State: FOLLOW_LINE -> HUMP
+129844 15:52:05.148 Hump: over the top after 488 ms -> easing back to cruise.
+129848 15:52:05.574 Hump cleared after 876 ms, 45 mm driven: peak height 1.3 mm, peak tilt 1.7 deg.
+129849 15:52:05.574 Highest this run: 1.7 mm (5 humps).
+129850 15:52:05.574 State: HUMP -> FOLLOW_LINE
+129852 15:52:05.574 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":17,"run_height_mm":1.7,"run_peak_tilt_x10":17,"n":5,"t":525721}
+129883 15:52:13.978 Raised 1.0 mm for 308 ms -> HUMP, climbing.
+129884 15:52:13.978   pitch -0.7 deg
+129885 15:52:13.978   roll 0.4 deg
+129886 15:52:13.994 State: FOLLOW_LINE -> HUMP
+129890 15:52:14.144 Hump cleared after 509 ms, 28 mm driven: peak height 1.0 mm, peak tilt 1.1 deg.
+129891 15:52:14.144 Highest this run: 1.7 mm (6 humps).
+129892 15:52:14.144 State: HUMP -> FOLLOW_LINE
+129909 15:52:17.397 Raised 1.6 mm for 309 ms -> HUMP, climbing.
+129910 15:52:17.408   pitch -1.1 deg
+129911 15:52:17.409   roll 0.0 deg
+129912 15:52:17.409 State: FOLLOW_LINE -> HUMP
+129916 15:52:17.894 Hump cleared after 512 ms, 20 mm driven: peak height 1.3 mm, peak tilt 1.4 deg.
+129917 15:52:18.005 Highest this run: 1.7 mm (7 humps).
+129918 15:52:18.005 State: HUMP -> FOLLOW_LINE
+129920 15:52:18.023 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":14,"run_height_mm":1.7,"run_peak_tilt_x10":17,"n":7,"t":538092}
+129926 15:52:19.098 Stalled on a slope for 690 ms -> HUMP, more power.
+129927 15:52:19.196   pitch -0.9 deg
+129928 15:52:19.196   roll 1.2 deg
+129929 15:52:19.196 State: FOLLOW_LINE -> HUMP
+129932 15:52:19.338 Hump: still stalled -> power 17.
+129938 15:52:20.322 Hump: over the top after 1210 ms -> easing back to cruise.
+129945 15:52:21.572 Hump cleared after 2401 ms, 131 mm driven: peak height 7.2 mm, peak tilt 3.9 deg.
+129946 15:52:21.572 Highest this run: 7.2 mm (8 humps).
+129947 15:52:21.575 State: HUMP -> FOLLOW_LINE
+129949 15:52:21.577 inf2004/aai14/supercar/hump {"height_mm":7.2,"peak_tilt_x10":39,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":8,"t":541691}
+130013 15:52:36.617 Raised 1.6 mm for 300 ms -> HUMP, climbing.
+130014 15:52:36.617   pitch 1.1 deg
+130015 15:52:36.617   roll 0.3 deg
+130016 15:52:36.621 State: FOLLOW_LINE -> HUMP
+130020 15:52:37.124 Hump cleared after 508 ms, 26 mm driven: peak height 1.5 mm, peak tilt 1.4 deg.
+130021 15:52:37.128 Highest this run: 7.2 mm (9 humps).
+130022 15:52:37.128 State: HUMP -> FOLLOW_LINE
+130024 15:52:37.130 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":14,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":9,"t":557252}
+130051 15:52:42.916 Raised 1.6 mm for 310 ms -> HUMP, climbing.
+130052 15:52:43.031   pitch -1.1 deg
+130053 15:52:43.031   roll 0.5 deg
+130054 15:52:43.031 State: FOLLOW_LINE -> HUMP
+130057 15:52:43.258 Hump: over the top after 330 ms -> easing back to cruise.
+130061 15:52:43.676 Hump cleared after 709 ms, 36 mm driven: peak height 2.2 mm, peak tilt 2.9 deg.
+130062 15:52:43.676 Highest this run: 7.2 mm (10 humps).
+130063 15:52:43.676 State: HUMP -> FOLLOW_LINE
+130065 15:52:43.692 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":29,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":10,"t":563841}
+130077 15:52:46.302 Raised 1.5 mm for 307 ms -> HUMP, climbing.
+130078 15:52:46.370   pitch 1.0 deg
+130079 15:52:46.383   roll -0.1 deg
+130080 15:52:46.383 State: FOLLOW_LINE -> HUMP
+130083 15:52:46.545 Hump: over the top after 292 ms -> easing back to cruise.
+130086 15:52:46.937 Hump cleared after 651 ms, 31 mm driven: peak height 1.8 mm, peak tilt 2.0 deg.
+130087 15:52:46.937 Highest this run: 7.2 mm (11 humps).
+130088 15:52:46.937 State: HUMP -> FOLLOW_LINE
+130090 15:52:46.955 inf2004/aai14/supercar/hump {"height_mm":1.8,"peak_tilt_x10":20,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":11,"t":567111}
+130131 15:52:55.754 Raised 1.7 mm for 300 ms -> HUMP, climbing.
+130132 15:52:55.832   pitch -0.1 deg
+130133 15:52:55.832   roll 0.8 deg
+130134 15:52:55.841 State: FOLLOW_LINE -> HUMP
+130138 15:52:56.266 Hump cleared after 501 ms, 26 mm driven: peak height 2.0 mm, peak tilt 1.5 deg.
+130139 15:52:56.366 Highest this run: 7.2 mm (12 humps).
+130140 15:52:56.369 State: HUMP -> FOLLOW_LINE
+130142 15:52:56.371 inf2004/aai14/supercar/hump {"height_mm":2.0,"peak_tilt_x10":15,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":12,"t":576462}
+130196 15:53:06.628 Raised 1.6 mm for 300 ms -> HUMP, climbing.
+130197 15:53:06.644   pitch -1.1 deg
+130198 15:53:06.644   roll 0.4 deg
+130199 15:53:06.644 State: FOLLOW_LINE -> HUMP
+130205 15:53:07.117 Hump cleared after 508 ms, 26 mm driven: peak height 1.3 mm, peak tilt 1.3 deg.
+130206 15:53:07.298 Highest this run: 7.2 mm (13 humps).
+130207 15:53:07.304 State: HUMP -> FOLLOW_LINE
+130209 15:53:07.304 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":13,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":13,"t":587332}
+130244 15:53:14.031 Raised 1.5 mm for 306 ms -> HUMP, climbing.
+130245 15:53:14.033   pitch -1.0 deg
+130246 15:53:14.035   roll 0.6 deg
+130247 15:53:14.037 State: FOLLOW_LINE -> HUMP
+130253 15:53:15.009 Hump: over the top after 990 ms -> easing back to cruise.
+130256 15:53:15.467 Hump cleared after 1398 ms, 79 mm driven: peak height 3.1 mm, peak tilt 2.2 deg.
+130257 15:53:15.467 Highest this run: 7.2 mm (14 humps).
+130258 15:53:15.483 State: HUMP -> FOLLOW_LINE
+130260 15:53:15.483 inf2004/aai14/supercar/hump {"height_mm":3.1,"peak_tilt_x10":22,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":14,"t":595611}
+130280 15:53:21.669 Raised 3.3 mm for 309 ms -> HUMP, climbing.
+130281 15:53:21.671   pitch -2.2 deg
+130282 15:53:21.671   roll -0.6 deg
+130283 15:53:21.671 State: FOLLOW_LINE -> HUMP
+130286 15:53:21.762 Hump: over the top after 949 ms -> easing back to cruise.
+130287 15:53:21.770 Hump cleared after 1138 ms, 69 mm driven: peak height 2.4 mm, peak tilt 1.7 deg.
+130288 15:53:21.770 Highest this run: 7.2 mm (15 humps).
+130289 15:53:21.770 State: HUMP -> FOLLOW_LINE
+130291 15:53:21.776 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+130292 15:53:21.778   pitch 0.7 deg
+130293 15:53:21.780   roll -0.6 deg
+130294 15:53:21.874 State: FOLLOW_LINE -> HUMP
+130299 15:53:22.526 Hump: over the top after 892 ms -> easing back to cruise.
+130300 15:53:22.619 Hump cleared after 892 ms, 50 mm driven: peak height 2.0 mm, peak tilt 1.7 deg.
+130301 15:53:22.627 Highest this run: 7.2 mm (16 humps).
+130302 15:53:22.627 State: HUMP -> FOLLOW_LINE
+130303 15:53:22.627 inf2004/aai14/supercar/hump {"height_mm":2.0,"peak_tilt_x10":17,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":16,"t":602742}
+130333 15:53:26.777 Raised 2.4 mm for 310 ms -> HUMP, climbing.
+130334 15:53:26.858   pitch 0.9 deg
+130335 15:53:26.858   roll -1.1 deg
+130336 15:53:26.858 State: FOLLOW_LINE -> HUMP
+130340 15:53:27.085 Hump: over the top after 370 ms -> easing back to cruise.
+130344 15:53:27.584 Hump cleared after 858 ms, 42 mm driven: peak height 2.2 mm, peak tilt 2.3 deg.
+130345 15:53:27.598 Highest this run: 7.2 mm (17 humps).
+130346 15:53:27.600 State: HUMP -> FOLLOW_LINE
+130348 15:53:27.600 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":23,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":17,"t":607731}
+130363 15:53:30.835 Raised 1.8 mm for 300 ms -> HUMP, climbing.
+130364 15:53:30.948   pitch 1.2 deg
+130365 15:53:30.958   roll -0.2 deg
+130366 15:53:30.960 State: FOLLOW_LINE -> HUMP
+130369 15:53:31.184 Hump: over the top after 340 ms -> easing back to cruise.
+130373 15:53:31.670 Hump cleared after 818 ms, 40 mm driven: peak height 1.9 mm, peak tilt 2.3 deg.
+130374 15:53:31.769 Highest this run: 7.2 mm (18 humps).
+130375 15:53:31.769 State: HUMP -> FOLLOW_LINE
+130377 15:53:31.774 inf2004/aai14/supercar/hump {"height_mm":1.9,"peak_tilt_x10":23,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":18,"t":611862}
+130466 15:53:49.665 Raised 1.2 mm for 300 ms -> HUMP, climbing.
+130467 15:53:49.681   pitch -0.8 deg
+130468 15:53:49.683   roll 0.2 deg
+130469 15:53:49.685 State: FOLLOW_LINE -> HUMP
+130473 15:53:49.986 Hump cleared after 508 ms, 28 mm driven: peak height 1.0 mm, peak tilt 0.9 deg.
+130474 15:53:50.067 Highest this run: 7.2 mm (19 humps).
+130475 15:53:50.067 State: HUMP -> FOLLOW_LINE
+130477 15:53:50.067 inf2004/aai14/supercar/hump {"height_mm":1.0,"peak_tilt_x10":9,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":19,"t":630182}
+130494 15:53:53.456 Raised 2.2 mm for 301 ms -> HUMP, climbing.
+130495 15:53:53.456   pitch -1.5 deg
+130496 15:53:53.463   roll -0.7 deg
+130497 15:53:53.464 State: FOLLOW_LINE -> HUMP
+130500 15:53:53.657 Hump: over the top after 280 ms -> easing back to cruise.
+130502 15:53:53.909 Hump cleared after 509 ms, 26 mm driven: peak height 2.2 mm, peak tilt 1.7 deg.
+130503 15:53:53.917 Highest this run: 7.2 mm (20 humps).
+130504 15:53:53.917 State: HUMP -> FOLLOW_LINE
+130506 15:53:53.917 inf2004/aai14/supercar/hump {"height_mm":2.2,"peak_tilt_x10":17,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":20,"t":634071}
+130514 15:53:55.496 Raised 3.7 mm for 308 ms -> HUMP, climbing.
+130515 15:53:55.497   pitch 0.8 deg
+130516 15:53:55.497   roll 1.7 deg
+130517 15:53:55.497 State: FOLLOW_LINE -> HUMP
+130527 15:53:57.034 Hump: over the top after 1832 ms -> easing back to cruise.
+130534 15:53:58.126 Hump cleared after 2922 ms, 140 mm driven: peak height 6.8 mm, peak tilt 3.4 deg.
+130535 15:53:58.128 Highest this run: 7.2 mm (21 humps).
+130536 15:53:58.128 State: HUMP -> FOLLOW_LINE
+130538 15:53:58.132 inf2004/aai14/supercar/hump {"height_mm":6.8,"peak_tilt_x10":34,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":21,"t":638311}
+130559 15:54:02.755 Raised 1.1 mm for 300 ms -> HUMP, climbing.
+130560 15:54:02.861   pitch -0.5 deg
+130561 15:54:02.869   roll -0.5 deg
+130562 15:54:02.869 State: FOLLOW_LINE -> HUMP
+130566 15:54:03.313 Hump cleared after 508 ms, 29 mm driven: peak height 1.0 mm, peak tilt 0.9 deg.
+130567 15:54:03.425 Highest this run: 7.2 mm (22 humps).
+130568 15:54:03.441 State: HUMP -> FOLLOW_LINE
+130570 15:54:03.443 inf2004/aai14/supercar/hump {"height_mm":1.0,"peak_tilt_x10":9,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":22,"t":643482}
+130579 15:54:06.484 Raised 1.3 mm for 304 ms -> HUMP, climbing.
+130580 15:54:06.614   pitch 0.2 deg
+130581 15:54:06.620   roll 0.6 deg
+130582 15:54:06.622 State: FOLLOW_LINE -> HUMP
+130587 15:54:06.675 Hump: over the top after 502 ms -> easing back to cruise.
+130588 15:54:06.677 Hump cleared after 831 ms, 45 mm driven: peak height 2.4 mm, peak tilt 2.4 deg.
+130589 15:54:06.677 Highest this run: 7.2 mm (23 humps).
+130590 15:54:06.677 State: HUMP -> FOLLOW_LINE
+130631 15:54:15.286 Raised 1.5 mm for 310 ms -> HUMP, climbing.
+130632 15:54:16.652   pitch 0.6 deg
+130633 15:54:16.654   roll -0.7 deg
+130634 15:54:16.658 State: FOLLOW_LINE -> HUMP
+130639 15:54:16.756 Hump cleared after 508 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.2 deg.
+130640 15:54:16.756 Highest this run: 7.2 mm (24 humps).
+130641 15:54:16.766 State: HUMP -> FOLLOW_LINE
+130643 15:54:16.769 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":12,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":24,"t":655981}
+130664 15:54:21.699 Raised 1.1 mm for 308 ms -> HUMP, climbing.
+130665 15:54:21.699   pitch 0.2 deg
+130666 15:54:21.704   roll -0.5 deg
+130667 15:54:21.705 State: FOLLOW_LINE -> HUMP
+130672 15:54:21.846 Hump: over the top after 462 ms -> easing back to cruise.
+130674 15:54:21.944 Hump cleared after 790 ms, 44 mm driven: peak height 1.6 mm, peak tilt 1.6 deg.
+130675 15:54:21.946 Highest this run: 7.2 mm (25 humps).
+130676 15:54:21.946 State: HUMP -> FOLLOW_LINE
+130678 15:54:21.946 inf2004/aai14/supercar/hump {"height_mm":1.6,"peak_tilt_x10":16,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":25,"t":662021}
+130690 15:54:24.405 Raised 1.6 mm for 308 ms -> HUMP, climbing.
+130691 15:54:24.500   pitch -1.1 deg
+130692 15:54:24.500   roll -0.3 deg
+130693 15:54:24.510 State: FOLLOW_LINE -> HUMP
+130697 15:54:24.955 Hump cleared after 502 ms, 29 mm driven: peak height 1.5 mm, peak tilt 0.8 deg.
+130698 15:54:25.008 Highest this run: 7.2 mm (26 humps).
+130699 15:54:25.008 State: HUMP -> FOLLOW_LINE
+130701 15:54:25.011 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":8,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":26,"t":665112}
+130717 15:54:28.058 Raised 1.9 mm for 306 ms -> HUMP, climbing.
+130718 15:54:28.058   pitch -1.3 deg
+130719 15:54:28.058   roll -0.4 deg
+130720 15:54:28.058 State: FOLLOW_LINE -> HUMP
+130724 15:54:31.198 Hump cleared after 512 ms, 29 mm driven: peak height 1.9 mm, peak tilt 1.2 deg.
+130725 15:54:31.274 Highest this run: 7.2 mm (27 humps).
+130726 15:54:31.292 State: HUMP -> FOLLOW_LINE
+130728 15:54:31.296 inf2004/aai14/supercar/hump {"height_mm":1.9,"peak_tilt_x10":12,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":27,"t":668762}
+130804 15:54:46.145 Raised 2.5 mm for 300 ms -> HUMP, climbing.
+130805 15:54:46.147   pitch -1.7 deg
+130806 15:54:46.149   roll -0.5 deg
+130807 15:54:46.149 State: FOLLOW_LINE -> HUMP
+130810 15:54:46.225 Hump cleared after 509 ms, 29 mm driven: peak height 1.5 mm, peak tilt 1.8 deg.
+130811 15:54:46.241 Highest this run: 7.2 mm (28 humps).
+130812 15:54:46.241 State: HUMP -> FOLLOW_LINE
+130822 15:54:47.946 Raised 2.2 mm for 309 ms -> HUMP, climbing.
+130823 15:54:48.065   pitch -0.3 deg
+130824 15:54:48.065   roll -1.0 deg
+130825 15:54:48.065 State: FOLLOW_LINE -> HUMP
+130829 15:54:48.382 Hump cleared after 508 ms, 29 mm driven: peak height 1.3 mm, peak tilt 1.1 deg.
+130830 15:54:48.464 Highest this run: 7.2 mm (29 humps).
+130831 15:54:48.476 State: HUMP -> FOLLOW_LINE
+130833 15:54:48.478 inf2004/aai14/supercar/hump {"height_mm":1.3,"peak_tilt_x10":11,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":29,"t":688592}
+130867 15:54:56.049 Raised 1.3 mm for 314 ms -> HUMP, climbing.
+130868 15:54:56.143   pitch 0.9 deg
+130869 15:54:56.151   roll -0.1 deg
+130870 15:54:56.151 State: FOLLOW_LINE -> HUMP
+130872 15:54:56.472 Hump: over the top after 537 ms -> easing back to cruise.
+130874 15:54:56.569 Hump cleared after 726 ms, 41 mm driven: peak height 1.7 mm, peak tilt 1.9 deg.
+130875 15:54:56.569 Highest this run: 7.2 mm (30 humps).
+130876 15:54:56.569 State: HUMP -> FOLLOW_LINE
+130878 15:54:56.578 inf2004/aai14/supercar/hump {"height_mm":1.7,"peak_tilt_x10":19,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":30,"t":696631}
+130887 15:54:58.170 Raised 3.1 mm for 306 ms -> HUMP, climbing.
+130888 15:54:58.239   pitch 0.0 deg
+130889 15:54:58.239   roll -1.4 deg
+130890 15:54:58.239 State: FOLLOW_LINE -> HUMP
+130894 15:54:58.705 Hump cleared after 501 ms, 27 mm driven: peak height 1.5 mm, peak tilt 1.4 deg.
+130895 15:54:58.842 Highest this run: 7.2 mm (31 humps).
+130896 15:54:58.843 State: HUMP -> FOLLOW_LINE
+130898 15:54:58.843 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":14,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":31,"t":698852}
+130910 15:55:01.168 Raised 1.3 mm for 300 ms -> HUMP, climbing.
+130911 15:55:01.171   pitch 0.3 deg
+130912 15:55:01.173   roll -0.6 deg
+130913 15:55:01.173 State: FOLLOW_LINE -> HUMP
+130918 15:55:01.699 Hump: over the top after 490 ms -> easing back to cruise.
+130921 15:55:02.254 Hump cleared after 1180 ms, 58 mm driven: peak height 1.5 mm, peak tilt 1.9 deg.
+130922 15:55:02.366 Highest this run: 7.2 mm (32 humps).
+130923 15:55:02.369 State: HUMP -> FOLLOW_LINE
+130925 15:55:02.374 inf2004/aai14/supercar/hump {"height_mm":1.5,"peak_tilt_x10":19,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":32,"t":702472}
+130933 15:55:03.648 Raised 2.6 mm for 308 ms -> HUMP, climbing.
+130934 15:55:03.648   pitch 0.0 deg
+130935 15:55:03.648   roll -1.2 deg
+130936 15:55:03.648 State: FOLLOW_LINE -> HUMP
+130940 15:55:04.151 Hump: over the top after 502 ms -> easing back to cruise.
+130941 15:55:04.151 Hump cleared after 530 ms, 30 mm driven: peak height 2.6 mm, peak tilt 1.6 deg.
+130942 15:55:04.164 Highest this run: 7.2 mm (33 humps).
+130943 15:55:04.164 State: HUMP -> FOLLOW_LINE
+130945 15:55:04.164 inf2004/aai14/supercar/hump {"height_mm":2.6,"peak_tilt_x10":16,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":33,"t":704321}
+130958 15:55:06.934 Raised 2.0 mm for 310 ms -> HUMP, climbing.
+130959 15:55:06.934   pitch 0.0 deg
+130960 15:55:06.934   roll -0.9 deg
+130961 15:55:06.934 State: FOLLOW_LINE -> HUMP
+130964 15:55:07.285 Hump: over the top after 440 ms -> easing back to cruise.
+130967 15:55:07.541 Hump cleared after 650 ms, 37 mm driven: peak height 1.7 mm, peak tilt 2.1 deg.
+130968 15:55:07.541 Highest this run: 7.2 mm (34 humps).
+130969 15:55:07.541 State: HUMP -> FOLLOW_LINE
+130971 15:55:07.541 inf2004/aai14/supercar/hump {"height_mm":1.7,"peak_tilt_x10":21,"run_height_mm":7.2,"run_peak_tilt_x10":39,"n":34,"t":707701}
+131003 15:55:14.408 Raised 1.3 mm for 309 ms -> HUMP, climbing.
+131004 15:55:14.417   pitch 0.0 deg
+131005 15:55:14.417   roll -0.6 deg
+131006 15:55:14.417 State: FOLLOW_LINE -> HUMP
+131010 15:55:14.915 Hump: over the top after 550 ms -> easing back to cruise.
+131021 15:55:17.239 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+131022 15:55:17.239 State: HUMP -> PICKED_UP

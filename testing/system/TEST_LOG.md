@@ -2,11 +2,11 @@
 
 Full demo runs on the course: START to pick-up, controlled over MQTT.
 
-Keep test IDs stable: add new rows, never renumber or delete old ones. Put raw evidence (MQTT log, serial output, photos) in `logs/` and name it in the Evidence column.
+Keep test IDs stable: add new rows, never renumber or delete old ones. Raw evidence is in `logs/`: MQTT log events per day, copied from the `.\mqtt` console log (`%USERPROFILE%\mqtt_log.txt`) with its line numbers. Counts below were taken from those logs.
 
 | ID | Date | Test | Setup / firmware | Expected | Result | Evidence |
 |---|---|---|---|---|---|---|
 
-**To fill in:**
+**Notes:**
 
-- No recorded full-course runs yet. For each demo run: date, firmware commit, which features passed, and the MQTT log in `logs/`.
+- No complete course run (line, barcode turn, hump, obstacle bypass, pick-up in one run) can be identified in the MQTT logs, so no system test result is recorded. Record the demo run here.

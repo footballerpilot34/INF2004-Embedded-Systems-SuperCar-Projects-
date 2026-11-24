@@ -1,0 +1,76 @@
+# motion: MQTT log events, 2026-11-20
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 13539 17:19:05.762 Last restart: power-on or brown-out (supply dipped).
+ 13548 17:19:05.841 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 13722 17:19:36.289 Stalled on a slope for 200 ms -> HUMP, more power.
+ 13727 17:19:36.521 Hump: still stalled -> power 16.
+ 13946 17:20:20.341 Stalled on a slope for 457 ms -> HUMP, more power.
+ 13961 17:20:22.747 Hump: still stalled -> power 16.
+ 14449 17:22:03.228 Stalled on a slope for 200 ms -> HUMP, more power.
+ 14454 17:22:03.460 Hump: still stalled -> power 16.
+ 15192 17:27:09.705 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 15253 17:27:11.234 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 15548 17:28:10.626 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 15661 17:28:32.653 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 15716 17:28:41.760 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 16077 17:29:48.669 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 16141 17:29:58.337 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 16342 17:30:37.752 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 16429 17:30:56.367 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 16994 17:32:47.761 Stalled on a slope for 201 ms -> HUMP, more power.
+ 17000 17:32:48.052 Hump: still stalled -> power 16.
+ 17168 17:33:22.199 Stalled on a slope for 211 ms -> HUMP, more power.
+ 17424 17:34:17.974 Stalled on a slope for 3598 ms -> HUMP, more power.
+ 17430 17:34:18.191 Hump: still stalled -> power 16.
+ 18084 17:36:38.636 Stalled on a slope for 208 ms -> HUMP, more power.
+ 18090 17:36:38.772 Hump: still stalled -> power 16.
+ 18624 17:39:17.884 Stalled on a slope for 210 ms -> HUMP, more power.
+ 18634 17:39:19.096 Hump: still stalled -> power 17.
+ 18636 17:39:19.291 Hump: still stalled -> power 22.
+ 18640 17:39:19.809 Hump: stalled again -> climbing power.
+ 18649 17:39:22.105 Hump: stalled again -> climbing power.
+ 18786 17:39:47.562 Stalled on a slope for 205 ms -> HUMP, more power.
+ 18791 17:39:47.805 Hump: still stalled -> power 17.
+ 18942 17:40:17.237 Stalled on a slope for 11614 ms -> HUMP, more power.
+ 18947 17:40:17.448 Hump: still stalled -> power 17.
+ 18951 17:40:17.948 Hump: stalled again -> climbing power.
+ 18956 17:40:18.461 Hump: stalled again -> climbing power.
+ 19072 17:40:40.198 Stalled on a slope for 210 ms -> HUMP, more power.
+ 19077 17:40:40.356 Hump: still stalled -> power 17.
+ 20536 17:46:45.713 Last restart: power-on or brown-out (supply dipped).
+ 20545 17:46:45.770 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 29933 18:22:42.959 Last restart: power-on or brown-out (supply dipped).
+ 29942 18:22:42.977 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 30504 18:24:38.084 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 30736 18:25:25.268 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 31003 18:26:15.630 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36280 18:52:36.315 Last restart: power-on or brown-out (supply dipped).
+ 36289 18:52:36.345 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 36573 18:53:36.073 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36684 18:53:54.629 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36768 18:54:07.858 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36784 18:54:09.950 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36861 18:54:26.579 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36876 18:54:26.685 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36959 18:54:41.390 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 36990 18:54:47.319 Stalled on a slope for 260 ms -> HUMP, more power.
+ 36996 18:54:47.527 Hump: still stalled -> power 17.
+ 37599 18:56:50.002 Stalled on a slope for 200 ms -> HUMP, more power.
+ 37603 18:56:50.169 Hump: still stalled -> power 17.
+ 37705 18:57:07.762 Stalled on a slope for 202 ms -> HUMP, more power.
+ 37716 18:57:09.079 Hump: still stalled -> power 17.
+ 37729 18:57:11.513 Hump: stalled again -> climbing power.
+ 37922 18:57:49.871 Stalled on a slope for 201 ms -> HUMP, more power.
+ 37927 18:57:50.033 Hump: still stalled -> power 17.
+ 38057 18:58:14.917 Stalled on a slope for 200 ms -> HUMP, more power.
+ 38073 18:58:17.237 Hump: still stalled -> power 17.
+ 38156 18:58:30.754 Stalled on a slope for 210 ms -> HUMP, more power.
+ 38179 18:58:35.041 Hump: still stalled -> power 17.
+ 38293 18:58:53.536 Stalled on a slope for 581 ms -> HUMP, more power.
+ 38299 18:58:53.832 Hump: still stalled -> power 17.
+ 38401 18:59:11.607 Stalled on a slope for 203 ms -> HUMP, more power.
+ 38408 18:59:11.824 Hump: still stalled -> power 17.
+ 38415 18:59:13.108 Hump: stalled again -> climbing power.
+ 38668 19:00:04.071 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):
+ 38851 19:00:39.904 Barcode widths in 0.1 encoder ticks (#1 is a bar, then space, bar, ...):

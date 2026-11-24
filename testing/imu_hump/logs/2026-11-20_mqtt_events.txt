@@ -1,0 +1,335 @@
+# imu_hump: MQTT log events, 2026-11-20
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+  9385 17:02:12.472 inf2004/aai14/supercar/hump {"height_mm":11.1,"peak_tilt_x10":55,"run_height_mm":11.1,"run_peak_tilt_x10":55,"n":1,"t":281258}
+ 10686 17:07:05.260 inf2004/aai14/supercar/hump {"height_mm":11.8,"peak_tilt_x10":61,"run_height_mm":11.8,"run_peak_tilt_x10":61,"n":1,"t":574028}
+ 11358 17:09:36.941 inf2004/aai14/supercar/hump {"height_mm":9.8,"peak_tilt_x10":51,"run_height_mm":9.8,"run_peak_tilt_x10":51,"n":1,"t":725708}
+ 11522 17:10:13.422 inf2004/aai14/supercar/hump {"height_mm":9.6,"peak_tilt_x10":57,"run_height_mm":9.6,"run_peak_tilt_x10":57,"n":1,"t":762208}
+ 11708 17:10:53.778 inf2004/aai14/supercar/hump {height_mm:10.9,peak_tilt_x10:66,run_height_mm:12.4,run_peak_tilt_x10:70,n:2,t:3}
+ 13538 17:19:05.762 === SuperCar AAI14: line + barcode + hump/wall ===
+ 13546 17:19:05.825 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 13548 17:19:05.841 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 13549 17:19:05.904 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 13556 17:19:05.906 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 13557 17:19:05.973 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 13673 17:19:30.566 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 13722 17:19:36.289 Stalled on a slope for 200 ms -> HUMP, more power.
+ 13723 17:19:36.414   pitch -2.3 deg
+ 13724 17:19:36.417   roll 2.5 deg
+ 13725 17:19:36.419 State: FOLLOW_LINE -> HUMP
+ 13727 17:19:36.521 Hump: still stalled -> power 16.
+ 13733 17:19:37.787 Hump: over the top after 1512 ms -> easing back to cruise.
+ 13741 17:19:39.192 Hump cleared after 2920 ms, 148 mm driven: peak height 9.2 mm, peak tilt 5.3 deg.
+ 13742 17:19:39.281 Highest this run: 9.2 mm (1 humps).
+ 13743 17:19:39.281 State: HUMP -> FOLLOW_LINE
+ 13744 17:19:39.281 inf2004/aai14/supercar/hump {"height_mm":9.2,"peak_tilt_x10":53,"run_height_mm":9.2,"run_peak_tilt_x10":53,"n":1,"t":47841}
+ 13759 17:19:42.347 Tilted for 310 ms -> HUMP, climbing.
+ 13760 17:19:42.431   pitch -5.3 deg
+ 13761 17:19:42.433   roll -0.4 deg
+ 13762 17:19:42.434 State: FOLLOW_LINE -> HUMP
+ 13764 17:19:42.437 Hump: over the top after 90 ms -> easing back to cruise.
+ 13770 17:19:43.100 State: HUMP -> STOPPED
+ 13927 17:20:17.009 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 13946 17:20:20.341 Stalled on a slope for 457 ms -> HUMP, more power.
+ 13947 17:20:20.456   pitch -0.7 deg
+ 13948 17:20:20.456   roll 1.3 deg
+ 13949 17:20:20.456 State: FOLLOW_LINE -> HUMP
+ 13961 17:20:22.747 Hump: still stalled -> power 16.
+ 13965 17:20:23.611 Hump: over the top after 3280 ms -> easing back to cruise.
+ 13973 17:20:25.106 Hump cleared after 4590 ms, 168 mm driven: peak height 10.7 mm, peak tilt 5.6 deg.
+ 13974 17:20:25.108 Highest this run: 10.7 mm (1 humps).
+ 13975 17:20:25.110 State: HUMP -> FOLLOW_LINE
+ 13976 17:20:25.112 inf2004/aai14/supercar/hump {"height_mm":10.7,"peak_tilt_x10":56,"run_height_mm":10.7,"run_peak_tilt_x10":56,"n":1,"t":93568}
+ 13995 17:20:28.663 Tilted for 300 ms -> HUMP, climbing.
+ 13996 17:20:28.665   pitch 2.2 deg
+ 13997 17:20:28.665   roll 2.3 deg
+ 13998 17:20:28.665 State: FOLLOW_LINE -> HUMP
+ 13999 17:20:28.665 Hump: over the top after 80 ms -> easing back to cruise.
+ 14005 17:20:29.019 State: HUMP -> STOPPED
+ 14403 17:21:59.935 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 14449 17:22:03.228 Stalled on a slope for 200 ms -> HUMP, more power.
+ 14450 17:22:03.377   pitch -1.1 deg
+ 14451 17:22:03.377   roll 1.7 deg
+ 14452 17:22:03.387 State: FOLLOW_LINE -> HUMP
+ 14454 17:22:03.460 Hump: still stalled -> power 16.
+ 14461 17:22:04.868 Hump: over the top after 1600 ms -> easing back to cruise.
+ 14467 17:22:06.026 Hump cleared after 2818 ms, 158 mm driven: peak height 9.8 mm, peak tilt 5.0 deg.
+ 14468 17:22:06.125 Highest this run: 9.8 mm (1 humps).
+ 14469 17:22:06.129 State: HUMP -> FOLLOW_LINE
+ 14470 17:22:06.131 inf2004/aai14/supercar/hump {"height_mm":9.8,"peak_tilt_x10":50,"run_height_mm":9.8,"run_peak_tilt_x10":50,"n":1,"t":194669}
+ 14861 17:26:03.251 inf2004/aai14/supercar/hump {"height_mm":9.8,"peak_tilt_x10":50,"run_height_mm":9.8,"run_peak_tilt_x10":50,"n":1,"t":194669}
+ 15157 17:27:07.193 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 15488 17:28:01.344 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 15637 17:28:28.832 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 15809 17:29:00.464 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16020 17:29:39.679 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16111 17:29:54.267 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16136 17:29:58.219 Picked up (no floor under any IR sensor for 802 ms) -> stopped. End of the demo.
+ 16288 17:30:29.414 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16407 17:30:52.961 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16515 17:31:11.945 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16775 17:32:02.024 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 16858 17:32:22.370 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 16910 17:32:33.225 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps ignored.
+ 16973 17:32:44.347 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 16994 17:32:47.761 Stalled on a slope for 201 ms -> HUMP, more power.
+ 16995 17:32:47.845   pitch -1.2 deg
+ 16996 17:32:47.845   roll 1.2 deg
+ 16997 17:32:47.850 State: FOLLOW_LINE -> HUMP
+ 17000 17:32:48.052 Hump: still stalled -> power 16.
+ 17009 17:32:49.972 Hump: over the top after 2099 ms -> easing back to cruise.
+ 17018 17:32:51.586 Hump cleared after 3829 ms, 181 mm driven: peak height 24.7 mm, peak tilt 12.4 deg.
+ 17019 17:32:51.679 Highest this run: 24.7 mm (1 humps).
+ 17020 17:32:51.679 State: HUMP -> FOLLOW_LINE
+ 17022 17:32:51.679 inf2004/aai14/supercar/hump {"height_mm":24.7,"peak_tilt_x10":124,"run_height_mm":24.7,"run_peak_tilt_x10":124,"n":1,"t":840241}
+ 17146 17:33:18.264 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 17168 17:33:22.199 Stalled on a slope for 211 ms -> HUMP, more power.
+ 17169 17:33:22.363   pitch -1.1 deg
+ 17170 17:33:22.365   roll 1.6 deg
+ 17171 17:33:22.369 State: FOLLOW_LINE -> HUMP
+ 17189 17:33:25.457 Hump: over the top after 3470 ms -> easing back to cruise.
+ 17198 17:33:27.149 Hump cleared after 5158 ms, 155 mm driven: peak height 10.9 mm, peak tilt 6.0 deg.
+ 17199 17:33:27.230 Highest this run: 10.9 mm (1 humps).
+ 17200 17:33:27.232 State: HUMP -> FOLLOW_LINE
+ 17202 17:33:27.234 inf2004/aai14/supercar/hump {"height_mm":10.9,"peak_tilt_x10":60,"run_height_mm":10.9,"run_peak_tilt_x10":60,"n":1,"t":875801}
+ 17394 17:34:12.470 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 17424 17:34:17.974 Stalled on a slope for 3598 ms -> HUMP, more power.
+ 17425 17:34:17.983   pitch -1.2 deg
+ 17426 17:34:17.983   roll -1.3 deg
+ 17427 17:34:17.983 State: FOLLOW_LINE -> HUMP
+ 17430 17:34:18.191 Hump: still stalled -> power 16.
+ 17440 17:34:20.248 Hump: over the top after 2270 ms -> easing back to cruise.
+ 17467 17:34:26.043 Hump took too long (stalled?) -> BLOCKED.
+ 17468 17:34:26.055 State: HUMP -> BLOCKED
+ 18062 17:36:36.127 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 18084 17:36:38.636 Stalled on a slope for 208 ms -> HUMP, more power.
+ 18085 17:36:38.642   pitch -1.3 deg
+ 18086 17:36:38.644   roll 1.4 deg
+ 18087 17:36:38.644 State: FOLLOW_LINE -> HUMP
+ 18090 17:36:38.772 Hump: still stalled -> power 16.
+ 18096 17:36:40.103 Hump: over the top after 1462 ms -> easing back to cruise.
+ 18105 17:36:41.837 Hump cleared after 3312 ms, 174 mm driven: peak height 10.7 mm, peak tilt 6.1 deg.
+ 18106 17:36:41.902 Highest this run: 10.7 mm (1 humps).
+ 18107 17:36:41.902 State: HUMP -> FOLLOW_LINE
+ 18109 17:36:41.918 inf2004/aai14/supercar/hump {"height_mm":10.7,"peak_tilt_x10":61,"run_height_mm":10.7,"run_peak_tilt_x10":61,"n":1,"t":1070491}
+ 18178 17:36:56.085 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 18199 17:36:59.362 Tilted for 308 ms -> HUMP, climbing.
+ 18200 17:36:59.378   pitch 11.4 deg
+ 18201 17:36:59.381   roll 11.3 deg
+ 18202 17:36:59.381 State: FOLLOW_LINE -> HUMP
+ 18209 17:37:00.062 Picked up (no floor under any IR sensor for 807 ms) -> stopped. End of the demo.
+ 18210 17:37:00.232 State: HUMP -> PICKED_UP
+ 18254 17:37:08.913 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 18277 17:37:12.177 Tilted for 300 ms -> HUMP, climbing.
+ 18278 17:37:12.260   pitch 17.7 deg
+ 18279 17:37:12.271   roll -0.1 deg
+ 18280 17:37:12.271 State: FOLLOW_LINE -> HUMP
+ 18286 17:37:12.527 Hump: over the top after 340 ms -> easing back to cruise.
+ 18290 17:37:13.047 Picked up (no floor under any IR sensor for 809 ms) -> stopped. End of the demo.
+ 18291 17:37:13.049 State: HUMP -> PICKED_UP
+ 18458 17:38:40.081 inf2004/aai14/supercar/hump {"height_mm":10.7,"peak_tilt_x10":61,"run_height_mm":10.7,"run_peak_tilt_x10":61,"n":1,"t":1070491}
+ 18573 17:39:08.185 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 18609 17:39:15.583 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 18624 17:39:17.884 Stalled on a slope for 210 ms -> HUMP, more power.
+ 18625 17:39:17.981   pitch -0.8 deg
+ 18626 17:39:17.986   roll 1.3 deg
+ 18627 17:39:17.988 State: FOLLOW_LINE -> HUMP
+ 18634 17:39:19.096 Hump: still stalled -> power 17.
+ 18636 17:39:19.291 Hump: still stalled -> power 22.
+ 18638 17:39:19.500 Hump: over the top after 1580 ms -> easing back to cruise.
+ 18640 17:39:19.809 Hump: stalled again -> climbing power.
+ 18646 17:39:22.091 Hump: over the top after 2821 ms -> easing back to cruise.
+ 18649 17:39:22.105 Hump: stalled again -> climbing power.
+ 18650 17:39:22.105 Hump: over the top after 3520 ms -> easing back to cruise.
+ 18655 17:39:22.508 Hump cleared after 4688 ms, 195 mm driven: peak height 24.9 mm, peak tilt 13.1 deg.
+ 18656 17:39:22.604 Highest this run: 24.9 mm (1 humps).
+ 18657 17:39:22.610 State: HUMP -> FOLLOW_LINE
+ 18658 17:39:22.612 inf2004/aai14/supercar/hump {"height_mm":24.9,"peak_tilt_x10":131,"run_height_mm":24.9,"run_peak_tilt_x10":131,"n":1,"t":62388}
+ 18737 17:39:37.555 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 18786 17:39:47.562 Stalled on a slope for 205 ms -> HUMP, more power.
+ 18787 17:39:47.564   pitch -1.6 deg
+ 18788 17:39:47.564   roll 1.8 deg
+ 18789 17:39:47.569 State: FOLLOW_LINE -> HUMP
+ 18791 17:39:47.805 Hump: still stalled -> power 17.
+ 18800 17:39:49.548 Hump: over the top after 1943 ms -> easing back to cruise.
+ 18808 17:39:51.126 Hump cleared after 3552 ms, 175 mm driven: peak height 25.3 mm, peak tilt 12.5 deg.
+ 18809 17:39:51.315 Highest this run: 25.3 mm (1 humps).
+ 18810 17:39:51.315 State: HUMP -> FOLLOW_LINE
+ 18811 17:39:51.315 inf2004/aai14/supercar/hump {"height_mm":25.3,"peak_tilt_x10":125,"run_height_mm":25.3,"run_peak_tilt_x10":125,"n":1,"t":90938}
+ 18878 17:40:03.886 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 18942 17:40:17.237 Stalled on a slope for 11614 ms -> HUMP, more power.
+ 18943 17:40:17.323   pitch -1.4 deg
+ 18944 17:40:17.323   roll -3.7 deg
+ 18945 17:40:17.323 State: FOLLOW_LINE -> HUMP
+ 18947 17:40:17.448 Hump: still stalled -> power 17.
+ 18948 17:40:17.524 Hump: over the top after 288 ms -> easing back to cruise.
+ 18951 17:40:17.948 Hump: stalled again -> climbing power.
+ 18953 17:40:18.106 Hump: over the top after 826 ms -> easing back to cruise.
+ 18956 17:40:18.461 Hump: stalled again -> climbing power.
+ 18965 17:40:20.294 Hump: over the top after 3023 ms -> easing back to cruise.
+ 18970 17:40:21.347 Hump cleared after 4066 ms, 165 mm driven: peak height 23.9 mm, peak tilt 11.5 deg.
+ 18971 17:40:21.507 Highest this run: 23.9 mm (1 humps).
+ 18972 17:40:21.512 State: HUMP -> FOLLOW_LINE
+ 18973 17:40:21.512 inf2004/aai14/supercar/hump {"height_mm":23.9,"peak_tilt_x10":115,"run_height_mm":23.9,"run_peak_tilt_x10":115,"n":1,"t":121168}
+ 19058 17:40:37.982 FEATURE TEST: line FOLLOWED, obstacles stop and wait, barcodes ignored, humps CLIMBED.
+ 19072 17:40:40.198 Stalled on a slope for 210 ms -> HUMP, more power.
+ 19073 17:40:40.200   pitch -1.0 deg
+ 19074 17:40:40.204   roll 1.8 deg
+ 19075 17:40:40.207 State: FOLLOW_LINE -> HUMP
+ 19077 17:40:40.356 Hump: still stalled -> power 17.
+ 19085 17:40:42.000 Hump: over the top after 1810 ms -> easing back to cruise.
+ 19091 17:40:43.020 Hump cleared after 2818 ms, 171 mm driven: peak height 9.8 mm, peak tilt 5.8 deg.
+ 19092 17:40:43.022 Highest this run: 9.8 mm (1 humps).
+ 19093 17:40:43.027 State: HUMP -> FOLLOW_LINE
+ 19094 17:40:43.027 inf2004/aai14/supercar/hump {"height_mm":9.8,"peak_tilt_x10":58,"run_height_mm":9.8,"run_peak_tilt_x10":58,"n":1,"t":142778}
+ 20351 17:45:29.714 inf2004/aai14/supercar/hump {"height_mm":9.8,"peak_tilt_x10":58,"run_height_mm":9.8,"run_peak_tilt_x10":58,"n":1,"t":142778}
+ 20535 17:46:45.699 === SuperCar AAI14: line + barcode + hump/wall ===
+ 20543 17:46:45.761 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 20545 17:46:45.770 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 20546 17:46:45.829 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 20552 17:46:45.842 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 20553 17:46:45.842 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 29932 18:22:42.957 === SuperCar AAI14: line + barcode + hump/wall ===
+ 29940 18:22:42.977 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 29942 18:22:42.977 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 29943 18:22:43.025 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 29950 18:22:43.041 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 29951 18:22:43.129 IMU calibration failed. Keep it still, level and try again.
+ 30043 18:23:04.257 inf2004/aai14/supercar/hump {"height_mm":9.8,"peak_tilt_x10":58,"run_height_mm":9.8,"run_peak_tilt_x10":58,"n":1,"t":142778}
+ 30123 18:23:20.513 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 30201 18:23:37.495 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 30475 18:24:34.236 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 30688 18:25:15.978 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 30828 18:25:43.075 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 30958 18:26:07.499 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 31104 18:26:35.381 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 31210 18:26:54.714 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 31339 18:27:23.003 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 31556 18:28:09.781 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 31643 18:28:23.665 Picked up (no floor under any IR sensor for 812 ms) -> stopped. End of the demo.
+ 36279 18:52:36.315 === SuperCar AAI14: line + barcode + hump/wall ===
+ 36287 18:52:36.344 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 36289 18:52:36.345 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 36291 18:52:36.443 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 36298 18:52:36.536 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 36299 18:52:36.546 IMU calibration failed. Keep it still, level and try again.
+ 36362 18:52:53.721 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 36452 18:53:13.319 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 36539 18:53:30.368 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 36604 18:53:41.437 Tilted for 310 ms -> HUMP, climbing.
+ 36605 18:53:41.440   pitch -4.1 deg
+ 36606 18:53:41.440   roll 3.7 deg
+ 36607 18:53:41.442 State: FEATURE_TEST -> HUMP
+ 36612 18:53:41.501 Hump: over the top after 50 ms -> easing back to cruise.
+ 36614 18:53:41.508 State: HUMP -> STOPPED
+ 36641 18:53:46.559 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 36748 18:54:04.545 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 36841 18:54:20.304 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 36932 18:54:36.374 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 36990 18:54:47.319 Stalled on a slope for 260 ms -> HUMP, more power.
+ 36991 18:54:47.401   pitch -1.7 deg
+ 36992 18:54:47.405   roll 1.3 deg
+ 36993 18:54:47.405 State: FEATURE_TEST -> HUMP
+ 36996 18:54:47.527 Hump: still stalled -> power 17.
+ 37000 18:54:47.758 State: HUMP -> STOPPED
+ 37078 18:55:03.818 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 37162 18:55:19.850 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 37277 18:55:41.889 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes READ, humps CLIMBED.
+ 37292 18:55:44.370 Tilted for 311 ms -> HUMP, climbing.
+ 37293 18:55:44.370   pitch -0.2 deg
+ 37294 18:55:44.370   roll 3.4 deg
+ 37295 18:55:44.370 State: FEATURE_TEST -> HUMP
+ 37300 18:55:44.679 Hump: over the top after 359 ms -> easing back to cruise.
+ 37303 18:55:45.142 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 37304 18:55:45.142 State: HUMP -> PICKED_UP
+ 37584 18:56:47.244 FEATURE TEST: line ignored (straight), obstacles stop and wait, barcodes ignored, humps CLIMBED
+ 37599 18:56:50.002 Stalled on a slope for 200 ms -> HUMP, more power.
+ 37600 18:56:50.004   pitch -0.8 deg
+ 37601 18:56:50.004   roll 1.4 deg
+ 37602 18:56:50.004 State: FEATURE_TEST -> HUMP
+ 37603 18:56:50.169 Hump: still stalled -> power 17.
+ 37609 18:56:52.604 Hump: over the top after 1342 ms -> easing back to cruise.
+ 37614 18:56:52.607 Hump cleared after 2000 ms, 122 mm driven: peak height 11.5 mm, peak tilt 7.1 deg.
+ 37615 18:56:52.684 Highest this run: 11.5 mm (1 humps).
+ 37616 18:56:52.686 State: HUMP -> FEATURE_TEST
+ 37688 18:57:05.008 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 37705 18:57:07.762 Stalled on a slope for 202 ms -> HUMP, more power.
+ 37706 18:57:07.764   pitch -1.0 deg
+ 37707 18:57:07.766   roll 1.3 deg
+ 37708 18:57:07.772 State: FOLLOW_LINE -> HUMP
+ 37716 18:57:09.079 Hump: still stalled -> power 17.
+ 37723 18:57:10.283 Hump: over the top after 2452 ms -> easing back to cruise.
+ 37729 18:57:11.513 Hump: stalled again -> climbing power.
+ 37730 18:57:11.642 Hump: over the top after 3838 ms -> easing back to cruise.
+ 37735 18:57:12.373 Hump cleared after 4580 ms, 171 mm driven: peak height 10.7 mm, peak tilt 6.0 deg.
+ 37736 18:57:12.375 Highest this run: 10.7 mm (1 humps).
+ 37737 18:57:12.377 State: HUMP -> FOLLOW_LINE
+ 37739 18:57:12.377 inf2004/aai14/supercar/hump {"height_mm":10.7,"peak_tilt_x10":60,"run_height_mm":10.7,"run_peak_tilt_x10":60,"n":1,"t":290916}
+ 37908 18:57:47.862 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 37922 18:57:49.871 Stalled on a slope for 201 ms -> HUMP, more power.
+ 37923 18:57:49.875   pitch -0.8 deg
+ 37924 18:57:49.875   roll 1.3 deg
+ 37925 18:57:49.875 State: FOLLOW_LINE -> HUMP
+ 37927 18:57:50.033 Hump: still stalled -> power 17.
+ 37935 18:57:51.711 Hump: over the top after 1899 ms -> easing back to cruise.
+ 37945 18:57:53.774 Hump cleared after 3979 ms, 174 mm driven: peak height 10.2 mm, peak tilt 5.1 deg.
+ 37946 18:57:53.868 Highest this run: 10.2 mm (1 humps).
+ 37947 18:57:53.870 State: HUMP -> FOLLOW_LINE
+ 37949 18:57:53.874 inf2004/aai14/supercar/hump {"height_mm":10.2,"peak_tilt_x10":51,"run_height_mm":10.2,"run_peak_tilt_x10":51,"n":1,"t":332376}
+ 38047 18:58:12.477 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 38057 18:58:14.917 Stalled on a slope for 200 ms -> HUMP, more power.
+ 38058 18:58:14.921   pitch -1.2 deg
+ 38059 18:58:14.925   roll 0.9 deg
+ 38060 18:58:14.925 State: FOLLOW_LINE -> HUMP
+ 38073 18:58:17.237 Hump: still stalled -> power 17.
+ 38076 18:58:17.656 Hump: over the top after 3982 ms -> easing back to cruise.
+ 38085 18:58:19.429 Hump cleared after 5760 ms, 187 mm driven: peak height 25.3 mm, peak tilt 12.7 deg.
+ 38086 18:58:19.545 Highest this run: 25.3 mm (1 humps).
+ 38087 18:58:19.551 State: HUMP -> FOLLOW_LINE
+ 38089 18:58:19.553 inf2004/aai14/supercar/hump {"height_mm":25.3,"peak_tilt_x10":127,"run_height_mm":25.3,"run_peak_tilt_x10":127,"n":1,"t":358026}
+ 38144 18:58:29.344 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 38156 18:58:30.754 Stalled on a slope for 210 ms -> HUMP, more power.
+ 38157 18:58:30.834   pitch -1.1 deg
+ 38158 18:58:30.841   roll 1.1 deg
+ 38159 18:58:30.841 State: FOLLOW_LINE -> HUMP
+ 38179 18:58:35.041 Hump: still stalled -> power 17.
+ 38181 18:58:35.218 Hump: over the top after 4460 ms -> easing back to cruise.
+ 38191 18:58:37.265 Hump cleared after 6348 ms, 200 mm driven: peak height 25.3 mm, peak tilt 13.1 deg.
+ 38192 18:58:37.265 Highest this run: 25.3 mm (1 humps).
+ 38193 18:58:37.265 State: HUMP -> FOLLOW_LINE
+ 38195 18:58:37.265 inf2004/aai14/supercar/hump {"height_mm":25.3,"peak_tilt_x10":131,"run_height_mm":25.3,"run_peak_tilt_x10":131,"n":1,"t":375697}
+ 38277 18:58:51.057 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 38293 18:58:53.536 Stalled on a slope for 581 ms -> HUMP, more power.
+ 38294 18:58:53.549   pitch -0.8 deg
+ 38295 18:58:53.552   roll 1.3 deg
+ 38296 18:58:53.552 State: FOLLOW_LINE -> HUMP
+ 38299 18:58:53.832 Hump: still stalled -> power 17.
+ 38307 18:58:55.425 Hump: over the top after 1759 ms -> easing back to cruise.
+ 38315 18:58:56.809 Hump cleared after 3297 ms, 154 mm driven: peak height 9.6 mm, peak tilt 5.3 deg.
+ 38316 18:58:56.874 Highest this run: 9.6 mm (1 humps).
+ 38317 18:58:56.889 State: HUMP -> FOLLOW_LINE
+ 38319 18:58:56.892 inf2004/aai14/supercar/hump {"height_mm":9.6,"peak_tilt_x10":53,"run_height_mm":9.6,"run_peak_tilt_x10":53,"n":1,"t":395396}
+ 38387 18:59:09.693 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 38401 18:59:11.607 Stalled on a slope for 203 ms -> HUMP, more power.
+ 38402 18:59:11.694   pitch -1.2 deg
+ 38403 18:59:11.696   roll 1.1 deg
+ 38404 18:59:11.697 State: FOLLOW_LINE -> HUMP
+ 38408 18:59:11.824 Hump: still stalled -> power 17.
+ 38412 18:59:12.682 Hump: over the top after 1049 ms -> easing back to cruise.
+ 38415 18:59:13.108 Hump: stalled again -> climbing power.
+ 38419 18:59:13.869 Hump: over the top after 2170 ms -> easing back to cruise.
+ 38425 18:59:14.903 Hump cleared after 3299 ms, 167 mm driven: peak height 10.9 mm, peak tilt 5.6 deg.
+ 38426 18:59:15.003 Highest this run: 10.9 mm (1 humps).
+ 38427 18:59:15.007 State: HUMP -> FOLLOW_LINE
+ 38429 18:59:15.009 inf2004/aai14/supercar/hump {"height_mm":10.9,"peak_tilt_x10":56,"run_height_mm":10.9,"run_peak_tilt_x10":56,"n":1,"t":413496}
+ 38631 18:59:57.536 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 38830 19:00:37.604 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 38846 19:00:39.754 Picked up (no floor under any IR sensor for 811 ms) -> stopped. End of the demo.
+ 38976 19:01:05.654 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 39083 19:01:26.422 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 39201 19:01:45.388 FEATURE TEST: line FOLLOWED, obstacles AVOIDED, barcodes READ, humps CLIMBED.
+ 41972 19:13:08.988 inf2004/aai14/supercar/hump {"height_mm":11.7,"peak_tilt_x10":160,"run_height_mm":11.7,"run_peak_tilt_x10":160,"n":1,"t":409731}
+ 44766 19:23:46.573 inf2004/aai14/supercar/hump {"height_mm":8.0,"peak_tilt_x10":61,"run_height_mm":8.0,"run_peak_tilt_x10":61,"n":1,"t":1047161}
+ 44902 19:24:15.639 inf2004/aai14/supercar/hump {"height_mm":8.1,"peak_tilt_x10":76,"run_height_mm":8.1,"run_peak_tilt_x10":76,"n":1,"t":1076292}
+ 45687 19:27:13.410 inf2004/aai14/supercar/hump {"height_mm":11.5,"peak_tilt_x10":61,"run_height_mm":11.5,"run_peak_tilt_x10":61,"n":1,"t":1254028}
+ 45792 19:27:35.670 inf2004/aai14/supercar/hump {"height_mm":11.3,"peak_tilt_x10":61,"run_height_mm":11.3,"run_peak_tilt_x10":61,"n":1,"t":1276388}

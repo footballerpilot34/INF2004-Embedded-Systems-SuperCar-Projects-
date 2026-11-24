@@ -1,0 +1,196 @@
+# imu_hump: MQTT log events, 2026-11-23
+# Source: %USERPROFILE%\mqtt_log.txt (the .\mqtt console log); first column = line number in that file.
+# Telemetry and heartbeat lines are left out.
+ 47256 15:41:01.519 === SuperCar AAI14: line + barcode + hump/wall ===
+ 47264 15:41:01.714 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 47266 15:41:01.723 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 47267 15:41:01.980 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 47274 15:41:01.996 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 47275 15:41:02.077 IMU calibration failed. Keep it still, level and try again.
+ 48347 15:45:02.760 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 48553 15:45:45.155 Stalled on a slope for 209 ms -> HUMP, more power.
+ 48554 15:45:45.155   pitch -0.6 deg
+ 48555 15:45:45.155   roll 1.7 deg
+ 48556 15:45:45.155 State: FOLLOW_LINE -> HUMP
+ 48568 15:45:47.678 Hump: over the top after 2332 ms -> easing back to cruise.
+ 48572 15:45:47.678 Hump: stalled again -> climbing power.
+ 48575 15:45:48.169 Hump: over the top after 3611 ms -> easing back to cruise.
+ 48587 15:45:50.577 Hump cleared after 5745 ms, 189 mm driven: peak height 12.6 mm, peak tilt 6.5 deg.
+ 48588 15:45:50.579 Highest this run: 12.6 mm (1 humps).
+ 48589 15:45:50.579 State: HUMP -> FOLLOW_LINE
+ 48591 15:45:50.585 inf2004/aai14/supercar/hump {"height_mm":12.6,"peak_tilt_x10":65,"run_height_mm":12.6,"run_peak_tilt_x10":65,"n":1,"t":306394}
+ 48610 15:45:54.471 Stalled on a slope for 210 ms -> HUMP, more power.
+ 48611 15:45:54.471   pitch -2.7 deg
+ 48612 15:45:54.471   roll 0.2 deg
+ 48613 15:45:54.471 State: FOLLOW_LINE -> HUMP
+ 48616 15:45:55.262 State: HUMP -> STOPPED
+ 48839 15:46:43.611 Tilted for 308 ms -> HUMP, climbing.
+ 48840 15:46:43.611   pitch -1.6 deg
+ 48841 15:46:43.611   roll 3.4 deg
+ 48842 15:46:43.611 State: FOLLOW_LINE -> HUMP
+ 48852 15:46:46.785 Hump: over the top after 1961 ms -> easing back to cruise.
+ 48858 15:46:46.877 Hump cleared after 3100 ms, 145 mm driven: peak height 10.7 mm, peak tilt 5.4 deg.
+ 48859 15:46:46.877 Highest this run: 10.7 mm (1 humps).
+ 48860 15:46:46.894 State: HUMP -> FOLLOW_LINE
+ 48873 15:46:48.944 Tilted for 300 ms -> HUMP, climbing.
+ 48874 15:46:49.037   pitch -3.8 deg
+ 48875 15:46:49.037   roll 1.4 deg
+ 48876 15:46:49.037 State: FOLLOW_LINE -> HUMP
+ 48882 15:46:49.407 Hump: over the top after 469 ms -> easing back to cruise.
+ 48885 15:46:49.916 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 48886 15:46:49.916 State: HUMP -> PICKED_UP
+ 50685 15:54:20.100 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 51242 15:56:04.831 Stalled on a slope for 212 ms -> HUMP, more power.
+ 51243 15:56:04.839   pitch -3.3 deg
+ 51244 15:56:04.841   roll -0.1 deg
+ 51245 15:56:04.841 State: FOLLOW_LINE -> HUMP
+ 51251 15:56:04.942 Hump: still stalled -> power 17.
+ 51254 15:56:05.981 Hump: over the top after 668 ms -> easing back to cruise.
+ 51255 15:56:05.983 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 51256 15:56:05.987 State: HUMP -> PICKED_UP
+ 53850 16:07:04.812 === SuperCar AAI14: line + barcode + hump/wall ===
+ 53858 16:07:04.844 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 53860 16:07:04.844 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 53861 16:07:04.940 IMU calibration failed. Keep it still, level and try again.
+ 53868 16:07:04.952 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 53870 16:07:05.084 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 53991 16:07:28.834 Tilted for 302 ms -> HUMP, climbing.
+ 53992 16:07:28.849   pitch -6.7 deg
+ 53993 16:07:28.849   roll 3.0 deg
+ 53994 16:07:28.849 State: FOLLOW_LINE -> HUMP
+ 53998 16:07:28.946 Hump: over the top after 78 ms -> easing back to cruise.
+ 54002 16:07:29.606 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 54003 16:07:29.606 State: HUMP -> PICKED_UP
+ 57409 16:20:16.783 Tilted for 300 ms -> HUMP, climbing.
+ 57410 16:20:16.785   pitch -1.8 deg
+ 57411 16:20:16.788   roll 3.8 deg
+ 57412 16:20:16.788 State: FOLLOW_LINE -> HUMP
+ 57415 16:20:16.879 Hump: over the top after 1332 ms -> easing back to cruise.
+ 57422 16:20:18.303 Hump cleared after 2579 ms, 141 mm driven: peak height 11.5 mm, peak tilt 6.7 deg.
+ 57423 16:20:18.305 Highest this run: 11.5 mm (1 humps).
+ 57424 16:20:18.305 State: HUMP -> FOLLOW_LINE
+ 57426 16:20:18.305 inf2004/aai14/supercar/hump {"height_mm":11.5,"peak_tilt_x10":67,"run_height_mm":11.5,"run_peak_tilt_x10":67,"n":1,"t":807938}
+ 57516 16:20:28.553 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 58235 16:22:38.580 Picked up (no floor under any IR sensor for 807 ms) -> stopped. End of the demo.
+ 59189 16:25:07.421 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 59665 16:26:35.867 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 61512 16:32:21.149 Tilted for 300 ms -> HUMP, climbing.
+ 61513 16:32:21.149   pitch -8.9 deg
+ 61514 16:32:21.149   roll -2.2 deg
+ 61515 16:32:21.149 State: FOLLOW_LINE -> HUMP
+ 61519 16:32:21.389 Hump: over the top after 250 ms -> easing back to cruise.
+ 61524 16:32:22.450 Hump cleared after 1241 ms, 81 mm driven: peak height 13.4 mm, peak tilt 10.5 deg.
+ 61525 16:32:22.635 Highest this run: 13.4 mm (1 humps).
+ 61526 16:32:22.635 State: HUMP -> FOLLOW_LINE
+ 61528 16:32:22.641 inf2004/aai14/supercar/hump {"height_mm":13.4,"peak_tilt_x10":105,"run_height_mm":13.4,"run_peak_tilt_x10":105,"n":1,"t":1532188}
+ 62128 16:34:04.193 Picked up (no floor under any IR sensor for 802 ms) -> stopped. End of the demo.
+ 63731 16:39:04.251 Tilted for 308 ms -> HUMP, climbing.
+ 63732 16:39:04.251   pitch -0.9 deg
+ 63733 16:39:04.251   roll 7.4 deg
+ 63734 16:39:04.260 State: FOLLOW_LINE -> HUMP
+ 63738 16:39:04.324 Hump: over the top after 74 ms -> easing back to cruise.
+ 63742 16:39:07.342 Picked up (no floor under any IR sensor for 809 ms) -> stopped. End of the demo.
+ 63743 16:39:07.346 State: HUMP -> PICKED_UP
+ 63871 16:39:31.305 Tilted for 300 ms -> HUMP, climbing.
+ 63872 16:39:31.308   pitch 6.3 deg
+ 63873 16:39:31.310   roll 8.9 deg
+ 63874 16:39:31.314 State: FOLLOW_LINE -> HUMP
+ 63881 16:39:31.813 Hump: over the top after 720 ms -> easing back to cruise.
+ 63883 16:39:32.018 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 63884 16:39:32.020 State: HUMP -> PICKED_UP
+ 64453 16:40:56.257 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 65209 16:43:19.543 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 65402 16:43:59.753 Picked up (no floor under any IR sensor for 808 ms) -> stopped. End of the demo.
+ 66273 16:46:55.607 Tilted for 310 ms -> HUMP, climbing.
+ 66274 16:46:55.613   pitch -5.0 deg
+ 66275 16:46:55.613   roll 2.3 deg
+ 66276 16:46:55.613 State: FOLLOW_LINE -> HUMP
+ 66287 16:46:55.820 Hump: over the top after 82 ms -> easing back to cruise.
+ 66293 16:46:56.210 State: HUMP -> STOPPED
+ 67013 16:49:49.988 === SuperCar AAI14: line + barcode + hump/wall ===
+ 67021 16:49:50.050 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 67023 16:49:50.064 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 67024 16:49:50.146 IMU calibration failed. Keep it still, level and try again.
+ 67031 16:49:50.162 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 67032 16:49:50.227 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 67986 16:53:10.993 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 68120 16:53:43.676 Stalled on a slope for 202 ms -> HUMP, more power.
+ 68121 16:53:43.685   pitch 1.9 deg
+ 68122 16:53:43.685   roll 2.9 deg
+ 68123 16:53:43.685 State: FOLLOW_LINE -> HUMP
+ 68125 16:53:43.692 Hump: over the top after 490 ms -> easing back to cruise.
+ 68126 16:53:43.692 Hump cleared after 1078 ms, 27 mm driven: peak height 6.5 mm, peak tilt 4.8 deg.
+ 68127 16:53:43.692 Highest this run: 6.5 mm (1 humps).
+ 68128 16:53:44.643 State: HUMP -> FOLLOW_LINE
+ 68463 16:54:36.087 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 68798 16:55:32.632 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
+ 68980 17:12:52.949 inf2004/aai14/supercar/hump {"height_mm":13.4,"peak_tilt_x10":105,"run_height_mm":13.4,"run_peak_tilt_x10":105,"n":1,"t":1532188}
+ 68986 17:13:27.430 === SuperCar AAI14: line + barcode + hump/wall ===
+ 68994 17:13:27.516 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 68996 17:13:27.518 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 68997 17:13:27.601 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 69004 17:13:27.617 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 69005 17:13:27.681 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 70150 17:17:08.611 Picked up (no floor under any IR sensor for 810 ms) -> stopped. End of the demo.
+ 70776 17:19:13.279 Picked up (no floor under any IR sensor for 800 ms) -> stopped. End of the demo.
+ 70933 17:19:50.406 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 71886 17:22:53.930 Tilted for 300 ms -> HUMP, climbing.
+ 71887 17:22:54.005   pitch -4.4 deg
+ 71888 17:22:54.010   roll 1.9 deg
+ 71889 17:22:54.010 State: FOLLOW_LINE -> HUMP
+ 71894 17:22:54.083 Hump: over the top after 50 ms -> easing back to cruise.
+ 71900 17:22:54.433 State: HUMP -> STOPPED
+ 72132 17:23:37.140 Tilted for 310 ms -> HUMP, climbing.
+ 72133 17:23:37.216   pitch -6.2 deg
+ 72134 17:23:37.216   roll -0.2 deg
+ 72135 17:23:37.216 State: FOLLOW_LINE -> HUMP
+ 72144 17:23:37.635 Hump: over the top after 480 ms -> easing back to cruise.
+ 72150 17:23:38.043 State: HUMP -> STOPPED
+ 72436 17:24:27.840 Stalled on a slope for 207 ms -> HUMP, more power.
+ 72437 17:24:27.840   pitch -2.4 deg
+ 72438 17:24:27.850   roll 0.3 deg
+ 72439 17:24:27.850 State: FOLLOW_LINE -> HUMP
+ 72445 17:24:29.973 Hump: still stalled -> power 17.
+ 72447 17:24:29.984 Hump: still stalled -> power 22.
+ 72450 17:24:30.082 State: HUMP -> STOPPED
+ 72939 17:26:34.621 === SuperCar AAI14: line + barcode + hump/wall ===
+ 72947 17:26:34.706 READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. Hold GP20 2 s for IMU calibration.
+ 72949 17:26:34.712 IMU: calibrating by itself (power-up). Keep the car still and level for 5 s...
+ 72950 17:26:34.760 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 72957 17:26:34.776 IMU: calibrating by itself (on the hotspot). Keep the car still and level for 5 s...
+ 72958 17:26:34.954 IMU calibrated. Pitch/roll baseline set; hump detection enabled.
+ 73467 17:28:01.494 Stalled on a slope for 201 ms -> HUMP, more power.
+ 73468 17:28:01.494   pitch -2.3 deg
+ 73469 17:28:01.494   roll 0.2 deg
+ 73470 17:28:01.500 State: FOLLOW_LINE -> HUMP
+ 73474 17:28:01.642 State: HUMP -> STOPPED
+ 73583 17:28:23.079 Stalled on a slope for 1120 ms -> HUMP, more power.
+ 73584 17:28:23.079   pitch -1.1 deg
+ 73585 17:28:23.085   roll 1.8 deg
+ 73586 17:28:23.085 State: FOLLOW_LINE -> HUMP
+ 73595 17:28:23.488 Hump: over the top after 501 ms -> easing back to cruise.
+ 73600 17:28:23.964 State: HUMP -> STOPPED
+ 73711 17:28:45.510 Stalled on a slope for 200 ms -> HUMP, more power.
+ 73712 17:28:45.521   pitch -1.9 deg
+ 73713 17:28:45.523   roll 0.2 deg
+ 73714 17:28:45.523 State: FOLLOW_LINE -> HUMP
+ 73719 17:28:45.623 State: HUMP -> STOPPED
+ 74272 17:30:39.143 Stalled on a slope for 202 ms -> HUMP, more power.
+ 74273 17:30:39.148   pitch -2.2 deg
+ 74274 17:30:39.148   roll -0.6 deg
+ 74275 17:30:39.148 State: FOLLOW_LINE -> HUMP
+ 74278 17:30:39.224 State: HUMP -> STOPPED
+ 74661 17:31:56.337 Tilted for 310 ms -> HUMP, climbing.
+ 74662 17:31:56.340   pitch -6.5 deg
+ 74663 17:31:56.340   roll -0.1 deg
+ 74664 17:31:56.340 State: FOLLOW_LINE -> HUMP
+ 74667 17:31:56.550 Hump: over the top after 300 ms -> easing back to cruise.
+ 74675 17:31:59.181 State: HUMP -> STOPPED
+ 75499 17:34:12.329 Stalled on a slope for 200 ms -> HUMP, more power.
+ 75500 17:34:12.329   pitch -3.9 deg
+ 75501 17:34:12.329   roll 0.6 deg
+ 75502 17:34:12.329 State: FOLLOW_LINE -> HUMP
+ 75511 17:34:12.547 Hump: over the top after 370 ms -> easing back to cruise.
+ 75517 17:34:12.805 State: HUMP -> STOPPED
+ 75591 17:34:22.000 Picked up (no floor under any IR sensor for 801 ms) -> stopped. End of the demo.
+ 76501 17:37:12.881 BYPASS controlled test: depth=100 mm; empty LEFT corridor assumed by operator, NOT verified by 
