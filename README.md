@@ -183,7 +183,7 @@ Supported MQTT commands also include feature-test selections (`ft1111`), barcode
 
 ## Obstacle avoidance and calibration
 
-The ultrasonic sensor detects objects ahead; a servo scan samples multiple angles to estimate obstacle boundaries. The bypass logic uses configurable geometry, wheel encoder estimates, turning stages and line reacquisition. It is not simply a fixed-duration steering command. The controlled centred 200 × 100 mm obstacle test now uses fixed 43° departure, 219 mm estimated offset and 65° return, with a full-footprint safety check before movement. USB/MQTT `v` continuously rehearses that route on empty floor and ends stopped. The checkpoint diagnostic and unapproved 270/280 mm planner are disabled. See [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) for parameters, limitations and safety checks.
+The ultrasonic sensor detects objects ahead; a servo scan samples multiple angles to estimate obstacle boundaries. The bypass logic uses configurable geometry, wheel encoder estimates, turning stages and line reacquisition. It is not simply a fixed-duration steering command. The controlled 180 ×140 mm car / centred 150 ×150 mm obstacle test now starts from a 150 mm ultrasonic reading (60 mm setback). It plans forward-only departures first: nominal −77°, 210 mm estimated offset and +65° return, about 836.5 mm axle travel, with no reverse leg. Normal success requires BOTH IR sensors and heading alignment before FOLLOW; continuous v always ends STOPPED. See [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) for geometry, bounded reverse fallback and the current lack of calibrated IMU yaw.
 
 Before relying on obstacle bypass, validate forward clearance, wheel track, encoder edges per distance, pivot slip, turning angles, lateral clearance and final line alignment on the actual surface. Scan edges at the servo limit or with missing echoes should not be treated as reliable object dimensions. Refer to **[OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md)** for the fixed-width route, parameters, protections and staged physical tests, and **[ULTRASONIC_SCAN.md](ULTRASONIC_SCAN.md)** for scan interpretation and width limitations.
 
@@ -223,3 +223,21 @@ The main control loop is organised around a nominal **10 ms** task period, with 
 - [MQTT.md](MQTT.md) — MQTT configuration, telemetry and commands.
 - [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) — obstacle bypass design, configuration and validation.
 - [ULTRASONIC_SCAN.md](ULTRASONIC_SCAN.md) — servo scan measurements and interpretation.
+
+Current width/recovery tuning: genuine full-angle scans retain raw/calibrated
+width and measured range; separate corrected width uses a labelled 150 mm
+fallback when needed. Planning width is at least 150 mm, depth 150 mm. The
+parallel leg is shortened by a footprint-validated 40 mm, and post-contact
+advance is 65 mm. Both IR sensors/heading remain required before normal FOLLOW.
+See [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) for safety limits and logs.
+
+Final line recovery now permits one low-speed, forward-only correction after
+alignment: at most 60 mm / 3 s with ±5° steering, behind the obstacle's complete
+turning envelope. Both IR readings and heading confirmation remain required;
+normal success enters FOLLOW_LINE, while failure and dry v end STOPPED.
+
+Latest recovery tuning: post-contact advance 140 mm with a 160 mm lateral
+cap; working route angles are unchanged. Missing-line recovery searches up to
+240 mm / 8 s with ±25° heading targets, restores zero, and accepts the normal
+follower's stable one-or-both-black pattern. Normal FOLLOW immediately resumes
+IR steering; manual v still ends STOPPED. See OBSTACLE_DETECTION.md.

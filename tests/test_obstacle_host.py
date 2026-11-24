@@ -31,6 +31,8 @@ static bool mock_bypass_begin_ok;
 bool bypass_begin(obstacle_profile_t const *p, uint32_t t, bool l) { (void)p; (void)t; (void)l; return mock_bypass_begin_ok; }
 static unsigned mock_bypass_starts;
 bool bypass_test_begin(uint32_t t) { (void)t; ++mock_bypass_starts; return true; }
+static bool mock_rehearsal_line;
+bool bypass_test_uses_line(void) { return mock_rehearsal_line; }
 void bypass_cancel(void) {}
 static bypass_result_t mock_bypass_result = BYPASS_FAILED;
 bypass_result_t bypass_step(uint32_t t, uint32_t r) { (void)t; (void)r; return mock_bypass_result; }
@@ -69,7 +71,8 @@ int32_t imu_max_tilt_x10(void) { return tilt; }
 int32_t imu_total_tilt_x10(void) { return tilt; }
 int32_t imu_pitch_x10(void) { return tilt; }
 int32_t imu_roll_x10(void) { return 0; }
-line_state_t line_sensor_read(void) { return (line_state_t){true, true}; }
+static bool both_line=true, left_line=true;
+line_state_t line_sensor_read(void) { return (line_state_t){left_line, both_line}; }
 line_junction_t line_junction_detect(bool black, bool enabled, uint32_t time,
                                      uint32_t * mark) {
     (void)black; (void)enabled; (void)time; (void)mark;
@@ -132,6 +135,30 @@ static void run_scan(void) {
 }
 
 
+static void estimate_checks(void) {
+    obstacle_profile_t p={.centre_seen=true,.left_bounded=true,.right_bounded=true,
+        .edges_confirmed=true,.calibrated_width_valid=true,.front_mm=150,.width_mm=333};
+    for(unsigned w=139;w<=161;++w) {
+        p.calibrated_width_mm=w;
+        obstacle_width_estimate_update(&p);
+        assert(p.corrected_width_mm==(w>=140 && w<=160 ? w : 150));
+        assert(p.width_fallback==!(w>=140 && w<=160));
+        assert(p.width_mm==333 && p.front_mm==150);
+    }
+    p.calibrated_width_mm=150; p.left_bounded=false;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback && p.corrected_width_mm==150);
+    p.left_bounded=true; p.timed_out=true;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.timed_out=false; p.right_bounded=false;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.right_bounded=true; p.cancelled=true;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.cancelled=false; p.calibrated_width_valid=false;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.calibrated_width_valid=true; p.width_mm=0;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+}
+
 static void width_calibration_checks(void) {
     // SYNTHETIC table/scan inputs exercise decisions, not physical accuracy.
     for (uint32_t d = 150; d <= 250; d += 50) {
@@ -151,6 +178,8 @@ static void width_calibration_checks(void) {
                 assert(p.calibrated_width_mm == (edge == 10 ? 150u : 250u));
             } else { assert(!p.calibrated_width_valid); }
             assert(p.width_mm > 0); // Raw geometry remains separate.
+            assert(p.corrected_width_mm==150);
+            assert(p.width_fallback==!(p.calibrated_width_valid && p.calibrated_width_mm==150));
             points[15].kind = OBSTACLE_RETURN_WEAK_RANGE;
             obstacle_profile_build(points, 31, d, &p);
             assert(!p.calibrated_width_valid);
@@ -243,6 +272,7 @@ static void geometry_checks(void) {
 }
 
 int main(void) {
+    estimate_checks();
     width_calibration_checks();
     geometry_checks();
     scan_depth = 250; width = 80; offset = 0;
@@ -305,7 +335,7 @@ int main(void) {
     vehicle_task(); now += OBSTACLE_CLEAR_MSEC + 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
     assert(reader_enabled);
-    for (uint32_t d = 150; d <= 250; d += 50) {
+    for (uint32_t d = 100; d <= OBSTACLE_STOP_MM; d += 30) {
         vehicle_stop(); vehicle_start(); range_mm = d; vehicle_task();
         assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN);
         assert(motor_left == 0 && motor_right == 0);
@@ -330,8 +360,17 @@ int main(void) {
     assert(vehicle_state() == VEHICLE_BYPASS && mock_bypass_starts == starts_before_repeat);
     mock_bypass_result = BYPASS_DONE; vehicle_task();
     assert(vehicle_state() == VEHICLE_STOPPED); // Dry run must not start driving straight.
+    mock_rehearsal_line=true;
+    vehicle_bypass_test();
+    assert(vehicle_state()==VEHICLE_BYPASS);
+    mock_bypass_result=BYPASS_DONE; vehicle_task();
+    assert(vehicle_state()==VEHICLE_STOPPED); // v always ends stopped, even over a line.
+    vehicle_stop();
+    vehicle_bypass_test(); mock_bypass_result=BYPASS_FAILED; vehicle_task();
+    assert(vehicle_state()==VEHICLE_STOPPED);
+    mock_rehearsal_line=false;
     mock_bypass_begin_ok = true; mock_bypass_result = BYPASS_RUNNING;
-    mode = BACKGROUND; width = 80; scan_depth = 300; range_mm = 300;
+    mode = BACKGROUND; width = 80; scan_depth = OBSTACLE_STOP_MM; range_mm = OBSTACLE_STOP_MM;
     vehicle_start(); vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN);
     uint32_t integration_start = now;
@@ -346,6 +385,36 @@ int main(void) {
     assert(vehicle_state() == VEHICLE_BYPASS); // No nested detection during return.
     mock_bypass_result = BYPASS_DONE; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE && reader_enabled);
+    range_mm=OBSTACLE_CLEAR_MM+1;
+    vehicle_task();
+    assert(vehicle_state()==VEHICLE_FOLLOW_LINE && motor_left>0 && motor_right>0);
+    // A single black sensor is a valid normal-follower input. Seed its
+    // history and steer immediately instead of the straight-launch delay.
+    vehicle_stop(); vehicle_start(); range_mm=OBSTACLE_STOP_MM;
+    mock_bypass_result=BYPASS_RUNNING; vehicle_task();
+    uint32_t handoff_start=now;
+    while(vehicle_state()==VEHICLE_OBSTACLE_SCAN) {
+        now+=10;
+        if(servo_is_settled() && now%60==0) sample();
+        vehicle_task();
+        assert(now-handoff_start<=OBSTACLE_SCAN_TIMEOUT_MSEC+10);
+    }
+    assert(vehicle_state()==VEHICLE_BYPASS);
+    both_line=false; mock_bypass_result=BYPASS_DONE; vehicle_task();
+    assert(vehicle_state()==VEHICLE_FOLLOW_LINE);
+    range_mm=OBSTACLE_CLEAR_MM+1; vehicle_task();
+    assert(motor_left>0 && motor_right>0 && motor_left<motor_right);
+    vehicle_stop(); both_line=true;
+    vehicle_start(); range_mm=OBSTACLE_STOP_MM; mock_bypass_result=BYPASS_RUNNING; vehicle_task();
+    handoff_start=now;
+    while(vehicle_state()==VEHICLE_OBSTACLE_SCAN) {
+        now+=10; if(servo_is_settled() && now%60==0) sample(); vehicle_task();
+        assert(now-handoff_start<=OBSTACLE_SCAN_TIMEOUT_MSEC+10);
+    }
+    assert(vehicle_state()==VEHICLE_BYPASS);
+    both_line=false; left_line=false; mock_bypass_result=BYPASS_DONE; vehicle_task();
+    assert(vehicle_state()==VEHICLE_STOPPED && motor_left==0 && motor_right==0);
+    both_line=left_line=true;
     vehicle_stop();
     return 0;
 }

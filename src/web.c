@@ -236,7 +236,7 @@ static char const g_page_html[] =
     "<div class=c><b>Obstacle scan</b><br><span id=os>No scan yet.</span>"
     "<div id=sst role=status aria-live=polite></div>"
     "<div class=hint>Edges: left negative, right positive, relative to sensor. "
-    "Depth is unknown. Bypass awaits movement calibration.</div></div>"
+    "Depth unmeasured; bypass assumes 150 mm. Fallback does not verify clearance.</div></div>"
     "<div class=c><b>Ultrasonic Distance Scan</b><br>"
     "<button id=scanNow class=t onclick=\"c('scan')\">SCAN NOW</button> "
     "<span id=usstate role=status aria-live=polite>Idle</span>"
@@ -1911,6 +1911,9 @@ scan_build(char * p_out, size_t capacity)
         length += append_text(p_out + length, capacity - length, "%lu",
                               (unsigned long)p->calibrated_width_mm);
     } else { length += append_text(p_out + length, capacity - length, "null"); }
+    length += append_text(p_out + length, capacity - length,
+        ",\"corrected_width\":%lu,\"width_fallback\":%d",
+        (unsigned long)p->corrected_width_mm,p->width_fallback);
     length += append_text(p_out + length, capacity - length, ",\"calibration_enabled\":%d",
                           OBSTACLE_WIDTH_CALIBRATION_ENABLED);
     length += append_text(p_out + length, capacity - length,
