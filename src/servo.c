@@ -1,3 +1,8 @@
+/** @file servo.c
+ * @brief Project-owned SuperCar implementation.
+ *
+ * NOTE: Remaining standards deviations are tracked in BARR_C_REVIEW.md.
+ */
 /** Ultrasonic pan servo. Increasing angle faces right (confirmed wiring). */
 #include "pico/stdlib.h"
 #include "hardware/clocks.h"
@@ -8,35 +13,38 @@
 #include "servo.h"
 #include "ultrasonic.h"
 
-static int32_t g_angle = -1;
+static int32_t  g_angle = -1;
 static uint64_t g_ready_usec;
-static bool gb_released = false;    // Pulse off: idle, not holding.
+static bool     gb_released = false; // Pulse off: idle, not holding.
 
+/** @brief Convert a clamped servo angle to its calibrated PWM pulse width. */
 static uint16_t
 angle_level(int32_t degrees)
 {
     return (uint16_t)(SERVO_MIN_USEC +
-        degrees * (SERVO_MAX_USEC - SERVO_MIN_USEC) / 180);
+                      ((degrees * (SERVO_MAX_USEC - SERVO_MIN_USEC)) / 180));
 }
 
+/** @brief Configure the servo PWM and select the forward-facing position. */
 void
 servo_init(void)
 {
     uint32_t slice = pwm_gpio_to_slice_num(PIN_SERVO);
     gpio_set_function(PIN_SERVO, GPIO_FUNC_PWM);
     pwm_set_clkdiv_int_frac(slice,
-        (uint8_t)(clock_get_hz(clk_sys) / 1000000u), 0u);
+                            (uint8_t)((clock_get_hz(clk_sys)) / 1000000u), 0u);
     pwm_set_wrap(slice, 19999u);
     servo_set_angle(SERVO_CENTER_DEG);
     pwm_set_enabled(slice, true);
 }
 
+/** @brief Clamp and command the pan angle, invalidating stale range data. */
 void
 servo_set_angle(int32_t degrees)
 {
-    int32_t low = SERVO_CENTER_DEG - SERVO_RANGE_DEG;
+    int32_t low  = SERVO_CENTER_DEG - SERVO_RANGE_DEG;
     int32_t high = SERVO_CENTER_DEG + SERVO_RANGE_DEG;
-    degrees = degrees < low ? low : (degrees > high ? high : degrees);
+    degrees      = degrees < low ? low : (degrees > high ? high : degrees);
     if (degrees == g_angle)
     {
         if (gb_released)
@@ -48,9 +56,9 @@ servo_set_angle(int32_t degrees)
         }
         return;
     }
-    g_angle = degrees;
-    gb_released = false;
-    g_ready_usec = time_us_64() + (uint64_t)SERVO_SETTLE_MSEC * 1000u;
+    g_angle      = degrees;
+    gb_released  = false;
+    g_ready_usec = (time_us_64()) + (((uint64_t)SERVO_SETTLE_MSEC) * 1000u);
     ultrasonic_invalidate();
     pwm_set_gpio_level(PIN_SERVO, angle_level(degrees));
     log_servo("Servo: %ld degrees.", (long)degrees);
@@ -70,10 +78,10 @@ servo_set_angle(int32_t degrees)
 void
 servo_idle_release(bool b_allow)
 {
-    uint64_t release_usec = g_ready_usec +
-                            ((uint64_t)SERVO_RELEASE_MSEC * 1000u);
+    uint64_t release_usec =
+        g_ready_usec + (((uint64_t)SERVO_RELEASE_MSEC) * 1000u);
 
-    if (b_allow && !gb_released && (time_us_64() >= release_usec))
+    if ((b_allow && (!gb_released)) && ((time_us_64()) >= release_usec))
     {
         pwm_set_gpio_level(PIN_SERVO, 0u);
         gb_released = true;
@@ -81,5 +89,17 @@ servo_idle_release(bool b_allow)
     }
 }
 
-int32_t servo_angle(void) { return g_angle; }
-bool servo_is_settled(void) { return time_us_64() >= g_ready_usec; }
+/** @brief Return the last commanded servo angle in degrees. */
+int32_t
+servo_angle(void)
+{
+    return g_angle;
+}
+/** @brief Check whether the calibrated servo settling interval has elapsed. */
+bool
+servo_is_settled(void)
+{
+    return (time_us_64()) >= g_ready_usec;
+}
+
+/*** end of file ***/

@@ -1,0 +1,2 @@
+# Patch context lines intentionally contain diff whitespace.
+review/*.patch -whitespace

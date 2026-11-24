@@ -34,30 +34,30 @@
 #include "hump.h"
 #include "imu.h"
 
-#define RAD_PER_TENTH_DEG   (0.1f * 0.0174532925f)
+#define RAD_PER_TENTH_DEG (0.1f * 0.0174532925f)
 
 // Encoder position units per mm: both wheels' edges added, times the
 // position scale. The edges per m are per wheel.
-#define POS_PER_MM          (((float) ENCODER_POS_SCALE *                 \
-                              (float) (ENC_LEFT_EDGES_PER_M +              \
-                                       ENC_RIGHT_EDGES_PER_M)) / 1000.0f)
+#define POS_PER_MM                                                             \
+    (((float)ENCODER_POS_SCALE *                                               \
+      (float)(ENC_LEFT_EDGES_PER_M + ENC_RIGHT_EDGES_PER_M)) /                 \
+     1000.0f)
 
 // Readings kept for the steady height: one per control tick.
-#define STEADY_TICKS        ((HUMP_STEADY_MSEC * 1000u) / TICK_USEC)
+#define STEADY_TICKS ((HUMP_STEADY_MSEC * 1000u) / TICK_USEC)
 
-static float    g_recent[STEADY_TICKS];         // The last readings.
-static uint32_t g_recent_next  = 0u;
-static uint32_t g_last_pos     = 0u;
-static bool     gb_pos_valid   = false;
-static float    g_now_mm       = 0.0f;  // Height the car is on now.
-static float    g_peak_mm      = 0.0f;  // Highest of it on this hump.
-static float    g_on_mm        = 0.0f;  // Driven since HUMP began.
-static int32_t  g_last_x10     = 0;     // The last hump cleared.
-static int32_t  g_last_tilt    = 0;
-static int32_t  g_run_x10      = 0;     // The highest hump this run.
-static int32_t  g_run_tilt     = 0;
-static uint32_t g_count        = 0u;    // Humps cleared this run.
-
+static float    g_recent[STEADY_TICKS]; // The last readings.
+static uint32_t g_recent_next = 0u;
+static uint32_t g_last_pos    = 0u;
+static bool     gb_pos_valid  = false;
+static float    g_now_mm      = 0.0f; // Height the car is on now.
+static float    g_peak_mm     = 0.0f; // Highest of it on this hump.
+static float    g_on_mm       = 0.0f; // Driven since HUMP began.
+static int32_t  g_last_x10    = 0;    // The last hump cleared.
+static int32_t  g_last_tilt   = 0;
+static int32_t  g_run_x10     = 0; // The highest hump this run.
+static int32_t  g_run_tilt    = 0;
+static uint32_t g_count       = 0u; // Humps cleared this run.
 
 /*!
  * @brief Lifted by this much at this tilt.
@@ -68,13 +68,12 @@ static uint32_t g_count        = 0u;    // Humps cleared this run.
  * @return The height, in mm.
  */
 static float
-lift_mm (uint32_t base_mm, int32_t tilt_x10)
+lift_mm(uint32_t base_mm, int32_t tilt_x10)
 {
     int32_t size = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
 
-    return ((float) base_mm * sinf((float) size * RAD_PER_TENTH_DEG));
-}   /* lift_mm() */
-
+    return (((float)base_mm) * (sinf(((float)size) * RAD_PER_TENTH_DEG)));
+} /* lift_mm() */
 
 /*!
  * @brief Work out the height the car is on. Call every control tick.
@@ -84,19 +83,19 @@ lift_mm (uint32_t base_mm, int32_t tilt_x10)
  * @param[in] b_on_hump True while the car is in HUMP: its peak is kept.
  */
 void
-hump_task (bool b_forward, bool b_on_hump)
+hump_task(bool b_forward, bool b_on_hump)
 {
-    uint32_t pos    = encoder_position();
-    float    caster = lift_mm(HUMP_WHEELBASE_MM, imu_pitch_x10());
-    float    wheel  = lift_mm(WHEEL_TRACK_MM, imu_roll_x10());
-    float    mm     = 0.0f;
-    float    steady = 0.0f;
+    uint32_t pos      = encoder_position();
+    float    caster   = lift_mm(HUMP_WHEELBASE_MM, imu_pitch_x10());
+    float    wheel    = lift_mm(WHEEL_TRACK_MM, imu_roll_x10());
+    float    value_mm = 0.0f;
+    float    steady   = 0.0f;
 
-    (void) b_forward;
+    (void)b_forward;
 
     if (gb_pos_valid)
     {
-        mm = (float) (pos - g_last_pos) / POS_PER_MM;  // Wraps correctly.
+        value_mm = ((float)(pos - g_last_pos)) / POS_PER_MM; // Wraps correctly.
     }
     g_last_pos   = pos;
     gb_pos_valid = true;
@@ -105,11 +104,11 @@ hump_task (bool b_forward, bool b_on_hump)
 
     // Held for HUMP_STEADY_MSEC: the lowest of the recent readings.
     g_recent[g_recent_next] = g_now_mm;
-    g_recent_next = ((g_recent_next + 1u) % STEADY_TICKS);
-    steady = g_recent[0];
+    g_recent_next           = ((g_recent_next + 1u) % STEADY_TICKS);
+    steady                  = g_recent[0];
     for (uint32_t idx = 1u; idx < STEADY_TICKS; idx++)
     {
-        if (g_recent[idx] < steady)
+        if ((g_recent[idx]) < steady)
         {
             steady = g_recent[idx];
         }
@@ -117,7 +116,7 @@ hump_task (bool b_forward, bool b_on_hump)
 
     if (b_on_hump)
     {
-        g_on_mm += mm;
+        g_on_mm += value_mm;
         if (steady > g_peak_mm)
         {
             g_peak_mm = steady;
@@ -125,11 +124,10 @@ hump_task (bool b_forward, bool b_on_hump)
     }
     else
     {
-        g_on_mm = 0.0f;
-        g_peak_mm = steady;     // Includes the climb before it was seen.
+        g_on_mm   = 0.0f;
+        g_peak_mm = steady; // Includes the climb before it was seen.
     }
-}   /* hump_task() */
-
+} /* hump_task() */
 
 /*!
  * @brief Record a hump the car has just cleared.
@@ -137,9 +135,9 @@ hump_task (bool b_forward, bool b_on_hump)
  * @param[in] peak_tilt_x10 Its highest tilt, in tenths of a degree.
  */
 void
-hump_finish (int32_t peak_tilt_x10)
+hump_finish(int32_t peak_tilt_x10)
 {
-    g_last_x10  = (int32_t) ((g_peak_mm * 10.0f) + 0.5f);
+    g_last_x10  = (int32_t)((g_peak_mm * 10.0f) + 0.5f);
     g_last_tilt = peak_tilt_x10;
     if (g_last_x10 > g_run_x10)
     {
@@ -150,22 +148,20 @@ hump_finish (int32_t peak_tilt_x10)
         g_run_tilt = peak_tilt_x10;
     }
     g_count++;
-}   /* hump_finish() */
-
+} /* hump_finish() */
 
 /*!
  * @brief Forget the humps of the last run (a new run is starting).
  */
 void
-hump_new_run (void)
+hump_new_run(void)
 {
     g_last_x10  = 0;
     g_last_tilt = 0;
     g_run_x10   = 0;
     g_run_tilt  = 0;
     g_count     = 0u;
-}   /* hump_new_run() */
-
+} /* hump_new_run() */
 
 /*!
  * @brief Report the height the car is on now, for live display.
@@ -174,11 +170,10 @@ hump_new_run (void)
  *         about 0 on the flat.
  */
 int32_t
-hump_height_x10 (void)
+hump_height_x10(void)
 {
-    return ((int32_t) ((g_now_mm * 10.0f) + 0.5f));
-}   /* hump_height_x10() */
-
+    return ((int32_t)((g_now_mm * 10.0f) + 0.5f));
+} /* hump_height_x10() */
 
 /*!
  * @brief Report how far the car has driven since this hump began.
@@ -186,11 +181,10 @@ hump_height_x10 (void)
  * @return mm; 0 when not on a hump.
  */
 int32_t
-hump_on_mm (void)
+hump_on_mm(void)
 {
-    return ((int32_t) g_on_mm);
-}   /* hump_on_mm() */
-
+    return ((int32_t)g_on_mm);
+} /* hump_on_mm() */
 
 /*!
  * @brief Report the peak height of the last hump cleared.
@@ -198,11 +192,10 @@ hump_on_mm (void)
  * @return Tenths of a mm; 0 before the first hump.
  */
 int32_t
-hump_last_height_x10 (void)
+hump_last_height_x10(void)
 {
     return (g_last_x10);
-}   /* hump_last_height_x10() */
-
+} /* hump_last_height_x10() */
 
 /*!
  * @brief Report the highest tilt on the last hump cleared.
@@ -210,11 +203,10 @@ hump_last_height_x10 (void)
  * @return Tenths of a degree; 0 before the first hump.
  */
 int32_t
-hump_last_tilt_x10 (void)
+hump_last_tilt_x10(void)
 {
     return (g_last_tilt);
-}   /* hump_last_tilt_x10() */
-
+} /* hump_last_tilt_x10() */
 
 /*!
  * @brief Report the highest hump peak of this run.
@@ -222,11 +214,10 @@ hump_last_tilt_x10 (void)
  * @return Tenths of a mm; 0 before the first hump.
  */
 int32_t
-hump_run_height_x10 (void)
+hump_run_height_x10(void)
 {
     return (g_run_x10);
-}   /* hump_run_height_x10() */
-
+} /* hump_run_height_x10() */
 
 /*!
  * @brief Report the highest tilt of this run.
@@ -234,11 +225,10 @@ hump_run_height_x10 (void)
  * @return Tenths of a degree; 0 before the first hump.
  */
 int32_t
-hump_run_tilt_x10 (void)
+hump_run_tilt_x10(void)
 {
     return (g_run_tilt);
-}   /* hump_run_tilt_x10() */
-
+} /* hump_run_tilt_x10() */
 
 /*!
  * @brief Report how many humps were cleared this run.
@@ -246,9 +236,9 @@ hump_run_tilt_x10 (void)
  * @return The count.
  */
 uint32_t
-hump_count (void)
+hump_count(void)
 {
     return (g_count);
-}   /* hump_count() */
+} /* hump_count() */
 
 /*** end of file ***/

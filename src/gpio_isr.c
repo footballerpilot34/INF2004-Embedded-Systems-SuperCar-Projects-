@@ -24,15 +24,11 @@
 #include "gpio_isr.h"
 #include "ultrasonic.h"
 
-
 // NOTE: The SDK's edge flags are small positive enum values, so they can
 // be cast to an unsigned mask safely.
-#define BOTH_EDGES  ((uint32_t) GPIO_IRQ_EDGE_RISE | \
-                     (uint32_t) GPIO_IRQ_EDGE_FALL)
-
+#define BOTH_EDGES ((uint32_t)GPIO_IRQ_EDGE_RISE | (uint32_t)GPIO_IRQ_EDGE_FALL)
 
 static void gpio_dispatch_isr(uint gpio, uint32_t events);
-
 
 /*!
  * @brief Enable edge interrupts on the ECHO, barcode and encoder pins.
@@ -42,19 +38,18 @@ static void gpio_dispatch_isr(uint gpio, uint32_t events);
  * set up the pins.
  */
 void
-gpio_isr_init (void)
+gpio_isr_init(void)
 {
     gpio_set_irq_enabled_with_callback(PIN_US_ECHO, BOTH_EDGES, true,
                                        gpio_dispatch_isr);
     // With the analog barcode reader, edges come from a timer instead.
     gpio_set_irq_enabled(PIN_BARCODE, BOTH_EDGES, !BARCODE_USE_ANALOG);
     // Encoder pins, plus the free GPIOs while the pin finder is on.
-    for (uint32_t idx = 0u; idx < encoder_watch_count(); idx++)
+    for (uint32_t idx = 0u; idx < (encoder_watch_count()); idx++)
     {
         gpio_set_irq_enabled(encoder_watch_pin(idx), BOTH_EDGES, true);
     }
-}   /* gpio_isr_init() */
-
+} /* gpio_isr_init() */
 
 /*!
  * @brief Route a GPIO edge to the driver that owns the pin.
@@ -63,7 +58,7 @@ gpio_isr_init (void)
  * @param[in] events The edge events that occurred.
  */
 static void
-gpio_dispatch_isr (uint gpio, uint32_t events)
+gpio_dispatch_isr(uint gpio, uint32_t events)
 {
     if (PIN_US_ECHO == gpio)
     {
@@ -81,6 +76,6 @@ gpio_dispatch_isr (uint gpio, uint32_t events)
     {
         // No other pin has edge interrupts enabled.
     }
-}   /* gpio_dispatch_isr() */
+} /* gpio_dispatch_isr() */
 
 /*** end of file ***/

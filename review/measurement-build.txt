@@ -1,0 +1,10 @@
+[  6%] Checking project-owned C layout
+[  6%] Built target cyw43_driver_picow_cyw43_bus_pio_spi_pio_h
+[  6%] Built target bs2_default
+[  6%] Built target bs2_default_library
+50 project-owned files reviewed; 0 findings.
+{}
+[  6%] Built target supercar_style_check
+[  6%] Building C object CMakeFiles/supercar.dir/src/obstacle.c.o
+[  6%] Linking CXX executable supercar.elf
+[100%] Built target supercar

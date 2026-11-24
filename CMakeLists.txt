@@ -133,6 +133,15 @@ target_link_libraries(supercar
     pico_lwip_mqtt                        # MQTT telemetry and commands
 )
 
+# Enforce the portable layout checks without touching SDK or vendor sources.
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+add_custom_target(supercar_style_check
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/tools/check_barr.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    COMMENT "Checking project-owned C layout"
+)
+add_dependencies(supercar supercar_style_check)
+
 # Name shown in a phone hotspot's device list (= WIFI_HOST_NAME).
 target_compile_definitions(supercar PRIVATE
     CYW43_HOST_NAME="supercar-aai14"

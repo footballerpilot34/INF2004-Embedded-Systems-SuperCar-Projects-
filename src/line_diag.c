@@ -32,28 +32,24 @@
 #include "log.h"
 #include "motor.h"
 
+#define STATUS_EVERY_TICKS 200u // 2 s at 10 ms per tick.
 
-#define STATUS_EVERY_TICKS  200u    // 2 s at 10 ms per tick.
-
-
-static bool       gb_active      = false;
+static bool       gb_active = false;
 static line_raw_t g_last_raw;
 static uint32_t   g_left_changes  = 0u;
 static uint32_t   g_right_changes = 0u;
 static uint32_t   g_ticks         = 0u;
 
 // Learnt levels, per sensor. "Known" flags say whether each was recorded.
-static bool       gb_black_known  = false;
-static bool       gb_white_known  = false;
+static bool       gb_black_known = false;
+static bool       gb_white_known = false;
 static line_raw_t g_black_raw;
 static line_raw_t g_white_raw;
 
-
 static char const * level_text(bool b_high);
 static char const * colour_text(bool b_left, bool b_high);
-static void         polarity_apply(bool b_left, char const * p_name,
-                                   bool b_black_high, bool b_white_high);
-
+static void polarity_apply(bool b_left, char const * p_name, bool b_black_high,
+                           bool b_white_high);
 
 /*!
  * @brief Enter diagnostic mode: brake, check wiring, show the levels.
@@ -62,7 +58,7 @@ static void         polarity_apply(bool b_left, char const * p_name,
  * Call only while the car is parked (READY or STOPPED).
  */
 void
-line_diag_enter (void)
+line_diag_enter(void)
 {
     bool b_left_ok  = line_sensor_is_driven(true);
     bool b_right_ok = line_sensor_is_driven(false);
@@ -76,34 +72,32 @@ line_diag_enter (void)
 
     log_line("DIAG ON: motors disabled. Move each IR sensor over black "
              "and white by hand.");
-    log_line("DIAG wiring: LEFT GP%u %s, RIGHT GP%u %s.",
-             PIN_LINE_LEFT,
+    log_line("DIAG wiring: LEFT GP%u %s, RIGHT GP%u %s.", PIN_LINE_LEFT,
              (b_left_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"),
-             PIN_LINE_RIGHT, (b_right_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"));
+             PIN_LINE_RIGHT,
+             (b_right_ok ? "driven (OK)" : "FLOATING: check DOUT/VCC/GND"));
     log_line("DIAG now: LEFT=%s RIGHT=%s. Digital DOUT only: no analogue "
              "values are wired.",
              level_text(g_last_raw.b_left_high),
              level_text(g_last_raw.b_right_high));
     log_line("DIAG: both over black -> 'b' / BLACK; both over white -> "
              "'n' / WHITE; 'd' / DIAG to exit.");
-}   /* line_diag_enter() */
-
+} /* line_diag_enter() */
 
 /*!
  * @brief Leave diagnostic mode and report the change counts.
  */
 void
-line_diag_exit (void)
+line_diag_exit(void)
 {
     if (gb_active)
     {
-        log_line("DIAG OFF. Changes seen: LEFT %" PRIu32 ", RIGHT %"
-                 PRIu32 ".", g_left_changes, g_right_changes);
+        log_line("DIAG OFF. Changes seen: LEFT %" PRIu32 ", RIGHT %" PRIu32 ".",
+                 g_left_changes, g_right_changes);
     }
 
     gb_active = false;
-}   /* line_diag_exit() */
-
+} /* line_diag_exit() */
 
 /*!
  * @brief Report whether diagnostic mode is on.
@@ -111,11 +105,10 @@ line_diag_exit (void)
  * @return True while the motors must stay off for sensor testing.
  */
 bool
-line_diag_is_active (void)
+line_diag_is_active(void)
 {
     return (gb_active);
-}   /* line_diag_is_active() */
-
+} /* line_diag_is_active() */
 
 /*!
  * @brief Log every raw level change, plus a status line every 2 s.
@@ -124,15 +117,15 @@ line_diag_is_active (void)
  * Call every control tick. Does nothing unless diagnostic mode is on.
  */
 void
-line_diag_task (void)
+line_diag_task(void)
 {
     line_raw_t raw = line_sensor_raw();
 
     if (gb_active)
     {
-        motor_set(0, 0);    // Belt and braces: no motion while testing.
+        motor_set(0, 0); // Belt and braces: no motion while testing.
 
-        if (raw.b_left_high != g_last_raw.b_left_high)
+        if ((raw.b_left_high) != (g_last_raw.b_left_high))
         {
             g_left_changes++;
             log_line("DIAG LEFT  GP%u: %s -> %s (%s)", PIN_LINE_LEFT,
@@ -141,7 +134,7 @@ line_diag_task (void)
                      colour_text(true, raw.b_left_high));
         }
 
-        if (raw.b_right_high != g_last_raw.b_right_high)
+        if ((raw.b_right_high) != (g_last_raw.b_right_high))
         {
             g_right_changes++;
             log_line("DIAG RIGHT GP%u: %s -> %s (%s)", PIN_LINE_RIGHT,
@@ -158,14 +151,12 @@ line_diag_task (void)
                      level_text(raw.b_left_high),
                      colour_text(true, raw.b_left_high), g_left_changes,
                      level_text(raw.b_right_high),
-                     colour_text(false, raw.b_right_high),
-                     g_right_changes);
+                     colour_text(false, raw.b_right_high), g_right_changes);
         }
 
         g_last_raw = raw;
     }
-}   /* line_diag_task() */
-
+} /* line_diag_task() */
 
 /*!
  * @brief Record the current levels as black or white, and set each
@@ -175,7 +166,7 @@ line_diag_task (void)
  *                    both are over white.
  */
 void
-line_diag_learn (bool b_black)
+line_diag_learn(bool b_black)
 {
     line_raw_t raw = line_sensor_raw();
 
@@ -189,27 +180,24 @@ line_diag_learn (bool b_black)
         g_black_raw    = raw;
         gb_black_known = true;
         log_line("DIAG learnt BLACK: LEFT=%s RIGHT=%s.",
-                 level_text(raw.b_left_high),
-                 level_text(raw.b_right_high));
+                 level_text(raw.b_left_high), level_text(raw.b_right_high));
     }
     else
     {
         g_white_raw    = raw;
         gb_white_known = true;
         log_line("DIAG learnt WHITE: LEFT=%s RIGHT=%s.",
-                 level_text(raw.b_left_high),
-                 level_text(raw.b_right_high));
+                 level_text(raw.b_left_high), level_text(raw.b_right_high));
     }
 
-    if (gb_active && gb_black_known && gb_white_known)
+    if ((gb_active && gb_black_known) && gb_white_known)
     {
         polarity_apply(true, "LEFT", g_black_raw.b_left_high,
                        g_white_raw.b_left_high);
         polarity_apply(false, "RIGHT", g_black_raw.b_right_high,
                        g_white_raw.b_right_high);
     }
-}   /* line_diag_learn() */
-
+} /* line_diag_learn() */
 
 /*!
  * @brief Set one sensor's polarity from its black and white readings, or
@@ -221,8 +209,8 @@ line_diag_learn (bool b_black)
  * @param[in] b_white_high The level read over white.
  */
 static void
-polarity_apply (bool b_left, char const * p_name, bool b_black_high,
-                bool b_white_high)
+polarity_apply(bool b_left, char const * p_name, bool b_black_high,
+               bool b_white_high)
 {
     if (b_black_high == b_white_high)
     {
@@ -235,12 +223,10 @@ polarity_apply (bool b_left, char const * p_name, bool b_black_high,
         line_sensor_set_black_level(b_left, b_black_high);
         log_line("DIAG %s OK: black=%s white=%s. Set config.h "
                  "LINE_BLACK_IS_HIGH %s.",
-                 p_name, level_text(b_black_high),
-                 level_text(b_white_high),
+                 p_name, level_text(b_black_high), level_text(b_white_high),
                  (b_black_high ? "true" : "false"));
     }
-}   /* polarity_apply() */
-
+} /* polarity_apply() */
 
 /*!
  * @brief Name a raw level.
@@ -250,11 +236,10 @@ polarity_apply (bool b_left, char const * p_name, bool b_black_high,
  * @return "HIGH" or "LOW".
  */
 static char const *
-level_text (bool b_high)
+level_text(bool b_high)
 {
     return (b_high ? "HIGH" : "LOW");
-}   /* level_text() */
-
+} /* level_text() */
 
 /*!
  * @brief Name the colour a raw level means with the current polarity.
@@ -265,10 +250,9 @@ level_text (bool b_high)
  * @return "black" or "white".
  */
 static char const *
-colour_text (bool b_left, bool b_high)
+colour_text(bool b_left, bool b_high)
 {
-    return ((line_sensor_black_level(b_left) == b_high) ? "black"
-                                                        : "white");
-}   /* colour_text() */
+    return (((line_sensor_black_level(b_left)) == b_high) ? "black" : "white");
+} /* colour_text() */
 
 /*** end of file ***/

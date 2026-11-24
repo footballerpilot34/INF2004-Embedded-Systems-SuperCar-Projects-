@@ -73,42 +73,41 @@
 #include "vehicle.h"
 #include "web.h"
 
+#define USB_WAIT_MSEC 3000u
+#define USB_POLL_MSEC 100u
+#define RESTART_TEXT_BYTES 96u      // "WATCHDOG: ... froze in ...".
+#define FLASH_BYTES_MAX 0x01000000u // XIP window: 16 MB.
+#define WHEEL_TEST_MSEC 1000u
+#define WHEEL_TEST_PAUSE_MSEC 500u
+#define WHEEL_TEST_SPEED 20
 
-#define USB_WAIT_MSEC           3000u
-#define USB_POLL_MSEC           100u
-#define RESTART_TEXT_BYTES      96u     // "WATCHDOG: ... froze in ...".
-#define FLASH_BYTES_MAX         0x01000000u // XIP window: 16 MB.
-#define WHEEL_TEST_MSEC         1000u
-#define WHEEL_TEST_PAUSE_MSEC   500u
-#define WHEEL_TEST_SPEED        20
-
-
-#define KEY_START               's'
-#define KEY_STOP                'x'
-#define KEY_WHEEL_TEST          'w'
-#define KEY_IMU_CALIBRATE       'c'
-#define KEY_DIAG                'd'
-#define KEY_LEARN_BLACK         'b'
-#define KEY_LEARN_WHITE         'n'
-#define KEY_TURN_LEFT           'l'
-#define KEY_TURN_RIGHT          'r'
-#define KEY_UTURN               'u'
-#define KEY_BARCODE_TEST        't'
-#define KEY_ENCODER_MARK        'e'
-#define KEY_STATIONARY_SCAN     'g'
-#define KEY_BYPASS_TEST         'v'
-#define SCAN_READY_TIMEOUT_MSEC 2000u // Nonblocking wait for a fresh forward ping.
+#define KEY_START 's'
+#define KEY_STOP 'x'
+#define KEY_WHEEL_TEST 'w'
+#define KEY_IMU_CALIBRATE 'c'
+#define KEY_DIAG 'd'
+#define KEY_LEARN_BLACK 'b'
+#define KEY_LEARN_WHITE 'n'
+#define KEY_TURN_LEFT 'l'
+#define KEY_TURN_RIGHT 'r'
+#define KEY_UTURN 'u'
+#define KEY_BARCODE_TEST 't'
+#define KEY_ENCODER_MARK 'e'
+#define KEY_STATIONARY_SCAN 'g'
+#define KEY_BYPASS_TEST 'v'
+#define SCAN_READY_TIMEOUT_MSEC                                                \
+    2000u // Nonblocking wait for a fresh forward ping.
 
 static bool g_encoder_marked;
 
 static void          usb_wait(void);
 static void          buttons_init(void);
 static web_command_t buttons_poll(void);
-static bool g_stationary_scan_test = false;
-static bool gb_imu_cal_due = true;      // Calibrate at power-up, and
-static bool gb_was_online  = false;     // on joining a hotspot.
-static bool g_stationary_scan_starting = false;
-static uint32_t g_stationary_scan_since = 0u;
+static bool          g_stationary_scan_test = false;
+static bool          gb_imu_cal_due = true;  // Calibrate at power-up, and
+static bool          gb_was_online  = false; // on joining a hotspot.
+static bool          g_stationary_scan_starting = false;
+static uint32_t      g_stationary_scan_since    = 0u;
 
 static web_command_t serial_poll(void);
 static void          command_run(web_command_t command);
@@ -126,14 +125,13 @@ static void          stationary_scan_test_start(void);
 static void          stationary_scan_test_cancel(void);
 static void          stationary_scan_test_task(void);
 
-
 /*!
  * @brief Set up every module, then run the 10 ms control loop forever.
  *
  * @return Never returns.
  */
 int
-main (void)
+main(void)
 {
     uint64_t next_tick_usec = 0u;
     uint32_t tick_count     = 0u;
@@ -145,7 +143,7 @@ main (void)
     usb_wait();
     log_printf("=== SuperCar AAI14: line + barcode + hump/wall ===");
     {
-        char const * p_reason = restart_reason();   // Reads it once.
+        char const * p_reason = restart_reason(); // Reads it once.
 
         web_set_restart_reason(p_reason);
         log_printf("Last restart: %s.", p_reason);
@@ -161,11 +159,11 @@ main (void)
     buttons_init();
 
     log_printf("Checking LSM303DLHC...");
-    (void) imu_init();
+    (void)imu_init();
 
-    (void) web_init();  // Logs its own result; the car runs either way.
-    mqtt_comm_init();   // Connects once on a hotspot with a broker set.
-    power_init();       // After Wi-Fi: shares GP29 with the Wi-Fi chip.
+    (void)web_init(); // Logs its own result; the car runs either way.
+    mqtt_comm_init(); // Connects once on a hotspot with a broker set.
+    power_init();     // After Wi-Fi: shares GP29 with the Wi-Fi chip.
 
     vehicle_init();
     log_printf("READY. START: GP20 / 's' / web. STOP: GP21 / 'x' / web. "
@@ -173,11 +171,12 @@ main (void)
 
     // Restart by itself if the loop ever stops (a freeze), instead of
     // sitting dead; the page then reports a watchdog restart.
-    watchdog_enable(WATCHDOG_MSEC, true);   // Paused while debugging.
+    watchdog_enable(WATCHDOG_MSEC, true); // Paused while debugging.
     log_printf("Watchdog on: the car restarts itself if it freezes for "
-               "%u ms.", WATCHDOG_MSEC);
+               "%u ms.",
+               WATCHDOG_MSEC);
 
-    next_tick_usec = time_us_64() + TICK_USEC;
+    next_tick_usec = (time_us_64()) + TICK_USEC;
 
     for (;;)
     {
@@ -186,7 +185,7 @@ main (void)
         watchdog_update();
         watchdog_hw->scratch[STAGE_TIME_SCRATCH] =
             to_ms_since_boot(get_absolute_time());
-        web_task();                         // Sets its own stages.
+        web_task(); // Sets its own stages.
         stage_set(STAGE_COMMANDS);
         imu_auto_calibrate();
         stage_set(STAGE_MQTT);
@@ -202,7 +201,7 @@ main (void)
         stage_set(STAGE_SERVO);
         if (web_servo_take(&servo_deg))
         {
-            if (vehicle_is_moving() || g_stationary_scan_test)
+            if ((vehicle_is_moving()) || g_stationary_scan_test)
             {
                 log_servo("Servo: locked while moving or scanning.");
             }
@@ -213,9 +212,9 @@ main (void)
         }
 
         // The scan and the bypass aim the servo themselves.
-        if (vehicle_is_moving() &&
-            (VEHICLE_OBSTACLE_SCAN != vehicle_state()) &&
-            (VEHICLE_BYPASS != vehicle_state()))
+        if (((vehicle_is_moving()) &&
+             (VEHICLE_OBSTACLE_SCAN != (vehicle_state()))) &&
+            (VEHICLE_BYPASS != (vehicle_state())))
         {
             servo_set_angle(SERVO_CENTER_DEG);
         }
@@ -231,11 +230,10 @@ main (void)
         stage_set(STAGE_BARCODE);
         barcode_report(barcode_task());
         stage_set(STAGE_VEHICLE);
-        if (vehicle_is_moving() &&
-            (VEHICLE_OBSTACLE_SCAN != vehicle_state()) &&
-            (VEHICLE_BYPASS != vehicle_state()) &&
-            ((!servo_is_settled()) ||
-             !ultrasonic_measurement_ready()))
+        if ((((vehicle_is_moving()) &&
+              (VEHICLE_OBSTACLE_SCAN != (vehicle_state()))) &&
+             (VEHICLE_BYPASS != (vehicle_state()))) &&
+            ((!servo_is_settled()) || (!ultrasonic_measurement_ready())))
         {
             motor_set(0, 0);
         }
@@ -245,9 +243,9 @@ main (void)
         }
         stage_set(STAGE_SCAN_TEST);
         stationary_scan_test_task();
-        servo_idle_release(IDLE_POWER_SAVING && vehicle_is_idle() &&
-                           !g_stationary_scan_test &&
-                           !obstacle_scan_active());
+        servo_idle_release(((IDLE_POWER_SAVING && (vehicle_is_idle())) &&
+                            (!g_stationary_scan_test)) &&
+                           (!obstacle_scan_active()));
 
         stage_set(STAGE_LINE_DIAG);
         line_diag_task();
@@ -263,7 +261,7 @@ main (void)
 
         // Wait for the next 10 ms tick.
         stage_set(STAGE_TICK_WAIT);
-        while (time_us_64() < next_tick_usec)
+        while ((time_us_64()) < next_tick_usec)
         {
             tight_loop_contents();
         }
@@ -271,15 +269,14 @@ main (void)
 
         // After a long blocking action (wheel test), skip the
         // missed ticks instead of running them all at once.
-        if (time_us_64() > next_tick_usec)
+        if ((time_us_64()) > next_tick_usec)
         {
-            next_tick_usec = time_us_64() + TICK_USEC;
+            next_tick_usec = (time_us_64()) + TICK_USEC;
         }
     }
 
     return (0);
-}   /* main() */
-
+} /* main() */
 
 /*!
  * @brief lwIP's failed-check hook (LWIP_PLATFORM_ASSERT, lwipopts.h):
@@ -289,13 +286,12 @@ main (void)
  * @param[in] p_message lwIP's message (a string literal, in flash).
  */
 void
-lwip_assert_record (char const * p_message)
+lwip_assert_record(char const * p_message)
 {
-    watchdog_hw->scratch[STAGE_FAULT_SCRATCH] = (uint32_t) p_message;
+    watchdog_hw->scratch[STAGE_FAULT_SCRATCH] = (uint32_t)p_message;
     watchdog_hw->scratch[STAGE_KIND_SCRATCH]  = STAGE_KIND_ASSERT;
-    panic("lwIP: %s", p_message);   // Prints, then waits for the watchdog.
-}   /* lwip_assert_record() */
-
+    panic("lwIP: %s", p_message); // Prints, then waits for the watchdog.
+} /* lwip_assert_record() */
 
 /*!
  * @brief CPU hard fault (a bad pointer, for example): record it for the
@@ -305,7 +301,7 @@ lwip_assert_record (char const * p_message)
  * Replaces the SDK's default handler, which would just stop for good.
  */
 void
-isr_hardfault (void)
+isr_hardfault(void)
 {
     watchdog_hw->scratch[STAGE_KIND_SCRATCH] = STAGE_KIND_HARDFAULT;
 
@@ -313,8 +309,7 @@ isr_hardfault (void)
     {
         // Wait for the watchdog (WATCHDOG_MSEC).
     }
-}   /* isr_hardfault() */
-
+} /* isr_hardfault() */
 
 /*!
  * @brief Say why the Pico last started, from the chip's reset flags.
@@ -328,57 +323,75 @@ isr_hardfault (void)
  * @return A short description.
  */
 static char const *
-restart_reason (void)
+restart_reason(void)
 {
-    static char const * const stage_names[STAGE_COUNT] =
-    {
-        "unknown", "Wi-Fi chip/network polling", "web server",
-        "hotspot joining", "battery reading", "buttons", "serial keys",
-        "running a command", "servo", "ultrasonic", "IMU", "barcode",
-        "vehicle control", "obstacle scan test", "IR diag", "buzzer",
-        "telemetry", "MQTT", "waiting for the next tick"
-    };
+    static char const * const stage_names[STAGE_COUNT] = {
+        "unknown",
+        "Wi-Fi chip/network polling",
+        "web server",
+        "hotspot joining",
+        "battery reading",
+        "buttons",
+        "serial keys",
+        "running a command",
+        "servo",
+        "ultrasonic",
+        "IMU",
+        "barcode",
+        "vehicle control",
+        "obstacle scan test",
+        "IR diag",
+        "buzzer",
+        "telemetry",
+        "MQTT",
+        "waiting for the next tick"};
     static char  text[RESTART_TEXT_BYTES];
     uint32_t     flags    = vreg_and_chip_reset_hw->chip_reset;
     uint32_t     marker   = watchdog_hw->scratch[STAGE_SCRATCH];
-    uint32_t     stage    = (marker & ~STAGE_MAGIC_MASK);
+    uint32_t     stage    = (marker & (~STAGE_MAGIC_MASK));
     char const * p_reason = "unknown";
 
-    uint32_t     kind     = watchdog_hw->scratch[STAGE_KIND_SCRATCH];
-    uint32_t     message  = watchdog_hw->scratch[STAGE_FAULT_SCRATCH];
+    uint32_t kind    = watchdog_hw->scratch[STAGE_KIND_SCRATCH];
+    uint32_t message = watchdog_hw->scratch[STAGE_FAULT_SCRATCH];
 
     // The freeze finder's record is only valid if we wrote it; clear it so
     // a later, different restart is not mistaken for this one.
     watchdog_hw->scratch[STAGE_SCRATCH]      = 0u;
     watchdog_hw->scratch[STAGE_KIND_SCRATCH] = 0u;
 
-    if (watchdog_enable_caused_reboot() && (STAGE_KIND_ASSERT == kind) &&
-        (message >= XIP_BASE) && (message < (XIP_BASE + FLASH_BYTES_MAX)))
+    if ((((watchdog_enable_caused_reboot()) && (STAGE_KIND_ASSERT == kind)) &&
+         (message >= XIP_BASE)) &&
+        (message < (XIP_BASE + FLASH_BYTES_MAX)))
     {
         // lwIP stopped on a failed check; its message is a string in flash
         // (the same firmware is still loaded), so it can be shown.
-        (void) snprintf(text, sizeof(text), "CRASH: network stack check "
-                        "failed: %.60s", (char const *) message);
+        (void)snprintf(text, sizeof(text),
+                       "CRASH: network stack check "
+                       "failed: %.60s",
+                       (char const *)message);
         p_reason = text;
     }
-    else if (watchdog_enable_caused_reboot() &&
+    else if ((watchdog_enable_caused_reboot()) &&
              (STAGE_KIND_HARDFAULT == kind))
     {
-        (void) snprintf(text, sizeof(text), "CRASH: CPU hard fault in %s",
-                        ((((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
-                          (stage < (uint32_t) STAGE_COUNT)) ?
-                         stage_names[stage] : "unknown"));
+        (void)snprintf(text, sizeof(text), "CRASH: CPU hard fault in %s",
+                       ((((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
+                         (stage < ((uint32_t)STAGE_COUNT)))
+                            ? stage_names[stage]
+                            : "unknown"));
         p_reason = text;
     }
     else if (watchdog_enable_caused_reboot())
     {
         // Our watchdog fired: the loop stopped for WATCHDOG_MSEC.
-        (void) snprintf(text, sizeof(text), "WATCHDOG: the program froze in "
-                        "%s, %" PRIu32 " s after power-up",
-                        ((((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
-                          (stage < (uint32_t) STAGE_COUNT)) ?
-                         stage_names[stage] : "unknown"),
-                        (watchdog_hw->scratch[STAGE_TIME_SCRATCH] / 1000u));
+        (void)snprintf(text, sizeof(text),
+                       "WATCHDOG: the program froze in "
+                       "%s, %" PRIu32 " s after power-up",
+                       ((((marker & STAGE_MAGIC_MASK) == STAGE_MAGIC) &&
+                         (stage < ((uint32_t)STAGE_COUNT)))
+                            ? stage_names[stage]
+                            : "unknown"),
+                       ((watchdog_hw->scratch[STAGE_TIME_SCRATCH]) / 1000u));
         p_reason = text;
     }
     else if (watchdog_caused_reboot())
@@ -389,8 +402,8 @@ restart_reason (void)
     {
         p_reason = "reset button (RUN pin)";
     }
-    else if (0u != (flags &
-                    VREG_AND_CHIP_RESET_CHIP_RESET_HAD_PSM_RESTART_BITS))
+    else if (0u !=
+             (flags & VREG_AND_CHIP_RESET_CHIP_RESET_HAD_PSM_RESTART_BITS))
     {
         p_reason = "debugger restart";
     }
@@ -404,8 +417,7 @@ restart_reason (void)
     }
 
     return (p_reason);
-}   /* restart_reason() */
-
+} /* restart_reason() */
 
 /*!
  * @brief Run one command, from whichever source it came.
@@ -413,21 +425,26 @@ restart_reason (void)
  * @param[in] command The command (WEB_CMD_NONE does nothing).
  */
 static void
-command_run (web_command_t command)
+command_run(web_command_t command)
 {
-    if (g_stationary_scan_test &&
-        (command == WEB_CMD_START || command == WEB_CMD_WHEEL_TEST ||
-         command == WEB_CMD_TURN_LEFT || command == WEB_CMD_TURN_RIGHT ||
-         command == WEB_CMD_UTURN || command == WEB_CMD_BARCODE_TEST ||
-         command == WEB_CMD_FEATURE_TEST || command == WEB_CMD_BYPASS_TEST ||
-         command == WEB_CMD_BARCODE_STATIC || command == WEB_CMD_IMU_CALIBRATE))
+    if (g_stationary_scan_test && ((((((((((command == WEB_CMD_START) ||
+                                           (command == WEB_CMD_WHEEL_TEST)) ||
+                                          (command == WEB_CMD_TURN_LEFT)) ||
+                                         (command == WEB_CMD_TURN_RIGHT)) ||
+                                        (command == WEB_CMD_UTURN)) ||
+                                       (command == WEB_CMD_BARCODE_TEST)) ||
+                                      (command == WEB_CMD_FEATURE_TEST)) ||
+                                     (command == WEB_CMD_BYPASS_TEST)) ||
+                                    (command == WEB_CMD_BARCODE_STATIC)) ||
+                                   (command == WEB_CMD_IMU_CALIBRATE)))
     {
-        web_set_scan_test_status("REJECTED: scan running; STOP before driving or other tests.");
+        web_set_scan_test_status(
+            "REJECTED: scan running; STOP before driving or other tests.");
         return;
     }
     // Any other command cancels an unfinished roll measurement; the mark
     // command itself (the second press) must not, or it never finishes.
-    if ((WEB_CMD_NONE != command) && (WEB_CMD_ENCODER_MARK != command) &&
+    if (((WEB_CMD_NONE != command) && (WEB_CMD_ENCODER_MARK != command)) &&
         g_encoder_marked)
     {
         g_encoder_marked = false;
@@ -436,142 +453,145 @@ command_run (web_command_t command)
     }
     switch (command)
     {
-    case WEB_CMD_STOP:
-        stationary_scan_test_cancel();
-        vehicle_stop();
-    break;
+        case WEB_CMD_STOP:
+            stationary_scan_test_cancel();
+            vehicle_stop();
+            break;
 
-    case WEB_CMD_BYPASS_TEST:
-        if (!line_diag_is_active()) { vehicle_bypass_test(); }
-    break;
+        case WEB_CMD_BYPASS_TEST:
+            if (!line_diag_is_active())
+            {
+                vehicle_bypass_test();
+            }
+            break;
 
-    case WEB_CMD_STATIONARY_SCAN:
-        stationary_scan_test_start();
-    break;
+        case WEB_CMD_STATIONARY_SCAN:
+            stationary_scan_test_start();
+            break;
 
-    case WEB_CMD_ENCODER_MARK:
-        encoder_calibration_mark();     // Same as serial 'e'.
-    break;
+        case WEB_CMD_ENCODER_MARK:
+            encoder_calibration_mark(); // Same as serial 'e'.
+            break;
 
-    case WEB_CMD_START:
-        if (line_diag_is_active())
-        {
-            log_printf("IR DIAG is on (motors off): turn it off first.");
-        }
-        else
-        {
-            vehicle_start();
-        }
-    break;
+        case WEB_CMD_START:
+            if (line_diag_is_active())
+            {
+                log_printf("IR DIAG is on (motors off): turn it off first.");
+            }
+            else
+            {
+                vehicle_start();
+            }
+            break;
 
-    case WEB_CMD_DIAG:
-        if (line_diag_is_active())
-        {
-            line_diag_exit();
-        }
-        else if (vehicle_is_idle())
-        {
-            line_diag_enter();
-        }
-        else
-        {
-            log_printf("Stop the car before IR DIAG.");
-        }
-    break;
+        case WEB_CMD_DIAG:
+            if (line_diag_is_active())
+            {
+                line_diag_exit();
+            }
+            else if (vehicle_is_idle())
+            {
+                line_diag_enter();
+            }
+            else
+            {
+                log_printf("Stop the car before IR DIAG.");
+            }
+            break;
 
-    case WEB_CMD_LEARN_BLACK:
-        line_diag_learn(true);
-    break;
+        case WEB_CMD_LEARN_BLACK:
+            line_diag_learn(true);
+            break;
 
-    case WEB_CMD_LEARN_WHITE:
-        line_diag_learn(false);
-    break;
+        case WEB_CMD_LEARN_WHITE:
+            line_diag_learn(false);
+            break;
 
-    case WEB_CMD_IMU_CALIBRATE:
-        if (vehicle_is_idle())
-        {
-            imu_calibrate_run();
-        }
-        else
-        {
-            log_printf("Stop the car before calibrating the IMU.");
-        }
-    break;
+        case WEB_CMD_IMU_CALIBRATE:
+            if (vehicle_is_idle())
+            {
+                imu_calibrate_run();
+            }
+            else
+            {
+                log_printf("Stop the car before calibrating the IMU.");
+            }
+            break;
 
-    case WEB_CMD_WHEEL_TEST:
-        if (line_diag_is_active())
-        {
-            log_printf("IR DIAG is on (motors off): turn it off first.");
-        }
-        else if (vehicle_is_idle())
-        {
-            wheel_test();
-        }
-        else
-        {
-            log_printf("Stop the car before the wheel test.");
-        }
-    break;
+        case WEB_CMD_WHEEL_TEST:
+            if (line_diag_is_active())
+            {
+                log_printf("IR DIAG is on (motors off): turn it off first.");
+            }
+            else if (vehicle_is_idle())
+            {
+                wheel_test();
+            }
+            else
+            {
+                log_printf("Stop the car before the wheel test.");
+            }
+            break;
 
-    case WEB_CMD_TURN_LEFT:
-        turn_test(BARCODE_CMD_LEFT);
-    break;
+        case WEB_CMD_TURN_LEFT:
+            turn_test(BARCODE_CMD_LEFT);
+            break;
 
-    case WEB_CMD_TURN_RIGHT:
-        turn_test(BARCODE_CMD_RIGHT);
-    break;
+        case WEB_CMD_TURN_RIGHT:
+            turn_test(BARCODE_CMD_RIGHT);
+            break;
 
-    case WEB_CMD_UTURN:
-        turn_test(BARCODE_CMD_UTURN);
-    break;
+        case WEB_CMD_UTURN:
+            turn_test(BARCODE_CMD_UTURN);
+            break;
 
-    case WEB_CMD_BARCODE_TEST:
-        if (line_diag_is_active())
-        {
-            log_printf("IR DIAG is on (motors off): turn it off first.");
-        }
-        else
-        {
-            vehicle_barcode_test();
-        }
-    break;
+        case WEB_CMD_BARCODE_TEST:
+            if (line_diag_is_active())
+            {
+                log_printf("IR DIAG is on (motors off): turn it off first.");
+            }
+            else
+            {
+                vehicle_barcode_test();
+            }
+            break;
 
-    case WEB_CMD_FEATURE_TEST:
-        if (line_diag_is_active())
-        {
-            log_printf("IR DIAG is on (motors off): turn it off first.");
-        }
-        else
-        {
-            bool b_line    = true;
-            bool b_avoid   = true;
-            bool b_barcode = true;
-            bool b_hump    = true;
+        case WEB_CMD_FEATURE_TEST:
+            if (line_diag_is_active())
+            {
+                log_printf("IR DIAG is on (motors off): turn it off first.");
+            }
+            else
+            {
+                bool b_line    = true;
+                bool b_avoid   = true;
+                bool b_barcode = true;
+                bool b_hump    = true;
 
-            web_features(&b_line, &b_avoid, &b_barcode, &b_hump);
-            vehicle_feature_test(b_line, b_avoid, b_barcode, b_hump);
-        }
-    break;
+                web_features(&b_line, &b_avoid, &b_barcode, &b_hump);
+                vehicle_feature_test(b_line, b_avoid, b_barcode, b_hump);
+            }
+            break;
 
-    case WEB_CMD_BARCODE_STATIC:
-        if (line_diag_is_active())
-        {
-            log_printf("IR DIAG is on (motors off): turn it off first.");
-        }
-        else
-        {
-            vehicle_barcode_static();
-        }
-    break;
+        case WEB_CMD_BARCODE_STATIC:
+            if (line_diag_is_active())
+            {
+                log_printf("IR DIAG is on (motors off): turn it off first.");
+            }
+            else
+            {
+                vehicle_barcode_static();
+            }
+            break;
 
-    case WEB_CMD_NONE:
-    default:
-        // Nothing to do.
-    break;
+        case WEB_CMD_NONE:
+        default:
+            // Nothing to do.
+            break;
     }
-}   /* command_run() */
+} /* command_run() */
 
-
+/** @brief Record the stationary scan status for terminal and dashboard. */
 static void
 stationary_scan_test_status(char const * p_status)
 {
@@ -579,11 +599,11 @@ stationary_scan_test_status(char const * p_status)
     log_printf("STATIONARY SCAN TEST %s", p_status);
 }
 
-
+/** @brief Start a stationary scan only when vehicle safety guards permit. */
 static void
 stationary_scan_test_start(void)
 {
-    if (g_stationary_scan_test || obstacle_scan_active())
+    if (g_stationary_scan_test || (obstacle_scan_active()))
     {
         stationary_scan_test_status("REJECTED: scan already running.");
     }
@@ -594,27 +614,28 @@ stationary_scan_test_start(void)
     else
     {
         motor_set(0, 0);
-        g_stationary_scan_test = true;
+        g_stationary_scan_test     = true;
         g_stationary_scan_starting = true;
-        g_stationary_scan_since = to_ms_since_boot(get_absolute_time());
+        g_stationary_scan_since    = to_ms_since_boot(get_absolute_time());
         web_set_scan_test_busy(true);
         // Completion recentres the servo and invalidates the previous ray.
         // Never reject a repeat click just because that fresh ping is pending,
         // and never use the last side-facing echo as a forward safety check.
         servo_set_angle(SERVO_CENTER_DEG);
         ultrasonic_invalidate();
-        stationary_scan_test_status("STARTED: waiting for forward reading; wheels braked.");
+        stationary_scan_test_status(
+            "STARTED: waiting for forward reading; wheels braked.");
     }
 }
 
-
+/** @brief Cancel a stationary scan and preserve the stop behavior. */
 static void
 stationary_scan_test_cancel(void)
 {
     if (g_stationary_scan_test)
     {
         obstacle_scan_cancel();
-        g_stationary_scan_test = false;
+        g_stationary_scan_test     = false;
         g_stationary_scan_starting = false;
         web_set_scan_test_busy(false);
         motor_set(0, 0);
@@ -622,11 +643,14 @@ stationary_scan_test_cancel(void)
     }
 }
 
-
+/** @brief Advance the stationary scan while keeping the motors stopped. */
 static void
 stationary_scan_test_task(void)
 {
-    if (!g_stationary_scan_test) { return; }
+    if (!g_stationary_scan_test)
+    {
+        return;
+    }
     if (!vehicle_is_idle())
     {
         stationary_scan_test_cancel();
@@ -636,23 +660,25 @@ stationary_scan_test_task(void)
     if (g_stationary_scan_starting)
     {
         uint32_t now = to_ms_since_boot(get_absolute_time());
-        if (!servo_is_settled() || !ultrasonic_measurement_ready())
+        if ((!servo_is_settled()) || (!ultrasonic_measurement_ready()))
         {
-            if (now - g_stationary_scan_since >= SCAN_READY_TIMEOUT_MSEC)
+            if ((now - g_stationary_scan_since) >= SCAN_READY_TIMEOUT_MSEC)
             {
                 g_stationary_scan_test = g_stationary_scan_starting = false;
                 web_set_scan_test_busy(false);
-                stationary_scan_test_status("FAILED: no fresh forward reading; wheels braked.");
+                stationary_scan_test_status(
+                    "FAILED: no fresh forward reading; wheels braked.");
             }
             return;
         }
-        uint32_t range = ultrasonic_range_mm();
+        uint32_t range             = ultrasonic_range_mm();
         g_stationary_scan_starting = false;
-        if (range == 0u || range > OBSTACLE_STOP_MM)
+        if ((range == 0u) || (range > OBSTACLE_STOP_MM))
         {
             g_stationary_scan_test = false;
             web_set_scan_test_busy(false);
-            stationary_scan_test_status("REJECTED: obstacle must be within stop range.");
+            stationary_scan_test_status(
+                "REJECTED: obstacle must be within stop range.");
             return;
         }
         obstacle_scan_start(range, now);
@@ -664,12 +690,12 @@ stationary_scan_test_task(void)
     {
         g_stationary_scan_test = false;
         web_set_scan_test_busy(false);
-        stationary_scan_test_status(obstacle_profile()->timed_out ?
-            "FAILED: timed out; results incomplete. Wheels braked." :
-            "COMPLETE: results below; wheels braked.");
+        stationary_scan_test_status(
+            obstacle_profile()->timed_out
+                ? "FAILED: timed out; results incomplete. Wheels braked."
+                : "COMPLETE: results below; wheels braked.");
     }
 }
-
 
 /*!
  * @brief Run a barcode command without a barcode, to test the turns.
@@ -677,7 +703,7 @@ stationary_scan_test_task(void)
  * @param[in] command The command to act on.
  */
 static void
-turn_test (barcode_command_t command)
+turn_test(barcode_command_t command)
 {
     if (line_diag_is_active())
     {
@@ -689,8 +715,7 @@ turn_test (barcode_command_t command)
                  barcode_command_name(command));
         vehicle_barcode_command(command, true);
     }
-}   /* turn_test() */
-
+} /* turn_test() */
 
 /*!
  * @brief Calibrate the IMU by itself at power-up and each time the car
@@ -699,17 +724,17 @@ turn_test (barcode_command_t command)
  *        success beep is ended by buzzer_task().
  */
 static void
-imu_auto_calibrate (void)
+imu_auto_calibrate(void)
 {
     bool b_online = web_is_online();
 
-    if (b_online && !gb_was_online)
+    if (b_online && (!gb_was_online))
     {
-        gb_imu_cal_due = true;          // Just joined a hotspot.
+        gb_imu_cal_due = true; // Just joined a hotspot.
     }
     gb_was_online = b_online;
 
-    if (gb_imu_cal_due && vehicle_is_idle() && !line_diag_is_active())
+    if ((gb_imu_cal_due && (vehicle_is_idle())) && (!line_diag_is_active()))
     {
         gb_imu_cal_due = false;
         log_printf("IMU: calibrating by itself (%s). Keep the car still "
@@ -717,9 +742,9 @@ imu_auto_calibrate (void)
                    (b_online ? "on the hotspot" : "power-up"));
         imu_calibrate_run();
     }
-    else if (gb_imu_cal_due && vehicle_is_moving())
+    else if (gb_imu_cal_due && (vehicle_is_moving()))
     {
-        gb_imu_cal_due = false;         // Joined mid-run: keep the old one.
+        gb_imu_cal_due = false; // Joined mid-run: keep the old one.
         log_printf("IMU: joined the hotspot while driving; calibration "
                    "skipped.");
     }
@@ -727,15 +752,14 @@ imu_auto_calibrate (void)
     {
         // Nothing due, or waiting for the car to park.
     }
-}   /* imu_auto_calibrate() */
-
+} /* imu_auto_calibrate() */
 
 /*!
  * @brief Calibrate the LSM303DLHC pitch reference while the car is still,
  *        log the result, and beep softly (as for a barcode) if it worked.
  */
 static void
-imu_calibrate_run (void)
+imu_calibrate_run(void)
 {
     if (!imu_is_ok())
     {
@@ -745,15 +769,14 @@ imu_calibrate_run (void)
     {
         log_printf("IMU calibrated. Pitch/roll baseline set; hump "
                    "detection enabled.");
-        buzzer_beep_soft(BARCODE_BEEP_MSEC);    // As for a barcode.
+        buzzer_beep_soft(BARCODE_BEEP_MSEC); // As for a barcode.
     }
     else
     {
         log_printf("IMU calibration failed. Keep it still, level and "
                    "try again.");
     }
-}   /* imu_calibrate_run() */
-
+} /* imu_calibrate_run() */
 
 /*!
  * @brief Report a finished barcode scan to the log, web page and Teleplot.
@@ -761,13 +784,13 @@ imu_calibrate_run (void)
  * @param[in] result The result from barcode_task().
  */
 static void
-barcode_report (barcode_result_t result)
+barcode_report(barcode_result_t result)
 {
     if (BARCODE_DECODED == result)
     {
         barcode_command_t command = barcode_command();
 
-        buzzer_beep_soft(BARCODE_BEEP_MSEC);   // A barcode was read.
+        buzzer_beep_soft(BARCODE_BEEP_MSEC); // A barcode was read.
         web_barcode_record(barcode_message(), command);
         mqtt_comm_barcode(barcode_message(), command);
 
@@ -786,21 +809,21 @@ barcode_report (barcode_result_t result)
     else if (BARCODE_INVALID == result)
     {
         log_line("Barcode NOT decoded: %" PRIu32 " bars+spaces seen "
-                 "(valid: 10 per character - 1).", barcode_scan_size());
+                 "(valid: 10 per character - 1).",
+                 barcode_scan_size());
         telemetry_text("barcode", "(invalid scan)");
     }
     else
     {
         // No scan finished this tick.
     }
-}   /* barcode_report() */
-
+} /* barcode_report() */
 
 /*!
  * @brief Wait up to 3 s for a serial monitor, without blocking on battery.
  */
 static void
-usb_wait (void)
+usb_wait(void)
 {
     uint32_t waited_ms = 0u;
 
@@ -809,14 +832,13 @@ usb_wait (void)
         sleep_ms(USB_POLL_MSEC);
         waited_ms += USB_POLL_MSEC;
     }
-}   /* usb_wait() */
-
+} /* usb_wait() */
 
 /*!
  * @brief Set up the START and STOP buttons (active low).
  */
 static void
-buttons_init (void)
+buttons_init(void)
 {
     gpio_init(PIN_BUTTON_START);
     gpio_set_dir(PIN_BUTTON_START, GPIO_IN);
@@ -825,8 +847,7 @@ buttons_init (void)
     gpio_init(PIN_BUTTON_STOP);
     gpio_set_dir(PIN_BUTTON_STOP, GPIO_IN);
     gpio_pull_up(PIN_BUTTON_STOP);
-}   /* buttons_init() */
-
+} /* buttons_init() */
 
 /*!
  * @brief Turn button presses into commands.
@@ -838,16 +859,16 @@ buttons_init (void)
  * @return The command to run, or WEB_CMD_NONE.
  */
 static web_command_t
-buttons_poll (void)
+buttons_poll(void)
 {
     static uint32_t held_ticks = 0u;
-    static bool     b_stop_was = false;     // STOP down last tick.
+    static bool     b_stop_was = false; // STOP down last tick.
     web_command_t   command    = WEB_CMD_NONE;
     bool            b_stop     = !gpio_get(PIN_BUTTON_STOP);
 
     // Every press is logged, so a button that does nothing can be told
     // apart from one the Pico never sees (wiring, or a pin in use).
-    if (b_stop && !b_stop_was)
+    if (b_stop && (!b_stop_was))
     {
         log_printf("Button: STOP (GP%u) pressed%s.", PIN_BUTTON_STOP,
                    (vehicle_is_idle() ? " (already stopped)" : ""));
@@ -867,7 +888,8 @@ buttons_poll (void)
         if (BUTTON_DEBOUNCE_TICKS == held_ticks)
         {
             log_printf("Button: START (GP%u) pressed; starts on release, "
-                       "hold 2 s to calibrate the IMU.", PIN_BUTTON_START);
+                       "hold 2 s to calibrate the IMU.",
+                       PIN_BUTTON_START);
         }
         if (BUTTON_LONG_PRESS_TICKS == held_ticks)
         {
@@ -886,8 +908,7 @@ buttons_poll (void)
     }
 
     return (command);
-}   /* buttons_poll() */
-
+} /* buttons_poll() */
 
 /*!
  * @brief Turn a serial key press into a command.
@@ -895,7 +916,7 @@ buttons_poll (void)
  * @return The command to run, or WEB_CMD_NONE.
  */
 static web_command_t
-serial_poll (void)
+serial_poll(void)
 {
     int           key     = getchar_timeout_us(0u);
     web_command_t command = WEB_CMD_NONE;
@@ -903,22 +924,21 @@ serial_poll (void)
     if ('p' == key)
     {
         log_printf("Encoder pins: GP7=%lu GP28=%lu GP0=%lu GP1=%lu",
-                (unsigned long)encoder_watch_edges(0u),
-                (unsigned long)encoder_watch_edges(1u),
-                (unsigned long)encoder_watch_edges(2u),
-                (unsigned long)encoder_watch_edges(3u));
+                   (unsigned long)encoder_watch_edges(0u),
+                   (unsigned long)encoder_watch_edges(1u),
+                   (unsigned long)encoder_watch_edges(2u),
+                   (unsigned long)encoder_watch_edges(3u));
     }
     else if ('t' == key)
     {
-        static uint32_t step = 0u;
+        static uint32_t      step     = 0u;
         static const int32_t angles[] = {60, 90, 120, 90};
 
-        if (vehicle_is_idle() && !obstacle_scan_active())
+        if ((vehicle_is_idle()) && (!obstacle_scan_active()))
         {
             int32_t angle = angles[step];
             servo_set_angle(angle);
-            log_printf("SERVO TEST: commanded %ld degrees",
-                       (long)angle);
+            log_printf("SERVO TEST: commanded %ld degrees", (long)angle);
             step = (step + 1u) % 4u;
         }
         else
@@ -988,15 +1008,16 @@ serial_poll (void)
     }
 
     return (command);
-}   /* serial_poll() */
-
+} /* serial_poll() */
 
 // Measure raw per-wheel edges over a user-measured straight roll. No
 // wheel diameter or encoder counts/revolution assumption is required.
+/** @brief Record or report the manual encoder rolling calibration mark. */
 static void
 encoder_calibration_mark(void)
 {
-    static uint32_t left_start, right_start;
+    static uint32_t left_start;
+    static uint32_t right_start;
     if (!vehicle_is_idle())
     {
         g_encoder_marked = false;
@@ -1005,8 +1026,8 @@ encoder_calibration_mark(void)
     }
     if (!g_encoder_marked)
     {
-        left_start = encoder_count(PIN_ENC_LEFT_A);
-        right_start = encoder_count(PIN_ENC_RIGHT_A);
+        left_start       = encoder_count(PIN_ENC_LEFT_A);
+        right_start      = encoder_count(PIN_ENC_RIGHT_A);
         g_encoder_marked = true;
         // Two lines: a log line holds at most 96 characters.
         log_printf("Encoder mark set. Roll straight exactly 300 mm, then "
@@ -1016,19 +1037,20 @@ encoder_calibration_mark(void)
     }
     else
     {
-        uint32_t left = encoder_count(PIN_ENC_LEFT_A) - left_start;
-        uint32_t right = encoder_count(PIN_ENC_RIGHT_A) - right_start;
+        uint32_t left    = (encoder_count(PIN_ENC_LEFT_A)) - left_start;
+        uint32_t right   = (encoder_count(PIN_ENC_RIGHT_A)) - right_start;
         g_encoder_marked = false;
-        log_printf("Encoder 300 mm roll: LEFT=%lu RIGHT=%lu edges. "
-                   "Repeat 3 times and record results; calibration not applied.",
-                   (unsigned long)left, (unsigned long)right);
-        if (left == 0u || right == 0u)
+        log_printf(
+            "Encoder 300 mm roll: LEFT=%lu RIGHT=%lu edges. "
+            "Repeat 3 times and record results; calibration not applied.",
+            (unsigned long)left, (unsigned long)right);
+        if ((left == 0u) || (right == 0u))
         {
-            log_printf("Encoder calibration invalid: at least one wheel counted no edges.");
+            log_printf("Encoder calibration invalid: at least one wheel "
+                       "counted no edges.");
         }
     }
 }
-
 
 /*!
  * @brief Spin each wheel forward in turn, to check the motor wiring.
@@ -1039,12 +1061,12 @@ encoder_calibration_mark(void)
  * flag.
  */
 static void
-wheel_test (void)
+wheel_test(void)
 {
     log_printf("Wheel test: LEFT wheel should spin FORWARD...");
     motor_set(WHEEL_TEST_SPEED, 0);
     sleep_ms(WHEEL_TEST_MSEC);
-    watchdog_update();                  // Each wait is under WATCHDOG_MSEC.
+    watchdog_update(); // Each wait is under WATCHDOG_MSEC.
     motor_set(0, 0);
     sleep_ms(WHEEL_TEST_PAUSE_MSEC);
     watchdog_update();
@@ -1056,8 +1078,7 @@ wheel_test (void)
     motor_set(0, 0);
 
     log_printf("Wheel test done. Fix config.h if either wheel was wrong.");
-}   /* wheel_test() */
-
+} /* wheel_test() */
 
 /*!
  * @brief Report whether the car is parked (READY or STOPPED).
@@ -1065,12 +1086,12 @@ wheel_test (void)
  * @return True if the motors are not being driven.
  */
 static bool
-vehicle_is_idle (void)
+vehicle_is_idle(void)
 {
     vehicle_state_t state = vehicle_state();
 
-    return ((VEHICLE_READY == state) || (VEHICLE_STOPPED == state) ||
+    return (((VEHICLE_READY == state) || (VEHICLE_STOPPED == state)) ||
             (VEHICLE_PICKED_UP == state));
-}   /* vehicle_is_idle() */
+} /* vehicle_is_idle() */
 
 /*** end of file ***/

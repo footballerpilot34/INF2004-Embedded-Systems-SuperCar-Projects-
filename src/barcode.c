@@ -62,95 +62,95 @@
 #include "encoder.h"
 #include "log.h"
 
-
-#define EDGE_RING_SIZE          256u    // Power of two.
-#define EDGE_RING_MASK          (EDGE_RING_SIZE - 1u)
-#define MAX_ELEMENTS            200u    // 20 characters.
-#define ELEMENTS_PER_CHAR       9u
-#define ELEMENTS_WITH_GAP       10u     // 9 elements + inter-character gap.
-#define WIDE_PER_CHAR           3u
-#define MIN_CHARS               3u      // '*', one character, '*'.
-#define MIN_ELEMENTS            ((MIN_CHARS * ELEMENTS_WITH_GAP) - 1u)
-#define WIDE_RATIO_NUM          5u      // Narrowest wide must be at least
-#define WIDE_RATIO_DEN          4u      // 1.25x the widest narrow.
-#define START_STOP_CHAR         '*'
-#define NUM_CODE39_SYMBOLS      44u
-#define REPORT_MIN_ELEMENTS     4u      // Shorter scans are not reported.
-#define DUMP_PER_LINE           10u     // Widths per log line (fits 96).
-#define DUMP_LINE_BYTES         96u     // Must match LOG_LINE_MAX in log.c.
-#define USEC_PER_MSEC           1000u
-#define DUMP_TENTHS             10u     // Distance widths in 0.1 ticks.
-#define BRANCH_MIN_USEC        (BARCODE_FIRST_MARK_MAX_MSEC * USEC_PER_MSEC)
+#define EDGE_RING_SIZE 256u // Power of two.
+#define EDGE_RING_MASK (EDGE_RING_SIZE - 1u)
+#define MAX_ELEMENTS 200u // 20 characters.
+#define ELEMENTS_PER_CHAR 9u
+#define ELEMENTS_WITH_GAP 10u // 9 elements + inter-character gap.
+#define WIDE_PER_CHAR 3u
+#define MIN_CHARS 3u // '*', one character, '*'.
+#define MIN_ELEMENTS ((MIN_CHARS * ELEMENTS_WITH_GAP) - 1u)
+#define WIDE_RATIO_NUM 5u // Narrowest wide must be at least
+#define WIDE_RATIO_DEN 4u // 1.25x the widest narrow.
+#define START_STOP_CHAR '*'
+#define NUM_CODE39_SYMBOLS 44u
+#define REPORT_MIN_ELEMENTS 4u // Shorter scans are not reported.
+#define DUMP_PER_LINE 10u      // Widths per log line (fits 96).
+#define DUMP_LINE_BYTES 96u    // Must match LOG_LINE_MAX in log.c.
+#define USEC_PER_MSEC 1000u
+#define DUMP_TENTHS 10u // Distance widths in 0.1 ticks.
+#define BRANCH_MIN_USEC (BARCODE_FIRST_MARK_MAX_MSEC * USEC_PER_MSEC)
 
 // Lenient decode of one letter, "*X*" (see scan_decode_lenient()).
-#define LENIENT_ELEMENTS        29u     // '*' gap letter gap '*'.
-#define LENIENT_LETTER_FIRST    10u     // The letter is elements 10..18.
-#define LENIENT_GAP_A           9u      // Gaps between the characters.
-#define LENIENT_GAP_B           19u
-#define LENIENT_STOP_FIRST      20u     // The second '*' is 20..28.
-#define LENIENT_MAX_MISSING     4u      // Elements one end may lose...
-#define LENIENT_MAX_MISSING_ALL 4u      // ...and both ends together, or
-#define LENIENT_MAX_ONE_SIDED   8u      // one end alone while the other
-                                        // '*' is complete (gap kept).
-#define LENIENT_MAX_JUNK        4u      // Stray elements left out at the
-                                        // ends (both together).
-#define LENIENT_MIN_VIEW        (LENIENT_ELEMENTS - LENIENT_MAX_ONE_SIDED)
-#define LENIENT_RATIO_X10       20u     // Wide >= 2.0x narrow (same kind).
-#define LENIENT_BAND_PERCENT    20u     // Within 20% of the narrow/wide
-                                        // split: too unclear to trust.
-#define LENIENT_LONG_X          2u      // A cut-off end element may not be
-                                        // longer than 2x the split.
-#define LENIENT_SUM_MIN_PERCENT 70u     // An end's elements must add up to
-#define LENIENT_SUM_MAX_PERCENT 140u    // 70-140% of their expected width.
-#define BARS_PER_CHAR           5u
-#define WIDE_BARS_PER_CHAR      2u      // A-Z and '*': 2 wide bars and
-#define UNITS_PER_CHAR          15u     // 1 wide space = 6x1 + 3x3 units.
-#define WIDE_UNITS              3u
-#define PERCENT_100             100u
-#define STAR_PATTERN            0x094u  // '*' in g_code39.
-#define ADC_FIRST_PIN           26u     // ADC0 is GP26, ADC1 GP27, ...
-#define ADC_FULL_SCALE          4095    // 12-bit ADC.
-#define AO_FILTER_DIV           8       // Smoothing: 1/8 of each change
-                                        // (1.6 ms; a bar lasts 10+ ms).
-#define AO_WHITE_DIV            64      // Paper-white tracking (13 ms).
-#define AO_GUARD_DIV            2       // Guard band: DELTA / 2 above white.
+#define LENIENT_ELEMENTS 29u     // '*' gap letter gap '*'.
+#define LENIENT_LETTER_FIRST 10u // The letter is elements 10..18.
+#define LENIENT_GAP_A 9u         // Gaps between the characters.
+#define LENIENT_GAP_B 19u
+#define LENIENT_STOP_FIRST 20u     // The second '*' is 20..28.
+#define LENIENT_MAX_MISSING 4u     // Elements one end may lose...
+#define LENIENT_MAX_MISSING_ALL 4u // ...and both ends together, or
+#define LENIENT_MAX_ONE_SIDED                                                  \
+    8u // one end alone while the other
+       // '*' is complete (gap kept).
+#define LENIENT_MAX_JUNK                                                       \
+    4u // Stray elements left out at the
+       // ends (both together).
+#define LENIENT_MIN_VIEW (LENIENT_ELEMENTS - LENIENT_MAX_ONE_SIDED)
+#define LENIENT_RATIO_X10 20u // Wide >= 2.0x narrow (same kind).
+#define LENIENT_BAND_PERCENT                                                   \
+    20u // Within 20% of the narrow/wide
+        // split: too unclear to trust.
+#define LENIENT_LONG_X                                                         \
+    2u                               // A cut-off end element may not be
+                                     // longer than 2x the split.
+#define LENIENT_SUM_MIN_PERCENT 70u  // An end's elements must add up to
+#define LENIENT_SUM_MAX_PERCENT 140u // 70-140% of their expected width.
+#define BARS_PER_CHAR 5u
+#define WIDE_BARS_PER_CHAR 2u // A-Z and '*': 2 wide bars and
+#define UNITS_PER_CHAR 15u    // 1 wide space = 6x1 + 3x3 units.
+#define WIDE_UNITS 3u
+#define PERCENT_100 100u
+#define STAR_PATTERN 0x094u // '*' in g_code39.
+#define ADC_FIRST_PIN 26u   // ADC0 is GP26, ADC1 GP27, ...
+#define ADC_FULL_SCALE 4095 // 12-bit ADC.
+#define AO_FILTER_DIV                                                          \
+    8                   // Smoothing: 1/8 of each change
+                        // (1.6 ms; a bar lasts 10+ ms).
+#define AO_WHITE_DIV 64 // Paper-white tracking (13 ms).
+#define AO_GUARD_DIV 2  // Guard band: DELTA / 2 above white.
 
 typedef struct
 {
-    uint16_t pattern;   // 9 bits, first element in bit 8; 1 = wide.
+    uint16_t pattern; // 9 bits, first element in bit 8; 1 = wide.
     char     symbol;
 } code39_t;
 
 // Code 39 table: element order is bar, space, bar, space ... bar.
-static code39_t const g_code39[NUM_CODE39_SYMBOLS] =
-{
-    { 0x034u, '0' }, { 0x121u, '1' }, { 0x061u, '2' }, { 0x160u, '3' },
-    { 0x031u, '4' }, { 0x130u, '5' }, { 0x070u, '6' }, { 0x025u, '7' },
-    { 0x124u, '8' }, { 0x064u, '9' }, { 0x109u, 'A' }, { 0x049u, 'B' },
-    { 0x148u, 'C' }, { 0x019u, 'D' }, { 0x118u, 'E' }, { 0x058u, 'F' },
-    { 0x00Du, 'G' }, { 0x10Cu, 'H' }, { 0x04Cu, 'I' }, { 0x01Cu, 'J' },
-    { 0x103u, 'K' }, { 0x043u, 'L' }, { 0x142u, 'M' }, { 0x013u, 'N' },
-    { 0x112u, 'O' }, { 0x052u, 'P' }, { 0x007u, 'Q' }, { 0x106u, 'R' },
-    { 0x046u, 'S' }, { 0x016u, 'T' }, { 0x181u, 'U' }, { 0x0C1u, 'V' },
-    { 0x1C0u, 'W' }, { 0x091u, 'X' }, { 0x190u, 'Y' }, { 0x0D0u, 'Z' },
-    { 0x085u, '-' }, { 0x184u, '.' }, { 0x0C4u, ' ' }, { 0x094u, '*' },
-    { 0x0A8u, '$' }, { 0x0A2u, '/' }, { 0x08Au, '+' }, { 0x02Au, '%' }
-};
+static code39_t const g_code39[NUM_CODE39_SYMBOLS] = {
+    {0x034u, '0'}, {0x121u, '1'}, {0x061u, '2'}, {0x160u, '3'}, {0x031u, '4'},
+    {0x130u, '5'}, {0x070u, '6'}, {0x025u, '7'}, {0x124u, '8'}, {0x064u, '9'},
+    {0x109u, 'A'}, {0x049u, 'B'}, {0x148u, 'C'}, {0x019u, 'D'}, {0x118u, 'E'},
+    {0x058u, 'F'}, {0x00Du, 'G'}, {0x10Cu, 'H'}, {0x04Cu, 'I'}, {0x01Cu, 'J'},
+    {0x103u, 'K'}, {0x043u, 'L'}, {0x142u, 'M'}, {0x013u, 'N'}, {0x112u, 'O'},
+    {0x052u, 'P'}, {0x007u, 'Q'}, {0x106u, 'R'}, {0x046u, 'S'}, {0x016u, 'T'},
+    {0x181u, 'U'}, {0x0C1u, 'V'}, {0x1C0u, 'W'}, {0x091u, 'X'}, {0x190u, 'Y'},
+    {0x0D0u, 'Z'}, {0x085u, '-'}, {0x184u, '.'}, {0x0C4u, ' '}, {0x094u, '*'},
+    {0x0A8u, '$'}, {0x0A2u, '/'}, {0x08Au, '+'}, {0x02Au, '%'}};
 
 // Narrow/wide splits learned from a cleanly decoded letter.
 typedef struct
 {
-    uint16_t pattern;       // The letter's pattern.
-    uint32_t bar_split;     // Bars wider than this are wide.
-    uint32_t space_split;   // Spaces wider than this are wide.
-    uint32_t unit;          // One narrow unit (1/15 of the letter).
+    uint16_t pattern;     // The letter's pattern.
+    uint32_t bar_split;   // Bars wider than this are wide.
+    uint32_t space_split; // Spaces wider than this are wide.
+    uint32_t unit;        // One narrow unit (1/15 of the letter).
 } split_t;
 
 // One command letter per letter A-Z; see config.h.
-_Static_assert(sizeof(BARCODE_LETTER_COMMANDS) == 27u,
+_Static_assert((sizeof(BARCODE_LETTER_COMMANDS)) == 27u,
                "BARCODE_LETTER_COMMANDS needs exactly one entry per letter");
 
-#define LETTERS             26u
+#define LETTERS 26u
 
 // The letter table now: L, R, S, U or N (no command: a message) per
 // letter A-Z, plus the terminator.
@@ -159,79 +159,73 @@ static char g_letters[LETTERS + 1u] = BARCODE_LETTER_COMMANDS;
 // Edge ring, filled by the ISR. The head only ever increases (it wraps
 // naturally at 2^32), so head - tail is the number of unread edges.
 static volatile uint32_t g_edge_usec[EDGE_RING_SIZE];
-static volatile uint32_t g_edge_pos[EDGE_RING_SIZE];   // encoder_position().
+static volatile uint32_t g_edge_pos[EDGE_RING_SIZE]; // encoder_position().
 static volatile bool     g_edge_black[EDGE_RING_SIZE];
 static volatile uint32_t g_edge_head = 0u;
 static uint32_t          g_edge_tail = 0u;
 
 // Scan in progress. Widths are kept both in time and in distance; the
 // decoder uses g_elements, which scan_finish() fills from the better one.
-static uint32_t g_elements[MAX_ELEMENTS];
-static uint32_t g_elem_usec[MAX_ELEMENTS];
-static uint32_t g_elem_dist[MAX_ELEMENTS];
-static uint32_t g_num_elements   = 0u;
-static uint32_t g_view_first     = 0u;  // The decoders see elements
-static uint32_t g_view_len       = 0u;  // [first, first + len).
-static uint32_t g_widest_usec    = 0u;
-static uint32_t g_widest_dist    = 0u;
-static uint32_t g_narrow_usec    = UINT32_MAX; // Narrowest after the
-static uint32_t g_narrow_dist    = UINT32_MAX; // first (maybe cut) one.
-static uint32_t g_last_edge_usec = 0u;
-static uint32_t g_last_edge_pos  = 0u;
-static uint32_t g_scan_start_pos = 0u;
-static bool     gb_widths_dist   = false;   // g_elements is in distance.
+static uint32_t         g_elements[MAX_ELEMENTS];
+static uint32_t         g_elem_usec[MAX_ELEMENTS];
+static uint32_t         g_elem_dist[MAX_ELEMENTS];
+static uint32_t         g_num_elements   = 0u;
+static uint32_t         g_view_first     = 0u; // The decoders see elements
+static uint32_t         g_view_len       = 0u; // [first, first + len).
+static uint32_t         g_widest_usec    = 0u;
+static uint32_t         g_widest_dist    = 0u;
+static uint32_t         g_narrow_usec    = UINT32_MAX; // Narrowest after the
+static uint32_t         g_narrow_dist    = UINT32_MAX; // first (maybe cut) one.
+static uint32_t         g_last_edge_usec = 0u;
+static uint32_t         g_last_edge_pos  = 0u;
+static uint32_t         g_scan_start_pos = 0u;
+static bool             gb_widths_dist   = false; // g_elements is in distance.
 static barcode_result_t g_pending_result = BARCODE_NONE; // Cut-off scan.
-static barcode_result_t g_last_result = BARCODE_NONE;
-static bool     gb_last_black    = false;
-static bool     gb_capturing     = false;
-static bool     gb_overflow      = false;
-static bool     gb_enabled       = true;
-static bool     gb_hand          = false;   // Slid past by hand.
+static barcode_result_t g_last_result    = BARCODE_NONE;
+static bool             gb_last_black    = false;
+static bool             gb_capturing     = false;
+static bool             gb_overflow      = false;
+static bool             gb_enabled       = true;
+static bool             gb_hand          = false; // Slid past by hand.
 
 // Analog reader state. Written by the sampling timer only.
 static repeating_timer_t g_ao_timer;
-static volatile int32_t  g_ao_level   = 0;      // Smoothed darkness.
-static volatile bool     gb_ao_black  = false;  // Over a bar now.
-static int32_t           g_ao_white   = 0;      // Paper white, tracked.
-static int32_t           g_ao_extreme = 0;      // Last dip (on white) or
-                                                // peak (on black).
+static volatile int32_t  g_ao_level   = 0;     // Smoothed darkness.
+static volatile bool     gb_ao_black  = false; // Over a bar now.
+static int32_t           g_ao_white   = 0;     // Paper white, tracked.
+static int32_t           g_ao_extreme = 0;     // Last dip (on white) or
+                                               // peak (on black).
 
 static char              g_message[BARCODE_MESSAGE_MAX + 1u];
 static barcode_command_t g_command = BARCODE_CMD_NONE;
 
 // Why the last lenient line-up failed, for the log.
-static char const *      gp_lenient_why = "";
-static uint32_t          g_lenient_pos  = 0u;   // Scan position (1-based).
+static char const * gp_lenient_why = "";
+static uint32_t     g_lenient_pos  = 0u; // Scan position (1-based).
 
-
-static void             edge_push(uint32_t edge_usec, bool b_black);
-static bool             ao_sample_isr(repeating_timer_t * p_timer);
-static int32_t          ao_darkness(void);
-static void             edge_add(uint32_t edge_usec, uint32_t edge_pos,
-                                 bool b_black);
-static void             debug_log_colour(uint32_t edges);
-static bool             scan_has_ended(uint32_t end_gap_usec);
-static uint32_t         end_gap_factor(uint32_t widest, uint32_t narrowest);
-static void             widths_select(void);
+static void     edge_push(uint32_t edge_usec, bool b_black);
+static bool     ao_sample_isr(repeating_timer_t * p_timer);
+static int32_t  ao_darkness(void);
+static void     edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black);
+static void     debug_log_colour(uint32_t edges);
+static bool     scan_has_ended(uint32_t end_gap_usec);
+static uint32_t end_gap_factor(uint32_t widest, uint32_t narrowest);
+static void     widths_select(void);
 static barcode_result_t scan_finish(void);
 static void             scan_dump(void);
 static bool             scan_decode(bool b_reverse);
 static bool             scan_decode_lenient(void);
 static char             lenient_view(bool b_log, uint32_t * p_lead);
 static char             lenient_try(bool b_reverse, uint32_t lead);
-static char             letter_decode(uint32_t first, bool b_reverse,
-                                      split_t * p_split);
-static bool             lenient_check(uint32_t j, uint32_t lead,
-                                      bool b_reverse,
-                                      split_t const * p_split);
-static bool             lenient_sum_ok(uint32_t first_j, uint32_t last_j,
-                                       uint32_t lead, bool b_reverse,
-                                       split_t const * p_split);
-static bool             expected_wide(uint32_t idx, uint16_t letter);
-static char             char_decode(uint32_t first, bool b_reverse);
-static uint32_t         element_get(uint32_t index, bool b_reverse);
+static char letter_decode(uint32_t first, bool b_reverse, split_t * p_split);
+static bool lenient_check(uint32_t index_j, uint32_t lead, bool b_reverse,
+                          split_t const * p_split);
+static bool lenient_sum_ok(uint32_t first_j, uint32_t last_j, uint32_t lead,
+                           bool b_reverse, split_t const * p_split);
+static bool expected_wide(uint32_t idx, uint16_t letter);
+static char char_decode(uint32_t first, bool b_reverse);
+static uint32_t          element_get(uint32_t index, bool b_reverse);
 static barcode_command_t command_match(char const * p_message);
-
 
 /*!
  * @brief Set up the barcode sensor: the analog sampler, or the DOUT pin.
@@ -240,7 +234,7 @@ static barcode_command_t command_match(char const * p_message);
  * For DOUT, the edge interrupt itself is enabled by gpio_isr_init().
  */
 void
-barcode_init (void)
+barcode_init(void)
 {
     gpio_init(PIN_BARCODE);
     gpio_set_dir(PIN_BARCODE, GPIO_IN);
@@ -259,19 +253,18 @@ barcode_init (void)
         g_ao_white   = g_ao_level;
 
         // NOTE: A negative period keeps samples evenly spaced.
-        if (add_repeating_timer_us(-((int64_t) BARCODE_AO_SAMPLE_USEC),
+        if (add_repeating_timer_us(-((int64_t)BARCODE_AO_SAMPLE_USEC),
                                    ao_sample_isr, NULL, &g_ao_timer))
         {
-            log_line("Barcode: analog reader on GP%u, level %" PRId32
-                     " now.", PIN_BARCODE_AO, g_ao_level);
+            log_line("Barcode: analog reader on GP%u, level %" PRId32 " now.",
+                     PIN_BARCODE_AO, g_ao_level);
         }
         else
         {
             log_line("Barcode: FAILED to start the analog sampler.");
         }
     }
-}   /* barcode_init() */
-
+} /* barcode_init() */
 
 /*!
  * @brief Record one barcode edge. Called from the GPIO interrupt (DOUT
@@ -281,13 +274,12 @@ barcode_init (void)
  *                   glitch that rises and falls together is handled).
  */
 void
-barcode_edge_isr (uint32_t events)
+barcode_edge_isr(uint32_t events)
 {
-    (void) events;  // The level is read from the pin instead.
+    (void)events; // The level is read from the pin instead.
 
-    edge_push(time_us_32(), (BARCODE_BLACK_IS_HIGH == gpio_get(PIN_BARCODE)));
-}   /* barcode_edge_isr() */
-
+    edge_push(time_us_32(), (BARCODE_BLACK_IS_HIGH == (gpio_get(PIN_BARCODE))));
+} /* barcode_edge_isr() */
 
 /*!
  * @brief Report the barcode sensor's smoothed darkness, for tuning.
@@ -296,7 +288,7 @@ barcode_edge_isr (uint32_t events)
  *         0 or 4095.
  */
 int32_t
-barcode_level (void)
+barcode_level(void)
 {
     int32_t level = g_ao_level;
 
@@ -306,8 +298,7 @@ barcode_level (void)
     }
 
     return (level);
-}   /* barcode_level() */
-
+} /* barcode_level() */
 
 /*!
  * @brief Report how many bars and spaces the last scan had.
@@ -315,11 +306,10 @@ barcode_level (void)
  * @return The count; a valid Code 39 scan has 10 per character, less 1.
  */
 uint32_t
-barcode_scan_size (void)
+barcode_scan_size(void)
 {
     return (g_num_elements);
-}   /* barcode_scan_size() */
-
+} /* barcode_scan_size() */
 
 /*!
  * @brief Process new edges and decode a scan once it has ended.
@@ -331,13 +321,13 @@ barcode_scan_size (void)
  *         when a scan could not be decoded, otherwise BARCODE_NONE.
  */
 barcode_result_t
-barcode_task (void)
+barcode_task(void)
 {
-    barcode_result_t result   = g_pending_result;
-    uint32_t         head     = g_edge_head;
-    uint32_t         end_gap  = 0u;
+    barcode_result_t result  = g_pending_result;
+    uint32_t         head    = g_edge_head;
+    uint32_t         end_gap = 0u;
 
-    g_pending_result = BARCODE_NONE;    // A scan cut off: reported now.
+    g_pending_result = BARCODE_NONE; // A scan cut off: reported now.
 
     if ((head - g_edge_tail) > EDGE_RING_SIZE)
     {
@@ -357,15 +347,15 @@ barcode_task (void)
         g_edge_tail++;
     }
 
-    end_gap = g_widest_usec * end_gap_factor(g_widest_usec, g_narrow_usec);
-    end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ?
-               end_gap : BARCODE_END_GAP_MIN_USEC);
+    end_gap = g_widest_usec * (end_gap_factor(g_widest_usec, g_narrow_usec));
+    end_gap = ((end_gap > BARCODE_END_GAP_MIN_USEC) ? end_gap
+                                                    : BARCODE_END_GAP_MIN_USEC);
     if (gb_hand && (end_gap < BARCODE_HAND_END_GAP_USEC))
     {
-        end_gap = BARCODE_HAND_END_GAP_USEC;    // A hand pauses mid-code.
+        end_gap = BARCODE_HAND_END_GAP_USEC; // A hand pauses mid-code.
     }
 
-    if ((BARCODE_NONE == result) && gb_capturing && scan_has_ended(end_gap))
+    if (((BARCODE_NONE == result) && gb_capturing) && (scan_has_ended(end_gap)))
     {
         result = scan_finish();
     }
@@ -374,7 +364,10 @@ barcode_task (void)
         // Nothing finished this tick.
     }
 
-    if (BARCODE_NONE != result) { g_last_result = result; }
+    if (BARCODE_NONE != result)
+    {
+        g_last_result = result;
+    }
 
     if (BARCODE_DEBUG_LOG)
     {
@@ -382,8 +375,7 @@ barcode_task (void)
     }
 
     return (result);
-}   /* barcode_task() */
-
+} /* barcode_task() */
 
 /*!
  * @brief TEMPORARY: log every black/white change the barcode sensor sees,
@@ -399,18 +391,18 @@ barcode_task (void)
  * @param[in] edges The interrupt's edge count now (g_edge_head).
  */
 static void
-debug_log_colour (uint32_t edges)
+debug_log_colour(uint32_t edges)
 {
-    static bool     b_was_black  = false;
-    static uint32_t since_msec   = 0u;
-    static uint32_t last_edges   = 0u;
-    static uint32_t window_msec  = 0u;
-    static uint32_t lines        = 0u;
-    static uint32_t skipped      = 0u;
-    static bool     b_left_was   = false;   // Left line sensor pin level.
-    uint32_t        now_msec     = to_ms_since_boot(get_absolute_time());
-    bool            b_black      = barcode_is_black();
-    bool            b_left       = gpio_get(PIN_LINE_LEFT);
+    static bool     b_was_black = false;
+    static uint32_t since_msec  = 0u;
+    static uint32_t last_edges  = 0u;
+    static uint32_t window_msec = 0u;
+    static uint32_t lines       = 0u;
+    static uint32_t skipped     = 0u;
+    static bool     b_left_was  = false; // Left line sensor pin level.
+    uint32_t        now_msec    = to_ms_since_boot(get_absolute_time());
+    bool            b_black     = barcode_is_black();
+    bool            b_left      = gpio_get(PIN_LINE_LEFT);
 
     // Also the left line sensor's pin, to see which sensor drives which
     // pin (they share a Grove pin on the Robo Pico).
@@ -442,7 +434,8 @@ debug_log_colour (uint32_t edges)
         if (skipped > 0u)
         {
             log_line("Barcode IR: ...%" PRIu32 " more changes in that "
-                     "second not shown.", skipped);
+                     "second not shown.",
+                     skipped);
         }
         window_msec = now_msec;
         lines       = 0u;
@@ -454,10 +447,10 @@ debug_log_colour (uint32_t edges)
         if (lines < BARCODE_DEBUG_MAX_PER_SEC)
         {
             log_line("Barcode IR: %s (GP%u %s) after %" PRIu32 " ms %s, "
-                     "%" PRIu32 " edges.", (b_black ? "BLACK" : "white"),
-                     PIN_BARCODE, (gpio_get(PIN_BARCODE) ? "HIGH" : "LOW"),
-                     (now_msec - since_msec),
-                     (b_was_black ? "black" : "white"),
+                     "%" PRIu32 " edges.",
+                     (b_black ? "BLACK" : "white"), PIN_BARCODE,
+                     (gpio_get(PIN_BARCODE) ? "HIGH" : "LOW"),
+                     (now_msec - since_msec), (b_was_black ? "black" : "white"),
                      (edges - last_edges));
             lines++;
         }
@@ -470,12 +463,26 @@ debug_log_colour (uint32_t edges)
         since_msec  = now_msec;
         last_edges  = edges;
     }
-}   /* debug_log_colour() */
+} /* debug_log_colour() */
 
-bool barcode_is_enabled(void) { return gb_enabled; }
-uint32_t barcode_edge_count(void) { return g_edge_head; }
-barcode_result_t barcode_last_result(void) { return g_last_result; }
-
+/** @brief Report whether barcode acquisition is enabled. */
+bool
+barcode_is_enabled(void)
+{
+    return gb_enabled;
+}
+/** @brief Return the count of captured barcode edges. */
+uint32_t
+barcode_edge_count(void)
+{
+    return g_edge_head;
+}
+/** @brief Return the last barcode decoding result. */
+barcode_result_t
+barcode_last_result(void)
+{
+    return g_last_result;
+}
 
 /*!
  * @brief Turn barcode reading on or off.
@@ -490,23 +497,23 @@ barcode_result_t barcode_last_result(void) { return g_last_result; }
  * @param[in] b_enabled True to read barcodes.
  */
 void
-barcode_set_enabled (bool b_enabled)
+barcode_set_enabled(bool b_enabled)
 {
     if (b_enabled != gb_enabled)
     {
         log_line("Barcode reader %s; IRQ edges=%lu", b_enabled ? "ON" : "OFF",
                  (unsigned long)g_edge_head);
     }
-    if (!b_enabled && gb_capturing)
+    if ((!b_enabled) && gb_capturing)
     {
         log_line("Barcode: reading switched off after %" PRIu32
-                 " bars+spaces -> decoding what was read.", g_num_elements);
+                 " bars+spaces -> decoding what was read.",
+                 g_num_elements);
         g_pending_result = scan_finish();
     }
 
     gb_enabled = b_enabled;
-}   /* barcode_set_enabled() */
-
+} /* barcode_set_enabled() */
 
 /*!
  * @brief Read barcodes slid past the sensor by hand (car standing still).
@@ -519,11 +526,10 @@ barcode_set_enabled (bool b_enabled)
  * @param[in] b_hand True while BARCODE TEST (STATIC) runs.
  */
 void
-barcode_set_hand_mode (bool b_hand)
+barcode_set_hand_mode(bool b_hand)
 {
     gb_hand = b_hand;
-}   /* barcode_set_hand_mode() */
-
+} /* barcode_set_hand_mode() */
 
 /*!
  * @brief End the scan in progress now and decode it (a crossroad was
@@ -537,20 +543,20 @@ barcode_set_hand_mode (bool b_hand)
  * @return True if a scan was in progress.
  */
 bool
-barcode_end_scan (void)
+barcode_end_scan(void)
 {
     bool b_was = gb_capturing;
 
     if (b_was)
     {
         log_line("Barcode: crossroad reached after %" PRIu32
-                 " bars+spaces -> decoding now.", g_num_elements);
+                 " bars+spaces -> decoding now.",
+                 g_num_elements);
         g_pending_result = scan_finish();
     }
 
     return (b_was);
-}   /* barcode_end_scan() */
-
+} /* barcode_end_scan() */
 
 /*!
  * @brief Return the last decoded message (without the '*' characters).
@@ -558,11 +564,10 @@ barcode_end_scan (void)
  * @return A null-terminated string, empty until the first decode.
  */
 char const *
-barcode_message (void)
+barcode_message(void)
 {
     return (g_message);
-}   /* barcode_message() */
-
+} /* barcode_message() */
 
 /*!
  * @brief Forget the last decoded message (web CLEAR OUTPUT).
@@ -571,12 +576,11 @@ barcode_message (void)
  * Only the shown message is cleared; a pending turn is kept.
  */
 void
-barcode_clear_message (void)
+barcode_clear_message(void)
 {
     g_message[0] = '\0';
     g_command    = BARCODE_CMD_NONE;
-}   /* barcode_clear_message() */
-
+} /* barcode_clear_message() */
 
 /*!
  * @brief Return what the last decoded message asks the car to do.
@@ -584,11 +588,10 @@ barcode_clear_message (void)
  * @return The command, or BARCODE_CMD_NONE for a plain message.
  */
 barcode_command_t
-barcode_command (void)
+barcode_command(void)
 {
     return (g_command);
-}   /* barcode_command() */
-
+} /* barcode_command() */
 
 /*!
  * @brief Name a barcode command for the log and the web page.
@@ -598,37 +601,36 @@ barcode_command (void)
  * @return A constant string.
  */
 char const *
-barcode_command_name (barcode_command_t command)
+barcode_command_name(barcode_command_t command)
 {
     char const * p_name = "MESSAGE";
 
     switch (command)
     {
-    case BARCODE_CMD_LEFT:
-        p_name = "TURN LEFT";
-    break;
+        case BARCODE_CMD_LEFT:
+            p_name = "TURN LEFT";
+            break;
 
-    case BARCODE_CMD_RIGHT:
-        p_name = "TURN RIGHT";
-    break;
+        case BARCODE_CMD_RIGHT:
+            p_name = "TURN RIGHT";
+            break;
 
-    case BARCODE_CMD_UTURN:
-        p_name = "U-TURN";
-    break;
+        case BARCODE_CMD_UTURN:
+            p_name = "U-TURN";
+            break;
 
-    case BARCODE_CMD_STRAIGHT:
-        p_name = "GO STRAIGHT";
-    break;
+        case BARCODE_CMD_STRAIGHT:
+            p_name = "GO STRAIGHT";
+            break;
 
-    case BARCODE_CMD_NONE:
-    default:
-        p_name = "MESSAGE";
-    break;
+        case BARCODE_CMD_NONE:
+        default:
+            p_name = "MESSAGE";
+            break;
     }
 
     return (p_name);
-}   /* barcode_command_name() */
-
+} /* barcode_command_name() */
 
 /*!
  * @brief Change what one letter's barcode tells the car to do.
@@ -641,12 +643,13 @@ barcode_command_name (barcode_command_t command)
  * @return True if both were valid and the table was changed.
  */
 bool
-barcode_set_letter (char letter, char command)
+barcode_set_letter(char letter, char command)
 {
-    char upper   = (char) toupper((int) letter);
-    char what    = (char) toupper((int) command);
-    bool b_valid = (('A' <= upper) && (upper <= 'Z') &&
-                    (NULL != strchr("LRSUN", (int) what)) && ('\0' != what));
+    char upper   = (char)toupper((int)letter);
+    char what    = (char)toupper((int)command);
+    bool b_valid = (((('A' <= upper) && (upper <= 'Z')) &&
+                     ((NULL) != (strchr("LRSUN", (int)what)))) &&
+                    ('\0' != what));
 
     if (b_valid)
     {
@@ -654,18 +657,16 @@ barcode_set_letter (char letter, char command)
     }
 
     return (b_valid);
-}   /* barcode_set_letter() */
-
+} /* barcode_set_letter() */
 
 /*!
  * @brief Put the letter table back to BARCODE_LETTER_COMMANDS (config.h).
  */
 void
-barcode_reset_letters (void)
+barcode_reset_letters(void)
 {
-    (void) memcpy(g_letters, BARCODE_LETTER_COMMANDS, sizeof(g_letters));
-}   /* barcode_reset_letters() */
-
+    (void)memcpy(g_letters, BARCODE_LETTER_COMMANDS, sizeof(g_letters));
+} /* barcode_reset_letters() */
 
 /*!
  * @brief Report the letter table now.
@@ -673,11 +674,10 @@ barcode_reset_letters (void)
  * @return 26 characters, one per letter A-Z: L, R, S, U or N.
  */
 char const *
-barcode_letters (void)
+barcode_letters(void)
 {
     return (g_letters);
-}   /* barcode_letters() */
-
+} /* barcode_letters() */
 
 /*!
  * @brief Report whether a barcode is being read right now.
@@ -689,11 +689,10 @@ barcode_letters (void)
  * @return True while a scan is in progress.
  */
 bool
-barcode_is_capturing (void)
+barcode_is_capturing(void)
 {
     return (gb_capturing);
-}   /* barcode_is_capturing() */
-
+} /* barcode_is_capturing() */
 
 /*!
  * @brief Report whether the barcode sensor sees black right now.
@@ -701,18 +700,17 @@ barcode_is_capturing (void)
  * @return True over a bar.
  */
 bool
-barcode_is_black (void)
+barcode_is_black(void)
 {
     bool b_black = gb_ao_black;
 
     if (!BARCODE_USE_ANALOG)
     {
-        b_black = (BARCODE_BLACK_IS_HIGH == gpio_get(PIN_BARCODE));
+        b_black = (BARCODE_BLACK_IS_HIGH == (gpio_get(PIN_BARCODE)));
     }
 
     return (b_black);
-}   /* barcode_is_black() */
-
+} /* barcode_is_black() */
 
 /*!
  * @brief Put one edge into the ring for barcode_task(). Interrupt context.
@@ -725,16 +723,15 @@ barcode_is_black (void)
  * @param[in] b_black   True if the sensor sees black after the edge.
  */
 static void
-edge_push (uint32_t edge_usec, bool b_black)
+edge_push(uint32_t edge_usec, bool b_black)
 {
     uint32_t head = g_edge_head;
 
     g_edge_usec[head & EDGE_RING_MASK]  = edge_usec;
     g_edge_pos[head & EDGE_RING_MASK]   = encoder_position();
     g_edge_black[head & EDGE_RING_MASK] = b_black;
-    g_edge_head = head + 1u;
-}   /* edge_push() */
-
+    g_edge_head                         = head + 1u;
+} /* edge_push() */
 
 /*!
  * @brief Sample the analog output and turn peaks and dips into edges.
@@ -745,15 +742,15 @@ edge_push (uint32_t edge_usec, bool b_black)
  * @return True, to keep sampling.
  */
 static bool
-ao_sample_isr (repeating_timer_t * p_timer)
+ao_sample_isr(repeating_timer_t * p_timer)
 {
     int32_t level = g_ao_level;
     int32_t guard = 0;
 
-    (void) p_timer;
+    (void)p_timer;
 
     // Smoothing removes ADC noise without blurring a bar.
-    level += (ao_darkness() - level) / AO_FILTER_DIV;
+    level += ((ao_darkness()) - level) / AO_FILTER_DIV;
 
     // Nothing whiter than paper white plus the guard band is ever a bar.
     guard = g_ao_white + (BARCODE_AO_DELTA / AO_GUARD_DIV);
@@ -765,12 +762,12 @@ ao_sample_isr (repeating_timer_t * p_timer)
 
         if (level < g_ao_extreme)
         {
-            g_ao_extreme = level;           // Whiter still: new dip.
+            g_ao_extreme = level; // Whiter still: new dip.
         }
         else if ((level >= (g_ao_extreme + BARCODE_AO_DELTA)) &&
                  (level >= guard))
         {
-            gb_ao_black  = true;            // Darkened enough: a bar.
+            gb_ao_black  = true; // Darkened enough: a bar.
             g_ao_extreme = level;
             edge_push(time_us_32(), true);
         }
@@ -783,7 +780,7 @@ ao_sample_isr (repeating_timer_t * p_timer)
     {
         if (level > g_ao_extreme)
         {
-            g_ao_extreme = level;           // Darker still: new peak.
+            g_ao_extreme = level; // Darker still: new peak.
         }
         else if ((level <= (g_ao_extreme - BARCODE_AO_DELTA)) ||
                  (level < guard))
@@ -803,8 +800,7 @@ ao_sample_isr (repeating_timer_t * p_timer)
     g_ao_level = level;
 
     return (true);
-}   /* ao_sample_isr() */
-
+} /* ao_sample_isr() */
 
 /*!
  * @brief Read the analog output as darkness: higher means blacker.
@@ -812,7 +808,7 @@ ao_sample_isr (repeating_timer_t * p_timer)
  * @return 0 to 4095.
  */
 static int32_t
-ao_darkness (void)
+ao_darkness(void)
 {
     int32_t sum = 0;
     int32_t raw = 0;
@@ -822,13 +818,12 @@ ao_darkness (void)
     // by roughly the square root of N.
     for (uint32_t read = 0u; read < BARCODE_AO_OVERSAMPLE; read++)
     {
-        sum += (int32_t) adc_read();
+        sum += (int32_t)adc_read();
     }
-    raw = sum / (int32_t) BARCODE_AO_OVERSAMPLE;
+    raw = sum / ((int32_t)BARCODE_AO_OVERSAMPLE);
 
     return (BARCODE_AO_BLACK_IS_HIGH ? raw : (ADC_FULL_SCALE - raw));
-}   /* ao_darkness() */
-
+} /* ao_darkness() */
 
 /*!
  * @brief Add one edge to the current scan, or start a scan on a bar.
@@ -838,7 +833,7 @@ ao_darkness (void)
  * @param[in] b_black   True if the sensor sees black after the edge.
  */
 static void
-edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
+edge_add(uint32_t edge_usec, uint32_t edge_pos, bool b_black)
 {
     if (!gb_capturing)
     {
@@ -856,7 +851,8 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
             g_last_edge_usec = edge_usec;
             g_last_edge_pos  = edge_pos;
             g_scan_start_pos = edge_pos;
-            log_line("Barcode capture started; IRQ edges=%lu", (unsigned long)g_edge_head);
+            log_line("Barcode capture started; IRQ edges=%lu",
+                     (unsigned long)g_edge_head);
         }
     }
     else if (b_black == gb_last_black)
@@ -869,14 +865,14 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         // space: undo it, so the element before it simply continues.
         if (0u == g_num_elements)
         {
-            gb_capturing = false;   // The "first bar" was only a flicker.
+            gb_capturing = false; // The "first bar" was only a flicker.
         }
         else
         {
             g_num_elements--;
             g_last_edge_usec -= g_elem_usec[g_num_elements];
-            g_last_edge_pos  -= g_elem_dist[g_num_elements];
-            gb_last_black     = b_black;
+            g_last_edge_pos -= g_elem_dist[g_num_elements];
+            gb_last_black = b_black;
         }
     }
     else if ((0u == g_num_elements) &&
@@ -886,8 +882,9 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
         // (line_sensor.c has reported it): not a barcode. Drop it, so a
         // barcode soon after it is read on its own.
         gb_capturing = false;
-        log_line("Barcode initial mark %lu ms: treated as junction, scan dropped.",
-                 (unsigned long)((edge_usec - g_last_edge_usec) / 1000u));
+        log_line(
+            "Barcode initial mark %lu ms: treated as junction, scan dropped.",
+            (unsigned long)((edge_usec - g_last_edge_usec) / 1000u));
     }
     else
     {
@@ -905,22 +902,18 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
             gb_overflow = true;
         }
 
-        g_widest_usec    = ((width > g_widest_usec) ? width
-                                                    : g_widest_usec);
-        g_widest_dist    = ((dist > g_widest_dist) ? dist : g_widest_dist);
+        g_widest_usec = ((width > g_widest_usec) ? width : g_widest_usec);
+        g_widest_dist = ((dist > g_widest_dist) ? dist : g_widest_dist);
         if (g_num_elements > 1u)
         {
-            g_narrow_usec = ((width < g_narrow_usec) ? width
-                                                     : g_narrow_usec);
-            g_narrow_dist = ((dist < g_narrow_dist) ? dist
-                                                    : g_narrow_dist);
+            g_narrow_usec = ((width < g_narrow_usec) ? width : g_narrow_usec);
+            g_narrow_dist = ((dist < g_narrow_dist) ? dist : g_narrow_dist);
         }
         g_last_edge_usec = edge_usec;
         g_last_edge_pos  = edge_pos;
         gb_last_black    = b_black;
     }
-}   /* edge_add() */
-
+} /* edge_add() */
 
 /*!
  * @brief Decide whether the scan in progress has ended.
@@ -938,19 +931,18 @@ edge_add (uint32_t edge_usec, uint32_t edge_pos, bool b_black)
  * @return True if the scan has ended.
  */
 static bool
-scan_has_ended (uint32_t end_gap_usec)
+scan_has_ended(uint32_t end_gap_usec)
 {
     uint32_t now_pos    = encoder_position();
-    uint32_t quiet_usec = time_us_32() - g_last_edge_usec;
+    uint32_t quiet_usec = (time_us_32()) - g_last_edge_usec;
     uint32_t moved      = now_pos - g_last_edge_pos;
     bool     b_enc      = (BARCODE_USE_ENCODERS &&
-                           ((now_pos - g_scan_start_pos) >=
-                            ENCODER_POS_SCALE));
+                           ((now_pos - g_scan_start_pos) >= ENCODER_POS_SCALE));
     bool     b_end      = false;
 
     if (quiet_usec > BARCODE_STALL_USEC)
     {
-        b_end = true;           // Nothing for a long time: stop waiting.
+        b_end = true; // Nothing for a long time: stop waiting.
     }
     else if (gb_last_black)
     {
@@ -961,7 +953,7 @@ scan_has_ended (uint32_t end_gap_usec)
     {
         b_end = ((quiet_usec > BARCODE_END_GAP_MIN_USEC) &&
                  (moved > (g_widest_dist *
-                           end_gap_factor(g_widest_dist, g_narrow_dist))));
+                           (end_gap_factor(g_widest_dist, g_narrow_dist)))));
     }
     else
     {
@@ -969,8 +961,7 @@ scan_has_ended (uint32_t end_gap_usec)
     }
 
     return (b_end);
-}   /* scan_has_ended() */
-
+} /* scan_has_ended() */
 
 /*!
  * @brief How many times the widest element of white ends a scan.
@@ -989,41 +980,40 @@ scan_has_ended (uint32_t end_gap_usec)
  * @return The factor.
  */
 static uint32_t
-end_gap_factor (uint32_t widest, uint32_t narrowest)
+end_gap_factor(uint32_t widest, uint32_t narrowest)
 {
-    bool b_wide_seen = ((UINT32_MAX != narrowest) &&
-                        ((widest * 10u) >=
-                         (narrowest * BARCODE_WIDE_SEEN_X10)));
+    bool b_wide_seen =
+        ((UINT32_MAX != narrowest) &&
+         ((widest * 10u) >= (narrowest * BARCODE_WIDE_SEEN_X10)));
 
     return (b_wide_seen ? BARCODE_END_GAP_FAST : BARCODE_END_GAP_FACTOR);
-}   /* end_gap_factor() */
-
+} /* end_gap_factor() */
 
 /*!
  * @brief Choose the widths to decode: distance if the encoders turned
  *        enough during the scan, otherwise time.
  */
 static void
-widths_select (void)
+widths_select(void)
 {
-    uint32_t ticks = (g_last_edge_pos - g_scan_start_pos) /
-                     ENCODER_POS_SCALE;
+    uint32_t ticks = (g_last_edge_pos - g_scan_start_pos) / ENCODER_POS_SCALE;
 
-    gb_widths_dist = (BARCODE_USE_ENCODERS &&
-                      (ticks >= BARCODE_MIN_SCAN_TICKS));
+    gb_widths_dist =
+        (BARCODE_USE_ENCODERS && (ticks >= BARCODE_MIN_SCAN_TICKS));
 
-    for (uint32_t el = 0u; el < g_num_elements; el++)
+    for (uint32_t value_el = 0u; value_el < g_num_elements; value_el++)
     {
-        g_elements[el] = (gb_widths_dist ? g_elem_dist[el] : g_elem_usec[el]);
+        g_elements[value_el] =
+            (gb_widths_dist ? g_elem_dist[value_el] : g_elem_usec[value_el]);
     }
 
-    if (BARCODE_USE_ENCODERS && !gb_widths_dist)
+    if (BARCODE_USE_ENCODERS && (!gb_widths_dist))
     {
         log_line("Barcode: encoders moved only %" PRIu32 " ticks over the "
-                 "scan -> widths measured in time.", ticks);
+                 "scan -> widths measured in time.",
+                 ticks);
     }
-}   /* widths_select() */
-
+} /* widths_select() */
 
 /*!
  * @brief Decode the finished scan, forwards and then backwards; if that
@@ -1033,12 +1023,12 @@ widths_select (void)
  *         was too short to be a barcode (for example, a line crossing).
  */
 static barcode_result_t
-scan_finish (void)
+scan_finish(void)
 {
     barcode_result_t result = BARCODE_NONE;
 
     gb_capturing = false;
-    g_view_first = 0u;              // Decode the whole scan.
+    g_view_first = 0u; // Decode the whole scan.
     g_view_len   = g_num_elements;
 
     if (gb_overflow)
@@ -1047,7 +1037,7 @@ scan_finish (void)
     }
     else if (g_num_elements >= REPORT_MIN_ELEMENTS)
     {
-        widths_select();    // Distance or time, before decoding.
+        widths_select(); // Distance or time, before decoding.
     }
     else
     {
@@ -1066,13 +1056,13 @@ scan_finish (void)
                  g_num_elements);
     }
     else if ((g_num_elements >= MIN_ELEMENTS) &&
-             (scan_decode(false) || scan_decode(true)))
+             ((scan_decode(false)) || (scan_decode(true))))
     {
-        result = BARCODE_DECODED;   // Every element read cleanly.
+        result = BARCODE_DECODED; // Every element read cleanly.
     }
     else if (scan_decode_lenient())
     {
-        result = BARCODE_DECODED;   // One letter, ends partly missed.
+        result = BARCODE_DECODED; // One letter, ends partly missed.
     }
     else
     {
@@ -1085,21 +1075,26 @@ scan_finish (void)
         // even when total travel passes the distance-mode threshold. Only
         // accept a COMPLETE, strict *letter* timing decode as fallback.
         // Never add a second lenient attempt with another set of widths.
-        if (!gb_overflow && gb_widths_dist && g_num_elements == MIN_ELEMENTS)
+        if (((!gb_overflow) && gb_widths_dist) &&
+            (g_num_elements == MIN_ELEMENTS))
         {
-            for (uint32_t el = 0; el < g_num_elements; ++el) {
-                g_elements[el] = g_elem_usec[el];
-            }
-            if (scan_decode(false) || scan_decode(true))
+            for (uint32_t value_el = 0; value_el < g_num_elements; ++value_el)
             {
-                result = BARCODE_DECODED;
+                g_elements[value_el] = g_elem_usec[value_el];
+            }
+            if ((scan_decode(false)) || (scan_decode(true)))
+            {
+                result         = BARCODE_DECODED;
                 gb_widths_dist = false;
-                log_line("Barcode: distance decode failed; complete Code 39 timing decode succeeded.");
+                log_line("Barcode: distance decode failed; complete Code 39 "
+                         "timing decode succeeded.");
             }
             else
             {
-                for (uint32_t el = 0; el < g_num_elements; ++el) {
-                    g_elements[el] = g_elem_dist[el];
+                for (uint32_t value_el = 0; value_el < g_num_elements;
+                     ++value_el)
+                {
+                    g_elements[value_el] = g_elem_dist[value_el];
                 }
             }
         }
@@ -1112,8 +1107,7 @@ scan_finish (void)
     g_widest_usec = 0u;
 
     return (result);
-}   /* scan_finish() */
-
+} /* scan_finish() */
 
 /*!
  * @brief Log every element width of the current scan, to diagnose it.
@@ -1124,39 +1118,37 @@ scan_finish (void)
  * #3, ...) are bars and even numbers are spaces.
  */
 static void
-scan_dump (void)
+scan_dump(void)
 {
-    char   text[DUMP_LINE_BYTES] = { 0 };
-    size_t length = 0u;
+    char   text[DUMP_LINE_BYTES] = {0};
+    size_t length                = 0u;
 
     log_line("Barcode widths in %s (#1 is a bar, then space, bar, ...):",
              (gb_widths_dist ? "0.1 encoder ticks" : "ms"));
 
     // NOTE: A line holds a 6-character prefix plus DUMP_PER_LINE widths of
     // at most 8 characters each (86 bytes), so snprintf never truncates.
-    for (uint32_t el = 0u; el < g_num_elements; el++)
+    for (uint32_t value_el = 0u; value_el < g_num_elements; value_el++)
     {
-        if (0u == (el % DUMP_PER_LINE))
+        if (0u == (value_el % DUMP_PER_LINE))
         {
-            length = (size_t) snprintf(text, sizeof(text), " #%" PRIu32 ":",
-                                       el + 1u);
+            length = (size_t)snprintf(text, sizeof(text), " #%" PRIu32 ":",
+                                      value_el + 1u);
         }
 
-        length += (size_t) snprintf(text + length, sizeof(text) - length,
-                                    " %" PRIu32,
-                                    (gb_widths_dist ?
-                                     ((g_elements[el] * DUMP_TENTHS) /
-                                      ENCODER_POS_SCALE) :
-                                     (g_elements[el] / USEC_PER_MSEC)));
+        length += (size_t)snprintf(
+            text + length, (sizeof(text)) - length, " %" PRIu32,
+            (gb_widths_dist
+                 ? (((g_elements[value_el]) * DUMP_TENTHS) / ENCODER_POS_SCALE)
+                 : ((g_elements[value_el]) / USEC_PER_MSEC)));
 
-        if (((DUMP_PER_LINE - 1u) == (el % DUMP_PER_LINE)) ||
-            ((el + 1u) == g_num_elements))
+        if (((DUMP_PER_LINE - 1u) == (value_el % DUMP_PER_LINE)) ||
+            ((value_el + 1u) == g_num_elements))
         {
             log_line("%s", text);
         }
     }
-}   /* scan_dump() */
-
+} /* scan_dump() */
 
 /*!
  * @brief Decode the scan as Code 39 and store the message if valid.
@@ -1171,17 +1163,17 @@ scan_dump (void)
  * @return True if the scan was a valid "*X*" with X from A to Z.
  */
 static bool
-scan_decode (bool b_reverse)
+scan_decode(bool b_reverse)
 {
-    char     decoded[BARCODE_MESSAGE_MAX + 1u] = { 0 };
+    char     decoded[BARCODE_MESSAGE_MAX + 1u] = {0};
     uint32_t num_chars = (g_view_len + 1u) / ELEMENTS_WITH_GAP;
     uint32_t out_len   = 0u;
     bool     b_ok      = (0u == ((g_view_len + 1u) % ELEMENTS_WITH_GAP));
 
-    for (uint32_t ch = 0u; (ch < num_chars) && b_ok; ch++)
+    for (uint32_t value_ch = 0u; (value_ch < num_chars) && b_ok; value_ch++)
     {
-        char symbol   = char_decode(ch * ELEMENTS_WITH_GAP, b_reverse);
-        bool b_is_end = ((0u == ch) || ((num_chars - 1u) == ch));
+        char symbol   = char_decode(value_ch * ELEMENTS_WITH_GAP, b_reverse);
+        bool b_is_end = ((0u == value_ch) || ((num_chars - 1u) == value_ch));
 
         if ('\0' == symbol)
         {
@@ -1204,19 +1196,18 @@ scan_decode (bool b_reverse)
     }
 
     // Only a single letter A to Z is a real track barcode.
-    b_ok = (b_ok && (1u == out_len) &&
-            ('A' <= decoded[0]) && (decoded[0] <= 'Z'));
+    b_ok = (((b_ok && (1u == out_len)) && ('A' <= (decoded[0]))) &&
+            ((decoded[0]) <= 'Z'));
 
     if (b_ok)
     {
         decoded[out_len] = '\0';
-        (void) strcpy(g_message, decoded);  // Lengths match; result unused.
+        (void)strcpy(g_message, decoded); // Lengths match; result unused.
         g_command = command_match(g_message);
     }
 
     return (b_ok);
-}   /* scan_decode() */
-
+} /* scan_decode() */
 
 /*!
  * @brief Lenient decode of a one-letter barcode "*X*" (X = A to Z) whose
@@ -1246,7 +1237,7 @@ scan_decode (bool b_reverse)
  * @return True if a letter was decoded and stored as the message.
  */
 static bool
-scan_decode_lenient (void)
+scan_decode_lenient(void)
 {
     char     found      = '\0';
     bool     b_clash    = false;
@@ -1258,16 +1249,15 @@ scan_decode_lenient (void)
     // ends on a bar.
     for (uint32_t front = 0u; front <= LENIENT_MAX_JUNK; front += 2u)
     {
-        for (uint32_t back = 0u; (front + back) <= LENIENT_MAX_JUNK;
-             back += 2u)
+        for (uint32_t back = 0u; (front + back) <= LENIENT_MAX_JUNK; back += 2u)
         {
             uint32_t lead   = 0u;
             char     symbol = '\0';
 
-            if ((front + back + LENIENT_MIN_VIEW) <= g_num_elements)
+            if (((front + back) + LENIENT_MIN_VIEW) <= g_num_elements)
             {
                 g_view_first = front;
-                g_view_len   = g_num_elements - front - back;
+                g_view_len   = (g_num_elements - front) - back;
                 symbol       = lenient_view(false, &lead);
             }
 
@@ -1292,15 +1282,16 @@ scan_decode_lenient (void)
     g_view_first = 0u;
     g_view_len   = g_num_elements;
 
-    if (('\0' != found) && !b_clash)
+    if (('\0' != found) && (!b_clash))
     {
         g_message[0] = found;
         g_message[1] = '\0';
         g_command    = command_match(g_message);
         log_line("Barcode: read leniently (%" PRIu32 " of %u bars+spaces, "
                  "%" PRIu32 "+%" PRIu32 " missing, %" PRIu32 " stray "
-                 "left out).", found_len, LENIENT_ELEMENTS, found_lead,
-                 (LENIENT_ELEMENTS - found_lead - found_len), found_junk);
+                 "left out).",
+                 found_len, LENIENT_ELEMENTS, found_lead,
+                 ((LENIENT_ELEMENTS - found_lead) - found_len), found_junk);
     }
     else if (b_clash)
     {
@@ -1309,12 +1300,11 @@ scan_decode_lenient (void)
     }
     else
     {
-        (void) lenient_view(true, &found_lead);  // Log why, for the scan.
+        (void)lenient_view(true, &found_lead); // Log why, for the scan.
     }
 
-    return (('\0' != found) && !b_clash);
-}   /* scan_decode_lenient() */
-
+    return (('\0' != found) && (!b_clash));
+} /* scan_decode_lenient() */
 
 /*!
  * @brief Try every line-up of the current view with "*X*".
@@ -1325,12 +1315,12 @@ scan_decode_lenient (void)
  * @return The letter, or '\0' if none fits or two different ones do.
  */
 static char
-lenient_view (bool b_log, uint32_t * p_lead)
+lenient_view(bool b_log, uint32_t * p_lead)
 {
     char     found   = '\0';
     bool     b_clash = false;
     bool     b_tried = false;
-    uint32_t n       = g_view_len;
+    uint32_t count_n = g_view_len;
 
     // A scan starts and ends on a bar, so it loses elements in pairs.
     for (uint32_t dir = 0u; dir < 2u; dir++)
@@ -1338,16 +1328,17 @@ lenient_view (bool b_log, uint32_t * p_lead)
         for (uint32_t lead = 0u; lead <= LENIENT_MAX_ONE_SIDED; lead += 2u)
         {
             char     symbol = '\0';
-            uint32_t trail  = LENIENT_ELEMENTS - lead - n;
-            bool     b_both = ((lead <= LENIENT_MAX_MISSING) &&
-                               (trail <= LENIENT_MAX_MISSING) &&
+            uint32_t trail  = (LENIENT_ELEMENTS - lead) - count_n;
+            bool     b_both = (((lead <= LENIENT_MAX_MISSING) &&
+                                (trail <= LENIENT_MAX_MISSING)) &&
                                ((lead + trail) <= LENIENT_MAX_MISSING_ALL));
             bool     b_one  = (((0u == lead) || (0u == trail)) &&
                                ((lead + trail) <= LENIENT_MAX_ONE_SIDED));
 
             // Only whole bar+space pairs can be missing at the other end
             // too, within the limits above.
-            if (((lead + n) <= LENIENT_ELEMENTS) && (0u == (trail % 2u)) &&
+            if ((((lead + count_n) <= LENIENT_ELEMENTS) &&
+                 (0u == (trail % 2u))) &&
                 (b_both || b_one))
             {
                 b_tried = true;
@@ -1378,16 +1369,15 @@ lenient_view (bool b_log, uint32_t * p_lead)
         }
     }
 
-    if (b_log && !b_tried)
+    if (b_log && (!b_tried))
     {
         log_line("Barcode lenient: %" PRIu32 " bars+spaces cannot be "
-                 "\"*X*\" with at most %u missing.", n,
-                 LENIENT_MAX_ONE_SIDED);
+                 "\"*X*\" with at most %u missing.",
+                 count_n, LENIENT_MAX_ONE_SIDED);
     }
 
     return (b_clash ? '\0' : found);
-}   /* lenient_view() */
-
+} /* lenient_view() */
 
 /*!
  * @brief Try one line-up for the lenient decode.
@@ -1398,34 +1388,36 @@ lenient_view (bool b_log, uint32_t * p_lead)
  * @return The letter (A to Z), or '\0' if this line-up does not fit.
  */
 static char
-lenient_try (bool b_reverse, uint32_t lead)
+lenient_try(bool b_reverse, uint32_t lead)
 {
     split_t  split;
-    uint32_t n      = g_view_len;
-    uint32_t last_j = n - 1u;
-    uint32_t first  = LENIENT_LETTER_FIRST - lead;
-    char     symbol = letter_decode(first, b_reverse, &split);
-    bool     b_ok   = (('A' <= symbol) && (symbol <= 'Z'));
+    uint32_t count_n = g_view_len;
+    uint32_t last_j  = count_n - 1u;
+    uint32_t first   = LENIENT_LETTER_FIRST - lead;
+    char     symbol  = letter_decode(first, b_reverse, &split);
+    bool     b_ok    = (('A' <= symbol) && (symbol <= 'Z'));
 
     // Scan positions in the log count from 1, in scan order (as the
     // width dump does).
     gp_lenient_why = "letter not a clean A-Z";
-    g_lenient_pos  = (b_reverse ? (n - first) : (first + 1u));
+    g_lenient_pos  = (b_reverse ? (count_n - first) : (first + 1u));
 
     // Every element outside the letter must match '*' or a narrow gap.
-    for (uint32_t j = 0u; (j < n) && b_ok; j++)
+    for (uint32_t index_j = 0u; (index_j < count_n) && b_ok; index_j++)
     {
-        uint32_t idx = j + lead;
+        uint32_t idx = index_j + lead;
 
-        if ((idx < LENIENT_LETTER_FIRST) || (idx > LENIENT_GAP_B - 1u))
+        if ((idx < LENIENT_LETTER_FIRST) || (idx > (LENIENT_GAP_B - 1u)))
         {
-            b_ok = lenient_check(j, lead, b_reverse, &split);
+            b_ok = lenient_check(index_j, lead, b_reverse, &split);
 
             if (!b_ok)
             {
-                gp_lenient_why = (expected_wide(idx, split.pattern) ?
-                                  "should be wide" : "should be narrow");
-                g_lenient_pos  = (b_reverse ? (n - j) : (j + 1u));
+                gp_lenient_why =
+                    (expected_wide(idx, split.pattern) ? "should be wide"
+                                                       : "should be narrow");
+                g_lenient_pos =
+                    (b_reverse ? (count_n - index_j) : (index_j + 1u));
             }
         }
     }
@@ -1434,22 +1426,21 @@ lenient_try (bool b_reverse, uint32_t lead)
     // add up to about the right width: nothing missing or extra inside.
     if (b_ok)
     {
-        b_ok = lenient_sum_ok(1u, (LENIENT_GAP_A - lead), lead, b_reverse,
-                              &split);
+        b_ok =
+            lenient_sum_ok(1u, (LENIENT_GAP_A - lead), lead, b_reverse, &split);
         gp_lenient_why = "first end's width off";
-        g_lenient_pos  = (b_reverse ? n : 1u);
+        g_lenient_pos  = (b_reverse ? count_n : 1u);
     }
     if (b_ok)
     {
         b_ok = lenient_sum_ok((LENIENT_GAP_B - lead), (last_j - 1u), lead,
                               b_reverse, &split);
         gp_lenient_why = "last end's width off";
-        g_lenient_pos  = (b_reverse ? 1u : n);
+        g_lenient_pos  = (b_reverse ? 1u : count_n);
     }
 
     return (b_ok ? symbol : '\0');
-}   /* lenient_try() */
-
+} /* lenient_try() */
 
 /*!
  * @brief Decode one complete character, judging bars and spaces apart:
@@ -1463,18 +1454,18 @@ lenient_try (bool b_reverse, uint32_t lead)
  *         clearly apart (LENIENT_RATIO_X10) or the pattern is unknown.
  */
 static char
-letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
+letter_decode(uint32_t first, bool b_reverse, split_t * p_split)
 {
-    uint32_t bar_wide_min    = UINT32_MAX;
-    uint32_t bar_narrow_max  = 0u;
-    uint32_t bar_narrow_sum  = 0u;
-    uint32_t bar_wide_sum    = 0u;
-    uint32_t space_wide      = 0u;
+    uint32_t bar_wide_min     = UINT32_MAX;
+    uint32_t bar_narrow_max   = 0u;
+    uint32_t bar_narrow_sum   = 0u;
+    uint32_t bar_wide_sum     = 0u;
+    uint32_t space_wide       = 0u;
     uint32_t space_narrow_max = 0u;
     uint32_t space_narrow_sum = 0u;
-    uint32_t total           = 0u;
-    uint16_t pattern         = 0u;
-    char     symbol          = '\0';
+    uint32_t total            = 0u;
+    uint16_t pattern          = 0u;
+    char     symbol           = '\0';
 
     // Mark the 2 widest bars (even elements) wide.
     for (uint32_t pick = 0u; pick < WIDE_BARS_PER_CHAR; pick++)
@@ -1482,18 +1473,20 @@ letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
         uint32_t best_el    = 0u;
         uint32_t best_width = 0u;
 
-        for (uint32_t el = 0u; el < ELEMENTS_PER_CHAR; el += 2u)
+        for (uint32_t value_el = 0u; value_el < ELEMENTS_PER_CHAR;
+             value_el += 2u)
         {
-            uint16_t bit   = (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - el));
-            uint32_t width = element_get(first + el, b_reverse);
+            uint16_t bit =
+                (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - value_el));
+            uint32_t width = element_get(first + value_el, b_reverse);
 
             if ((0u == (pattern & bit)) && (width > best_width))
             {
                 best_width = width;
-                best_el    = el;
+                best_el    = value_el;
             }
         }
-        pattern |= (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - best_el));
+        pattern |= (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - best_el));
     }
 
     // Mark the widest space (odd elements) wide.
@@ -1501,41 +1494,41 @@ letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
         uint32_t best_el    = 1u;
         uint32_t best_width = 0u;
 
-        for (uint32_t el = 1u; el < ELEMENTS_PER_CHAR; el += 2u)
+        for (uint32_t value_el = 1u; value_el < ELEMENTS_PER_CHAR;
+             value_el += 2u)
         {
-            uint32_t width = element_get(first + el, b_reverse);
+            uint32_t width = element_get(first + value_el, b_reverse);
 
             if (width > best_width)
             {
                 best_width = width;
-                best_el    = el;
+                best_el    = value_el;
             }
         }
-        pattern |= (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - best_el));
+        pattern |= (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - best_el));
     }
 
     // Measure each group, to check they are clearly apart.
-    for (uint32_t el = 0u; el < ELEMENTS_PER_CHAR; el++)
+    for (uint32_t value_el = 0u; value_el < ELEMENTS_PER_CHAR; value_el++)
     {
-        uint16_t bit    = (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - el));
-        uint32_t width  = element_get(first + el, b_reverse);
+        uint16_t bit = (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - value_el));
+        uint32_t width  = element_get(first + value_el, b_reverse);
         bool     b_wide = (0u != (pattern & bit));
 
         total += width;
 
-        if (0u == (el % 2u))
+        if (0u == (value_el % 2u))
         {
             if (b_wide)
             {
                 bar_wide_sum += width;
-                bar_wide_min  = ((width < bar_wide_min) ? width
-                                                        : bar_wide_min);
+                bar_wide_min = ((width < bar_wide_min) ? width : bar_wide_min);
             }
             else
             {
                 bar_narrow_sum += width;
-                bar_narrow_max  = ((width > bar_narrow_max) ? width
-                                                            : bar_narrow_max);
+                bar_narrow_max =
+                    ((width > bar_narrow_max) ? width : bar_narrow_max);
             }
         }
         else if (b_wide)
@@ -1545,8 +1538,8 @@ letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
         else
         {
             space_narrow_sum += width;
-            space_narrow_max  = ((width > space_narrow_max) ? width
-                                                            : space_narrow_max);
+            space_narrow_max =
+                ((width > space_narrow_max) ? width : space_narrow_max);
         }
     }
 
@@ -1555,7 +1548,7 @@ letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
     {
         for (uint32_t idx = 0u; idx < NUM_CODE39_SYMBOLS; idx++)
         {
-            if (g_code39[idx].pattern == pattern)
+            if ((g_code39[idx].pattern) == pattern)
             {
                 symbol = g_code39[idx].symbol;
             }
@@ -1563,18 +1556,19 @@ letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
     }
 
     // Splits halfway between the average narrow and wide of each kind.
-    p_split->pattern     = pattern;
-    p_split->bar_split   = ((bar_narrow_sum / (BARS_PER_CHAR -
-                                               WIDE_BARS_PER_CHAR)) +
-                            (bar_wide_sum / WIDE_BARS_PER_CHAR)) / 2u;
-    p_split->space_split = ((space_narrow_sum /
-                             (ELEMENTS_PER_CHAR - BARS_PER_CHAR - 1u)) +
-                            space_wide) / 2u;
-    p_split->unit        = total / UNITS_PER_CHAR;
+    p_split->pattern = pattern;
+    p_split->bar_split =
+        ((bar_narrow_sum / (BARS_PER_CHAR - WIDE_BARS_PER_CHAR)) +
+         (bar_wide_sum / WIDE_BARS_PER_CHAR)) /
+        2u;
+    p_split->space_split =
+        ((space_narrow_sum / ((ELEMENTS_PER_CHAR - BARS_PER_CHAR) - 1u)) +
+         space_wide) /
+        2u;
+    p_split->unit = total / UNITS_PER_CHAR;
 
     return (symbol);
-}   /* letter_decode() */
-
+} /* letter_decode() */
 
 /*!
  * @brief Check one element outside the letter against "*X*".
@@ -1590,24 +1584,24 @@ letter_decode (uint32_t first, bool b_reverse, split_t * p_split)
  *         long).
  */
 static bool
-lenient_check (uint32_t j, uint32_t lead, bool b_reverse,
-               split_t const * p_split)
+lenient_check(uint32_t index_j, uint32_t lead, bool b_reverse,
+              split_t const * p_split)
 {
-    uint32_t idx      = j + lead;
-    bool     b_bar    = (0u == (idx % 2u));
-    bool     b_wide   = expected_wide(idx, p_split->pattern);
-    uint32_t split    = (b_bar ? p_split->bar_split : p_split->space_split);
-    uint32_t width    = element_get(j, b_reverse);
-    bool     b_outer  = ((0u == j) || ((g_view_len - 1u) == j));
+    uint32_t idx     = index_j + lead;
+    bool     b_bar   = (0u == (idx % 2u));
+    bool     b_wide  = expected_wide(idx, p_split->pattern);
+    uint32_t split   = (b_bar ? p_split->bar_split : p_split->space_split);
+    uint32_t width   = element_get(index_j, b_reverse);
+    bool     b_outer = ((0u == index_j) || ((g_view_len - 1u) == index_j));
     bool     b_narrow_clear = ((width * PERCENT_100) <=
                                (split * (PERCENT_100 - LENIENT_BAND_PERCENT)));
     bool     b_wide_clear   = ((width * PERCENT_100) >=
                                (split * (PERCENT_100 + LENIENT_BAND_PERCENT)));
-    bool     b_ok     = false;
+    bool     b_ok           = false;
 
     if (b_outer && b_wide)
     {
-        b_ok = (width <= (split * LENIENT_LONG_X));  // May be cut short.
+        b_ok = (width <= (split * LENIENT_LONG_X)); // May be cut short.
     }
     else if (b_wide)
     {
@@ -1619,8 +1613,7 @@ lenient_check (uint32_t j, uint32_t lead, bool b_reverse,
     }
 
     return (b_ok);
-}   /* lenient_check() */
-
+} /* lenient_check() */
 
 /*!
  * @brief Check that a run of elements adds up to about its expected
@@ -1636,33 +1629,32 @@ lenient_check (uint32_t j, uint32_t lead, bool b_reverse,
  *         empty).
  */
 static bool
-lenient_sum_ok (uint32_t first_j, uint32_t last_j, uint32_t lead,
-                bool b_reverse, split_t const * p_split)
+lenient_sum_ok(uint32_t first_j, uint32_t last_j, uint32_t lead, bool b_reverse,
+               split_t const * p_split)
 {
     uint32_t width = 0u;
     uint32_t units = 0u;
     bool     b_ok  = true;
 
-    for (uint32_t j = first_j; (j <= last_j) && (j < g_view_len); j++)
+    for (uint32_t index_j = first_j;
+         (index_j <= last_j) && (index_j < g_view_len); index_j++)
     {
-        width += element_get(j, b_reverse);
-        units += (expected_wide(j + lead, p_split->pattern) ? WIDE_UNITS
-                                                            : 1u);
+        width += element_get(index_j, b_reverse);
+        units +=
+            (expected_wide(index_j + lead, p_split->pattern) ? WIDE_UNITS : 1u);
     }
 
     if (units > 0u)
     {
-        uint32_t expected = units * p_split->unit;
+        uint32_t expected = units * (p_split->unit);
 
-        b_ok = (((width * PERCENT_100) >=
-                 (expected * LENIENT_SUM_MIN_PERCENT)) &&
-                ((width * PERCENT_100) <=
-                 (expected * LENIENT_SUM_MAX_PERCENT)));
+        b_ok =
+            (((width * PERCENT_100) >= (expected * LENIENT_SUM_MIN_PERCENT)) &&
+             ((width * PERCENT_100) <= (expected * LENIENT_SUM_MAX_PERCENT)));
     }
 
     return (b_ok);
-}   /* lenient_sum_ok() */
-
+} /* lenient_sum_ok() */
 
 /*!
  * @brief Report whether element idx of "*X*" is wide.
@@ -1673,38 +1665,38 @@ lenient_sum_ok (uint32_t first_j, uint32_t last_j, uint32_t lead,
  * @return True if that element is wide.
  */
 static bool
-expected_wide (uint32_t idx, uint16_t letter)
+expected_wide(uint32_t idx, uint16_t letter)
 {
-    uint16_t pattern = STAR_PATTERN;
-    uint32_t el      = idx;
-    bool     b_wide  = false;
+    uint16_t pattern  = STAR_PATTERN;
+    uint32_t value_el = idx;
+    bool     b_wide   = false;
 
     if ((LENIENT_GAP_A == idx) || (LENIENT_GAP_B == idx))
     {
-        b_wide = false;                     // Gaps are narrow.
+        b_wide = false; // Gaps are narrow.
     }
     else
     {
         if (idx >= LENIENT_STOP_FIRST)
         {
-            el = idx - LENIENT_STOP_FIRST;
+            value_el = idx - LENIENT_STOP_FIRST;
         }
         else if (idx >= LENIENT_LETTER_FIRST)
         {
-            el      = idx - LENIENT_LETTER_FIRST;
-            pattern = letter;
+            value_el = idx - LENIENT_LETTER_FIRST;
+            pattern  = letter;
         }
         else
         {
             // The first '*'.
         }
 
-        b_wide = (0u != (pattern & (1u << (ELEMENTS_PER_CHAR - 1u - el))));
+        b_wide =
+            (0u != (pattern & (1u << ((ELEMENTS_PER_CHAR - 1u) - value_el))));
     }
 
     return (b_wide);
-}   /* expected_wide() */
-
+} /* expected_wide() */
 
 /*!
  * @brief Decode one 9-element character by finding its 3 widest elements.
@@ -1715,12 +1707,12 @@ expected_wide (uint32_t idx, uint16_t letter)
  * @return The character, or '\0' if the pattern is invalid or ambiguous.
  */
 static char
-char_decode (uint32_t first, bool b_reverse)
+char_decode(uint32_t first, bool b_reverse)
 {
-    uint16_t pattern     = 0u;
-    uint32_t widest_narrow = 0u;
+    uint16_t pattern        = 0u;
+    uint32_t widest_narrow  = 0u;
     uint32_t narrowest_wide = UINT32_MAX;
-    char     symbol      = '\0';
+    char     symbol         = '\0';
 
     // Mark the 3 widest elements as wide.
     for (uint32_t pick = 0u; pick < WIDE_PER_CHAR; pick++)
@@ -1728,36 +1720,36 @@ char_decode (uint32_t first, bool b_reverse)
         uint32_t best_idx   = 0u;
         uint32_t best_width = 0u;
 
-        for (uint32_t el = 0u; el < ELEMENTS_PER_CHAR; el++)
+        for (uint32_t value_el = 0u; value_el < ELEMENTS_PER_CHAR; value_el++)
         {
-            uint16_t bit   = (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - el));
-            uint32_t width = element_get(first + el, b_reverse);
+            uint16_t bit =
+                (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - value_el));
+            uint32_t width = element_get(first + value_el, b_reverse);
 
             if ((0u == (pattern & bit)) && (width > best_width))
             {
                 best_width = width;
-                best_idx   = el;
+                best_idx   = value_el;
             }
         }
 
-        pattern |= (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - best_idx));
+        pattern |= (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - best_idx));
     }
 
     // Check the wide and narrow groups are clearly different.
-    for (uint32_t el = 0u; el < ELEMENTS_PER_CHAR; el++)
+    for (uint32_t value_el = 0u; value_el < ELEMENTS_PER_CHAR; value_el++)
     {
-        uint16_t bit   = (uint16_t) (1u << (ELEMENTS_PER_CHAR - 1u - el));
-        uint32_t width = element_get(first + el, b_reverse);
+        uint16_t bit = (uint16_t)(1u << ((ELEMENTS_PER_CHAR - 1u) - value_el));
+        uint32_t width = element_get(first + value_el, b_reverse);
 
         if (0u != (pattern & bit))
         {
-            narrowest_wide = ((width < narrowest_wide) ? width
-                                                       : narrowest_wide);
+            narrowest_wide =
+                ((width < narrowest_wide) ? width : narrowest_wide);
         }
         else
         {
-            widest_narrow = ((width > widest_narrow) ? width
-                                                     : widest_narrow);
+            widest_narrow = ((width > widest_narrow) ? width : widest_narrow);
         }
     }
 
@@ -1765,7 +1757,7 @@ char_decode (uint32_t first, bool b_reverse)
     {
         for (uint32_t idx = 0u; idx < NUM_CODE39_SYMBOLS; idx++)
         {
-            if (g_code39[idx].pattern == pattern)
+            if ((g_code39[idx].pattern) == pattern)
             {
                 symbol = g_code39[idx].symbol;
             }
@@ -1773,8 +1765,7 @@ char_decode (uint32_t first, bool b_reverse)
     }
 
     return (symbol);
-}   /* char_decode() */
-
+} /* char_decode() */
 
 /*!
  * @brief Read one element width, from either end of the scan.
@@ -1785,14 +1776,13 @@ char_decode (uint32_t first, bool b_reverse)
  * @return The element width in microseconds.
  */
 static uint32_t
-element_get (uint32_t index, bool b_reverse)
+element_get(uint32_t index, bool b_reverse)
 {
-    uint32_t actual = g_view_first +
-                      (b_reverse ? ((g_view_len - 1u) - index) : index);
+    uint32_t actual =
+        g_view_first + (b_reverse ? ((g_view_len - 1u) - index) : index);
 
     return (g_elements[actual]);
-}   /* element_get() */
-
+} /* element_get() */
 
 /*!
  * @brief Look a message up in BARCODE_LETTER_COMMANDS.
@@ -1803,38 +1793,38 @@ element_get (uint32_t index, bool b_reverse)
  *         a single letter A-Z (a plain message).
  */
 static barcode_command_t
-command_match (char const * p_message)
+command_match(char const * p_message)
 {
     barcode_command_t command = BARCODE_CMD_NONE;
     char              letter  = p_message[0];
 
-    if (('A' <= letter) && (letter <= 'Z') && ('\0' == p_message[1]))
+    if ((('A' <= letter) && (letter <= 'Z')) && ('\0' == (p_message[1])))
     {
         switch (g_letters[letter - 'A'])
         {
-        case 'L':
-            command = BARCODE_CMD_LEFT;
-        break;
+            case 'L':
+                command = BARCODE_CMD_LEFT;
+                break;
 
-        case 'R':
-            command = BARCODE_CMD_RIGHT;
-        break;
+            case 'R':
+                command = BARCODE_CMD_RIGHT;
+                break;
 
-        case 'S':
-            command = BARCODE_CMD_STRAIGHT;
-        break;
+            case 'S':
+                command = BARCODE_CMD_STRAIGHT;
+                break;
 
-        case 'U':
-            command = BARCODE_CMD_UTURN;
-        break;
+            case 'U':
+                command = BARCODE_CMD_UTURN;
+                break;
 
-        default:
-            command = BARCODE_CMD_NONE;     // Not a command letter.
-        break;
+            default:
+                command = BARCODE_CMD_NONE; // Not a command letter.
+                break;
         }
     }
 
     return (command);
-}   /* command_match() */
+} /* command_match() */
 
 /*** end of file ***/

@@ -55,10 +55,9 @@
  * interrupts the scan.
  * A decoded command (every letter A-Z: left, right, straight or U-turn,
  * BARCODE_LETTER_COMMANDS) is kept as the pending turn and carried out at
- * the next crossroad, which line_junction_detect() finds from the side sensor (junction_act()); a
- * newer command replaces it.
- * Crossroads are only looked for while such a turn is waiting, so no
- * barcode bar is ever taken for one. A
+ * the next crossroad, which line_junction_detect() finds from the side sensor
+ * (junction_act()); a newer command replaces it. Crossroads are only looked for
+ * while such a turn is waiting, so no barcode bar is ever taken for one. A
  * U-turn there pivots past the side branch (TURN_UTURN_SKIP_LINES) to the
  * line it came along. A turn (TURN state) runs:
  * 0. ADVANCE (crossroad turns only): drive straight for
@@ -101,53 +100,51 @@
 #include "ultrasonic.h"
 #include "vehicle.h"
 
-
-#define USEC_PER_MSEC   1000u
-#define PERCENT         100
+#define USEC_PER_MSEC 1000u
+#define PERCENT 100
 
 // Line filter score limits, in control ticks.
-#define MSEC_TO_TICKS(msec)  (((msec) * USEC_PER_MSEC) / TICK_USEC)
-#define LINE_SCORE_FULL      MSEC_TO_TICKS(LINE_TURN_DELAY_MSEC)
-#define LINE_SCORE_CONFIRM   MSEC_TO_TICKS(LINE_BLACK_CONFIRM_MSEC)
-#define LINE_SCORE_CAPTURE   MSEC_TO_TICKS(LINE_LOST_BLACK_CONFIRM_MSEC)
-#define PATH_MAX_TICKS       MSEC_TO_TICKS(LINE_BACKTRACK_MAX_MSEC)
+#define MSEC_TO_TICKS(msec) (((msec) * USEC_PER_MSEC) / TICK_USEC)
+#define LINE_SCORE_FULL MSEC_TO_TICKS(LINE_TURN_DELAY_MSEC)
+#define LINE_SCORE_CONFIRM MSEC_TO_TICKS(LINE_BLACK_CONFIRM_MSEC)
+#define LINE_SCORE_CAPTURE MSEC_TO_TICKS(LINE_LOST_BLACK_CONFIRM_MSEC)
+#define PATH_MAX_TICKS MSEC_TO_TICKS(LINE_BACKTRACK_MAX_MSEC)
 
 // Calibration speed: LINE_CAL_SPEED_PERCENT of the following speed. Pivots
 // still burst at PIVOT_PULSE_SPEED (lower stalls), with braked pauses
 // long enough that the AVERAGE is CAL_SPEED.
-#define CAL_SPEED           ((SPEED_CRUISE * LINE_CAL_SPEED_PERCENT) / PERCENT)
-#define CAL_PIVOT_OFF_MSEC  ((PIVOT_PULSE_ON_MSEC *                           \
-                              (uint32_t) (PIVOT_PULSE_SPEED - CAL_SPEED)) /   \
-                             (uint32_t) CAL_SPEED)
+#define CAL_SPEED ((SPEED_CRUISE * LINE_CAL_SPEED_PERCENT) / PERCENT)
+#define CAL_PIVOT_OFF_MSEC                                                     \
+    ((PIVOT_PULSE_ON_MSEC * (uint32_t)(PIVOT_PULSE_SPEED - CAL_SPEED)) /       \
+     (uint32_t)CAL_SPEED)
 
-
-static bool            gb_bypass_dry_run = false;
-static vehicle_state_t g_state        = VEHICLE_READY;
-static uint32_t        g_entered_msec = 0u;     // When g_state began.
-static uint32_t        g_level_msec   = 0u;     // Level since (in HUMP).
-static uint32_t        g_clear_msec   = 0u;     // Clear since (BLOCKED).
-static uint32_t        g_ignore_until = 0u;     // Ignore range until.
+static bool            gb_bypass_dry_run    = false;
+static vehicle_state_t g_state              = VEHICLE_READY;
+static uint32_t        g_entered_msec       = 0u; // When g_state began.
+static uint32_t        g_level_msec         = 0u; // Level since (in HUMP).
+static uint32_t        g_clear_msec         = 0u; // Clear since (BLOCKED).
+static uint32_t        g_ignore_until       = 0u; // Ignore range until.
 static int32_t         g_hump_peak_tilt_x10 = 0;
-static bool            gb_level       = false;
-static bool            gb_clear       = false;
-static bool            gb_hump_tilted = false;
-static uint32_t        g_hump_off_msec = 0u;    // When HUMP last ended.
-static bool            gb_floorless   = false;  // No floor seen, since
-static uint32_t        g_floorless_msec = 0u;   // this time.
-static bool            gb_hump_over   = false;  // Past the top of it.
-static uint32_t        g_top_msec     = 0u;     // When it went over.
-static int32_t         g_top_speed    = 0;      // Speed then.
-static int32_t         g_hump_speed   = 0;      // Speed on it now.
-static int32_t         g_hump_extra   = 0;      // Power added for stalls.
-static uint32_t        g_boost_msec   = 0u;     // Last stall boost.
-static uint32_t        g_stall_edges  = 0u;     // Edges at window start.
-static uint32_t        g_stall_window = 0u;     // Window start.
-static uint32_t        g_stall_since  = 0u;     // Stalled since.
-static bool            gb_stalled     = false;  // Last window stalled.
-static int32_t         g_exit_speed   = 0;      // Speed as HUMP ended.
-static bool            gb_tilting     = false;  // Over HUMP_ENTER, since
-static uint32_t        g_tilt_msec    = 0u;     // g_tilt_msec.
-static bool            gb_last_left   = true;   // Line last seen left.
+static bool            gb_level             = false;
+static bool            gb_clear             = false;
+static bool            gb_hump_tilted       = false;
+static uint32_t        g_hump_off_msec      = 0u;    // When HUMP last ended.
+static bool            gb_floorless         = false; // No floor seen, since
+static uint32_t        g_floorless_msec     = 0u;    // this time.
+static bool            gb_hump_over         = false; // Past the top of it.
+static uint32_t        g_top_msec           = 0u;    // When it went over.
+static int32_t         g_top_speed          = 0;     // Speed then.
+static int32_t         g_hump_speed         = 0;     // Speed on it now.
+static int32_t         g_hump_extra         = 0;     // Power added for stalls.
+static uint32_t        g_boost_msec         = 0u;    // Last stall boost.
+static uint32_t        g_stall_edges        = 0u;    // Edges at window start.
+static uint32_t        g_stall_window       = 0u;    // Window start.
+static uint32_t        g_stall_since        = 0u;    // Stalled since.
+static bool            gb_stalled           = false; // Last window stalled.
+static int32_t         g_exit_speed         = 0;     // Speed as HUMP ended.
+static bool            gb_tilting           = false; // Over HUMP_ENTER, since
+static uint32_t        g_tilt_msec          = 0u;    // g_tilt_msec.
+static bool            gb_last_left         = true;  // Line last seen left.
 
 // Which sensors last saw the line, so the car knows which limit it left by.
 typedef enum
@@ -157,12 +154,12 @@ typedef enum
     LINE_LAST_RIGHT
 } line_last_t;
 
-static line_last_t     g_line_last    = LINE_LAST_BOTH;
+static line_last_t g_line_last = LINE_LAST_BOTH;
 
 // Debounced line state used for steering.
-static line_state_t    g_line          = { true, true };
-static uint32_t        g_left_score    = LINE_SCORE_FULL;  // Net black,
-static uint32_t        g_right_score   = LINE_SCORE_FULL;  // in ticks.
+static line_state_t g_line        = {true, true};
+static uint32_t     g_left_score  = LINE_SCORE_FULL; // Net black,
+static uint32_t     g_right_score = LINE_SCORE_FULL; // in ticks.
 
 // Steering: a gentle arc while one sensor is still on the line, a hard
 // arc once both are off it. Going straight or reversing the turn is held
@@ -176,91 +173,89 @@ typedef enum
     STEER_HARD_RIGHT
 } steer_t;
 
-static steer_t         g_steer         = STEER_STRAIGHT;
-static uint32_t        g_steer_msec    = 0u;    // Steering last changed at.
+static steer_t  g_steer      = STEER_STRAIGHT;
+static uint32_t g_steer_msec = 0u; // Steering last changed at.
 
 // Backtrack: the wheel speeds driven since both sensors were last on the
 // line, so a car that has lost it can reverse along the same path back.
-static int8_t          g_path_left[PATH_MAX_TICKS];
-static int8_t          g_path_right[PATH_MAX_TICKS];
-static uint32_t        g_path_len      = 0u;
-static bool            gb_path_ok      = false; // Path leads back to black.
-static bool            gb_backtracking = false;
-static bool            gb_backtracked  = false; // Used up for this loss.
-static uint32_t        g_back_msec     = 0u;    // Reverse began at.
-static uint32_t        g_back_pos_x100 = 0u;    // Replay position, ticks
-                                                // x 100 (counts down).
-static line_state_t    g_raw_line      = { false, false };
+static int8_t       g_path_left[PATH_MAX_TICKS];
+static int8_t       g_path_right[PATH_MAX_TICKS];
+static uint32_t     g_path_len      = 0u;
+static bool         gb_path_ok      = false; // Path leads back to black.
+static bool         gb_backtracking = false;
+static bool         gb_backtracked  = false; // Used up for this loss.
+static uint32_t     g_back_msec     = 0u;    // Reverse began at.
+static uint32_t     g_back_pos_x100 = 0u;    // Replay position, ticks
+                                             // x 100 (counts down).
+static line_state_t g_raw_line      = {false, false};
 
 // START calibration.
-static uint32_t        g_centred_ticks = 0u;    // Both on black this long.
-static bool            gb_cal_left     = true;  // Turning left (calibration).
-static bool            gb_cal_turned   = false; // Has arced at all.
-static uint32_t        g_cal_black_msec = 0u;   // A line sensor last on
-                                                // black (calibration).
-static bool            gb_pivoting     = false;
-static bool            gb_pivot_left   = true;
-static uint32_t        g_pivot_msec    = 0u;    // Pivot began/reversed.
+static uint32_t g_centred_ticks  = 0u;    // Both on black this long.
+static bool     gb_cal_left      = true;  // Turning left (calibration).
+static bool     gb_cal_turned    = false; // Has arced at all.
+static uint32_t g_cal_black_msec = 0u;    // A line sensor last on
+                                          // black (calibration).
+static bool     gb_pivoting      = false;
+static bool     gb_pivot_left    = true;
+static uint32_t g_pivot_msec     = 0u; // Pivot began/reversed.
 
 // Barcode reading and barcode turns.
 typedef enum
 {
-    TURN_ADVANCE,   // Crossroad: drive on until the axle is over it.
-    TURN_LEAVE,     // Pivot until both line sensors are off the line.
-    TURN_FIND,      // Pivot until a line sensor finds a line.
-    TURN_ALIGN      // Pivot until both line sensors are on it.
+    TURN_ADVANCE, // Crossroad: drive on until the axle is over it.
+    TURN_LEAVE,   // Pivot until both line sensors are off the line.
+    TURN_FIND,    // Pivot until a line sensor finds a line.
+    TURN_ALIGN    // Pivot until both line sensors are on it.
 } turn_phase_t;
 
 static bool              gb_follow_from_bypass;
-static bool              gb_launch      = true;  // Straight start allowed.
-static barcode_command_t g_turn_cmd     = BARCODE_CMD_NONE;
-static vehicle_state_t   g_turn_after   = VEHICLE_FOLLOW_LINE;
-static turn_phase_t      g_turn_phase   = TURN_LEAVE;
-static uint32_t          g_turn_msec    = 0u;    // Current phase began.
-static uint32_t          g_pivot_start_msec = 0u; // LEAVE began (pivot).
-static bool              gb_turn_left_on = true; // Left was last on black.
-static bool              gb_turn_advance = false; // Next turn: ADVANCE first.
-static uint32_t          g_uturn_skip    = 0u;    // Lines still to pivot past.
+static bool              gb_launch          = true; // Straight start allowed.
+static barcode_command_t g_turn_cmd         = BARCODE_CMD_NONE;
+static vehicle_state_t   g_turn_after       = VEHICLE_FOLLOW_LINE;
+static turn_phase_t      g_turn_phase       = TURN_LEAVE;
+static uint32_t          g_turn_msec        = 0u;   // Current phase began.
+static uint32_t          g_pivot_start_msec = 0u;   // LEAVE began (pivot).
+static bool              gb_turn_left_on    = true; // Left was last on black.
+static bool              gb_turn_advance = false;   // Next turn: ADVANCE first.
+static uint32_t          g_uturn_skip    = 0u; // Lines still to pivot past.
 static bool              gb_junction_deferred = false; // Crossroad waiting
                                                        // for a decode.
-static bool              gb_feat_line    = true;  // Follow the line (else
-                                                  // drive straight).
-static bool              gb_feat_avoid   = true;  // Scan and go round (else
-                                                  // stop and wait).
-static bool              gb_feat_barcode = true;  // Read barcodes.
-static bool              gb_feat_hump    = true;  // Climb and measure humps
-                                                  // (else tilt is ignored).
-static barcode_command_t g_pending_turn = BARCODE_CMD_NONE; // At the next
-                                                            // crossroad.
+static bool              gb_feat_line         = true;  // Follow the line (else
+                                                       // drive straight).
+static bool              gb_feat_avoid        = true; // Scan and go round (else
+                                                      // stop and wait).
+static bool              gb_feat_barcode      = true; // Read barcodes.
+static bool              gb_feat_hump         = true; // Climb and measure humps
+                                                      // (else tilt is ignored).
+static barcode_command_t g_pending_turn       = BARCODE_CMD_NONE; // At the next
+                                                                  // crossroad.
 
-
-static void     state_enter(vehicle_state_t state, uint32_t now_msec);
-static void     junction_seen(uint32_t now_msec);
-static void     junction_act(uint32_t now_msec, uint32_t already_msec);
-static void     turn_step(uint32_t now_msec);
-static void     turn_phase_enter(turn_phase_t phase, uint32_t now_msec);
-static void     turn_finish(uint32_t now_msec, line_state_t line,
-                            line_last_t last, char const * p_how);
-static void     scan_hold_line(void);
-static void     line_steer(int32_t speed, uint32_t now_msec);
-static void     line_cal_step(uint32_t now_msec);
-static void     pivot(bool b_left, uint32_t now_msec);
+static void state_enter(vehicle_state_t state, uint32_t now_msec);
+static void junction_seen(uint32_t now_msec);
+static void junction_act(uint32_t now_msec, uint32_t already_msec);
+static void turn_step(uint32_t now_msec);
+static void turn_phase_enter(turn_phase_t phase, uint32_t now_msec);
+static void turn_finish(uint32_t now_msec, line_state_t line, line_last_t last,
+                        char const * p_how);
+static void scan_hold_line(void);
+static void line_steer(int32_t speed, uint32_t now_msec);
+static void line_cal_step(uint32_t now_msec);
+static void pivot(bool b_left, uint32_t now_msec);
 static line_state_t line_filtered(void);
-static bool     line_score_step(uint32_t * p_score, bool b_raw_black,
-                                bool b_black, uint32_t confirm);
-static void     line_filter_reset(line_state_t line, uint32_t now_msec);
-static bool     backtrack_step(line_state_t line, uint32_t now_msec);
-static void     path_record(int32_t left, int32_t right, line_state_t line);
-static void     path_reset(bool b_ok);
-static bool     steer_allowed(steer_t want, uint32_t now_msec);
+static bool line_score_step(uint32_t * p_score, bool b_raw_black, bool b_black,
+                            uint32_t confirm);
+static void line_filter_reset(line_state_t line, uint32_t now_msec);
+static bool backtrack_step(line_state_t line, uint32_t now_msec);
+static void path_record(int32_t left, int32_t right, line_state_t line);
+static void path_reset(bool b_ok);
+static bool steer_allowed(steer_t want, uint32_t now_msec);
 static uint32_t now_msec_get(void);
 static void     follow_line_step(uint32_t now_msec, uint32_t range_mm,
                                  int32_t pitch_x10);
-static void     probe_step(uint32_t now_msec, uint32_t range_mm,
-                           int32_t pitch_x10);
-static void     hump_step(uint32_t now_msec, int32_t pitch_x10);
-static bool     hump_tilt_held(uint32_t now_msec, int32_t tilt_x10);
-static void     stall_update(uint32_t now_msec);
+static void probe_step(uint32_t now_msec, uint32_t range_mm, int32_t pitch_x10);
+static void hump_step(uint32_t now_msec, int32_t pitch_x10);
+static bool hump_tilt_held(uint32_t now_msec, int32_t tilt_x10);
+static void stall_update(uint32_t now_msec);
 static uint32_t stall_msec(uint32_t now_msec);
 static int32_t  hump_speed(uint32_t now_msec, uint32_t in_hump_msec);
 static int32_t  cruise_speed(uint32_t now_msec);
@@ -273,35 +268,37 @@ static void     blocked_step(uint32_t now_msec, uint32_t range_mm);
 static void     barcode_test_step(uint32_t now_msec, uint32_t range_mm,
                                   int32_t tilt_x10);
 
-
 /*!
  * @brief Start in READY with the motors braked.
  */
 void
-vehicle_init (void)
+vehicle_init(void)
 {
     state_enter(VEHICLE_READY, now_msec_get());
-}   /* vehicle_init() */
+} /* vehicle_init() */
 
-
-// Shared rehearsal: recover/follow when started on line; empty floor ends stopped.
+// Shared rehearsal: recover/follow when started on line; empty floor ends
+// stopped.
+/** @brief Start the manual bypass rehearsal subject to existing guards. */
 void
 vehicle_bypass_test(void)
 {
     uint32_t now = now_msec_get();
-    if (!is_parked(g_state) || obstacle_scan_active()) {
-        log_obstacle("BYPASS DRY RUN: stop the car and finish/cancel the scan first.");
+    if ((!is_parked(g_state)) || (obstacle_scan_active()))
+    {
+        log_obstacle(
+            "BYPASS DRY RUN: stop the car and finish/cancel the scan first.");
         return;
     }
-    if (bypass_test_begin(now)) {
-        gb_feat_line = false;
-        gb_feat_barcode = false;
-        gb_feat_hump = false;
+    if (bypass_test_begin(now))
+    {
+        gb_feat_line      = false;
+        gb_feat_barcode   = false;
+        gb_feat_hump      = false;
         gb_bypass_dry_run = true;
         state_enter(VEHICLE_BYPASS, now);
     }
 }
-
 
 /*!
  * @brief Start: search for the line (LINE_CAL), then follow it.
@@ -311,24 +308,23 @@ vehicle_bypass_test(void)
  * the line.
  */
 void
-vehicle_start (void)
+vehicle_start(void)
 {
-    if (is_parked(g_state) && !line_under_car())
+    if ((is_parked(g_state)) && (!line_under_car()))
     {
         // Both line sensors on white: stay put (line_under_car() logs).
     }
     else if (is_parked(g_state))
     {
-        gb_feat_line    = true;     // A full run: every feature on.
+        gb_feat_line    = true; // A full run: every feature on.
         gb_feat_avoid   = true;
         gb_feat_barcode = true;
         gb_feat_hump    = true;
-        g_pending_turn  = BARCODE_CMD_NONE;  // A new run: no old turn.
-        hump_new_run();                      // Nor the last run's humps.
+        g_pending_turn  = BARCODE_CMD_NONE; // A new run: no old turn.
+        hump_new_run();                     // Nor the last run's humps.
         state_enter(VEHICLE_LINE_CAL, now_msec_get());
     }
-}   /* vehicle_start() */
-
+} /* vehicle_start() */
 
 /*!
  * @brief Start a FEATURE TEST run: each feature on or off.
@@ -349,10 +345,9 @@ vehicle_start (void)
  * @param[in] b_hump    Climb and measure humps.
  */
 void
-vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode,
-                      bool b_hump)
+vehicle_feature_test(bool b_line, bool b_avoid, bool b_barcode, bool b_hump)
 {
-    if (is_parked(g_state) && b_line && !line_under_car())
+    if (((is_parked(g_state)) && b_line) && (!line_under_car()))
     {
         // Both line sensors on white: stay put (line_under_car() logs).
     }
@@ -377,18 +372,16 @@ vehicle_feature_test (bool b_line, bool b_avoid, bool b_barcode,
     {
         log_printf("Stop the car before FEATURE TEST.");
     }
-}   /* vehicle_feature_test() */
-
+} /* vehicle_feature_test() */
 
 /*!
  * @brief Stop at once, from any state. START is needed to move again.
  */
 void
-vehicle_stop (void)
+vehicle_stop(void)
 {
     state_enter(VEHICLE_STOPPED, now_msec_get());
-}   /* vehicle_stop() */
-
+} /* vehicle_stop() */
 
 /*!
  * @brief Act on a barcode command.
@@ -406,22 +399,22 @@ vehicle_stop (void)
  * @param[in] b_test  True for a test key, false for a read barcode.
  */
 void
-vehicle_barcode_command (barcode_command_t command, bool b_test)
+vehicle_barcode_command(barcode_command_t command, bool b_test)
 {
     uint32_t now_msec  = now_msec_get();
     bool     b_stopped = is_parked(g_state);
-    bool     b_moving  = ((VEHICLE_FOLLOW_LINE == g_state) ||
-                          (VEHICLE_BARCODE_TEST == g_state) ||
-                          (VEHICLE_BARCODE_STATIC == g_state) ||
-                          (VEHICLE_BLOCKED == g_state) ||
-                          (VEHICLE_PROBE == g_state) ||
+    bool     b_moving  = ((((((VEHICLE_FOLLOW_LINE == g_state) ||
+                              (VEHICLE_BARCODE_TEST == g_state)) ||
+                             (VEHICLE_BARCODE_STATIC == g_state)) ||
+                            (VEHICLE_BLOCKED == g_state)) ||
+                           (VEHICLE_PROBE == g_state)) ||
                           (VEHICLE_HUMP == g_state));
 
     if (BARCODE_CMD_NONE == command)
     {
         // A plain message: keep following.
     }
-    else if (b_test && b_stopped && (BARCODE_CMD_STRAIGHT == command))
+    else if ((b_test && b_stopped) && (BARCODE_CMD_STRAIGHT == command))
     {
         log_line("GO STRAIGHT: nothing to turn on the bench.");
     }
@@ -446,8 +439,7 @@ vehicle_barcode_command (barcode_command_t command, bool b_test)
         log_line("%s not acted on in %s.", barcode_command_name(command),
                  vehicle_state_name(g_state));
     }
-}   /* vehicle_barcode_command() */
-
+} /* vehicle_barcode_command() */
 
 /*!
  * @brief The side sensor's mark (after a barcode) is the crossroad: act
@@ -460,11 +452,10 @@ vehicle_barcode_command (barcode_command_t command, bool b_test)
  * @param[in] now_msec The current time.
  */
 static void
-junction_seen (uint32_t now_msec)
+junction_seen(uint32_t now_msec)
 {
     junction_act(now_msec, 0u);
-}   /* junction_seen() */
-
+} /* junction_seen() */
 
 /*!
  * @brief A crossroad was just reached: carry out the pending turn, if any.
@@ -479,7 +470,7 @@ junction_seen (uint32_t now_msec)
  *                         phase is that much shorter.
  */
 static void
-junction_act (uint32_t now_msec, uint32_t already_msec)
+junction_act(uint32_t now_msec, uint32_t already_msec)
 {
     if (BARCODE_CMD_STRAIGHT == g_pending_turn)
     {
@@ -494,15 +485,14 @@ junction_act (uint32_t now_msec, uint32_t already_msec)
         g_turn_after    = g_state;
         gb_turn_advance = true;
         state_enter(VEHICLE_TURN, now_msec);
-        g_turn_msec    -= already_msec;     // ADVANCE counts from the mark.
+        g_turn_msec -= already_msec; // ADVANCE counts from the mark.
     }
     else
     {
         log_line("Crossroad seen in %s, no turn pending: straight on.",
                  vehicle_state_name(g_state));
     }
-}   /* junction_act() */
-
+} /* junction_act() */
 
 /*!
  * @brief Report the turn waiting for the next crossroad.
@@ -510,11 +500,10 @@ junction_act (uint32_t now_msec, uint32_t already_msec)
  * @return The pending command, or BARCODE_CMD_NONE.
  */
 barcode_command_t
-vehicle_pending_turn (void)
+vehicle_pending_turn(void)
 {
     return (g_pending_turn);
-}   /* vehicle_pending_turn() */
-
+} /* vehicle_pending_turn() */
 
 /*!
  * @brief Start BARCODE TEST: drive straight and read barcodes.
@@ -523,12 +512,11 @@ vehicle_pending_turn (void)
  * Works from READY or STOPPED only. STOP ends it.
  */
 void
-vehicle_barcode_test (void)
+vehicle_barcode_test(void)
 {
     // Kept for the serial key: a feature test with only barcodes on.
     vehicle_feature_test(false, false, true, false);
-}   /* vehicle_barcode_test() */
-
+} /* vehicle_barcode_test() */
 
 /*!
  * @brief Start BARCODE TEST (STATIC): stand still and read barcodes slid
@@ -539,39 +527,38 @@ vehicle_barcode_test (void)
  * as the pending turn, as in a real run, so the page shows it.
  */
 void
-vehicle_barcode_static (void)
+vehicle_barcode_static(void)
 {
     if (is_parked(g_state))
     {
         log_state("BARCODE TEST (STATIC): motors off. Slide a barcode "
                   "slowly past the side sensor. STOP to end.");
-        g_pending_turn = BARCODE_CMD_NONE;  // A new test: no old turn.
+        g_pending_turn = BARCODE_CMD_NONE; // A new test: no old turn.
         state_enter(VEHICLE_BARCODE_STATIC, now_msec_get());
     }
     else
     {
         log_printf("Stop the car before BARCODE TEST (STATIC).");
     }
-}   /* vehicle_barcode_static() */
-
+} /* vehicle_barcode_static() */
 
 /*!
  * @brief Run one step of the state machine. Call every control tick,
  *        after the sensor tasks.
  */
 void
-vehicle_task (void)
+vehicle_task(void)
 {
-    uint32_t now_msec  = now_msec_get();
-    uint32_t range_mm  = ultrasonic_range_mm();
-    int32_t  tilt_x10  = imu_total_tilt_x10();  // Humps (config.h).
-    bool     b_reading = ((VEHICLE_FOLLOW_LINE == g_state) ||
-                          (VEHICLE_BARCODE_TEST == g_state));
-    uint32_t mark_msec = 0u;
-    line_junction_t junction = LINE_JUNCTION_NONE;
+    uint32_t now_msec = now_msec_get();
+    uint32_t range_mm = ultrasonic_range_mm();
+    int32_t  tilt_x10 = imu_total_tilt_x10(); // Humps (config.h).
+    bool     b_reading =
+        ((VEHICLE_FOLLOW_LINE == g_state) || (VEHICLE_BARCODE_TEST == g_state));
+    uint32_t        mark_msec = 0u;
+    line_junction_t junction  = LINE_JUNCTION_NONE;
 
     // Lifted off the floor while driving: the end of the demo.
-    if (vehicle_is_moving() && picked_up(now_msec))
+    if ((vehicle_is_moving()) && (picked_up(now_msec)))
     {
         log_state("Picked up (no floor under any IR sensor for %" PRIu32
                   " ms) -> stopped. End of the demo.",
@@ -584,18 +571,20 @@ vehicle_task (void)
     stall_update(now_msec);
 
     // Hump height: add up the climb while driving forwards.
-    hump_task(((VEHICLE_FOLLOW_LINE == g_state) ||
-               (VEHICLE_PROBE == g_state) || (VEHICLE_HUMP == g_state) ||
-               (VEHICLE_BARCODE_TEST == g_state)),
-              (VEHICLE_HUMP == g_state));
+    hump_task(
+        ((((VEHICLE_FOLLOW_LINE == g_state) || (VEHICLE_PROBE == g_state)) ||
+          (VEHICLE_HUMP == g_state)) ||
+         (VEHICLE_BARCODE_TEST == g_state)),
+        (VEHICLE_HUMP == g_state));
 
     // Apply the immediate stop before junctions, calibration, turns or
     // tilt handling can issue another movement command.
-    if (OBSTACLE_STOP_AT_ONCE && vehicle_is_moving() &&
-        (VEHICLE_BLOCKED != g_state) &&
-        (VEHICLE_OBSTACLE_SCAN != g_state) &&
-        (VEHICLE_BYPASS != g_state) && (VEHICLE_HUMP != g_state) &&
-        ((int32_t) (now_msec - g_ignore_until) >= 0) &&
+    if (((((((OBSTACLE_STOP_AT_ONCE && (vehicle_is_moving())) &&
+             (VEHICLE_BLOCKED != g_state)) &&
+            (VEHICLE_OBSTACLE_SCAN != g_state)) &&
+           (VEHICLE_BYPASS != g_state)) &&
+          (VEHICLE_HUMP != g_state)) &&
+         (((int32_t)(now_msec - g_ignore_until)) >= 0)) &&
         (range_mm <= OBSTACLE_STOP_MM))
     {
         log_obstacle("Obstacle at %" PRIu32 " mm -> stopped.", range_mm);
@@ -623,17 +612,17 @@ vehicle_task (void)
     // turn is waiting (a barcode always comes before its crossroad). So a
     // barcode's own bars, however wide the print, are never taken for a
     // crossroad, and nor is any mark when no turn is due.
-    junction = line_junction_detect(barcode_is_black(),
-                                    (b_reading &&
-                                     (BARCODE_CMD_NONE != g_pending_turn)),
-                                    now_msec, &mark_msec);
-    if ((LINE_JUNCTION_FOUND == junction) && barcode_is_capturing() &&
-             (barcode_scan_size() > 1u))
+    junction = line_junction_detect(
+        barcode_is_black(), (b_reading && (BARCODE_CMD_NONE != g_pending_turn)),
+        now_msec, &mark_msec);
+    if (((LINE_JUNCTION_FOUND == junction) && (barcode_is_capturing())) &&
+        ((barcode_scan_size()) > 1u))
     {
         // A turn is waiting but a new barcode is being read (the last
         // crossroad was missed): this mark is one of its bars.
         log_line("Side sensor: %" PRIu32 " ms black mark is a barcode bar, "
-                 "not a crossroad.", mark_msec);
+                 "not a crossroad.",
+                 mark_msec);
     }
     else if (LINE_JUNCTION_FOUND == junction)
     {
@@ -641,7 +630,7 @@ vehicle_task (void)
                  mark_msec);
         if (barcode_end_scan())
         {
-            gb_junction_deferred = true;    // Decode first, then turn.
+            gb_junction_deferred = true; // Decode first, then turn.
         }
         else
         {
@@ -651,7 +640,8 @@ vehicle_task (void)
     else if (LINE_JUNCTION_TOO_LONG == junction)
     {
         log_line("Side sensor: %" PRIu32 " ms black mark, too long for a "
-                 "crossroad branch: ignored.", mark_msec);
+                 "crossroad branch: ignored.",
+                 mark_msec);
     }
     else
     {
@@ -660,90 +650,103 @@ vehicle_task (void)
 
     switch (g_state)
     {
-    case VEHICLE_OBSTACLE_SCAN:
-        motor_set(0, 0);
-        obstacle_scan_task(now_msec);
-        if (!obstacle_scan_active())
-        {
-            state_enter((bypass_begin(obstacle_profile(), now_msec,
-                                      true) ?
-                         VEHICLE_BYPASS : VEHICLE_BLOCKED), now_msec);
-        }
-    break;
-
-    case VEHICLE_BYPASS:
-    {
-        bypass_result_t result = bypass_step(now_msec, range_mm);
-
-        if (BYPASS_DONE == result)
-        {
-            // Recheck a live follower-valid reading, not just cached recovery ticks.
-            line_state_t recovered=line_sensor_read();
-            if (!gb_bypass_dry_run &&
-                !(recovered.b_left_black || recovered.b_right_black)) {
-                log_obstacle("BYPASS: line lost at FOLLOW handoff; stopping.");
-                state_enter(VEHICLE_STOPPED,now_msec);
-                break;
+        case VEHICLE_OBSTACLE_SCAN:
+            motor_set(0, 0);
+            obstacle_scan_task(now_msec);
+            if (!obstacle_scan_active())
+            {
+                state_enter((bypass_begin(obstacle_profile(), now_msec, true)
+                                 ? VEHICLE_BYPASS
+                                 : VEHICLE_BLOCKED),
+                            now_msec);
             }
-            if(!gb_bypass_dry_run) {
-                gb_feat_line=true;
-                line_filter_reset(recovered,now_msec);
-                g_line_last=recovered.b_left_black && recovered.b_right_black ? LINE_LAST_BOTH :
-                            recovered.b_left_black ? LINE_LAST_LEFT : LINE_LAST_RIGHT;
-                if(g_line_last!=LINE_LAST_BOTH) gb_last_left=recovered.b_left_black;
+            break;
+
+        case VEHICLE_BYPASS:
+        {
+            bypass_result_t result = bypass_step(now_msec, range_mm);
+
+            if (BYPASS_DONE == result)
+            {
+                // Recheck a live follower-valid reading, not just cached
+                // recovery ticks.
+                line_state_t recovered = line_sensor_read();
+                if ((!gb_bypass_dry_run) &&
+                    (!((recovered.b_left_black) || (recovered.b_right_black))))
+                {
+                    log_obstacle(
+                        "BYPASS: line lost at FOLLOW handoff; stopping.");
+                    state_enter(VEHICLE_STOPPED, now_msec);
+                    break;
+                }
+                if (!gb_bypass_dry_run)
+                {
+                    gb_feat_line = true;
+                    line_filter_reset(recovered, now_msec);
+                    g_line_last =
+                        (recovered.b_left_black) && (recovered.b_right_black)
+                            ? LINE_LAST_BOTH
+                        : recovered.b_left_black ? LINE_LAST_LEFT
+                                                 : LINE_LAST_RIGHT;
+                    if (g_line_last != LINE_LAST_BOTH)
+                    {
+                        gb_last_left = recovered.b_left_black;
+                    }
+                }
+                state_enter(gb_bypass_dry_run ? VEHICLE_STOPPED
+                                              : VEHICLE_FOLLOW_LINE,
+                            now_msec);
             }
-            state_enter(gb_bypass_dry_run ? VEHICLE_STOPPED : VEHICLE_FOLLOW_LINE,now_msec);
+            else if (BYPASS_FAILED == result)
+            {
+                log_obstacle("BYPASS recovery failed: STOPPED; line/heading or "
+                             "safety not confirmed.");
+                state_enter(VEHICLE_STOPPED, now_msec);
+            }
+            else
+            {
+                // Still going round.
+            }
         }
-        else if (BYPASS_FAILED == result)
-        {
-            log_obstacle("BYPASS recovery failed: STOPPED; line/heading or safety not confirmed.");
-            state_enter(VEHICLE_STOPPED, now_msec);
-        }
-        else
-        {
-            // Still going round.
-        }
+        break;
+
+        case VEHICLE_LINE_CAL:
+            line_cal_step(now_msec);
+            break;
+
+        case VEHICLE_FOLLOW_LINE:
+            follow_line_step(now_msec, range_mm, tilt_x10);
+            break;
+
+        case VEHICLE_PROBE:
+            probe_step(now_msec, range_mm, tilt_x10);
+            break;
+
+        case VEHICLE_HUMP:
+            hump_step(now_msec, tilt_x10);
+            break;
+
+        case VEHICLE_BLOCKED:
+            blocked_step(now_msec, range_mm);
+            break;
+
+        case VEHICLE_TURN:
+            turn_step(now_msec);
+            break;
+
+        case VEHICLE_BARCODE_TEST:
+            barcode_test_step(now_msec, range_mm, tilt_x10);
+            break;
+
+        case VEHICLE_BARCODE_STATIC: // Barcodes are read by barcode_task().
+        case VEHICLE_READY:
+        case VEHICLE_STOPPED:
+        case VEHICLE_PICKED_UP:
+        default:
+            motor_set(0, 0);
+            break;
     }
-    break;
-
-    case VEHICLE_LINE_CAL:
-        line_cal_step(now_msec);
-    break;
-
-    case VEHICLE_FOLLOW_LINE:
-        follow_line_step(now_msec, range_mm, tilt_x10);
-    break;
-
-    case VEHICLE_PROBE:
-        probe_step(now_msec, range_mm, tilt_x10);
-    break;
-
-    case VEHICLE_HUMP:
-        hump_step(now_msec, tilt_x10);
-    break;
-
-    case VEHICLE_BLOCKED:
-        blocked_step(now_msec, range_mm);
-    break;
-
-    case VEHICLE_TURN:
-        turn_step(now_msec);
-    break;
-
-    case VEHICLE_BARCODE_TEST:
-        barcode_test_step(now_msec, range_mm, tilt_x10);
-    break;
-
-    case VEHICLE_BARCODE_STATIC:    // Barcodes are read by barcode_task().
-    case VEHICLE_READY:
-    case VEHICLE_STOPPED:
-    case VEHICLE_PICKED_UP:
-    default:
-        motor_set(0, 0);
-    break;
-    }
-}   /* vehicle_task() */
-
+} /* vehicle_task() */
 
 /*!
  * @brief Report the current state.
@@ -751,11 +754,10 @@ vehicle_task (void)
  * @return The state.
  */
 vehicle_state_t
-vehicle_state (void)
+vehicle_state(void)
 {
     return (g_state);
-}   /* vehicle_state() */
-
+} /* vehicle_state() */
 
 /*!
  * @brief Report whether the car may be driving (any state but READY,
@@ -764,11 +766,10 @@ vehicle_state (void)
  * @return True if the car may be moving.
  */
 bool
-vehicle_is_moving (void)
+vehicle_is_moving(void)
 {
-    return (!is_parked(g_state) && (VEHICLE_BARCODE_STATIC != g_state));
-}   /* vehicle_is_moving() */
-
+    return ((!is_parked(g_state)) && (VEHICLE_BARCODE_STATIC != g_state));
+} /* vehicle_is_moving() */
 
 /*!
  * @brief Name a state for telemetry.
@@ -778,82 +779,80 @@ vehicle_is_moving (void)
  * @return A constant string.
  */
 char const *
-vehicle_state_name (vehicle_state_t state)
+vehicle_state_name(vehicle_state_t state)
 {
     char const * p_name = "UNKNOWN";
 
     switch (state)
     {
-    case VEHICLE_OBSTACLE_SCAN:
-        p_name = "OBSTACLE_SCAN";
-    break;
+        case VEHICLE_OBSTACLE_SCAN:
+            p_name = "OBSTACLE_SCAN";
+            break;
 
-    case VEHICLE_BYPASS:
-        p_name = "BYPASS";
-    break;
+        case VEHICLE_BYPASS:
+            p_name = "BYPASS";
+            break;
 
-    case VEHICLE_READY:
-        p_name = "READY";
-    break;
+        case VEHICLE_READY:
+            p_name = "READY";
+            break;
 
-    case VEHICLE_FOLLOW_LINE:
-        p_name = "FOLLOW_LINE";
-    break;
+        case VEHICLE_FOLLOW_LINE:
+            p_name = "FOLLOW_LINE";
+            break;
 
-    case VEHICLE_PROBE:
-        p_name = "PROBE";
-    break;
+        case VEHICLE_PROBE:
+            p_name = "PROBE";
+            break;
 
-    case VEHICLE_HUMP:
-        p_name = "HUMP";
-    break;
+        case VEHICLE_HUMP:
+            p_name = "HUMP";
+            break;
 
-    case VEHICLE_BLOCKED:
-        p_name = "BLOCKED";
-    break;
+        case VEHICLE_BLOCKED:
+            p_name = "BLOCKED";
+            break;
 
-    case VEHICLE_STOPPED:
-        p_name = "STOPPED";
-    break;
+        case VEHICLE_STOPPED:
+            p_name = "STOPPED";
+            break;
 
-    case VEHICLE_PICKED_UP:
-        p_name = "PICKED_UP";
-    break;
+        case VEHICLE_PICKED_UP:
+            p_name = "PICKED_UP";
+            break;
 
-    case VEHICLE_LINE_CAL:
-        p_name = "LINE_CAL";
-    break;
+        case VEHICLE_LINE_CAL:
+            p_name = "LINE_CAL";
+            break;
 
-    case VEHICLE_TURN:
-        p_name = "TURN";
-    break;
+        case VEHICLE_TURN:
+            p_name = "TURN";
+            break;
 
-    case VEHICLE_BARCODE_TEST:
-        p_name = "FEATURE_TEST";
-    break;
+        case VEHICLE_BARCODE_TEST:
+            p_name = "FEATURE_TEST";
+            break;
 
-    case VEHICLE_BARCODE_STATIC:
-        p_name = "BARCODE_STATIC";
-    break;
+        case VEHICLE_BARCODE_STATIC:
+            p_name = "BARCODE_STATIC";
+            break;
 
-    default:
-        p_name = "UNKNOWN";
-    break;
+        default:
+            p_name = "UNKNOWN";
+            break;
     }
 
     return (p_name);
-}   /* vehicle_state_name() */
-
+} /* vehicle_state_name() */
 
 /*!
  * @brief Report the maximum positive pitch seen during the latest hump.
  */
 int32_t
-vehicle_hump_peak_tilt_x10 (void)
+vehicle_hump_peak_tilt_x10(void)
 {
     return (g_hump_peak_tilt_x10);
-}   /* vehicle_hump_peak_tilt_x10() */
-
+} /* vehicle_hump_peak_tilt_x10() */
 
 /*!
  * @brief FOLLOW_LINE: steer along the line; react to humps and obstacles.
@@ -863,9 +862,9 @@ vehicle_hump_peak_tilt_x10 (void)
  * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
+follow_line_step(uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
-    bool b_range_used = ((int32_t) (now_msec - g_ignore_until) >= 0);
+    bool b_range_used = (((int32_t)(now_msec - g_ignore_until)) >= 0);
 
     if (hump_tilt_held(now_msec, tilt_x10))
     {
@@ -885,8 +884,8 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     }
     else if (barcode_is_capturing())
     {
-        scan_hold_line();                   // Reading a barcode: straight.
-        path_reset(false);                  // Not following: no way back.
+        scan_hold_line();  // Reading a barcode: straight.
+        path_reset(false); // Not following: no way back.
     }
     else if (b_range_used && (range_mm <= OBSTACLE_SLOW_MM))
     {
@@ -896,8 +895,7 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     {
         line_steer(cruise_speed(now_msec), now_msec);
     }
-}   /* follow_line_step() */
-
+} /* follow_line_step() */
 
 /*!
  * @brief While a barcode is read: drive strictly straight at SPEED_SCAN
@@ -912,30 +910,30 @@ follow_line_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
  * or reversing.
  */
 static void
-scan_hold_line (void)
+scan_hold_line(void)
 {
-    line_state_t line  = line_filtered();   // Keeps the filter up to date.
+    line_state_t line  = line_filtered(); // Keeps the filter up to date.
     int32_t      fast  = SPEED_SCAN + SCAN_TRIM_EXTRA;
     int32_t      slow  = SPEED_SCAN;
     int32_t      left  = SPEED_SCAN;
     int32_t      right = SPEED_SCAN;
 
-    if (line.b_left_black && line.b_right_black)
+    if ((line.b_left_black) && (line.b_right_black))
     {
-        g_line_last = LINE_LAST_BOTH;       // Centred: straight.
+        g_line_last = LINE_LAST_BOTH; // Centred: straight.
     }
     else if (line.b_left_black)
     {
         gb_last_left = true;
         g_line_last  = LINE_LAST_LEFT;
-        left         = slow;                // Line is to the left.
+        left         = slow; // Line is to the left.
         right        = fast;
     }
     else if (line.b_right_black)
     {
         gb_last_left = false;
         g_line_last  = LINE_LAST_RIGHT;
-        left         = fast;                // Line is to the right.
+        left         = fast; // Line is to the right.
         right        = slow;
     }
     else if (LINE_LAST_LEFT == g_line_last)
@@ -954,8 +952,7 @@ scan_hold_line (void)
     }
 
     motor_set(left, right);
-}   /* scan_hold_line() */
-
+} /* scan_hold_line() */
 
 /*!
  * @brief TURN: carry out a barcode command, then follow the line found.
@@ -963,16 +960,16 @@ scan_hold_line (void)
  * @param[in] now_msec The current time.
  */
 static void
-turn_step (uint32_t now_msec)
+turn_step(uint32_t now_msec)
 {
-    line_state_t line     = line_sensor_read();
-    bool         b_black  = (line.b_left_black || line.b_right_black);
-    bool         b_uturn  = (BARCODE_CMD_UTURN == g_turn_cmd);
-    bool         b_left   = (b_uturn ? TURN_UTURN_LEFT
-                                     : (BARCODE_CMD_LEFT == g_turn_cmd));
+    line_state_t line    = line_sensor_read();
+    bool         b_black = ((line.b_left_black) || (line.b_right_black));
+    bool         b_uturn = (BARCODE_CMD_UTURN == g_turn_cmd);
+    bool         b_left =
+        (b_uturn ? TURN_UTURN_LEFT : (BARCODE_CMD_LEFT == g_turn_cmd));
     uint32_t     max_msec = (b_uturn ? TURN_UTURN_MAX_MSEC : TURN_90_MSEC);
-    uint32_t     in_turn  = now_msec - g_pivot_start_msec;  // Pivot only.
-    line_state_t no_line  = { false, false };
+    uint32_t     in_turn  = now_msec - g_pivot_start_msec; // Pivot only.
+    line_state_t no_line  = {false, false};
 
     if (TURN_ADVANCE == g_turn_phase)
     {
@@ -1007,7 +1004,7 @@ turn_step (uint32_t now_msec)
             log_line("U-turn: side branch passed; looking for the next "
                      "line.");
             turn_phase_enter(TURN_LEAVE, now_msec);
-            g_pivot_start_msec = now_msec - in_turn;    // Keep timing.
+            g_pivot_start_msec = now_msec - in_turn; // Keep timing.
         }
         else if (b_black)
         {
@@ -1020,7 +1017,7 @@ turn_step (uint32_t now_msec)
         }
         pivot(b_left, now_msec);
     }
-    else if (line.b_left_black && line.b_right_black)
+    else if ((line.b_left_black) && (line.b_right_black))
     {
         turn_finish(now_msec, line, LINE_LAST_BOTH, "on the line");
     }
@@ -1042,8 +1039,7 @@ turn_step (uint32_t now_msec)
         gb_turn_left_on = line.b_left_black;
         pivot(b_left, now_msec);
     }
-}   /* turn_step() */
-
+} /* turn_step() */
 
 /*!
  * @brief Start a TURN phase.
@@ -1052,17 +1048,16 @@ turn_step (uint32_t now_msec)
  * @param[in] now_msec The current time.
  */
 static void
-turn_phase_enter (turn_phase_t phase, uint32_t now_msec)
+turn_phase_enter(turn_phase_t phase, uint32_t now_msec)
 {
     g_turn_phase = phase;
     g_turn_msec  = now_msec;
 
     if (TURN_LEAVE == phase)
     {
-        g_pivot_start_msec = now_msec;  // TURN_90_MSEC counts from here.
+        g_pivot_start_msec = now_msec; // TURN_90_MSEC counts from here.
     }
-}   /* turn_phase_enter() */
-
+} /* turn_phase_enter() */
 
 /*!
  * @brief End a barcode turn: hand the line state to the steering and
@@ -1074,19 +1069,17 @@ turn_phase_enter (turn_phase_t phase, uint32_t now_msec)
  * @param[in] p_how    How the turn ended, for the log.
  */
 static void
-turn_finish (uint32_t now_msec, line_state_t line, line_last_t last,
-             char const * p_how)
+turn_finish(uint32_t now_msec, line_state_t line, line_last_t last,
+            char const * p_how)
 {
-    log_line("%s done (%s, %" PRIu32 " ms).",
-             barcode_command_name(g_turn_cmd), p_how,
-             (now_msec - g_entered_msec));
+    log_line("%s done (%s, %" PRIu32 " ms).", barcode_command_name(g_turn_cmd),
+             p_how, (now_msec - g_entered_msec));
 
     line_filter_reset(line, now_msec);
-    g_line_last    = last;
-    gb_last_left   = (LINE_LAST_LEFT == last);
+    g_line_last  = last;
+    gb_last_left = (LINE_LAST_LEFT == last);
     state_enter(g_turn_after, now_msec);
-}   /* turn_finish() */
-
+} /* turn_finish() */
 
 /*!
  * @brief PROBE: creep towards the object and decide hump or wall.
@@ -1096,7 +1089,7 @@ turn_finish (uint32_t now_msec, line_state_t line, line_last_t last,
  * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
+probe_step(uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
     if (hump_tilt_held(now_msec, tilt_x10))
     {
@@ -1117,15 +1110,13 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     {
         line_steer(SPEED_CREEP, now_msec);
     }
-}   /* probe_step() */
-
+} /* probe_step() */
 
 /*!
- * @brief Decide whether the car is on a hump: raised (any way) by at
- *        least HUMP_ENTER_HEIGHT (hump_height_x10()) for HUMP_ENTER_MSEC
- *        without a break (a jolt lifts the reading for less), or stalled
- *        on a slope: wheels still for HUMP_STALL_MSEC while tilted by
- *        HUMP_STALL_TILT.
+ * @brief Decide whether the car is on a hump: raised (any way) by
+ *        HUMP_ENTER_HEIGHT for HUMP_ENTER_MSEC without a break (a jolt
+ *        lifts the reading for less), or stalled on a slope: wheels still
+ *        for HUMP_STALL_MSEC while tilted by HUMP_STALL_TILT.
  *
  * @param[in] now_msec The current time.
  * @param[in] tilt_x10 The total tilt, in tenths of a degree.
@@ -1133,7 +1124,7 @@ probe_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
  * @return True once the tilt has lasted (logged with pitch and roll).
  */
 static bool
-hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
+hump_tilt_held(uint32_t now_msec, int32_t tilt_x10)
 {
     bool b_held     = false;
     bool b_settling = ((VEHICLE_PROBE != g_state) &&
@@ -1141,17 +1132,19 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
 
     // Pulling away (or setting off again after a turn or a hump) tilts
     // the reading for a while: no hump is looked for until it settles.
-    if (gb_feat_hump && !b_settling && (tilt_x10 >= HUMP_STALL_TILT_X10) &&
-        (stall_msec(now_msec) >= HUMP_STALL_MSEC))
+    if (((gb_feat_hump && (!b_settling)) &&
+         (tilt_x10 >= HUMP_STALL_TILT_X10)) &&
+        ((stall_msec(now_msec)) >= HUMP_STALL_MSEC))
     {
-        b_held = true;          // Stuck on the ramp: power now (config.h).
+        b_held = true; // Stuck on the ramp: power now (config.h).
         log_obstacle("Stalled on a slope for %" PRIu32 " ms -> HUMP, "
-                     "more power.", stall_msec(now_msec));
+                     "more power.",
+                     stall_msec(now_msec));
         log_tenths("  pitch", imu_pitch_x10());
         log_tenths("  roll", imu_roll_x10());
     }
-    else if (!gb_feat_hump || b_settling ||
-             (hump_height_x10() < HUMP_ENTER_HEIGHT_X10))
+    else if (((!gb_feat_hump) || b_settling) ||
+             ((hump_height_x10()) < HUMP_ENTER_HEIGHT_X10))
     {
         gb_tilting = false;
     }
@@ -1164,8 +1157,9 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
     {
         b_held = true;
         log_obstacle("Raised %" PRId32 ".%" PRId32 " mm for %" PRIu32
-                     " ms -> HUMP, climbing.", (hump_height_x10() / 10),
-                     (hump_height_x10() % 10), (now_msec - g_tilt_msec));
+                     " ms -> HUMP, climbing.",
+                     ((hump_height_x10()) / 10), ((hump_height_x10()) % 10),
+                     (now_msec - g_tilt_msec));
         log_tenths("  pitch", imu_pitch_x10());
         log_tenths("  roll", imu_roll_x10());
     }
@@ -1175,8 +1169,7 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
     }
 
     return (b_held);
-}   /* hump_tilt_held() */
-
+} /* hump_tilt_held() */
 
 /*!
  * @brief Measure whether the wheels have (nearly) stopped while driven:
@@ -1186,27 +1179,26 @@ hump_tilt_held (uint32_t now_msec, int32_t tilt_x10)
  * @param[in] now_msec The current time.
  */
 static void
-stall_update (uint32_t now_msec)
+stall_update(uint32_t now_msec)
 {
     if ((now_msec - g_stall_window) >= HUMP_STALL_WINDOW_MSEC)
     {
-        uint32_t edges   = encoder_count(PIN_ENC_LEFT_A) +
-                           encoder_count(PIN_ENC_RIGHT_A);
-        bool     b_drive = ((motor_left_speed() > 0) ||
-                            (motor_right_speed() > 0));
-        bool     b_still = (b_drive &&
-                            ((edges - g_stall_edges) < HUMP_STALL_EDGES));
+        uint32_t edges =
+            (encoder_count(PIN_ENC_LEFT_A)) + (encoder_count(PIN_ENC_RIGHT_A));
+        bool b_drive =
+            (((motor_left_speed()) > 0) || ((motor_right_speed()) > 0));
+        bool b_still =
+            (b_drive && ((edges - g_stall_edges) < HUMP_STALL_EDGES));
 
-        if (b_still && !gb_stalled)
+        if (b_still && (!gb_stalled))
         {
-            g_stall_since = g_stall_window;   // Since this window began.
+            g_stall_since = g_stall_window; // Since this window began.
         }
         gb_stalled     = b_still;
         g_stall_edges  = edges;
         g_stall_window = now_msec;
     }
-}   /* stall_update() */
-
+} /* stall_update() */
 
 /*!
  * @brief Report how long the wheels have been stalled while driven.
@@ -1216,11 +1208,10 @@ stall_update (uint32_t now_msec)
  * @return ms; 0 if they are turning (or not driven).
  */
 static uint32_t
-stall_msec (uint32_t now_msec)
+stall_msec(uint32_t now_msec)
 {
     return (gb_stalled ? (now_msec - g_stall_since) : 0u);
-}   /* stall_msec() */
-
+} /* stall_msec() */
 
 /*!
  * @brief Log an angle in tenths of a degree as degrees, e.g. "-3.4 deg".
@@ -1229,14 +1220,13 @@ stall_msec (uint32_t now_msec)
  * @param[in] value_x10 The angle, in tenths of a degree.
  */
 static void
-log_tenths (char const * p_what, int32_t value_x10)
+log_tenths(char const * p_what, int32_t value_x10)
 {
     int32_t size = ((value_x10 < 0) ? -value_x10 : value_x10);
 
     log_obstacle("%s %s%" PRId32 ".%" PRId32 " deg", p_what,
                  ((value_x10 < 0) ? "-" : ""), (size / 10), (size % 10));
-}   /* log_tenths() */
-
+} /* log_tenths() */
 
 /*!
  * @brief HUMP: climb and descend, ignoring the ultrasonic.
@@ -1245,11 +1235,11 @@ log_tenths (char const * p_what, int32_t value_x10)
  * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-hump_step (uint32_t now_msec, int32_t tilt_x10)
+hump_step(uint32_t now_msec, int32_t tilt_x10)
 {
     int32_t  magnitude = ((tilt_x10 < 0) ? -tilt_x10 : tilt_x10);
     uint32_t in_hump   = now_msec - g_entered_msec;
-    bool     b_stalled = (stall_msec(now_msec) >= HUMP_STALL_MSEC);
+    bool     b_stalled = ((stall_msec(now_msec)) >= HUMP_STALL_MSEC);
 
     // Stalled again after "over the top" (a wobble looked like the
     // crest): it is still climbing, so power back up (2026-11-20).
@@ -1260,11 +1250,9 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         log_obstacle("Hump: stalled again -> climbing power.");
     }
 
-    // Total tilt (config.h); finish only once it is back near level. A
-    // low hump may never tilt by HUMP_ENTER_PITCH: being raised by the
-    // entry height counts too, or the car could never leave HUMP.
+    // Total tilt (config.h); finish only once it is back near level.
     if ((magnitude >= HUMP_ENTER_PITCH_X10) ||
-        (hump_height_x10() >= HUMP_ENTER_HEIGHT_X10))
+        ((hump_height_x10()) >= HUMP_ENTER_HEIGHT_X10))
     {
         gb_hump_tilted = true;
         if (magnitude > g_hump_peak_tilt_x10)
@@ -1275,17 +1263,19 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
 
     // Tilt falling from its peak while the wheels turn: over the top, so
     // ease off (config.h).
-    if (!gb_hump_over && gb_hump_tilted && (0u == stall_msec(now_msec)) &&
+    if ((((!gb_hump_over) && gb_hump_tilted) &&
+         (0u == (stall_msec(now_msec)))) &&
         ((magnitude + HUMP_TOP_DROP_X10) <= g_hump_peak_tilt_x10))
     {
         gb_hump_over = true;
         g_top_msec   = now_msec;
         g_top_speed  = g_hump_speed;
         log_obstacle("Hump: over the top after %" PRIu32 " ms -> easing "
-                     "back to cruise.", in_hump);
+                     "back to cruise.",
+                     in_hump);
     }
 
-    if (!gb_hump_tilted || (magnitude > HUMP_LEVEL_PITCH_X10))
+    if ((!gb_hump_tilted) || (magnitude > HUMP_LEVEL_PITCH_X10))
     {
         gb_level = false;
     }
@@ -1299,34 +1289,35 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
         // Still level.
     }
 
-    if (gb_hump_tilted && !b_stalled && (in_hump > HUMP_MIN_MSEC) &&
+    if (((gb_hump_tilted && (!b_stalled)) && (in_hump > HUMP_MIN_MSEC)) &&
         ((gb_level && ((now_msec - g_level_msec) > HUMP_LEVEL_MSEC)) ||
-         ((hump_on_mm() >= (int32_t) HUMP_PASS_MM) &&
+         (((hump_on_mm()) >= ((int32_t)HUMP_PASS_MM)) &&
           (magnitude < HUMP_ENTER_PITCH_X10))))
     {
         hump_finish(g_hump_peak_tilt_x10);
         log_obstacle("Hump cleared after %" PRIu32 " ms, %" PRId32 " mm "
                      "driven: peak height %" PRId32 ".%" PRId32 " mm, "
-                     "peak tilt %" PRId32 ".%" PRId32 " deg.", in_hump,
-                     hump_on_mm(), (hump_last_height_x10() / 10),
-                     (hump_last_height_x10() % 10),
-                     (g_hump_peak_tilt_x10 / 10),
-                     (g_hump_peak_tilt_x10 % 10));
-        log_obstacle("Highest this run: %" PRId32 ".%" PRId32 " mm (%"
-                     PRIu32 " humps).\n", (hump_run_height_x10() / 10),
-                     (hump_run_height_x10() % 10), hump_count());
+                     "peak tilt %" PRId32 ".%" PRId32 " deg.",
+                     in_hump, hump_on_mm(), ((hump_last_height_x10()) / 10),
+                     ((hump_last_height_x10()) % 10),
+                     (g_hump_peak_tilt_x10 / 10), (g_hump_peak_tilt_x10 % 10));
+        log_obstacle("Highest this run: %" PRId32 ".%" PRId32 " mm (%" PRIu32
+                     " humps).\n",
+                     ((hump_run_height_x10()) / 10),
+                     ((hump_run_height_x10()) % 10), hump_count());
         g_ignore_until  = now_msec + HUMP_IGNORE_RANGE_MSEC;
-        g_hump_off_msec = now_msec;     // Slow back down gently from here.
+        g_hump_off_msec = now_msec; // Slow back down gently from here.
         g_exit_speed    = g_hump_speed;
-        state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
-                                  : VEHICLE_BARCODE_TEST), now_msec);
+        state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE : VEHICLE_BARCODE_TEST),
+                    now_msec);
     }
     else if ((in_hump > HUMP_MAX_MSEC) ||
              ((g_hump_speed >= SPEED_HUMP_MAX) &&
-              (stall_msec(now_msec) >= HUMP_GIVE_UP_MSEC)))
+              ((stall_msec(now_msec)) >= HUMP_GIVE_UP_MSEC)))
     {
         log_obstacle("Hump: still stuck at power %" PRId32 " after %" PRIu32
-                     " ms -> BLOCKED.\n", g_hump_speed, in_hump);
+                     " ms -> BLOCKED.\n",
+                     g_hump_speed, in_hump);
         state_enter(VEHICLE_BLOCKED, now_msec);
     }
     else if (b_stalled)
@@ -1345,10 +1336,9 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
     {
         int32_t speed = hump_speed(now_msec, in_hump);
 
-        motor_set(speed, speed);            // Feature test: straight over.
+        motor_set(speed, speed); // Feature test: straight over.
     }
-}   /* hump_step() */
-
+} /* hump_step() */
 
 /*!
  * @brief The speed on a hump: up from SPEED_CRUISE to SPEED_HUMP over
@@ -1362,37 +1352,38 @@ hump_step (uint32_t now_msec, int32_t tilt_x10)
  * @return The motor power, in %.
  */
 static int32_t
-hump_speed (uint32_t now_msec, uint32_t in_hump_msec)
+hump_speed(uint32_t now_msec, uint32_t in_hump_msec)
 {
     if (gb_hump_over)
     {
         uint32_t span = now_msec - g_top_msec;
         uint32_t done = ((span < HUMP_RAMP_MSEC) ? span : HUMP_RAMP_MSEC);
 
-        g_hump_speed = g_top_speed - (((g_top_speed - SPEED_CRUISE) *
-                                       (int32_t) done) /
-                                      (int32_t) HUMP_RAMP_MSEC);
+        g_hump_speed =
+            g_top_speed - (((g_top_speed - SPEED_CRUISE) * ((int32_t)done)) /
+                           ((int32_t)HUMP_RAMP_MSEC));
     }
     else
     {
-        uint32_t done = ((in_hump_msec < HUMP_RAMP_UP_MSEC) ? in_hump_msec
-                                                           : HUMP_RAMP_UP_MSEC);
+        uint32_t done =
+            ((in_hump_msec < HUMP_RAMP_UP_MSEC) ? in_hump_msec
+                                                : HUMP_RAMP_UP_MSEC);
 
         // Still not moving: more power, a step at a time (config.h).
-        if ((stall_msec(now_msec) >= HUMP_STALL_MSEC) &&
-            ((now_msec - g_boost_msec) >= HUMP_STALL_MSEC) &&
+        if ((((stall_msec(now_msec)) >= HUMP_STALL_MSEC) &&
+             ((now_msec - g_boost_msec) >= HUMP_STALL_MSEC)) &&
             ((SPEED_HUMP + g_hump_extra) < SPEED_HUMP_MAX))
         {
-            g_boost_msec  = now_msec;
+            g_boost_msec = now_msec;
             g_hump_extra += HUMP_STALL_STEP;
             log_obstacle("Hump: still stalled -> power %" PRId32 ".",
                          SPEED_HUMP + g_hump_extra);
         }
 
-        g_hump_speed = SPEED_CRUISE + (((SPEED_HUMP - SPEED_CRUISE) *
-                                        (int32_t) done) /
-                                       (int32_t) HUMP_RAMP_UP_MSEC) +
-                       g_hump_extra;
+        g_hump_speed =
+            (SPEED_CRUISE + (((SPEED_HUMP - SPEED_CRUISE) * ((int32_t)done)) /
+                             ((int32_t)HUMP_RAMP_UP_MSEC))) +
+            g_hump_extra;
         if (g_hump_speed > SPEED_HUMP_MAX)
         {
             g_hump_speed = SPEED_HUMP_MAX;
@@ -1400,8 +1391,7 @@ hump_speed (uint32_t now_msec, uint32_t in_hump_msec)
     }
 
     return (g_hump_speed);
-}   /* hump_speed() */
-
+} /* hump_speed() */
 
 /*!
  * @brief The cruising speed: SPEED_CRUISE, except just after a hump left
@@ -1414,21 +1404,21 @@ hump_speed (uint32_t now_msec, uint32_t in_hump_msec)
  * @return The motor power, in %.
  */
 static int32_t
-cruise_speed (uint32_t now_msec)
+cruise_speed(uint32_t now_msec)
 {
     uint32_t since = now_msec - g_hump_off_msec;
     int32_t  speed = SPEED_CRUISE;
 
-    if ((0u != g_hump_off_msec) && (since < HUMP_RAMP_MSEC) &&
+    if (((0u != g_hump_off_msec) && (since < HUMP_RAMP_MSEC)) &&
         (g_exit_speed > SPEED_CRUISE))
     {
-        speed = g_exit_speed - (((g_exit_speed - SPEED_CRUISE) *
-                                 (int32_t) since) / (int32_t) HUMP_RAMP_MSEC);
+        speed =
+            g_exit_speed - (((g_exit_speed - SPEED_CRUISE) * ((int32_t)since)) /
+                            ((int32_t)HUMP_RAMP_MSEC));
     }
 
     return (speed);
-}   /* cruise_speed() */
-
+} /* cruise_speed() */
 
 /*!
  * @brief Report whether a state is a parked one: braked, waiting for
@@ -1439,12 +1429,11 @@ cruise_speed (uint32_t now_msec)
  * @return True if parked.
  */
 static bool
-is_parked (vehicle_state_t state)
+is_parked(vehicle_state_t state)
 {
-    return ((VEHICLE_READY == state) || (VEHICLE_STOPPED == state) ||
+    return (((VEHICLE_READY == state) || (VEHICLE_STOPPED == state)) ||
             (VEHICLE_PICKED_UP == state));
-}   /* is_parked() */
-
+} /* is_parked() */
 
 /*!
  * @brief Decide whether the car has been picked up: all three IR sensors
@@ -1456,12 +1445,12 @@ is_parked (vehicle_state_t state)
  * @return True once the floor has been missing long enough.
  */
 static bool
-picked_up (uint32_t now_msec)
+picked_up(uint32_t now_msec)
 {
-    line_state_t line    = line_sensor_read();
-    bool         b_none  = (line.b_left_black && line.b_right_black &&
-                            barcode_is_black());
-    bool         b_found = false;
+    line_state_t line = line_sensor_read();
+    bool         b_none =
+        (((line.b_left_black) && (line.b_right_black)) && (barcode_is_black()));
+    bool b_found = false;
 
     if (!b_none)
     {
@@ -1478,8 +1467,7 @@ picked_up (uint32_t now_msec)
     }
 
     return (b_found);
-}   /* picked_up() */
-
+} /* picked_up() */
 
 /*!
  * @brief BLOCKED: stay braked until the way is clear for a while.
@@ -1488,12 +1476,11 @@ picked_up (uint32_t now_msec)
  * @param[in] range_mm The forward range.
  */
 static void
-blocked_step (uint32_t now_msec, uint32_t range_mm)
+blocked_step(uint32_t now_msec, uint32_t range_mm)
 {
     motor_set(0, 0);
 
-    if ((ULTRASONIC_NO_RANGE == range_mm) ||
-        (range_mm <= OBSTACLE_CLEAR_MM))
+    if ((ULTRASONIC_NO_RANGE == range_mm) || (range_mm <= OBSTACLE_CLEAR_MM))
     {
         gb_clear = false;
     }
@@ -1505,15 +1492,14 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
     else if ((now_msec - g_clear_msec) > OBSTACLE_CLEAR_MSEC)
     {
         log_obstacle("Obstacle cleared -> resuming.\n");
-        state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE
-                                  : VEHICLE_BARCODE_TEST), now_msec);
+        state_enter((gb_feat_line ? VEHICLE_FOLLOW_LINE : VEHICLE_BARCODE_TEST),
+                    now_msec);
     }
     else
     {
         // Clear, but not for long enough yet.
     }
-}   /* blocked_step() */
-
+} /* blocked_step() */
 
 /*!
  * @brief BARCODE TEST: drive straight at the same speeds as START (cruise,
@@ -1526,9 +1512,9 @@ blocked_step (uint32_t now_msec, uint32_t range_mm)
  * @param[in] tilt_x10 The larger-magnitude pitch or roll, in tenths degree.
  */
 static void
-barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
+barcode_test_step(uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 {
-    bool b_range_used = ((int32_t) (now_msec - g_ignore_until) >= 0);
+    bool b_range_used = (((int32_t)(now_msec - g_ignore_until)) >= 0);
 
     if (hump_tilt_held(now_msec, tilt_x10))
     {
@@ -1538,7 +1524,7 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     {
         int32_t speed = cruise_speed(now_msec);
 
-        motor_set(speed, speed);                // Just off a hump.
+        motor_set(speed, speed); // Just off a hump.
     }
     else if (range_mm <= OBSTACLE_STOP_MM)
     {
@@ -1548,7 +1534,7 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
     }
     else if (barcode_is_capturing())
     {
-        motor_set(SPEED_SCAN, SPEED_SCAN);      // As START while reading.
+        motor_set(SPEED_SCAN, SPEED_SCAN); // As START while reading.
     }
     else if (range_mm <= OBSTACLE_SLOW_MM)
     {
@@ -1560,8 +1546,7 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
 
         motor_set(speed, speed);
     }
-}   /* barcode_test_step() */
-
+} /* barcode_test_step() */
 
 /*!
  * @brief Change state, set up the new state's timers and barcode reading.
@@ -1570,16 +1555,17 @@ barcode_test_step (uint32_t now_msec, uint32_t range_mm, int32_t tilt_x10)
  * @param[in] now_msec The current time.
  */
 static void
-state_enter (vehicle_state_t state, uint32_t now_msec)
+state_enter(vehicle_state_t state, uint32_t now_msec)
 {
-    if ((VEHICLE_OBSTACLE_SCAN == g_state) &&
-        (VEHICLE_OBSTACLE_SCAN != state) && obstacle_scan_active())
+    if (((VEHICLE_OBSTACLE_SCAN == g_state) &&
+         (VEHICLE_OBSTACLE_SCAN != state)) &&
+        (obstacle_scan_active()))
     {
         obstacle_scan_cancel();
     }
     if ((VEHICLE_LINE_CAL == state) || (VEHICLE_BARCODE_TEST == state))
     {
-        obstacle_scan_cancel();  // New mission: discard the previous profile.
+        obstacle_scan_cancel(); // New mission: discard the previous profile.
     }
     if ((VEHICLE_BYPASS == g_state) && (VEHICLE_BYPASS != state))
     {
@@ -1591,34 +1577,38 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
                   vehicle_state_name(state));
     }
 
-    if (state != VEHICLE_BYPASS) { gb_bypass_dry_run = false; }
+    if (state != VEHICLE_BYPASS)
+    {
+        gb_bypass_dry_run = false;
+    }
     // After a barcode turn the car is already lined up: no straight start.
-    gb_follow_from_bypass=(g_state==VEHICLE_BYPASS && state==VEHICLE_FOLLOW_LINE);
+    gb_follow_from_bypass =
+        ((g_state == VEHICLE_BYPASS) && (state == VEHICLE_FOLLOW_LINE));
     gb_launch      = (VEHICLE_TURN != g_state);
     g_state        = state;
     g_entered_msec = now_msec;
-    path_reset(false);                  // Valid again once on the line.
-    gb_level       = false;
-    gb_clear       = false;
-    gb_tilting     = false;             // A tilt must build up afresh.
-    gb_floorless   = false;             // So must a missing floor.
+    path_reset(false); // Valid again once on the line.
+    gb_level     = false;
+    gb_clear     = false;
+    gb_tilting   = false; // A tilt must build up afresh.
+    gb_floorless = false; // So must a missing floor.
     if (VEHICLE_HUMP == state)
     {
         g_hump_peak_tilt_x10 = 0;
-        gb_hump_tilted = false;
-        gb_hump_over   = false;
-        g_hump_speed   = SPEED_CRUISE;
-        g_hump_extra   = 0;
-        g_boost_msec   = now_msec;     // First boost a stall later.
+        gb_hump_tilted       = false;
+        gb_hump_over         = false;
+        g_hump_speed         = SPEED_CRUISE;
+        g_hump_extra         = 0;
+        g_boost_msec         = now_msec; // First boost a stall later.
     }
 
     if (VEHICLE_LINE_CAL == state)
     {
-        gb_cal_left      = true;                // Until a sensor says.
+        gb_cal_left      = true; // Until a sensor says.
         gb_cal_turned    = false;
         g_cal_black_msec = now_msec;
-        gb_pivoting     = false;                // First burst starts fresh.
-        g_centred_ticks = 0u;
+        gb_pivoting      = false; // First burst starts fresh.
+        g_centred_ticks  = 0u;
     }
 
     if (VEHICLE_TURN == state)
@@ -1628,25 +1618,25 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
         turn_phase_enter((gb_turn_advance ? TURN_ADVANCE : TURN_LEAVE),
                          now_msec);
         // At a + crossroad a U-turn pivots past one side branch first.
-        g_uturn_skip = (((BARCODE_CMD_UTURN == g_turn_cmd) &&
-                         gb_turn_advance) ? TURN_UTURN_SKIP_LINES : 0u);
+        g_uturn_skip = (((BARCODE_CMD_UTURN == g_turn_cmd) && gb_turn_advance)
+                            ? TURN_UTURN_SKIP_LINES
+                            : 0u);
     }
 
     // Barcodes are only read while following the line normally, or in
     // either BARCODE TEST.
     barcode_set_hand_mode(VEHICLE_BARCODE_STATIC == state);
-    barcode_set_enabled(gb_feat_barcode &&
-                        ((VEHICLE_FOLLOW_LINE == state) ||
-                         (VEHICLE_BARCODE_TEST == state) ||
-                         (VEHICLE_BARCODE_STATIC == state)));
+    barcode_set_enabled(gb_feat_barcode && (((VEHICLE_FOLLOW_LINE == state) ||
+                                             (VEHICLE_BARCODE_TEST == state)) ||
+                                            (VEHICLE_BARCODE_STATIC == state)));
 
-    if ((VEHICLE_FOLLOW_LINE != state) && (VEHICLE_PROBE != state) &&
-        (VEHICLE_HUMP != state) && (VEHICLE_LINE_CAL != state))
+    if ((((VEHICLE_FOLLOW_LINE != state) && (VEHICLE_PROBE != state)) &&
+         (VEHICLE_HUMP != state)) &&
+        (VEHICLE_LINE_CAL != state))
     {
         motor_set(0, 0);
     }
-}   /* state_enter() */
-
+} /* state_enter() */
 
 /*!
  * @brief LINE_CAL: drive forward onto the line, then follow it.
@@ -1662,36 +1652,35 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
  * @param[in] now_msec The current time.
  */
 static void
-line_cal_step (uint32_t now_msec)
+line_cal_step(uint32_t now_msec)
 {
     line_state_t line = line_sensor_read();
 
-    if (line.b_left_black && line.b_right_black)
+    if ((line.b_left_black) && (line.b_right_black))
     {
-        motor_set(LINE_CAL_SPEED, LINE_CAL_SPEED);  // Straight on.
+        motor_set(LINE_CAL_SPEED, LINE_CAL_SPEED); // Straight on.
         g_centred_ticks++;
 
-        if (!gb_cal_turned || (g_centred_ticks >= LINE_CAL_ALIGN_TICKS))
+        if ((!gb_cal_turned) || (g_centred_ticks >= LINE_CAL_ALIGN_TICKS))
         {
-            log_line("%s", (gb_cal_turned ?
-                            "LINE_CAL OK: both sensors on the line -> "
-                            "following." :
-                            "LINE_CAL: both sensors already on the "
-                            "line -> skipping calibration."));
+            log_line("%s", (gb_cal_turned
+                                ? "LINE_CAL OK: both sensors on the line -> "
+                                  "following."
+                                : "LINE_CAL: both sensors already on the "
+                                  "line -> skipping calibration."));
             line_filter_reset(line, now_msec);
             g_line_last = LINE_LAST_BOTH;
             state_enter(VEHICLE_FOLLOW_LINE, now_msec);
         }
     }
-    else if (line.b_left_black || line.b_right_black)
+    else if ((line.b_left_black) || (line.b_right_black))
     {
-        bool b_left = line.b_left_black;    // Towards the black sensor.
+        bool b_left = line.b_left_black; // Towards the black sensor.
 
         if ((!gb_cal_turned) || (b_left != gb_cal_left))
         {
             log_line("LINE_CAL: %s sensor on black -> forward, arcing %s.",
-                     (b_left ? "left" : "right"),
-                     (b_left ? "left" : "right"));
+                     (b_left ? "left" : "right"), (b_left ? "left" : "right"));
         }
 
         g_centred_ticks  = 0u;
@@ -1715,10 +1704,9 @@ line_cal_step (uint32_t now_msec)
     else
     {
         g_centred_ticks = 0u;
-        cal_arc(gb_cal_left);               // Overshot: keep arcing.
+        cal_arc(gb_cal_left); // Overshot: keep arcing.
     }
-}   /* line_cal_step() */
-
+} /* line_cal_step() */
 
 /*!
  * @brief LINE_CAL: drive forward in an arc, the outer wheel at
@@ -1728,7 +1716,7 @@ line_cal_step (uint32_t now_msec)
  * @param[in] b_left True to curve left (left wheel slower).
  */
 static void
-cal_arc (bool b_left)
+cal_arc(bool b_left)
 {
     int32_t inner = (LINE_CAL_SPEED * LINE_CAL_INNER_PERCENT) / PERCENT;
 
@@ -1738,8 +1726,7 @@ cal_arc (bool b_left)
     }
     motor_set((b_left ? inner : LINE_CAL_SPEED),
               (b_left ? LINE_CAL_SPEED : inner));
-}   /* cal_arc() */
-
+} /* cal_arc() */
 
 /*!
  * @brief Check, before START or a line feature test moves the car, that a
@@ -1749,10 +1736,10 @@ cal_arc (bool b_left)
  * @return True if at least one line sensor is on black.
  */
 static bool
-line_under_car (void)
+line_under_car(void)
 {
     line_state_t line    = line_sensor_read();
-    bool         b_found = (line.b_left_black || line.b_right_black);
+    bool         b_found = ((line.b_left_black) || (line.b_right_black));
 
     if (!b_found)
     {
@@ -1765,8 +1752,7 @@ line_under_car (void)
     }
 
     return (b_found);
-}   /* line_under_car() */
-
+} /* line_under_car() */
 
 /*!
  * @brief Pivot on the spot in pulses: PIVOT_PULSE_ON_MSEC at
@@ -1782,12 +1768,13 @@ line_under_car (void)
  * @param[in] now_msec The current time.
  */
 static void
-pivot (bool b_left, uint32_t now_msec)
+pivot(bool b_left, uint32_t now_msec)
 {
-    bool     b_turn     = (VEHICLE_TURN == g_state);    // Barcode turn.
-    uint32_t off        = ((VEHICLE_LINE_CAL == g_state) ? CAL_PIVOT_OFF_MSEC :
-                           (b_turn ? TURN_PULSE_OFF_MSEC :
-                                     PIVOT_PULSE_OFF_MSEC));
+    bool     b_turn = (VEHICLE_TURN == g_state); // Barcode turn.
+    uint32_t off =
+        ((VEHICLE_LINE_CAL == g_state)
+             ? CAL_PIVOT_OFF_MSEC
+             : (b_turn ? TURN_PULSE_OFF_MSEC : PIVOT_PULSE_OFF_MSEC));
     int32_t  speed      = (b_turn ? TURN_PULSE_SPEED : PIVOT_PULSE_SPEED);
     uint32_t period     = PIVOT_PULSE_ON_MSEC + off;
     bool     b_bursting = false;
@@ -1803,7 +1790,7 @@ pivot (bool b_left, uint32_t now_msec)
 
     if (!b_bursting)
     {
-        motor_set(0, 0);    // Braked pause between bursts.
+        motor_set(0, 0); // Braked pause between bursts.
     }
     else if (b_left)
     {
@@ -1813,8 +1800,7 @@ pivot (bool b_left, uint32_t now_msec)
     {
         motor_set(speed, -speed);
     }
-}   /* pivot() */
-
+} /* pivot() */
 
 /*!
  * @brief Steer along the line at a given speed, never stopping.
@@ -1833,7 +1819,7 @@ pivot (bool b_left, uint32_t now_msec)
  * @param[in] now_msec The current time.
  */
 static void
-line_steer (int32_t speed, uint32_t now_msec)
+line_steer(int32_t speed, uint32_t now_msec)
 {
     line_state_t line     = line_filtered();
     int32_t      outer    = (speed * TURN_OUTER_PERCENT) / PERCENT;
@@ -1841,18 +1827,22 @@ line_steer (int32_t speed, uint32_t now_msec)
     int32_t      hard_out = (speed * TURN_HARD_OUTER_PERCENT) / PERCENT;
     int32_t      hard_in  = (speed * TURN_HARD_INNER_PERCENT) / PERCENT;
     steer_t      want     = STEER_STRAIGHT;
-    bool         b_launch = (!gb_follow_from_bypass && (VEHICLE_FOLLOW_LINE == g_state) &&
-                             ((now_msec - g_entered_msec) <
-                              LINE_START_STRAIGHT_MSEC));
-    int32_t      left     = speed;
-    int32_t      right    = speed;
+    bool         b_launch =
+        (((!gb_follow_from_bypass) && (VEHICLE_FOLLOW_LINE == g_state)) &&
+         ((now_msec - g_entered_msec) < LINE_START_STRAIGHT_MSEC));
+    int32_t left  = speed;
+    int32_t right = speed;
 
     // Both sensors lost the line: reverse along the recorded path to where
     // both were last on it (once per loss), then follow on from there.
-    if (LINE_BACKTRACK_ENABLE && !gb_backtracking && !gb_backtracked &&
-        gb_path_ok && (g_path_len > 0u) && !b_launch &&
-        (VEHICLE_FOLLOW_LINE == g_state) &&
-        !line.b_left_black && !line.b_right_black)
+    if ((((((((LINE_BACKTRACK_ENABLE && (!gb_backtracking)) &&
+              (!gb_backtracked)) &&
+             gb_path_ok) &&
+            (g_path_len > 0u)) &&
+           (!b_launch)) &&
+          (VEHICLE_FOLLOW_LINE == g_state)) &&
+         (!line.b_left_black)) &&
+        (!line.b_right_black))
     {
         log_line("Line lost: reversing %" PRIu32 " ms of path to where "
                  "both sensors were on it.",
@@ -1860,10 +1850,10 @@ line_steer (int32_t speed, uint32_t now_msec)
         gb_backtracking = true;
         gb_backtracked  = true;
         g_back_msec     = now_msec;
-        g_back_pos_x100 = g_path_len * (uint32_t) PERCENT;
+        g_back_pos_x100 = g_path_len * ((uint32_t)PERCENT);
     }
 
-    if (gb_backtracking && backtrack_step(line, now_msec))
+    if (gb_backtracking && (backtrack_step(line, now_msec)))
     {
         return;
     }
@@ -1872,38 +1862,38 @@ line_steer (int32_t speed, uint32_t now_msec)
     {
         // Just started: get moving first.
     }
-    else if (line.b_left_black && line.b_right_black)
+    else if ((line.b_left_black) && (line.b_right_black))
     {
-        g_line_last = LINE_LAST_BOTH;   // Centred: straight on.
+        g_line_last = LINE_LAST_BOTH; // Centred: straight on.
     }
     else if (line.b_left_black)
     {
         gb_last_left = true;
         g_line_last  = LINE_LAST_LEFT;
-        want = STEER_LEFT;              // Line moved left: arc left.
+        want         = STEER_LEFT; // Line moved left: arc left.
     }
     else if (line.b_right_black)
     {
         gb_last_left = false;
         g_line_last  = LINE_LAST_RIGHT;
-        want = STEER_RIGHT;             // Line moved right: arc right.
+        want         = STEER_RIGHT; // Line moved right: arc right.
     }
     else if (LINE_LAST_LEFT == g_line_last)
     {
         // Neither sensor on the line: turn hard towards the limit the
         // line was last seen at. Never stop, never pivot.
-        want = STEER_HARD_LEFT;         // Line slid out left.
+        want = STEER_HARD_LEFT; // Line slid out left.
     }
     else if (LINE_LAST_RIGHT == g_line_last)
     {
-        want = STEER_HARD_RIGHT;        // Line slid out right.
+        want = STEER_HARD_RIGHT; // Line slid out right.
     }
     else
     {
         // Line is between the sensors.
     }
 
-    if ((want != g_steer) && (b_launch || steer_allowed(want, now_msec)))
+    if ((want != g_steer) && (b_launch || (steer_allowed(want, now_msec))))
     {
         g_steer      = want;
         g_steer_msec = now_msec;
@@ -1943,8 +1933,7 @@ line_steer (int32_t speed, uint32_t now_msec)
 
     motor_set(left, right);
     path_record(left, right, line);
-}   /* line_steer() */
-
+} /* line_steer() */
 
 /*!
  * @brief Reverse one tick along the recorded path.
@@ -1969,7 +1958,7 @@ line_steer (int32_t speed, uint32_t now_msec)
  *         it is done.
  */
 static bool
-backtrack_step (line_state_t line, uint32_t now_msec)
+backtrack_step(line_state_t line, uint32_t now_msec)
 {
     bool     b_reversed = true;
     uint32_t centre     = 0u;
@@ -1978,50 +1967,52 @@ backtrack_step (line_state_t line, uint32_t now_msec)
     int32_t  sum_left   = 0;
     int32_t  sum_right  = 0;
     int32_t  count      = 0;
-    int32_t  pct        = (int32_t) LINE_BACKTRACK_SPEED_PERCENT;
+    int32_t  pct        = (int32_t)LINE_BACKTRACK_SPEED_PERCENT;
 
-    if (line.b_left_black || line.b_right_black || (0u == g_back_pos_x100))
+    if (((line.b_left_black) || (line.b_right_black)) ||
+        (0u == g_back_pos_x100))
     {
         log_line("Reverse done (%s).",
-                 ((0u == g_back_pos_x100) ? "back where both were on it" :
-                                            "a sensor found black"));
+                 ((0u == g_back_pos_x100) ? "back where both were on it"
+                                          : "a sensor found black"));
         gb_backtracking = false;
         g_path_len      = 0u;
-        g_steer         = STEER_STRAIGHT;   // Steer afresh from here.
+        g_steer         = STEER_STRAIGHT; // Steer afresh from here.
         g_steer_msec    = now_msec;
         b_reversed      = false;
     }
     else if ((now_msec - g_back_msec) < LINE_BACKTRACK_BRAKE_MSEC)
     {
-        motor_set(0, 0);                    // Stop rolling forward first.
+        motor_set(0, 0); // Stop rolling forward first.
     }
     else
     {
-        g_back_pos_x100 = ((g_back_pos_x100 > LINE_BACKTRACK_SPEED_PERCENT) ?
-                           (g_back_pos_x100 - LINE_BACKTRACK_SPEED_PERCENT) :
-                           0u);
+        g_back_pos_x100 =
+            ((g_back_pos_x100 > LINE_BACKTRACK_SPEED_PERCENT)
+                 ? (g_back_pos_x100 - LINE_BACKTRACK_SPEED_PERCENT)
+                 : 0u);
 
         // Average the recorded ticks around the current position.
-        centre = g_back_pos_x100 / (uint32_t) PERCENT;
-        first  = ((centre > (LINE_BACKTRACK_SMOOTH_TICKS / 2u)) ?
-                  (centre - (LINE_BACKTRACK_SMOOTH_TICKS / 2u)) : 0u);
+        centre = g_back_pos_x100 / ((uint32_t)PERCENT);
+        first  = ((centre > (LINE_BACKTRACK_SMOOTH_TICKS / 2u))
+                      ? (centre - (LINE_BACKTRACK_SMOOTH_TICKS / 2u))
+                      : 0u);
         last   = centre + (LINE_BACKTRACK_SMOOTH_TICKS / 2u);
         last   = ((last < g_path_len) ? last : (g_path_len - 1u));
 
         for (uint32_t idx = first; idx <= last; idx++)
         {
-            sum_left  += g_path_left[idx];
+            sum_left += g_path_left[idx];
             sum_right += g_path_right[idx];
             count++;
         }
 
-        motor_set(-(sum_left * pct) / (count * PERCENT),
-                  -(sum_right * pct) / (count * PERCENT));
+        motor_set((-(sum_left * pct)) / (count * PERCENT),
+                  (-(sum_right * pct)) / (count * PERCENT));
     }
 
     return (b_reversed);
-}   /* backtrack_step() */
-
+} /* backtrack_step() */
 
 /*!
  * @brief Record one tick of wheel speeds for a later backtrack.
@@ -2037,10 +2028,12 @@ backtrack_step (line_state_t line, uint32_t now_msec)
  * @param[in] line  The filtered line state.
  */
 static void
-path_record (int32_t left, int32_t right, line_state_t line)
+path_record(int32_t left, int32_t right, line_state_t line)
 {
-    bool const b_on_line = (line.b_left_black && g_raw_line.b_left_black &&
-                            line.b_right_black && g_raw_line.b_right_black);
+    bool const b_on_line =
+        ((((line.b_left_black) && (g_raw_line.b_left_black)) &&
+          (line.b_right_black)) &&
+         (g_raw_line.b_right_black));
 
     if (VEHICLE_FOLLOW_LINE != g_state)
     {
@@ -2053,16 +2046,15 @@ path_record (int32_t left, int32_t right, line_state_t line)
     else if (g_path_len < PATH_MAX_TICKS)
     {
         // NOTE: Wheel speeds are within +/-100, so they fit in int8_t.
-        g_path_left[g_path_len]  = (int8_t) left;
-        g_path_right[g_path_len] = (int8_t) right;
+        g_path_left[g_path_len]  = (int8_t)left;
+        g_path_right[g_path_len] = (int8_t)right;
         g_path_len++;
     }
     else
     {
-        gb_path_ok = false;             // Too long: no way back.
+        gb_path_ok = false; // Too long: no way back.
     }
-}   /* path_record() */
-
+} /* path_record() */
 
 /*!
  * @brief Start a new, empty backtrack path.
@@ -2071,7 +2063,7 @@ path_record (int32_t left, int32_t right, line_state_t line)
  *                 from here leads back to it.
  */
 static void
-path_reset (bool b_ok)
+path_reset(bool b_ok)
 {
     g_path_len      = 0u;
     gb_path_ok      = b_ok;
@@ -2079,10 +2071,9 @@ path_reset (bool b_ok)
 
     if (b_ok)
     {
-        gb_backtracked = false;         // Line found: next loss may reverse.
+        gb_backtracked = false; // Line found: next loss may reverse.
     }
-}   /* path_reset() */
-
+} /* path_reset() */
 
 /*!
  * @brief Decide whether the steering may change now.
@@ -2099,12 +2090,11 @@ path_reset (bool b_ok)
  * @return True if the steering may change to want.
  */
 static bool
-steer_allowed (steer_t want, uint32_t now_msec)
+steer_allowed(steer_t want, uint32_t now_msec)
 {
     return ((STEER_STRAIGHT != want) ||
             ((now_msec - g_steer_msec) >= LINE_STEER_HOLD_MSEC));
-}   /* steer_allowed() */
-
+} /* steer_allowed() */
 
 /*!
  * @brief Read the line sensors through the dirty-track filter.
@@ -2130,25 +2120,23 @@ steer_allowed (steer_t want, uint32_t now_msec)
  * @return The line state the steering should act on.
  */
 static line_state_t
-line_filtered (void)
+line_filtered(void)
 {
     line_state_t   raw         = line_sensor_read();
     bool const     b_left_was  = g_line.b_left_black;
     bool const     b_right_was = g_line.b_right_black;
-    uint32_t const confirm     = ((b_left_was || b_right_was) ?
-                                  LINE_SCORE_CONFIRM : LINE_SCORE_CAPTURE);
+    uint32_t const confirm =
+        ((b_left_was || b_right_was) ? LINE_SCORE_CONFIRM : LINE_SCORE_CAPTURE);
 
     g_raw_line = raw;
 
-    g_line.b_left_black  = line_score_step(&g_left_score, raw.b_left_black,
-                                           b_left_was, confirm);
-    g_line.b_right_black = line_score_step(&g_right_score,
-                                           raw.b_right_black, b_right_was,
-                                           confirm);
+    g_line.b_left_black =
+        line_score_step(&g_left_score, raw.b_left_black, b_left_was, confirm);
+    g_line.b_right_black = line_score_step(&g_right_score, raw.b_right_black,
+                                           b_right_was, confirm);
 
     return (g_line);
-}   /* line_filtered() */
-
+} /* line_filtered() */
 
 /*!
  * @brief Update one sensor's filter score with one reading.
@@ -2161,20 +2149,20 @@ line_filtered (void)
  * @return The sensor's new filtered state.
  */
 static bool
-line_score_step (uint32_t * p_score, bool b_raw_black, bool b_black,
-                 uint32_t confirm)
+line_score_step(uint32_t * p_score, bool b_raw_black, bool b_black,
+                uint32_t confirm)
 {
     uint32_t const limit  = (b_black ? LINE_SCORE_FULL : confirm);
     uint32_t const weight = (b_black ? 1u : LINE_GREY_WHITE_WEIGHT);
 
     if (b_raw_black)
     {
-        if (*p_score < limit)
+        if ((*p_score) < limit)
         {
             (*p_score)++;
         }
     }
-    else if (*p_score > weight)
+    else if ((*p_score) > weight)
     {
         *p_score -= weight;
     }
@@ -2183,11 +2171,11 @@ line_score_step (uint32_t * p_score, bool b_raw_black, bool b_black,
         *p_score = 0u;
     }
 
-    if (!b_black && (*p_score >= confirm))
+    if ((!b_black) && ((*p_score) >= confirm))
     {
         b_black = true;
     }
-    else if (0u == *p_score)
+    else if (0u == (*p_score))
     {
         b_black = false;
     }
@@ -2197,8 +2185,7 @@ line_score_step (uint32_t * p_score, bool b_raw_black, bool b_black,
     }
 
     return (b_black);
-}   /* line_score_step() */
-
+} /* line_score_step() */
 
 /*!
  * @brief Set the filtered line state outright, e.g. after lining up on
@@ -2208,15 +2195,14 @@ line_score_step (uint32_t * p_score, bool b_raw_black, bool b_black,
  * @param[in] now_msec The current time.
  */
 static void
-line_filter_reset (line_state_t line, uint32_t now_msec)
+line_filter_reset(line_state_t line, uint32_t now_msec)
 {
     g_line        = line;
     g_left_score  = (line.b_left_black ? LINE_SCORE_FULL : 0u);
     g_right_score = (line.b_right_black ? LINE_SCORE_FULL : 0u);
     g_steer       = STEER_STRAIGHT;
     g_steer_msec  = now_msec;
-}   /* line_filter_reset() */
-
+} /* line_filter_reset() */
 
 /*!
  * @brief Read the time in milliseconds since boot.
@@ -2224,11 +2210,11 @@ line_filter_reset (line_state_t line, uint32_t now_msec)
  * @return Milliseconds; wraps after about 49 days.
  */
 static uint32_t
-now_msec_get (void)
+now_msec_get(void)
 {
     // NOTE: Truncating to 32 bits is intended; all time differences use
     // unsigned subtraction, which is correct across the wrap.
-    return ((uint32_t) (time_us_64() / USEC_PER_MSEC));
-}   /* now_msec_get() */
+    return ((uint32_t)((time_us_64()) / USEC_PER_MSEC));
+} /* now_msec_get() */
 
 /*** end of file ***/

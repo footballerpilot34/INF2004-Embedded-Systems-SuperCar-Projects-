@@ -1,0 +1,150 @@
+
+MODULE robocar.c: exit=0
+
+MODULE tests/sensor_test.c: exit=0
+
+MODULE tests/i2cscanner.c: exit=0
+
+MODULE tests/gyro_test.c: exit=0
+
+MODULE src/supercar_main.c: exit=0
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/supercar_main.c: In function 'isr_hardfault':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/supercar_main.c:308:5: warning: infinite loop [CWE-835] [-Wanalyzer-infinite-loop]
+  308 |     for (;;)
+      |     ^~~
+  'isr_hardfault': event 1
+  308 |     for (;;)
+      |     ^~~
+      |     |
+      |     (1) ⚠️  infinite loop here
+  'isr_hardfault': event 2
+cc1:
+ (2): looping back...
+  'isr_hardfault': event 3
+  308 |     for (;;)
+      |     ^~~
+      |     |
+      |└───>(3) ...to here
+
+MODULE src/barcode.c: exit=0
+
+MODULE src/bypass.c: exit=0
+In file included from /Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:28:
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass_geometry.h: In function 'bypass_geometry_corridor':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass_geometry.h:121:27: warning: conversion from 'unsigned int' to 'float' may change value [-Wconversion]
+  121 |                     (2.0f * count_n);
+      |                           ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass_geometry.h:128:42: warning: conversion from 'unsigned int' to 'float' may change value [-Wconversion]
+  128 |         float value_u = ((float)index_i) / count_n;
+      |                                          ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'bypass_begin':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:273:28: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'float' may change value [-Wconversion]
+  273 |               (sqrtf((6.0f * shift) * TURN_RADIUS_MM))))
+      |                            ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:272:57: warning: conversion from 'long unsigned int' to 'float' may change value [-Wconversion]
+  272 |              ((SENSOR_TO_BUMPER_MM + SIDE_CLEARANCE_MM) +
+      |                                                         ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'fixed_begin':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:589:73: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'float' may change value [-Wconversion]
+  589 |     return fixed_start(profile->front_mm, (-(float)width) / 2.0f, width / 2.0f,
+      |                                                                         ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'fixed_turn_step':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:666:48: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  666 |     if (gb_turn_settling || ((g_turn_direction * error) <= PIVOT_DONE_DEG))
+      |                                                ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'side_shift':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:1183:33: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'float' may change value [-Wconversion]
+ 1183 |         (((p_profile->front_mm) * (tanf(SERVO_RANGE_DEG / DEG_PER_RAD))) <
+      |                                 ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'curve_start':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:1325:56: warning: conversion from 'long unsigned int' to 'float' may change value [-Wconversion]
+ 1325 |     g_clen = ((g_front_z - g_z) - SENSOR_TO_BUMPER_MM) - SIDE_CLEARANCE_MM;
+      |                                                        ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'odo_update':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2155:51: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2155 |             float signed_mean = (g_turn_direction * (value_dl - value_dr)) / 2;
+      |                                                   ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2157:49: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2157 |                 (g_heading + ((g_turn_direction * turn) / 2)) / DEG_PER_RAD;
+      |                                                 ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2162:45: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2162 |                          ? g_turn_direction * turn
+      |                                             ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2174:51: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2174 |             float signed_mean = (g_turn_direction * (value_dl - value_dr)) / 2;
+      |                                                   ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2176:49: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2176 |                 (g_heading + ((g_turn_direction * turn) / 2)) / DEG_PER_RAD;
+      |                                                 ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2180:55: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2180 |         g_heading += gb_fixed_test ? g_turn_direction * turn
+      |                                                       ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c: In function 'steer_at_speed':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/bypass.c:2252:36: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+ 2252 |         g_steer_residual = command - adjustment;
+      |                                    ^
+
+MODULE src/encoder.c: exit=0
+
+MODULE src/buzzer.c: exit=0
+
+MODULE src/gpio_isr.c: exit=0
+
+MODULE src/hump.c: exit=0
+
+MODULE src/imu.c: exit=0
+
+MODULE src/line_diag.c: exit=0
+
+MODULE src/line_sensor.c: exit=0
+
+MODULE src/log.c: exit=0
+
+MODULE src/motor.c: exit=0
+
+MODULE src/mqtt_comm.c: exit=0
+
+MODULE src/power.c: exit=0
+
+MODULE src/servo.c: exit=0
+
+MODULE src/obstacle.c: exit=0
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c: In function 'forward_depth':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:59:57: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+   59 |     return (point->range_mm) * (cosf((point->angle_deg) * RAD_PER_DEG));
+      |                                                         ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:59:30: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'float' may change value [-Wconversion]
+   59 |     return (point->range_mm) * (cosf((point->angle_deg) * RAD_PER_DEG));
+      |                              ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c: In function 'edge_geometry':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:170:56: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  170 |     float value_x        = lateral(depth, (*angle_x10) / 10.0f);
+      |                                                        ^
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c: In function 'obstacle_profile_build':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:271:58: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  271 |         (int32_t)lroundf(lateral(left_depth, points[left].angle_deg));
+      |                                              ~~~~~~~~~~~~^~~~~~~~~~
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:273:60: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  273 |         (int32_t)lroundf(lateral(right_depth, points[right].angle_deg));
+      |                                               ~~~~~~~~~~~~~^~~~~~~~~~
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:292:67: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  292 |         float left_bound  = lateral(left_depth, points[left_outer].angle_deg);
+      |                                                 ~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:293:69: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  293 |         float right_bound = lateral(right_depth, points[right_outer].angle_deg);
+      |                                                  ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/obstacle.c:295:73: warning: conversion from 'int32_t' {aka 'long int'} to 'float' may change value [-Wconversion]
+  295 |         float middle_x = ((p_value_p->left_mm) + (p_value_p->right_mm)) / 2.0f;
+      |                                                                         ^
+
+MODULE src/telemetry.c: exit=0
+
+MODULE src/ultrasonic.c: exit=0
+
+MODULE src/vehicle.c: exit=0
+
+MODULE src/web.c: exit=0
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/web.c: In function 'reply_send':
+/Users/felix/Desktop/INF2004-Embedded-Systems-SuperCar-Projects-/src/web.c:2381:39: warning: conversion from 'unsigned int' to 'u8_t' {aka 'unsigned char'} may change value [-Wconversion]
+ 2381 |                         b_static ? 0u : TCP_WRITE_FLAG_COPY);
+      |                                       ^

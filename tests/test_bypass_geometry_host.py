@@ -131,6 +131,13 @@ with tempfile.TemporaryDirectory() as directory:
     assert wider and wider['offset']==215
     wide_min,wide_side=dense_check(wider,front,-80,80)
     assert wide_min>=20 and wide_side>=40
+    # Updated trigger: validate the measured stationary range, not a fixed leg.
+    front200=200*math.cos(math.radians(10))-60
+    route200=plan(front200,-75,75)
+    assert route200 and route200['b']==65 and route200['reverse']==0
+    min200,side200=dense_check(route200,front200,-75,75)
+    assert min200>=20 and side200>=40
+    print(f'200 mm stationary range: {route200}; minimum={min200:.2f}; side={side200:.2f}')
     minimum,side=dense_check(nominal,front,-75,75)
     print(f'Forward-first geometry: {nominal}; dense minimum={minimum:.2f} mm; parallel minimum={side:.2f} mm')
     a,b=map(math.radians,(nominal['a'],nominal['b']))

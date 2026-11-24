@@ -1,0 +1,22 @@
+=== barcode: exit 0 ===
+Barcode host checks passed (GPIO streams, distance/time, reverse, malformed, re-enable)
+
+=== obstacle: exit 0 ===
+Obstacle scan host checks passed (geometry, freshness, cancellation, timeout)
+
+=== ultrasonic: exit 0 ===
+Ultrasonic host checks passed
+
+=== stationary_scan: exit 0 ===
+Stationary scan checks passed (shared dispatch, rejection, STOP, completion, braking)
+
+=== web: exit 0 ===
+Web host checks passed (hotspot recovery, DHCP, reconnect, JSON bounds, dashboard syntax)
+
+=== bypass: exit 0 ===
+Bypass, MQTT compatibility and calibration helper host checks passed
+
+=== bypass_geometry: exit 0 ===
+200 mm stationary range: {'a': 59, 'b': 65, 'offset': 210, 'departure': 244.993, 'departure_y': 126.181, 'clear_y': 446.962, 'return': 231.709, 'reverse': 0, 'path': 797.483, 'wheel': 1010.37, 'margin': 42.1196}; minimum=38.04; side=40.90
+Forward-first geometry: {'a': 77, 'b': 65, 'offset': 210, 'departure': 215.524, 'departure_y': 48.4823, 'clear_y': 397.721, 'return': 231.709, 'reverse': 0, 'path': 796.472, 'wheel': 1041.56, 'margin': 42.1196}; dense minimum=33.66 mm; parallel minimum=40.90 mm
+Independent swept-footprint geometry checks passed

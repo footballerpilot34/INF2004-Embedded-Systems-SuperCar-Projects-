@@ -26,9 +26,8 @@
 #ifndef WIFI_SECRETS_H
 #define WIFI_SECRETS_H
 
-#define HOTSPOT_LIST \
-    { "My Phone Hotspot",   "hotspot-password"  }, \
-    { "Ryan's iPhone",   "ryan2606"   }
+#define HOTSPOT_LIST                                                           \
+    {"My Phone Hotspot", "hotspot-password"}, {"Ryan's iPhone", "ryan2606"}
 
 #endif /* WIFI_SECRETS_H */
 

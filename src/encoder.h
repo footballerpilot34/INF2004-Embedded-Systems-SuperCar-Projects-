@@ -11,8 +11,8 @@
 
 // Positions are in encoder ticks x ENCODER_POS_SCALE (both wheels added),
 // so a fraction of a tick can be expressed.
-#define ENCODER_POS_SCALE   256u
-#define ENCODER_NUM_WATCH   10u     // Encoder pins + free GPIOs (finder).
+#define ENCODER_POS_SCALE 256u
+#define ENCODER_NUM_WATCH 10u // Encoder pins + free GPIOs (finder).
 
 void     encoder_init(void);
 void     encoder_edge_isr(uint32_t gpio);

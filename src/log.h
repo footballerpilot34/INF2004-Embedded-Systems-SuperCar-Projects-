@@ -14,16 +14,16 @@
 // NOTE: The page uses the numbers, so keep them in step with web.c.
 typedef enum
 {
-    LOG_CAT_SYSTEM   = 0,   // Start-up, Wi-Fi, buttons, tests: "All" only.
-    LOG_CAT_OBSTACLE = 1,   // Obstacle and hump detection.
-    LOG_CAT_LINE     = 2,   // Line following, barcodes and crossroads.
-    LOG_CAT_STATE    = 3,   // Vehicle state changes.
-    LOG_CAT_SERVO    = 4    // Ultrasonic pan servo.
+    LOG_CAT_SYSTEM   = 0, // Start-up, Wi-Fi, buttons, tests: "All" only.
+    LOG_CAT_OBSTACLE = 1, // Obstacle and hump detection.
+    LOG_CAT_LINE     = 2, // Line following, barcodes and crossroads.
+    LOG_CAT_STATE    = 3, // Vehicle state changes.
+    LOG_CAT_SERVO    = 4  // Ultrasonic pan servo.
 } log_cat_t;
 
 // Messages kept (for the web page and MQTT's log topic): enough for the
 // start-up and Wi-Fi lines logged before MQTT connects.
-#define LOG_LINES       64u
+#define LOG_LINES 64u
 
 void     log_printf(char const * p_format, ...);
 void     log_obstacle(char const * p_format, ...);

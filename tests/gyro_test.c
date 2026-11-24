@@ -34,75 +34,73 @@
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 
-
 // IMU bus wiring and speed.
 //
-#define I2C_PORT                i2c1
-#define SDA_PIN                 2u
-#define SCL_PIN                 3u
-#define I2C_HZ                  100000u
-#define I2C_TIMEOUT_USEC        5000u
-#define I2C_FIRST_ADDRESS       0x08u   // 0x00-0x07 are reserved.
-#define I2C_LAST_ADDRESS        0x77u   // 0x78-0x7F are reserved.
+#define I2C_PORT i2c1
+#define SDA_PIN 2u
+#define SCL_PIN 3u
+#define I2C_HZ 100000u
+#define I2C_TIMEOUT_USEC 5000u
+#define I2C_FIRST_ADDRESS 0x08u // 0x00-0x07 are reserved.
+#define I2C_LAST_ADDRESS 0x77u  // 0x78-0x7F are reserved.
 
 // MPU-6050 addresses and registers.
 //
-#define MPU_ADDRESS_LOW         0x68u
-#define MPU_ADDRESS_HIGH        0x69u
-#define REG_SMPLRT_DIV          0x19u
-#define REG_CONFIG              0x1Au
-#define REG_GYRO_CONFIG         0x1Bu
-#define REG_ACCEL_CONFIG        0x1Cu
-#define REG_ACCEL_XOUT_H        0x3Bu
-#define REG_PWR_MGMT_1          0x6Bu
-#define REG_WHO_AM_I            0x75u
+#define MPU_ADDRESS_LOW 0x68u
+#define MPU_ADDRESS_HIGH 0x69u
+#define REG_SMPLRT_DIV 0x19u
+#define REG_CONFIG 0x1Au
+#define REG_GYRO_CONFIG 0x1Bu
+#define REG_ACCEL_CONFIG 0x1Cu
+#define REG_ACCEL_XOUT_H 0x3Bu
+#define REG_PWR_MGMT_1 0x6Bu
+#define REG_WHO_AM_I 0x75u
 
 // MPU-6050 settings.
 //
-#define PWR_WAKE_PLL_X          0x01u   // Leave sleep; clock from gyro X.
-#define DLPF_44HZ               0x03u   // 44 Hz filter, 1 kHz internal rate.
-#define SAMPLE_DIV_100HZ        9u      // 1 kHz / (1 + 9) = 100 Hz.
-#define GYRO_RANGE_250DPS       0x00u
-#define ACCEL_RANGE_2G          0x00u
-#define POWER_UP_MSEC           100u
+#define PWR_WAKE_PLL_X 0x01u // Leave sleep; clock from gyro X.
+#define DLPF_44HZ 0x03u      // 44 Hz filter, 1 kHz internal rate.
+#define SAMPLE_DIV_100HZ 9u  // 1 kHz / (1 + 9) = 100 Hz.
+#define GYRO_RANGE_250DPS 0x00u
+#define ACCEL_RANGE_2G 0x00u
+#define POWER_UP_MSEC 100u
 
 // Raw data layout: accel X/Y/Z, temperature, gyro X/Y/Z, 2 bytes each.
 //
-#define NUM_AXES                3u
-#define RAW_FRAME_BYTES         14u
-#define GYRO_FRAME_OFFSET       8u
-#define BYTES_PER_VALUE         2u
+#define NUM_AXES 3u
+#define RAW_FRAME_BYTES 14u
+#define GYRO_FRAME_OFFSET 8u
+#define BYTES_PER_VALUE 2u
 
 // Scaling. Bias is kept in 1/16 counts so averaging keeps sub-count detail.
 //
-#define GYRO_LSB_PER_DPS        131
-#define ACCEL_LSB_PER_G         16384
-#define BIAS_FRACTION           16
-#define USEC_PER_SECOND         1000000
-#define TENTHS                  10
-#define HUNDREDTHS              100
+#define GYRO_LSB_PER_DPS 131
+#define ACCEL_LSB_PER_G 16384
+#define BIAS_FRACTION 16
+#define USEC_PER_SECOND 1000000
+#define TENTHS 10
+#define HUNDREDTHS 100
 
 // Calibration.
 //
-#define CAL_SAMPLES             100     // 1 s at 10 ms per sample.
-#define CAL_MAX_SPREAD          262     // 2 dps; more means the car moved.
+#define CAL_SAMPLES 100    // 1 s at 10 ms per sample.
+#define CAL_MAX_SPREAD 262 // 2 dps; more means the car moved.
 
 // Timing.
 //
-#define SAMPLE_PERIOD_USEC      10000u
-#define TEXT_EVERY_SAMPLES      10u     // 100 ms between text lines.
-#define PLOT_EVERY_SAMPLES      2u      // 20 ms (50 Hz) between plot points.
-#define USB_WAIT_MSEC           10000u
-#define USB_POLL_MSEC           100u
-#define RETRY_MSEC              2000u
-#define LINE_SETTLE_USEC        50u
+#define SAMPLE_PERIOD_USEC 10000u
+#define TEXT_EVERY_SAMPLES 10u // 100 ms between text lines.
+#define PLOT_EVERY_SAMPLES 2u  // 20 ms (50 Hz) between plot points.
+#define USB_WAIT_MSEC 10000u
+#define USB_POLL_MSEC 100u
+#define RETRY_MSEC 2000u
+#define LINE_SETTLE_USEC 50u
 
 // Serial commands.
 //
-#define CMD_ZERO_ANGLES         'z'
-#define CMD_RECALIBRATE         'c'
-#define CMD_TOGGLE_OUTPUT       't'
-
+#define CMD_ZERO_ANGLES 'z'
+#define CMD_RECALIBRATE 'c'
+#define CMD_TOGGLE_OUTPUT 't'
 
 static void usb_wait(void);
 static void bus_init(void);
@@ -116,18 +114,14 @@ static bool mpu_read(uint8_t address, int32_t * p_accel, int32_t * p_gyro);
 static bool gyro_calibrate(uint8_t address, int32_t * p_bias_q4);
 static void fixed_print(char const * p_label, int32_t value, int32_t scale);
 static void plot_print(char const * p_name, int32_t value, int32_t scale);
-static void values_scale(int32_t const * p_rate_q4,
-                         int64_t const * p_angle_sum,
+static void values_scale(int32_t const * p_rate_q4, int64_t const * p_angle_sum,
                          int32_t const * p_accel, int32_t * p_rate_x10,
                          int32_t * p_angle_x10, int32_t * p_accel_x100);
-static void report_text(int32_t const * p_rate_x10,
-                        int32_t const * p_angle_x10,
+static void report_text(int32_t const * p_rate_x10, int32_t const * p_angle_x10,
                         int32_t const * p_accel_x100);
-static void report_plot(int32_t const * p_rate_x10,
-                        int32_t const * p_angle_x10,
+static void report_plot(int32_t const * p_rate_x10, int32_t const * p_angle_x10,
                         int32_t const * p_accel_x100);
 static void test_task(uint8_t address);
-
 
 /*!
  * @brief Find the MPU-6050, then run the gyroscope test forever.
@@ -135,7 +129,7 @@ static void test_task(uint8_t address);
  * @return Never returns.
  */
 int
-main (void)
+main(void)
 {
     uint8_t address = 0u;
 
@@ -166,8 +160,7 @@ main (void)
     }
 
     return (0);
-}   /* main() */
-
+} /* main() */
 
 /*!
  * @brief Calibrate, then sample every 10 ms and print every 100 ms.
@@ -178,16 +171,16 @@ main (void)
  * @param[in] address The MPU-6050's I2C address.
  */
 static void
-test_task (uint8_t address)
+test_task(uint8_t address)
 {
-    int32_t  bias_q4[NUM_AXES]    = { 0 };
-    int64_t  angle_sum[NUM_AXES]  = { 0 };
-    int32_t  accel[NUM_AXES]      = { 0 };
-    int32_t  gyro[NUM_AXES]       = { 0 };
-    int32_t  rate_q4[NUM_AXES]    = { 0 };
-    int32_t  rate_x10[NUM_AXES]   = { 0 };
-    int32_t  angle_x10[NUM_AXES]  = { 0 };
-    int32_t  accel_x100[NUM_AXES] = { 0 };
+    int32_t  bias_q4[NUM_AXES]    = {0};
+    int64_t  angle_sum[NUM_AXES]  = {0};
+    int32_t  accel[NUM_AXES]      = {0};
+    int32_t  gyro[NUM_AXES]       = {0};
+    int32_t  rate_q4[NUM_AXES]    = {0};
+    int32_t  rate_x10[NUM_AXES]   = {0};
+    int32_t  angle_x10[NUM_AXES]  = {0};
+    int32_t  accel_x100[NUM_AXES] = {0};
     uint32_t sample_count         = 0u;
     bool     b_plot_mode          = true;
     bool     b_ok                 = gyro_calibrate(address, bias_q4);
@@ -213,8 +206,7 @@ test_task (uint8_t address)
         else if (CMD_TOGGLE_OUTPUT == command)
         {
             b_plot_mode = !b_plot_mode;
-            printf("Output: %s\n", (b_plot_mode ? "Teleplot graphs"
-                                                 : "text"));
+            printf("Output: %s\n", (b_plot_mode ? "Teleplot graphs" : "text"));
         }
         else
         {
@@ -222,26 +214,26 @@ test_task (uint8_t address)
         }
 
         // Wait for the next 10 ms sample slot.
-        while (time_us_64() < next_usec)
+        while ((time_us_64()) < next_usec)
         {
             tight_loop_contents();
         }
         next_usec += SAMPLE_PERIOD_USEC;
 
-        if (b_ok && mpu_read(address, accel, gyro))
+        if (b_ok && (mpu_read(address, accel, gyro)))
         {
             uint64_t now_usec = time_us_64();
             // NOTE: Samples are 10 ms apart, so the gap always fits int64.
-            int64_t  dt_usec  = (int64_t) (now_usec - last_usec);
+            int64_t dt_usec = (int64_t)(now_usec - last_usec);
 
             last_usec = now_usec;
 
             // Remove bias, then add rate x time to each axis's angle.
             for (uint32_t axis = 0u; axis < NUM_AXES; axis++)
             {
-                rate_q4[axis]    = (gyro[axis] * BIAS_FRACTION) -
-                                   bias_q4[axis];
-                angle_sum[axis] += (int64_t) rate_q4[axis] * dt_usec;
+                rate_q4[axis] =
+                    ((gyro[axis]) * BIAS_FRACTION) - (bias_q4[axis]);
+                angle_sum[axis] += ((int64_t)rate_q4[axis]) * dt_usec;
             }
 
             sample_count++;
@@ -257,8 +249,7 @@ test_task (uint8_t address)
             values_scale(rate_q4, angle_sum, accel, rate_x10, angle_x10,
                          accel_x100);
 
-            if (b_plot_mode &&
-                (0u == (sample_count % PLOT_EVERY_SAMPLES)))
+            if (b_plot_mode && (0u == (sample_count % PLOT_EVERY_SAMPLES)))
             {
                 report_plot(rate_x10, angle_x10, accel_x100);
             }
@@ -273,8 +264,7 @@ test_task (uint8_t address)
             }
         }
     }
-}   /* test_task() */
-
+} /* test_task() */
 
 /*!
  * @brief Convert raw sums into printable fixed-point values.
@@ -287,25 +277,25 @@ test_task (uint8_t address)
  * @param[out] p_accel_x100 Acceleration in hundredths of a g.
  */
 static void
-values_scale (int32_t const * p_rate_q4, int64_t const * p_angle_sum,
-              int32_t const * p_accel, int32_t * p_rate_x10,
-              int32_t * p_angle_x10, int32_t * p_accel_x100)
+values_scale(int32_t const * p_rate_q4, int64_t const * p_angle_sum,
+             int32_t const * p_accel, int32_t * p_rate_x10,
+             int32_t * p_angle_x10, int32_t * p_accel_x100)
 {
     // NOTE: The angle divisor is counts x microseconds per tenth of a
     // degree, so the quotient always fits int32 for any angle a test run
     // can reach.
-    int64_t angle_divisor = ((int64_t) GYRO_LSB_PER_DPS * BIAS_FRACTION *
-                             USEC_PER_SECOND) / TENTHS;
+    int64_t angle_divisor =
+        ((((int64_t)GYRO_LSB_PER_DPS) * BIAS_FRACTION) * USEC_PER_SECOND) /
+        TENTHS;
 
     for (uint32_t axis = 0u; axis < NUM_AXES; axis++)
     {
-        p_rate_x10[axis]   = (p_rate_q4[axis] * TENTHS) /
-                             (GYRO_LSB_PER_DPS * BIAS_FRACTION);
-        p_angle_x10[axis]  = (int32_t) (p_angle_sum[axis] / angle_divisor);
-        p_accel_x100[axis] = (p_accel[axis] * HUNDREDTHS) / ACCEL_LSB_PER_G;
+        p_rate_x10[axis] =
+            ((p_rate_q4[axis]) * TENTHS) / (GYRO_LSB_PER_DPS * BIAS_FRACTION);
+        p_angle_x10[axis]  = (int32_t)((p_angle_sum[axis]) / angle_divisor);
+        p_accel_x100[axis] = ((p_accel[axis]) * HUNDREDTHS) / ACCEL_LSB_PER_G;
     }
-}   /* values_scale() */
-
+} /* values_scale() */
 
 /*!
  * @brief Print one readable line of rates, angles and acceleration.
@@ -315,8 +305,8 @@ values_scale (int32_t const * p_rate_q4, int64_t const * p_angle_sum,
  * @param[in] p_accel_x100 Acceleration in hundredths of a g.
  */
 static void
-report_text (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
-             int32_t const * p_accel_x100)
+report_text(int32_t const * p_rate_x10, int32_t const * p_angle_x10,
+            int32_t const * p_accel_x100)
 {
     printf("Gyro dps");
     fixed_print(" X:", p_rate_x10[0], TENTHS);
@@ -334,8 +324,7 @@ report_text (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
     fixed_print(" Z:", p_accel_x100[2], HUNDREDTHS);
 
     printf("\n");
-}   /* report_text() */
-
+} /* report_text() */
 
 /*!
  * @brief Send one point to each Teleplot graph.
@@ -349,8 +338,8 @@ report_text (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
  * @param[in] p_accel_x100 Acceleration in hundredths of a g.
  */
 static void
-report_plot (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
-             int32_t const * p_accel_x100)
+report_plot(int32_t const * p_rate_x10, int32_t const * p_angle_x10,
+            int32_t const * p_accel_x100)
 {
     plot_print("gyroX_dps", p_rate_x10[0], TENTHS);
     plot_print("gyroY_dps", p_rate_x10[1], TENTHS);
@@ -361,8 +350,7 @@ report_plot (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
     plot_print("accelX_g", p_accel_x100[0], HUNDREDTHS);
     plot_print("accelY_g", p_accel_x100[1], HUNDREDTHS);
     plot_print("accelZ_g", p_accel_x100[2], HUNDREDTHS);
-}   /* report_plot() */
-
+} /* report_plot() */
 
 /*!
  * @brief Print one Teleplot point, such as ">gyroZ_dps:-12.3".
@@ -372,7 +360,7 @@ report_plot (int32_t const * p_rate_x10, int32_t const * p_angle_x10,
  * @param[in] scale  10 for one decimal place, 100 for two.
  */
 static void
-plot_print (char const * p_name, int32_t value, int32_t scale)
+plot_print(char const * p_name, int32_t value, int32_t scale)
 {
     int32_t magnitude = ((value < 0) ? -value : value);
     int     digits    = ((HUNDREDTHS == scale) ? 2 : 1);
@@ -380,8 +368,7 @@ plot_print (char const * p_name, int32_t value, int32_t scale)
     printf(">%s:%s%" PRId32 ".%0*" PRId32 "\n", p_name,
            ((value < 0) ? "-" : ""), magnitude / scale, digits,
            magnitude % scale);
-}   /* plot_print() */
-
+} /* plot_print() */
 
 /*!
  * @brief Average 1 s of still readings to find each gyro axis's bias.
@@ -392,13 +379,13 @@ plot_print (char const * p_name, int32_t value, int32_t scale)
  * @return True if every calibration read succeeded.
  */
 static bool
-gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
+gyro_calibrate(uint8_t address, int32_t * p_bias_q4)
 {
-    int32_t sum[NUM_AXES]     = { 0 };
-    int32_t minimum[NUM_AXES] = { INT32_MAX, INT32_MAX, INT32_MAX };
-    int32_t maximum[NUM_AXES] = { INT32_MIN, INT32_MIN, INT32_MIN };
-    int32_t accel[NUM_AXES]   = { 0 };
-    int32_t gyro[NUM_AXES]    = { 0 };
+    int32_t sum[NUM_AXES]     = {0};
+    int32_t minimum[NUM_AXES] = {INT32_MAX, INT32_MAX, INT32_MAX};
+    int32_t maximum[NUM_AXES] = {INT32_MIN, INT32_MIN, INT32_MIN};
+    int32_t accel[NUM_AXES]   = {0};
+    int32_t gyro[NUM_AXES]    = {0};
     bool    b_ok              = true;
     bool    b_moved           = false;
 
@@ -410,11 +397,11 @@ gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
 
         for (uint32_t axis = 0u; (axis < NUM_AXES) && b_ok; axis++)
         {
-            sum[axis]    += gyro[axis];
-            minimum[axis] = ((gyro[axis] < minimum[axis]) ? gyro[axis]
-                                                          : minimum[axis]);
-            maximum[axis] = ((gyro[axis] > maximum[axis]) ? gyro[axis]
-                                                          : maximum[axis]);
+            sum[axis] += gyro[axis];
+            minimum[axis] =
+                (((gyro[axis]) < (minimum[axis])) ? gyro[axis] : minimum[axis]);
+            maximum[axis] =
+                (((gyro[axis]) > (maximum[axis])) ? gyro[axis] : maximum[axis]);
         }
 
         sleep_us(SAMPLE_PERIOD_USEC);
@@ -422,9 +409,9 @@ gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
 
     for (uint32_t axis = 0u; (axis < NUM_AXES) && b_ok; axis++)
     {
-        p_bias_q4[axis] = (sum[axis] * BIAS_FRACTION) / CAL_SAMPLES;
-        b_moved = (b_moved || ((maximum[axis] - minimum[axis]) >
-                               CAL_MAX_SPREAD));
+        p_bias_q4[axis] = ((sum[axis]) * BIAS_FRACTION) / CAL_SAMPLES;
+        b_moved =
+            (b_moved || (((maximum[axis]) - (minimum[axis])) > CAL_MAX_SPREAD));
     }
 
     if (!b_ok)
@@ -434,12 +421,18 @@ gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
     else
     {
         printf("Calibrated. Bias in dps:");
-        fixed_print(" X:", (p_bias_q4[0] * TENTHS) /
-                    (GYRO_LSB_PER_DPS * BIAS_FRACTION), TENTHS);
-        fixed_print(" Y:", (p_bias_q4[1] * TENTHS) /
-                    (GYRO_LSB_PER_DPS * BIAS_FRACTION), TENTHS);
-        fixed_print(" Z:", (p_bias_q4[2] * TENTHS) /
-                    (GYRO_LSB_PER_DPS * BIAS_FRACTION), TENTHS);
+        fixed_print(" X:",
+                    ((p_bias_q4[0]) * TENTHS) /
+                        (GYRO_LSB_PER_DPS * BIAS_FRACTION),
+                    TENTHS);
+        fixed_print(" Y:",
+                    ((p_bias_q4[1]) * TENTHS) /
+                        (GYRO_LSB_PER_DPS * BIAS_FRACTION),
+                    TENTHS);
+        fixed_print(" Z:",
+                    ((p_bias_q4[2]) * TENTHS) /
+                        (GYRO_LSB_PER_DPS * BIAS_FRACTION),
+                    TENTHS);
         printf("\n%s", (b_moved ? "WARNING: the car moved during "
                                   "calibration; type 'c' to redo it.\n"
                                 : ""));
@@ -448,8 +441,7 @@ gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
     }
 
     return (b_ok);
-}   /* gyro_calibrate() */
-
+} /* gyro_calibrate() */
 
 /*!
  * @brief Read acceleration and rotation rate on all three axes.
@@ -461,9 +453,9 @@ gyro_calibrate (uint8_t address, int32_t * p_bias_q4)
  * @return True if the read succeeded.
  */
 static bool
-mpu_read (uint8_t address, int32_t * p_accel, int32_t * p_gyro)
+mpu_read(uint8_t address, int32_t * p_accel, int32_t * p_gyro)
 {
-    uint8_t raw[RAW_FRAME_BYTES] = { 0u };
+    uint8_t raw[RAW_FRAME_BYTES] = {0u};
     bool    b_ok = reg_read(address, REG_ACCEL_XOUT_H, raw, sizeof(raw));
 
     for (uint32_t axis = 0u; (axis < NUM_AXES) && b_ok; axis++)
@@ -473,15 +465,14 @@ mpu_read (uint8_t address, int32_t * p_accel, int32_t * p_gyro)
 
         // NOTE: Each value is a big-endian two's-complement 16-bit number;
         // the casts rebuild that bit pattern before sign-extending it.
-        p_accel[axis] = (int16_t) (((uint16_t) raw[accel_idx] << 8) |
-                                   raw[accel_idx + 1u]);
-        p_gyro[axis]  = (int16_t) (((uint16_t) raw[gyro_idx] << 8) |
-                                   raw[gyro_idx + 1u]);
+        p_accel[axis] = (int16_t)((((uint16_t)raw[accel_idx]) << 8) |
+                                  (raw[accel_idx + 1u]));
+        p_gyro[axis] =
+            (int16_t)((((uint16_t)raw[gyro_idx]) << 8) | (raw[gyro_idx + 1u]));
     }
 
     return (b_ok);
-}   /* mpu_read() */
-
+} /* mpu_read() */
 
 /*!
  * @brief Find the MPU-6050 at 0x68 or 0x69.
@@ -491,13 +482,13 @@ mpu_read (uint8_t address, int32_t * p_accel, int32_t * p_gyro)
  * @return True if it was found.
  */
 static bool
-mpu_find (uint8_t * p_address)
+mpu_find(uint8_t * p_address)
 {
-    static uint8_t const addresses[] = { MPU_ADDRESS_LOW, MPU_ADDRESS_HIGH };
+    static uint8_t const addresses[] = {MPU_ADDRESS_LOW, MPU_ADDRESS_HIGH};
     uint8_t              identity    = 0u;
     bool                 b_found     = false;
 
-    for (uint32_t idx = 0u; (idx < sizeof(addresses)) && (!b_found); idx++)
+    for (uint32_t idx = 0u; (idx < (sizeof(addresses))) && (!b_found); idx++)
     {
         if (reg_read(addresses[idx], REG_WHO_AM_I, &identity, 1u))
         {
@@ -509,15 +500,14 @@ mpu_find (uint8_t * p_address)
     }
 
     return (b_found);
-}   /* mpu_find() */
-
+} /* mpu_find() */
 
 /*!
  * @brief Explain why the MPU-6050 was not found: check the idle bus lines,
  *        then list every address that answers.
  */
 static void
-bus_diagnose (void)
+bus_diagnose(void)
 {
     bool     b_sda_high = false;
     bool     b_scl_high = false;
@@ -541,9 +531,9 @@ bus_diagnose (void)
     for (uint8_t address = I2C_FIRST_ADDRESS; address <= I2C_LAST_ADDRESS;
          address++)
     {
-        uint8_t dummy  = 0u;
-        int     result = i2c_read_timeout_us(I2C_PORT, address, &dummy, 1u,
-                                             false, I2C_TIMEOUT_USEC);
+        uint8_t dummy = 0u;
+        int result = i2c_read_timeout_us(I2C_PORT, address, &dummy, 1u, false,
+                                         I2C_TIMEOUT_USEC);
 
         if (1 == result)
         {
@@ -568,8 +558,7 @@ bus_diagnose (void)
         printf("  -> Something answers, but not at 0x68/0x69: this is not an "
                "MPU-6050. Tell me the address(es) above.\n");
     }
-}   /* bus_diagnose() */
-
+} /* bus_diagnose() */
 
 /*!
  * @brief Wake the MPU-6050 and set its ranges, filter and sample rate.
@@ -579,19 +568,18 @@ bus_diagnose (void)
  * @return True if every register was written.
  */
 static bool
-mpu_configure (uint8_t address)
+mpu_configure(uint8_t address)
 {
     bool b_ok = reg_write(address, REG_PWR_MGMT_1, PWR_WAKE_PLL_X);
 
     sleep_ms(POWER_UP_MSEC);
-    b_ok = (b_ok && reg_write(address, REG_CONFIG, DLPF_44HZ));
-    b_ok = (b_ok && reg_write(address, REG_SMPLRT_DIV, SAMPLE_DIV_100HZ));
-    b_ok = (b_ok && reg_write(address, REG_GYRO_CONFIG, GYRO_RANGE_250DPS));
-    b_ok = (b_ok && reg_write(address, REG_ACCEL_CONFIG, ACCEL_RANGE_2G));
+    b_ok = (b_ok && (reg_write(address, REG_CONFIG, DLPF_44HZ)));
+    b_ok = (b_ok && (reg_write(address, REG_SMPLRT_DIV, SAMPLE_DIV_100HZ)));
+    b_ok = (b_ok && (reg_write(address, REG_GYRO_CONFIG, GYRO_RANGE_250DPS)));
+    b_ok = (b_ok && (reg_write(address, REG_ACCEL_CONFIG, ACCEL_RANGE_2G)));
 
     return (b_ok);
-}   /* mpu_configure() */
-
+} /* mpu_configure() */
 
 /*!
  * @brief Write one register.
@@ -603,16 +591,14 @@ mpu_configure (uint8_t address)
  * @return True if the device acknowledged both bytes.
  */
 static bool
-reg_write (uint8_t address, uint8_t reg, uint8_t value)
+reg_write(uint8_t address, uint8_t reg, uint8_t value)
 {
-    uint8_t frame[2] = { reg, value };
-    int     written  = i2c_write_timeout_us(I2C_PORT, address, frame,
-                                            sizeof(frame), false,
-                                            I2C_TIMEOUT_USEC);
+    uint8_t frame[2] = {reg, value};
+    int written = i2c_write_timeout_us(I2C_PORT, address, frame, sizeof(frame),
+                                       false, I2C_TIMEOUT_USEC);
 
-    return ((int) sizeof(frame) == written);
-}   /* reg_write() */
-
+    return (((int)sizeof(frame)) == written);
+} /* reg_write() */
 
 /*!
  * @brief Read one or more consecutive registers.
@@ -625,7 +611,7 @@ reg_write (uint8_t address, uint8_t reg, uint8_t value)
  * @return True if every byte was read.
  */
 static bool
-reg_read (uint8_t address, uint8_t reg, uint8_t * p_data, size_t length)
+reg_read(uint8_t address, uint8_t reg, uint8_t * p_data, size_t length)
 {
     bool b_ok   = false;
     int  result = i2c_write_timeout_us(I2C_PORT, address, &reg, 1u, true,
@@ -633,16 +619,15 @@ reg_read (uint8_t address, uint8_t reg, uint8_t * p_data, size_t length)
 
     if (1 == result)
     {
-        result = i2c_read_timeout_us(I2C_PORT, address, p_data, length,
-                                     false, I2C_TIMEOUT_USEC);
+        result = i2c_read_timeout_us(I2C_PORT, address, p_data, length, false,
+                                     I2C_TIMEOUT_USEC);
 
         // NOTE: length is at most 14 here, so it fits an int.
-        b_ok = ((int) length == result);
+        b_ok = (((int)length) == result);
     }
 
     return (b_ok);
-}   /* reg_read() */
-
+} /* reg_read() */
 
 /*!
  * @brief Print a fixed-point value with a sign, such as " X: -12.3".
@@ -652,7 +637,7 @@ reg_read (uint8_t address, uint8_t reg, uint8_t * p_data, size_t length)
  * @param[in] scale   10 for one decimal place, 100 for two.
  */
 static void
-fixed_print (char const * p_label, int32_t value, int32_t scale)
+fixed_print(char const * p_label, int32_t value, int32_t scale)
 {
     char    sign      = ((value < 0) ? '-' : '+');
     int32_t magnitude = ((value < 0) ? -value : value);
@@ -660,28 +645,26 @@ fixed_print (char const * p_label, int32_t value, int32_t scale)
 
     printf("%s%c%3" PRId32 ".%0*" PRId32, p_label, sign, magnitude / scale,
            digits, magnitude % scale);
-}   /* fixed_print() */
-
+} /* fixed_print() */
 
 /*!
  * @brief Set up I2C1 on GP2 (SDA) and GP3 (SCL) at 100 kHz.
  */
 static void
-bus_init (void)
+bus_init(void)
 {
     i2c_init(I2C_PORT, I2C_HZ);
     gpio_set_function(SDA_PIN, GPIO_FUNC_I2C);
     gpio_set_function(SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(SDA_PIN);
     gpio_pull_up(SCL_PIN);
-}   /* bus_init() */
-
+} /* bus_init() */
 
 /*!
  * @brief Wait up to 10 s for a serial monitor to connect.
  */
 static void
-usb_wait (void)
+usb_wait(void)
 {
     uint32_t waited_ms = 0u;
 
@@ -690,6 +673,6 @@ usb_wait (void)
         sleep_ms(USB_POLL_MSEC);
         waited_ms += USB_POLL_MSEC;
     }
-}   /* usb_wait() */
+} /* usb_wait() */
 
 /*** end of file ***/

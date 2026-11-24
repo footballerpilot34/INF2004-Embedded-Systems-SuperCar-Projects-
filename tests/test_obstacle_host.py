@@ -36,6 +36,8 @@ bool bypass_test_uses_line(void) { return mock_rehearsal_line; }
 void bypass_cancel(void) {}
 static bypass_result_t mock_bypass_result = BYPASS_FAILED;
 bypass_result_t bypass_step(uint32_t t, uint32_t r) { (void)t; (void)r; return mock_bypass_result; }
+static int32_t mock_height;
+int32_t hump_height_x10(void) { return mock_height; }
 void hump_task(bool f, bool h) { (void)f; (void)h; }
 void hump_finish(int32_t t) { (void)t; }
 void hump_new_run(void) {}
@@ -136,61 +138,28 @@ static void run_scan(void) {
 
 
 static void estimate_checks(void) {
-    obstacle_profile_t p={.centre_seen=true,.left_bounded=true,.right_bounded=true,
-        .edges_confirmed=true,.calibrated_width_valid=true,.front_mm=150,.width_mm=333};
-    for(unsigned w=139;w<=161;++w) {
-        p.calibrated_width_mm=w;
-        obstacle_width_estimate_update(&p);
-        assert(p.corrected_width_mm==(w>=140 && w<=160 ? w : 150));
-        assert(p.width_fallback==!(w>=140 && w<=160));
-        assert(p.width_mm==333 && p.front_mm==150);
-    }
-    p.calibrated_width_mm=150; p.left_bounded=false;
-    obstacle_width_estimate_update(&p); assert(p.width_fallback && p.corrected_width_mm==150);
-    p.left_bounded=true; p.timed_out=true;
-    obstacle_width_estimate_update(&p); assert(p.width_fallback);
-    p.timed_out=false; p.right_bounded=false;
-    obstacle_width_estimate_update(&p); assert(p.width_fallback);
-    p.right_bounded=true; p.cancelled=true;
-    obstacle_width_estimate_update(&p); assert(p.width_fallback);
-    p.cancelled=false; p.calibrated_width_valid=false;
-    obstacle_width_estimate_update(&p); assert(p.width_fallback);
-    p.calibrated_width_valid=true; p.width_mm=0;
-    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    obstacle_profile_t p={.width_mm=333};
+    obstacle_width_estimate_update(&p);
+    assert(p.width_mm==333 && p.corrected_width_mm==0);
 }
-
 static void width_calibration_checks(void) {
-    // SYNTHETIC table/scan inputs exercise decisions, not physical accuracy.
-    for (uint32_t d = 150; d <= 250; d += 50) {
-        for (int edge = 10; edge <= 28; edge += 8) {
-            obstacle_point_t points[31];
-            for (unsigned i = 0; i < 31; ++i) {
-                int a = -30 + 2 * (int)i;
-                float depth = abs(a) <= edge ? d : 1000;
-                points[i] = (obstacle_point_t){a,
-                    (uint32_t)lroundf(depth / cosf(a * 0.017453292519943295f)),
-                    OBSTACLE_RETURN_RANGE};
-            }
-            obstacle_profile_t p;
-            obstacle_profile_build(points, 31, d, &p);
-            if (TEST_CALIBRATED && edge < 26 && OBSTACLE_WIDTH_CALIBRATION_ENABLED) {
-                assert(p.calibrated_width_valid);
-                assert(p.calibrated_width_mm == (edge == 10 ? 150u : 250u));
-            } else { assert(!p.calibrated_width_valid); }
-            assert(p.width_mm > 0); // Raw geometry remains separate.
-            assert(p.corrected_width_mm==150);
-            assert(p.width_fallback==!(p.calibrated_width_valid && p.calibrated_width_mm==150));
-            points[15].kind = OBSTACLE_RETURN_WEAK_RANGE;
-            obstacle_profile_build(points, 31, d, &p);
-            assert(!p.calibrated_width_valid);
-            points[15].kind = OBSTACLE_RETURN_NO_ECHO;
-            obstacle_profile_build(points, 31, d, &p);
-            assert(!p.calibrated_width_valid);
-            points[15].kind = OBSTACLE_RETURN_RANGE;
-            points[15].range_mm = 280;
-            obstacle_profile_build(points, 31, 280, &p);
-            assert(!p.calibrated_width_valid); // No extrapolation.
+    for (unsigned distance=150;distance<=350;distance+=25) {
+        obstacle_point_t points[31];
+        for(unsigned i=0;i<31;i++) {
+            int angle=-30+2*(int)i;
+            unsigned depth=abs(angle)<=10 ? distance : 1000;
+            points[i]=(obstacle_point_t){angle,
+                (uint32_t)lroundf(depth/cosf(angle*0.017453292519943295f)),
+                OBSTACLE_RETURN_RANGE};
         }
+        obstacle_profile_t p;
+        obstacle_profile_build(points,31,distance,&p);
+        assert(p.edges_confirmed && p.width_mm>0);
+        assert(!p.calibrated_width_valid && p.corrected_width_mm==0);
+        points[15].kind=OBSTACLE_RETURN_NO_ECHO;
+        obstacle_profile_build(points,31,distance,&p);
+        assert(!p.centre_seen && !p.left_bounded && !p.right_bounded);
+        assert(p.front_mm==ULTRASONIC_NO_RANGE && p.width_mm==0);
     }
 }
 
@@ -221,7 +190,7 @@ static void geometry_checks(void) {
     // Missing centre uses the pre-scan range for estimation, never clearance.
     a[2] = (obstacle_point_t){0, ULTRASONIC_NO_RANGE, OBSTACLE_RETURN_NO_ECHO};
     obstacle_profile_build(a, 5, 298, &p);
-    assert(!p.centre_seen && p.left_bounded && p.right_bounded && !p.bypass.available);
+    assert(!p.centre_seen && !p.left_bounded && !p.right_bounded && !p.bypass.available);
     // Every edge is discovered from the scan, including asymmetric observations.
     obstacle_point_t actual[] = {
         {-30,821,OBSTACLE_RETURN_RANGE}, {-28,836,OBSTACLE_RETURN_RANGE},
@@ -285,7 +254,8 @@ int main(void) {
         for (unsigned i = 0; i < count; ++i) { assert(points[i].angle_deg == -30 + 2 * (int)i); }
         if (mode == ONE_ECHO) {
             assert(points[15].range_mm == scan_depth && points[15].kind == OBSTACLE_RETURN_WEAK_RANGE);
-            assert(obstacle_profile()->left_bounded && obstacle_profile()->right_bounded);
+            assert(!obstacle_profile()->centre_seen);
+            assert(!obstacle_profile()->left_bounded && !obstacle_profile()->right_bounded);
             assert(!obstacle_profile()->edges_confirmed && !obstacle_profile()->bypass.available);
         }
         if (mode == TWO_ECHO) { assert(points[15].range_mm == scan_depth); }
@@ -309,11 +279,12 @@ int main(void) {
     vehicle_task();
     assert(motor_left > 0 && motor_right > 0);
     range_mm = OBSTACLE_STOP_MM; tilt = HUMP_ENTER_PITCH_X10;
+    mock_height=HUMP_ENTER_HEIGHT_X10;
     vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN); // Stop outranks tilt.
     assert(!reader_enabled);
     assert(motor_left == 0 && motor_right == 0);
-    tilt = 0;
+    tilt = 0; mock_height=0;
     uint32_t scan_start = now;
     while (vehicle_state() == VEHICLE_OBSTACLE_SCAN) {
         now += 10;

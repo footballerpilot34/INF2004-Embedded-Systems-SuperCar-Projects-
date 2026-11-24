@@ -82,7 +82,7 @@ void log_printf(char const * fmt, ...) { (void)fmt; }
 DEFINITIONS = block("#define HTTP_PORT", "    \"<!DOCTYPE html>")
 # Omit the HTML declaration; tested separately below.
 DEFINITIONS = DEFINITIONS[:DEFINITIONS.index("static char const g_page_html")]
-STATE = block("static web_command_t g_pending", "static void   server_check")
+STATE = SOURCE[SOURCE.index("static web_command_t g_pending"):re.search(r"static void\s+server_check", SOURCE).start()]
 
 NETWORK = r'''
 static unsigned joins, leaves, resets, recovery, ap_stops, mdns_removes;
@@ -356,10 +356,10 @@ with tempfile.TemporaryDirectory() as directory:
     assert parsed[3]["points"][1][1] is None
     assert parsed[4]["state"] == "Complete"
     assert parsed[4]["can_scan"]
-    assert parsed[3]["calibrated_width"] is None
-    assert parsed[4]["calibrated_width"] == 150
-    assert parsed[4]["width"] == 4294967295  # Raw value is not overwritten.
-    assert parsed[5]["calibrated_width"] is None
+    assert "calibrated_width" not in parsed[3]
+    assert "corrected_width" not in parsed[4]
+    assert parsed[4]["width"] is None  # Raw value is not overwritten.
+    assert parsed[5]["width"] is None
     assert parsed[5]["state"] == "Failed"
     assert parsed[5]["can_scan"]
     assert parsed[6]["state"] == "Idle"
@@ -397,8 +397,8 @@ global.fetch=()=>Promise.resolve({ok:true,json:()=>Promise.resolve(FIXTURE)});
     script.write_text(mock + plot + r'''
 setImmediate(()=>{assert.equal(dots,3);assert.equal(links,1);assert.equal(edges,2);
  assert.equal(elements.usstate.textContent,'Complete');assert(elements.usresult.textContent.includes('249 mm'));
- assert(elements.usresult.textContent.includes('Raw geometric width: 249 mm'));
- assert(elements.usresult.textContent.includes('Calibrated obstacle width: 150 mm'));
+ assert(elements.usresult.textContent.includes('Geometric width: 249 mm'));
+ assert(elements.usresult.textContent.includes('Measured centre distance: UNKNOWN'));
  assert.equal(elements.scanNow.disabled,false);});
 ''')
     subprocess.run(["node", str(script)], check=True, timeout=10)

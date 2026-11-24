@@ -1,0 +1,13 @@
+/** @file module.c
+ * @brief Describe module responsibility and hardware assumptions.
+ */
+#include "module.h"
+
+/** @brief Initialize the module; document any hardware preconditions. */
+void
+module_init (void)
+{
+    // Implement the documented initialization.
+}
+
+/*** end of file ***/

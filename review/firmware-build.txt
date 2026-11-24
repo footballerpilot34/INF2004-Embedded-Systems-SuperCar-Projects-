@@ -1,0 +1,308 @@
+[  6%] Checking project-owned C layout
+[  6%] Generating cyw43_bus_pio_spi.pio.h
+[  6%] Building ASM object pico-sdk/src/rp2040/boot_stage2/CMakeFiles/bs2_default.dir/compile_time_choice.S.o
+[  6%] Built target cyw43_driver_picow_cyw43_bus_pio_spi_pio_h
+[  6%] Linking ASM executable bs2_default.elf
+50 project-owned files reviewed; 0 findings.
+{}
+[  6%] Built target supercar_style_check
+[  6%] Built target bs2_default
+[  6%] Generating bs2_default.bin
+[  6%] Generating bs2_default_padded_checksummed.S
+[  6%] Building ASM object pico-sdk/src/rp2040/boot_stage2/CMakeFiles/bs2_default_library.dir/bs2_default_padded_checksummed.S.o
+[  6%] Built target bs2_default_library
+[  6%] Building C object CMakeFiles/supercar.dir/src/supercar_main.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/barcode.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/bypass.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/encoder.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/buzzer.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/gpio_isr.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/hump.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/imu.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/line_diag.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/line_sensor.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/log.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/motor.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/mqtt_comm.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/power.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/servo.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/obstacle.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/telemetry.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/ultrasonic.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/vehicle.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/src/web.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/dhcpserver/dhcpserver.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_stdlib/stdlib.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_gpio/gpio.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2040/pico_platform/platform.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_platform_common/common.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_platform_panic/panic.c.o
+[ 18%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_platform_panic/custom_panic_function.S.o
+[ 18%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/hardware_claim/claim.c.o
+[ 18%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_sync/sync.c.o
+[ 18%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_sync_spin_lock/sync_spin_lock.c.o
+[ 18%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_irq/irq.c.o
+[ 18%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_irq/irq_handler_chain.S.o
+[ 18%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_sync/sem.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_sync/lock_core.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_sync/mutex.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_sync/critical_section.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_time/time.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_time/timeout_helper.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_timer/timer.c.o
+[ 21%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_util/datetime.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_util/fixed_bitset.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_util/pheap.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/common/pico_util/queue.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_uart/uart.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_clocks/clocks.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_pll/pll.c.o
+[ 24%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_vreg/vreg.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_watchdog/watchdog.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_ticks/ticks.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_bootrom/bootrom.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_bootrom/bootrom_lock.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_boot_lock/boot_lock.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_flash/flash.c.o
+[ 27%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_xosc/xosc.c.o
+[ 30%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_divider/divider.S.o
+[ 30%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_runtime/runtime.c.o
+[ 30%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_runtime_init/runtime_init.c.o
+[ 30%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_runtime_init/runtime_init_clocks.c.o
+[ 30%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_runtime_init/runtime_init_stack_guard.c.o
+[ 30%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_rtc/rtc.c.o
+[ 30%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_divider/divider_hardware.S.o
+[ 33%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_bit_ops/bit_ops_aeabi.S.o
+[ 33%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_double/double_aeabi_rp2040.S.o
+[ 33%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_double/double_init_rom_rp2040.c.o
+[ 33%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_double/double_math.c.o
+[ 33%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_double/double_v1_rom_shim_rp2040.S.o
+[ 33%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_int64_ops/pico_int64_ops_aeabi.S.o
+[ 36%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_float/float_aeabi_rp2040.S.o
+[ 36%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_float/float_init_rom_rp2040.c.o
+[ 36%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_float/float_math.c.o
+[ 36%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_float/float_v1_rom_shim_rp2040.S.o
+[ 36%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_malloc/malloc.c.o
+[ 36%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_mem_ops/mem_ops_aeabi.S.o
+[ 36%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_atomic/atomic.c.o
+[ 39%] Building CXX object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cxx_options/new_delete.cpp.o
+[ 39%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_standard_binary_info/standard_binary_info.c.o
+[ 39%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_printf/printf.c.o
+[ 39%] Building ASM object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_crt0/crt0.S.o
+[ 39%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_clib_interface/newlib_interface.c.o
+[ 39%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_clib_interface/cxa_guard.c.o
+[ 39%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_stdio/stdio.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_stdio_usb/stdio_usb.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_unique_id/unique_id.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_flash/flash.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_xip_cache/xip_cache.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_usb_reset/usb_reset.c.o
+[ 42%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/device/usbd.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/device/usbd_control.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/audio/audio_device.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/cdc/cdc_device.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/dfu/dfu_device.c.o
+[ 45%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/dfu/dfu_rt_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/hid/hid_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/midi/midi_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/msc/msc_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/net/ecm_rndis_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/net/ncm_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.o
+[ 48%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/vendor/vendor_device.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/class/video/video_device.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/tusb.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/tinyusb/src/common/tusb_fifo.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_thread_local/thread_local.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_adc/adc.c.o
+[ 51%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_i2c/i2c.c.o
+[ 54%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_lwip/lwip_nosys.c.o
+[ 54%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_async_context/async_context_base.c.o
+[ 54%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_rand/rand.c.o
+[ 54%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/init.c.o
+[ 54%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/def.c.o
+[ 54%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/dns.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/inet_chksum.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ip.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/mem.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/memp.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/netif.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/pbuf.c.o
+[ 57%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/raw.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/stats.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/sys.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/altcp.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/altcp_alloc.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/altcp_tcp.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/tcp.c.o
+[ 60%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/tcp_in.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/tcp_out.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/timeouts.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/udp.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/autoip.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/etharp.c.o
+[ 63%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/icmp.c.o
+[ 66%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/igmp.c.o
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_discover.isra' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1053:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+In file included from /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/arch.h:48,
+                 from /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/debug.h:40,
+                 from /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/opt.h:52,
+                 from /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:66:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_discover.isra':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_discover.isra' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1053:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_discover.isra':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_reboot.isra' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1291:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_reboot.isra':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_reboot.isra' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1291:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_reboot.isra':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_select.isra' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:478:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_select.isra':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_select.isra' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:478:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_select.isra':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_renew' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1179:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_renew':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+In function 'dhcp_option_byte',
+    inlined from 'dhcp_renew' at /Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1179:25:
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/dhcp.c:1453:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+ 1453 |   options[options_out_len++] = value;
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h: In function 'dhcp_renew':
+/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/include/lwip/prot/dhcp.h:90:3: note: at offset 68 into destination object 'options' of size 68
+   90 |   PACK_STRUCT_FLD_8(u8_t options[DHCP_OPTIONS_LEN]);
+      |   ^~~~~~~~~~~~~~~~~
+[ 66%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/ip4_frag.c.o
+[ 66%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/ip4.c.o
+[ 66%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/ip4_addr.c.o
+[ 66%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv4/acd.c.o
+[ 66%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/dhcp6.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/ethip6.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/icmp6.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/inet6.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/ip6.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/ip6_addr.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/ip6_frag.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/mld6.c.o
+[ 69%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/core/ipv6/nd6.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/api_lib.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/api_msg.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/err.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/if_api.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/netbuf.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/netdb.c.o
+[ 72%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/netifapi.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/sockets.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/api/tcpip.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ethernet.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/bridgeif.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/bridgeif_fdb.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/slipif.c.o
+[ 75%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/lowpan6_common.c.o
+[ 78%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/lowpan6.c.o
+[ 78%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/lowpan6_ble.c.o
+[ 78%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/zepif.c.o
+[ 78%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/auth.c.o
+[ 78%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/ccp.c.o
+[ 78%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/chap-md5.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/chap_ms.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/chap-new.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/demand.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/eap.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/ecp.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/eui64.c.o
+[ 81%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/fsm.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/ipcp.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/ipv6cp.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/lcp.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/magic.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/mppe.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/multilink.c.o
+[ 84%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/ppp.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/pppapi.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/pppcrypt.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/pppol2tp.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/pppoe.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/pppos.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/upap.c.o
+[ 87%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/utils.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/vj.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/polarssl/arc4.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/polarssl/des.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/polarssl/md4.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/polarssl/md5.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/netif/ppp/polarssl/sha1.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_arch/cyw43_arch.c.o
+[ 90%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_arch/cyw43_arch_threadsafe_background.c.o
+[ 93%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_arch/cyw43_arch_poll.c.o
+[ 93%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_arch/cyw43_arch_freertos.c.o
+[ 93%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_driver/cyw43_bus_pio_spi.c.o
+[ 93%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/cyw43-driver/src/cyw43_ll.c.o
+[ 93%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/cyw43-driver/src/cyw43_stats.c.o
+[ 93%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/cyw43-driver/src/cyw43_lwip.c.o
+[ 96%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/cyw43-driver/src/cyw43_ctrl.c.o
+[ 96%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_driver/cybt_shared_bus/cybt_shared_bus.c.o
+[ 96%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_driver/cybt_shared_bus/cybt_shared_bus_driver.c.o
+[ 96%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_pio/pio.c.o
+[ 96%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_dma/dma.c.o
+[ 96%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/hardware_exception/exception.c.o
+[100%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_async_context/async_context_poll.c.o
+[100%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/src/rp2_common/pico_cyw43_driver/cyw43_driver.c.o
+[100%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/apps/mdns/mdns.c.o
+[100%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/apps/mdns/mdns_out.c.o
+[100%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/apps/mdns/mdns_domain.c.o
+[100%] Building C object CMakeFiles/supercar.dir/Users/felix/.pico-sdk/sdk/2.3.1/lib/lwip/src/apps/mqtt/mqtt.c.o
+[100%] Linking CXX executable supercar.elf
+[100%] Built target supercar

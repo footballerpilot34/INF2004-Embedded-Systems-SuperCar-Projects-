@@ -1,0 +1,5438 @@
+[
+  {
+    "file": "robocar.c",
+    "line": 247,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 290,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 291,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 291,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 465,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 466,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 524,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 542,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 616,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 620,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 625,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 692,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 693,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 731,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "robocar.c",
+    "line": 859,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 256,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 279,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 505,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 505,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 648,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 648,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 649,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 649,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 651,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 668,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 750,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 753,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 821,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 823,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 855,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 855,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 887,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 887,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 937,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1135,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1139,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1205,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1303,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1456,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1480,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1489,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1508,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1514,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1726,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1736,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1742,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/buzzer.c",
+    "line": 44,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/buzzer.c",
+    "line": 59,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/buzzer.c",
+    "line": 59,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/buzzer.c",
+    "line": 72,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/buzzer.c",
+    "line": 72,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 103,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 105,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 113,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 116,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 119,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 121,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 122,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 123,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 124,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 125,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 127,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 128,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 129,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 133,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 134,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 135,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 136,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 137,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 138,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 156,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 160,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 165,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 169,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 170,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 176,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 176,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 186,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 194,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 195,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 201,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 202,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 205,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 205,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 205,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 242,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 271,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 271,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 282,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 282,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 282,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 282,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 283,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 283,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 303,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 336,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 344,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 344,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 345,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 345,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 345,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 345,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 346,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 346,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 346,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 346,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 349,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 357,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 357,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 382,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 432,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 432,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 452,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 452,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 460,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 461,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 520,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 520,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 520,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 520,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 521,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 521,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 524,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 524,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 526,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 526,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 527,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 527,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 528,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 528,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 577,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 589,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 589,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 606,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 606,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 620,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 620,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 624,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 626,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 639,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 639,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 665,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 693,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 719,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 719,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 724,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 724,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 725,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 725,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 726,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 726,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 727,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 727,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 728,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 728,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 729,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 729,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 730,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 730,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 738,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 738,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 844,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 845,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 846,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 847,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 850,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 954,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 963,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1103,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1103,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1103,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1106,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1108,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1108,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1108,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1109,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1109,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1110,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1129,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1129,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1129,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1129,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1165,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1167,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1169,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1170,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1171,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1171,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1172,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1172,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1172,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1194,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1194,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1194,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1195,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1195,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1195,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1196,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1196,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1196,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1215,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1215,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1216,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1216,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1216,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1216,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1217,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1217,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1264,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1264,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1264,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1264,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1264,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1264,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1265,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1265,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1267,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1267,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1271,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1271,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1279,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1279,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1330,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1330,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1330,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1330,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1358,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1359,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1360,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1362,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1363,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1364,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1364,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1366,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1370,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1390,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1390,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1390,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1390,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1391,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1391,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1404,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1404,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1405,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1405,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1406,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1413,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1413,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1434,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1434,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1450,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1483,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1483,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1495,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1532,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1533,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1533,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1535,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1537,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1538,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1538,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1540,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1540,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1552,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1552,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1552,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1554,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1554,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1554,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1577,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1610,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1610,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1625,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1625,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1625,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1625,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1643,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1644,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1645,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1669,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1669,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1674,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1674,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1674,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1674,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1675,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1675,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1702,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1704,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1709,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1709,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1709,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1720,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1749,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1794,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1794,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1794,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1795,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1795,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1796,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1796,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1797,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1799,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1799,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1799,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1800,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1800,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1800,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1801,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1802,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1804,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1806,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1807,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1807,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1807,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1807,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1811,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1811,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1811,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1811,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1812,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1812,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1819,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1819,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1823,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1823,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1850,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1850,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1850,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1853,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1853,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1894,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1898,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1899,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1899,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1899,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1901,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1901,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1901,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1931,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1931,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1936,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1986,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1986,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1986,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1986,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2059,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2059,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2074,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2113,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2113,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2127,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2132,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2132,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2132,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2133,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2133,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2134,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2134,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2134,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2135,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2135,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2136,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2141,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2142,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2142,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2144,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2144,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2148,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2149,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2149,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2155,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2156,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2167,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2168,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2168,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2174,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2175,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2190,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2192,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2192,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2194,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2212,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2214,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2214,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2216,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2236,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2243,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2245,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2246,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2246,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2246,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2247,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2247,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2248,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2249,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2292,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2294,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2295,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2295,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2295,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2296,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2296,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2297,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2298,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2328,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2329,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2329,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 17,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 18,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 19,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 20,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 21,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 22,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 23,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 24,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 25,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 26,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 27,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 28,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 29,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 30,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 37,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 38,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 39,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 39,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 39,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 41,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 42,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 43,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 44,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 45,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 46,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 48,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 51,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 52,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 53,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 59,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 60,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 63,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 72,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 73,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 74,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 74,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 81,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 84,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 90,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 105,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 107,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 107,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 107,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 108,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 110,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 112,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 113,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 120,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 120,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 122,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 125,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 125,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 128,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 128,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 128,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 129,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 130,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 145,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 145,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 146,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 152,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 154,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 179,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 181,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 182,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 183,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 186,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 201,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 203,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 205,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 216,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 217,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 218,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 219,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 220,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 221,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 222,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 225,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 228,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 235,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 238,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 241,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 263,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 263,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 263,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 267,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 268,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/bypass_geometry.h",
+    "line": 272,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/config.h",
+    "line": 115,
+    "rule": "parse",
+    "message": "Parser limitation or syntax error; verify compiler."
+  },
+  {
+    "file": "src/encoder.c",
+    "line": 250,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/encoder.c",
+    "line": 250,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 49,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 53,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 54,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 55,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 70,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 75,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 75,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 75,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 75,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 89,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 90,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 91,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 92,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 94,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 98,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 98,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 140,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 175,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/hump.c",
+    "line": 186,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 211,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 218,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 218,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 219,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 219,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 220,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 220,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 251,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 252,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 329,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 329,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 329,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 330,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 330,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 330,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 332,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 359,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 390,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 418,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 418,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 418,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 418,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 418,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 420,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 429,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 429,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 429,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 429,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 429,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 431,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 440,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 460,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/imu.c",
+    "line": 478,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/log.c",
+    "line": 154,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/motor.c",
+    "line": 48,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/motor.c",
+    "line": 166,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/motor.c",
+    "line": 167,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/motor.c",
+    "line": 167,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 133,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 134,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 135,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 137,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 139,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 141,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 142,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 143,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 144,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 146,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 162,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 196,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 234,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 239,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 264,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 298,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 300,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 414,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 415,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 444,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 457,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 484,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 485,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 503,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 512,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 514,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 516,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 516,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 534,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 576,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 614,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 616,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 616,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 619,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 647,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 648,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 648,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 651,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 665,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 683,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 692,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 696,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 721,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 725,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 729,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 733,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 735,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 737,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 754,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 797,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 828,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 833,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 838,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 845,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 850,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 56,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 84,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 85,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 93,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 99,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 100,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 104,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 106,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 107,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 112,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 113,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 117,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 122,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 140,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 155,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 156,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 156,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 169,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 170,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 171,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 172,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 173,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 178,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 179,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 182,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 194,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 194,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 196,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 196,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 268,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 269,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 271,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 273,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 289,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 290,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 292,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 293,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 294,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 295,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 296,
+    "rule": "5.4.b.i",
+    "message": "Native floating type; retain tested arithmetic ABI."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 297,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 298,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 300,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 391,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 391,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 450,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 450,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 450,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 450,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 451,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 451,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 452,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 452,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 454,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 454,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 455,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 455,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 456,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 461,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 461,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 480,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 480,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 481,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 481,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 482,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 482,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 483,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 483,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 484,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 484,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 496,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 496,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 497,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 497,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 498,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 498,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 499,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 499,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 500,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 500,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 512,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 512,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 513,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 513,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 514,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 514,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 516,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 516,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 517,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 517,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 518,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 518,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 519,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 519,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 529,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 529,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 545,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 545,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 545,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 545,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 546,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 546,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 549,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 549,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 550,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 550,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/power.c",
+    "line": 72,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/power.c",
+    "line": 171,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/power.c",
+    "line": 181,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 24,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 35,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 61,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 61,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 64,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 64,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 82,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/stage.h",
+    "line": 61,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 133,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 162,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 164,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 179,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 274,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 291,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 368,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 371,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 377,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 379,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 387,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 391,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 427,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 927,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 927,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 928,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 928,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 929,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 929,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 930,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 930,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 941,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 941,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 1046,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 1046,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 1046,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 1046,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/telemetry.c",
+    "line": 65,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/telemetry.c",
+    "line": 70,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/telemetry.c",
+    "line": 76,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 57,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 100,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 104,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 149,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 150,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 194,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/ultrasonic.c",
+    "line": 195,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 549,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 587,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 867,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1237,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1294,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1363,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1364,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1384,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1385,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1416,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1417,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1517,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1821,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1853,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1970,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1996,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 2049,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 2050,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 2217,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 541,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 591,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 596,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 603,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 608,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 697,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 702,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 707,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 714,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 714,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 717,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 726,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 746,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 747,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 772,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 791,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 806,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 838,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 860,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 884,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 891,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 921,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1030,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1048,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1073,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1103,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1113,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1173,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1177,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1208,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1306,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1318,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1322,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1332,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1403,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1458,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1494,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1518,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1586,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1628,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1649,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1651,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1666,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1744,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1744,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1759,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1809,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1809,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1810,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1810,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1885,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1924,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1924,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1929,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1929,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1936,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1943,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1943,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1943,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1943,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1954,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1954,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1954,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1954,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1966,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1966,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1979,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1979,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1999,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2022,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2023,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2023,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2065,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2066,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2076,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2076,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2077,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2077,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2078,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2087,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2088,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2088,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2092,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2093,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2093,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2097,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2098,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2098,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2104,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2104,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2159,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2159,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2317,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2346,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2346,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2370,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2377,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2380,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 227,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 236,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 288,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 295,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 468,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 468,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 471,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 471,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 600,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/gyro_test.c",
+    "line": 626,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 320,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 342,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 659,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 659,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 661,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 666,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 666,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  },
+  {
+    "file": "tests/sensor_test.c",
+    "line": 668,
+    "rule": "1.6.a",
+    "message": "Cast range/comment requires manual review."
+  }
+]

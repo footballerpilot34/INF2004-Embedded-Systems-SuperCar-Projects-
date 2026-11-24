@@ -30,8 +30,7 @@ void         mqtt_comm_init(void);
 void         mqtt_comm_task(void);
 void         mqtt_comm_set_broker(char const * p_host);
 char const * mqtt_comm_status_text(void);
-void         mqtt_comm_barcode(char const * p_message,
-                               barcode_command_t command);
+void mqtt_comm_barcode(char const * p_message, barcode_command_t command);
 
 #endif /* MQTT_COMM_H */
 

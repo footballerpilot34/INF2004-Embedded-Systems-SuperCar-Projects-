@@ -13,35 +13,34 @@
 
 typedef enum
 {
-    VEHICLE_READY = 0,          // Waiting for START. Braked.
-    VEHICLE_FOLLOW_LINE,        // Following the line.
-    VEHICLE_PROBE,              // Something ahead: creep to tell hump/wall.
-    VEHICLE_HUMP,               // Climbing over a hump.
-    VEHICLE_BLOCKED,            // Stopped at a wall; resumes when clear.
-    VEHICLE_STOPPED,            // Stopped by STOP. Braked.
-    VEHICLE_LINE_CAL,           // START sweep: learn and check the line.
-    VEHICLE_TURN,               // Barcode command: turn, then follow.
-    VEHICLE_BARCODE_TEST,       // Drive straight, ignoring the line, and
-                                // read barcodes.
-    VEHICLE_BARCODE_STATIC,     // Stand still and read barcodes slid past
-                                // the sensor by hand.
-    VEHICLE_OBSTACLE_SCAN,      // Braked coarse/fine scan; owns pan servo.
-    VEHICLE_BYPASS,             // Going round the obstacle, back to the
-                                // line (bypass.c); owns the servo.
-    VEHICLE_PICKED_UP           // Lifted off the floor while driving: the
-                                // end of the demo. Braked; START again.
+    VEHICLE_READY = 0,      // Waiting for START. Braked.
+    VEHICLE_FOLLOW_LINE,    // Following the line.
+    VEHICLE_PROBE,          // Something ahead: creep to tell hump/wall.
+    VEHICLE_HUMP,           // Climbing over a hump.
+    VEHICLE_BLOCKED,        // Stopped at a wall; resumes when clear.
+    VEHICLE_STOPPED,        // Stopped by STOP. Braked.
+    VEHICLE_LINE_CAL,       // START sweep: learn and check the line.
+    VEHICLE_TURN,           // Barcode command: turn, then follow.
+    VEHICLE_BARCODE_TEST,   // Drive straight, ignoring the line, and
+                            // read barcodes.
+    VEHICLE_BARCODE_STATIC, // Stand still and read barcodes slid past
+                            // the sensor by hand.
+    VEHICLE_OBSTACLE_SCAN,  // Braked coarse/fine scan; owns pan servo.
+    VEHICLE_BYPASS,         // Going round the obstacle, back to the
+                            // line (bypass.c); owns the servo.
+    VEHICLE_PICKED_UP       // Lifted off the floor while driving: the
+                            // end of the demo. Braked; START again.
 } vehicle_state_t;
 
-void            vehicle_init(void);
-void            vehicle_start(void);
-void            vehicle_stop(void);
-void            vehicle_bypass_test(void); // Empty-floor serial/MQTT rehearsal.
-void            vehicle_barcode_command(barcode_command_t command,
-                                        bool b_test);
+void vehicle_init(void);
+void vehicle_start(void);
+void vehicle_stop(void);
+void vehicle_bypass_test(void); // Empty-floor serial/MQTT rehearsal.
+void vehicle_barcode_command(barcode_command_t command, bool b_test);
 barcode_command_t vehicle_pending_turn(void);
-void            vehicle_barcode_test(void);
-void            vehicle_feature_test(bool b_line, bool b_avoid,
-                                     bool b_barcode, bool b_hump);
+void              vehicle_barcode_test(void);
+void            vehicle_feature_test(bool b_line, bool b_avoid, bool b_barcode,
+                                     bool b_hump);
 void            vehicle_barcode_static(void);
 void            vehicle_task(void);
 vehicle_state_t vehicle_state(void);

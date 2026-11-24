@@ -1,0 +1,193 @@
+--- a/src/config.h
++++ b/src/config.h
+@@ -295,9 +295,9 @@
+ // hump/wall PROBE instead (creep closer, climb if the nose tips up). With
+ // true the car stops in front of a hump too.
+ #define OBSTACLE_STOP_AT_ONCE       true
+-// Close start measured from the sensor: 150 mm range, 60 mm setback, 90 mm axial bumper gap.
++// Trigger at 200 mm sensor range; plan from the stationary measured range.
+ #define OBSTACLE_SLOW_MM            350u
+-#define OBSTACLE_STOP_MM            150u
++#define OBSTACLE_STOP_MM            200u
+ #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
+ #define OBSTACLE_CLEAR_MM           350u    // Clear again (hysteresis).
+ #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
+@@ -310,10 +310,6 @@
+ // Positive = sensor behind front bumper; -1 = not measured, bypass blocked.
+ #ifndef SENSOR_TO_BUMPER_MM
+ #define SENSOR_TO_BUMPER_MM         60      // User measured 6 cm behind bumper.
+-#endif
+-// Enable detailed ultrasonic scan logs without changing scan behaviour.
+-#ifndef OBSTACLE_SCAN_DEBUG_LOG
+-#define OBSTACLE_SCAN_DEBUG_LOG false
+ #endif
+ #define OBSTACLE_SCAN_COARSE_DEG    10
+ #define OBSTACLE_SCAN_FINE_DEG      2
+--- a/src/obstacle.c
++++ b/src/obstacle.c
+@@ -6,8 +6,6 @@
+ #include "obstacle.h"
+ #include "servo.h"
+ #include "ultrasonic.h"
+-
+-#define scan_debug_log(...) do { if (OBSTACLE_SCAN_DEBUG_LOG) { log_obstacle(__VA_ARGS__); } } while (0)
+ 
+ #define SCAN_CAPACITY 64u
+ #define RAD_PER_DEG 0.017453292519943295f
+@@ -336,8 +334,8 @@
+     queue_angle(0);
+     queue_angle(-OBSTACLE_SCAN_FINE_DEG);
+ 
+-    scan_debug_log("SCAN: centre-outward search, left then right.");
+-    scan_debug_log("SCAN start: front=%lu mm",
++    log_obstacle("SCAN: centre-outward search, left then right.");
++    log_obstacle("SCAN start: front=%lu mm",
+                  (unsigned long)forward_mm);
+     aim();
+ }
+@@ -375,11 +373,11 @@
+     }
+     g_points[pos] = p;
+     ++g_count;
+-    scan_debug_log("SCAN echoes: angle=%ld valid=%lu/3 min=%ld max=%ld mm",
++    log_obstacle("SCAN echoes: angle=%ld valid=%lu/3 min=%ld max=%ld mm",
+         (long)p.angle_deg, (unsigned long)g_valid,
+         g_valid ? (long)g_values[0] : -1L,
+         g_valid ? (long)g_values[g_valid - 1u] : -1L);
+-    scan_debug_log("SCAN point: t=%lu ms angle=%ld range=%ld mm return=%u",
++    log_obstacle("SCAN point: t=%lu ms angle=%ld range=%ld mm return=%u",
+         (unsigned long)to_ms_since_boot(get_absolute_time()),
+         (long)p.angle_deg,
+         has_range(&p) ? (long)p.range_mm : -1L,
+@@ -395,64 +393,60 @@
+     g_active = false;
+     servo_set_angle(SERVO_CENTER_DEG);
+     if (g_profile.left_bounded) {
+-        scan_debug_log("SCAN left edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
++        log_obstacle("SCAN left edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
+             (long)g_profile.left_mm, (unsigned long)g_profile.left_edge.forward_mm,
+             (unsigned long)g_profile.left_edge.distance_mm,
+             (long)g_profile.left_edge.near_angle_deg, (long)g_profile.left_edge.far_angle_deg,
+             obstacle_edge_status_name(g_profile.left_status));
+     } else {
+-        scan_debug_log("SCAN left edge UNKNOWN (%s); observed foreground reaches %ld mm.",
++        log_obstacle("SCAN left edge UNKNOWN (%s); observed foreground reaches %ld mm.",
+             obstacle_edge_status_name(g_profile.left_status), (long)g_profile.left_observed_mm);
+     }
+     if (g_profile.right_bounded) {
+-        scan_debug_log("SCAN right edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
++        log_obstacle("SCAN right edge: x=%ld y=%lu range=%lu mm; %ld to %ld deg (%s)",
+             (long)g_profile.right_mm, (unsigned long)g_profile.right_edge.forward_mm,
+             (unsigned long)g_profile.right_edge.distance_mm,
+             (long)g_profile.right_edge.near_angle_deg, (long)g_profile.right_edge.far_angle_deg,
+             obstacle_edge_status_name(g_profile.right_status));
+     } else {
+-        scan_debug_log("SCAN right edge UNKNOWN (%s); observed foreground reaches %ld mm.",
++        log_obstacle("SCAN right edge UNKNOWN (%s); observed foreground reaches %ld mm.",
+             obstacle_edge_status_name(g_profile.right_status), (long)g_profile.right_observed_mm);
+     }
+     if (g_profile.left_bounded && g_profile.right_bounded) {
+-        scan_debug_log("SCAN %swidth=%lu mm; sampling interval=%lu..%lu mm",
++        log_obstacle("SCAN %swidth=%lu mm; sampling interval=%lu..%lu mm",
+             g_profile.edges_confirmed ? "" : "apparent ",
+             (unsigned long)g_profile.width_mm, (unsigned long)g_profile.width_min_mm,
+             (unsigned long)g_profile.width_max_mm);
+-        scan_debug_log("SCAN middle: x=%ld y=%lu range=%lu mm; centre ray=%lu mm",
++        log_obstacle("SCAN middle: x=%ld y=%lu range=%lu mm; centre ray=%lu mm",
+             (long)g_profile.middle_x_mm, (unsigned long)g_profile.middle_y_mm,
+             (unsigned long)g_profile.middle_distance_mm, (unsigned long)g_profile.front_mm);
+     } else {
+-        scan_debug_log("SCAN width UNKNOWN: one or both edges are outside reliable observations.");
++        log_obstacle("SCAN width UNKNOWN: one or both edges are outside reliable observations.");
+     }
+     if (g_profile.calibrated_width_valid && !timeout) {
+-        scan_debug_log("SCAN calibrated width=%lu mm", (unsigned long)g_profile.calibrated_width_mm);
++        log_obstacle("SCAN calibrated width=%lu mm", (unsigned long)g_profile.calibrated_width_mm);
+     } else {
+         g_profile.calibrated_width_valid = false;
+-        scan_debug_log("SCAN calibrated width=UNKNOWN (needs usable physical calibration).");
++        log_obstacle("SCAN calibrated width=UNKNOWN (needs usable physical calibration).");
+     }
+     if (timeout) {
+         g_profile.bypass.available = false;
+-        scan_debug_log("SCAN timed out; profile is incomplete.");
++        log_obstacle("SCAN timed out; profile is incomplete.");
+     }
+     obstacle_width_estimate_update(&g_profile);
+-    scan_debug_log("SCAN raw=%lu calibrated=%lu corrected=%lu mm fallback=%u front=%lu mm",
++    log_obstacle("SCAN raw=%lu calibrated=%lu corrected=%lu mm fallback=%u front=%lu mm",
+         (unsigned long)g_profile.width_mm,(unsigned long)g_profile.calibrated_width_mm,
+         (unsigned long)g_profile.corrected_width_mm,g_profile.width_fallback,
+         (unsigned long)g_profile.front_mm);
+-    log_obstacle("SCAN obstacle distance=%lu mm; estimated obstacle width=%lu mm (%s).",
+-        (unsigned long)g_profile.front_mm,
+-        (unsigned long)g_profile.corrected_width_mm,
+-        g_profile.width_fallback ? "nominal estimate" : "measured estimate");
+     obstacle_bypass_candidate_t const * path = &g_profile.bypass;
+     if (path->available) {
+-        scan_debug_log("SCAN bypass candidate: left x=%ld, right x=%ld, preferred x=%ld mm.",
++        log_obstacle("SCAN bypass candidate: left x=%ld, right x=%ld, preferred x=%ld mm.",
+             (long)path->left_x_mm, (long)path->right_x_mm, (long)path->preferred_x_mm);
+-        scan_debug_log("SCAN alongside y=%lu mm; return needs measured rear y + %lu mm.",
++        log_obstacle("SCAN alongside y=%lu mm; return needs measured rear y + %lu mm.",
+             (unsigned long)path->alongside_y_mm, (unsigned long)path->turn_clearance_mm);
+-        scan_debug_log("SCAN corridor unverified; vehicle controller decides motion.");
+-    } else {
+-        scan_debug_log("SCAN no verified corridor; corrected width available to vehicle controller.");
++        log_obstacle("SCAN corridor unverified; vehicle controller decides motion.");
++    } else {
++        log_obstacle("SCAN no verified corridor; corrected width available to vehicle controller.");
+     }
+ }
+ 
+@@ -484,7 +478,7 @@
+         g_searching_right = true;
+         g_scan_direction = 1;
+         queue_angle(OBSTACLE_SCAN_FINE_DEG);
+-        scan_debug_log("SCAN: left search complete; searching right.");
++        log_obstacle("SCAN: left search complete; searching right.");
+     } else if (side_finished && g_searching_right) {
+         finish(false);
+         return;
+--- a/tests/test_bypass_geometry_host.py
++++ b/tests/test_bypass_geometry_host.py
+@@ -131,6 +131,13 @@
+     assert wider and wider['offset']==215
+     wide_min,wide_side=dense_check(wider,front,-80,80)
+     assert wide_min>=20 and wide_side>=40
++    # Updated trigger: validate the measured stationary range, not a fixed leg.
++    front200=200*math.cos(math.radians(10))-60
++    route200=plan(front200,-75,75)
++    assert route200 and route200['b']==65 and route200['reverse']==0
++    min200,side200=dense_check(route200,front200,-75,75)
++    assert min200>=20 and side200>=40
++    print(f'200 mm stationary range: {route200}; minimum={min200:.2f}; side={side200:.2f}')
+     minimum,side=dense_check(nominal,front,-75,75)
+     print(f'Forward-first geometry: {nominal}; dense minimum={minimum:.2f} mm; parallel minimum={side:.2f} mm')
+     a,b=map(math.radians,(nominal['a'],nominal['b']))
+--- a/tests/test_bypass_host.py
++++ b/tests/test_bypass_host.py
+@@ -92,7 +92,11 @@
+     assert(planned_begin());
+     assert(g_target_x==-210 && g_geometry.departure<=BYPASS_DEPARTURE_MAX_DEG);
+     assert(fabsf(g_fixed_clear_z-((OBSTACLE_STOP_MM+BYPASS_AXLE_TO_FRONT_MM-SENSOR_TO_BUMPER_MM)*cosf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD)-BYPASS_AXLE_TO_FRONT_MM+150+180+20+BYPASS_PASS_EXTRA_MM-BYPASS_PASS_TRIM_MM))<0.01f);
+-    if(SENSOR_TO_BUMPER_MM==60) assert(g_geometry.departure==77 && g_geometry.reverse_mm==0);
++    if(SENSOR_TO_BUMPER_MM==60) {
++        assert(g_geometry.reverse_mm==0);
++        if(OBSTACLE_STOP_MM==150) assert(g_geometry.departure==77);
++        assert(g_geometry.return_deg==65);
++    }
+     assert(g_geometry.return_deg>=BYPASS_RETURN_MIN_DEG && g_geometry.return_deg<=70);
+     profile.corrected_width_mm=140;
+     assert(bypass_begin(&profile,0,true)); assert(g_geometry.left==-75 && g_target_x==-210);
+--- a/tests/test_ultrasonic_host.py
++++ b/tests/test_ultrasonic_host.py
+@@ -51,7 +51,7 @@
+     ultrasonic_task();
+ }
+ int main(void) {
+-    _Static_assert(OBSTACLE_STOP_MM == 150, "Stop at 150 mm sensor range, nominal 90 mm axial bumper gap");
++    _Static_assert(OBSTACLE_STOP_MM == 200, "Stop at 200 mm sensor range; planner uses measured stationary range");
+     _Static_assert(OBSTACLE_CLEAR_MM > OBSTACLE_STOP_MM, "Hysteresis");
+     ultrasonic_init();
+     assert(!ultrasonic_measurement_ready());

@@ -51,7 +51,7 @@ static void echo(uint32_t mm) {
     ultrasonic_task();
 }
 int main(void) {
-    _Static_assert(OBSTACLE_STOP_MM == 150, "Stop at 150 mm sensor range, nominal 90 mm axial bumper gap");
+    _Static_assert(OBSTACLE_STOP_MM == 200, "Stop at 200 mm sensor range; planner uses measured stationary range");
     _Static_assert(OBSTACLE_CLEAR_MM > OBSTACLE_STOP_MM, "Hysteresis");
     ultrasonic_init();
     assert(!ultrasonic_measurement_ready());

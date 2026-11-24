@@ -1,0 +1,27 @@
+[  0%] Built target bs2_default
+[  6%] Built target cyw43_driver_picow_cyw43_bus_pio_spi_pio_h
+[  6%] Checking project-owned C layout
+[  6%] Built target bs2_default_library
+50 project-owned files reviewed; 0 findings.
+{}
+[  6%] Built target supercar_style_check
+[  6%] Building C object CMakeFiles/supercar.dir/src/bypass.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/encoder.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/barcode.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/supercar_main.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/buzzer.c.o
+[  6%] Building C object CMakeFiles/supercar.dir/src/gpio_isr.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/hump.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/imu.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/line_diag.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/line_sensor.c.o
+[  9%] Building C object CMakeFiles/supercar.dir/src/motor.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/mqtt_comm.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/power.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/servo.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/obstacle.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/ultrasonic.c.o
+[ 12%] Building C object CMakeFiles/supercar.dir/src/vehicle.c.o
+[ 15%] Building C object CMakeFiles/supercar.dir/src/web.c.o
+[ 15%] Linking CXX executable supercar.elf
+[100%] Built target supercar

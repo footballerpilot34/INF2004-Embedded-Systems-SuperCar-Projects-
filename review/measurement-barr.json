@@ -1,0 +1,722 @@
+[
+  {
+    "file": "src/barcode.c",
+    "line": 505,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 855,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 887,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/barcode.c",
+    "line": 1452,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 303,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 344,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 345,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 345,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 346,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 346,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 357,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 520,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 520,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 521,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 524,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 526,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 527,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 528,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 693,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 724,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 725,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 726,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 727,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 728,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 729,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 730,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 738,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1128,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1128,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1214,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1215,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1215,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1216,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1270,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1329,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1329,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1388,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1388,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1389,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1411,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1623,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1623,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1672,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1672,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1673,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1747,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1806,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1806,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1807,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1818,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1889,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1981,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 1981,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2054,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/bypass.c",
+    "line": 2108,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/config.h",
+    "line": 115,
+    "rule": "parse",
+    "message": "Parser limitation or syntax error; verify compiler."
+  },
+  {
+    "file": "src/mqtt_comm.c",
+    "line": 648,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 381,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 438,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 438,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 439,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 440,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 442,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 442,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 448,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 467,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 468,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 469,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 470,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 471,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 483,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 484,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 485,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 486,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 487,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 499,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 500,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 501,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 503,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 504,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 505,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 506,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 516,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 532,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 532,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 533,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 536,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/obstacle.c",
+    "line": 537,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/servo.c",
+    "line": 64,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 133,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 427,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 927,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 928,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 929,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 930,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 941,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 1046,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/supercar_main.c",
+    "line": 1046,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 549,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1235,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/vehicle.c",
+    "line": 1818,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1112,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1758,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1884,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1922,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1927,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1941,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1941,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1952,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1952,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1963,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1975,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 1995,
+    "rule": "6.2.a",
+    "message": "Function exceeds 100 lines."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2019,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2072,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2073,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2084,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2089,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2094,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  },
+  {
+    "file": "src/web.c",
+    "line": 2100,
+    "rule": "5.2.b",
+    "message": "Native-width integer retained; review ABI/format cast."
+  }
+]

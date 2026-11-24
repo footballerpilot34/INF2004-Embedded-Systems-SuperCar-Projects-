@@ -23,34 +23,32 @@
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 
-
 // IMU bus wiring and speed.
 //
-#define I2C_PORT            i2c1
-#define SDA_PIN             2u
-#define SCL_PIN             3u
-#define I2C_HZ              100000u
-#define I2C_TIMEOUT_USEC    5000u
+#define I2C_PORT i2c1
+#define SDA_PIN 2u
+#define SCL_PIN 3u
+#define I2C_HZ 100000u
+#define I2C_TIMEOUT_USEC 5000u
 
 // Valid 7-bit addresses (0x00-0x07 and 0x78-0x7F are reserved).
 //
-#define I2C_FIRST_ADDRESS   0x08u
-#define I2C_LAST_ADDRESS    0x77u
+#define I2C_FIRST_ADDRESS 0x08u
+#define I2C_LAST_ADDRESS 0x77u
 
 // MPU-6050 addresses and identity register.
 //
-#define MPU_ADDRESS_LOW     0x68u   // AD0 pin low or unconnected.
-#define MPU_ADDRESS_HIGH    0x69u   // AD0 pin high.
-#define WHO_AM_I_REG        0x75u
-#define MPU6050_IDENTITY    0x68u
+#define MPU_ADDRESS_LOW 0x68u  // AD0 pin low or unconnected.
+#define MPU_ADDRESS_HIGH 0x69u // AD0 pin high.
+#define WHO_AM_I_REG 0x75u
+#define MPU6050_IDENTITY 0x68u
 
 // Timing.
 //
-#define LINE_SETTLE_USEC    50u
-#define USB_WAIT_MSEC       10000u
-#define USB_POLL_MSEC       100u
-#define REPEAT_PERIOD_MSEC  2000u
-
+#define LINE_SETTLE_USEC 50u
+#define USB_WAIT_MSEC 10000u
+#define USB_POLL_MSEC 100u
+#define REPEAT_PERIOD_MSEC 2000u
 
 static void bus_init(void);
 static bool bus_lines_check(void);
@@ -58,14 +56,13 @@ static int  bus_scan(void);
 static bool mpu_identify(uint8_t address);
 static void usb_wait(void);
 
-
 /*!
  * @brief Run the gyroscope connection test every 2 s, forever.
  *
  * @return Never returns.
  */
 int
-main (void)
+main(void)
 {
     stdio_init_all();
     usb_wait();
@@ -82,7 +79,7 @@ main (void)
             printf("A LOW line means the IMU has no power, or the wire is "
                    "shorted to GND. Skipping the scan.\n");
         }
-        else if (0 == bus_scan())
+        else if (0 == (bus_scan()))
         {
             printf("Lines are HIGH but nothing answered: SDA and SCL are "
                    "probably swapped.\n");
@@ -90,7 +87,7 @@ main (void)
         else
         {
             b_found = mpu_identify(MPU_ADDRESS_LOW);
-            b_found = (mpu_identify(MPU_ADDRESS_HIGH) || b_found);
+            b_found = ((mpu_identify(MPU_ADDRESS_HIGH)) || b_found);
 
             if (!b_found)
             {
@@ -103,14 +100,13 @@ main (void)
     }
 
     return (0);
-}   /* main() */
-
+} /* main() */
 
 /*!
  * @brief Set up I2C1 on GP2 (SDA) and GP3 (SCL) at 100 kHz.
  */
 static void
-bus_init (void)
+bus_init(void)
 {
     i2c_init(I2C_PORT, I2C_HZ);
     gpio_set_function(SDA_PIN, GPIO_FUNC_I2C);
@@ -120,8 +116,7 @@ bus_init (void)
     // their own.
     gpio_pull_up(SDA_PIN);
     gpio_pull_up(SCL_PIN);
-}   /* bus_init() */
-
+} /* bus_init() */
 
 /*!
  * @brief Read the idle level of SDA and SCL. An idle I2C bus sits HIGH.
@@ -129,7 +124,7 @@ bus_init (void)
  * @return True if both lines are HIGH.
  */
 static bool
-bus_lines_check (void)
+bus_lines_check(void)
 {
     bool b_sda_high = false;
     bool b_scl_high = false;
@@ -151,8 +146,7 @@ bus_lines_check (void)
            (b_scl_high ? "HIGH" : "LOW"));
 
     return (b_sda_high && b_scl_high);
-}   /* bus_lines_check() */
-
+} /* bus_lines_check() */
 
 /*!
  * @brief Print every address on the bus that answers.
@@ -160,7 +154,7 @@ bus_lines_check (void)
  * @return The number of devices found.
  */
 static int
-bus_scan (void)
+bus_scan(void)
 {
     int num_found = 0;
 
@@ -169,9 +163,9 @@ bus_scan (void)
     for (uint8_t address = I2C_FIRST_ADDRESS; address <= I2C_LAST_ADDRESS;
          address++)
     {
-        uint8_t dummy  = 0u;
-        int     result = i2c_read_timeout_us(I2C_PORT, address, &dummy, 1u,
-                                             false, I2C_TIMEOUT_USEC);
+        uint8_t dummy = 0u;
+        int result = i2c_read_timeout_us(I2C_PORT, address, &dummy, 1u, false,
+                                         I2C_TIMEOUT_USEC);
 
         if (1 == result)
         {
@@ -183,8 +177,7 @@ bus_scan (void)
     printf((0 == num_found) ? " none\n" : "\n");
 
     return (num_found);
-}   /* bus_scan() */
-
+} /* bus_scan() */
 
 /*!
  * @brief Read and print the WHO_AM_I register at one MPU-6050 address.
@@ -194,18 +187,18 @@ bus_scan (void)
  * @return True if a device answered with its identity.
  */
 static bool
-mpu_identify (uint8_t address)
+mpu_identify(uint8_t address)
 {
     uint8_t reg      = WHO_AM_I_REG;
     uint8_t identity = 0u;
     bool    b_found  = false;
-    int     result   = i2c_write_timeout_us(I2C_PORT, address, &reg, 1u,
-                                            true, I2C_TIMEOUT_USEC);
+    int     result   = i2c_write_timeout_us(I2C_PORT, address, &reg, 1u, true,
+                                            I2C_TIMEOUT_USEC);
 
     if (1 == result)
     {
-        result = i2c_read_timeout_us(I2C_PORT, address, &identity, 1u,
-                                     false, I2C_TIMEOUT_USEC);
+        result = i2c_read_timeout_us(I2C_PORT, address, &identity, 1u, false,
+                                     I2C_TIMEOUT_USEC);
     }
 
     if (1 != result)
@@ -223,19 +216,19 @@ mpu_identify (uint8_t address)
         // NOTE: Clone boards and related parts (0x70 MPU-6500, 0x71
         // MPU-9250, 0x98 ICM-20689) report other values.
         printf("0x%02X: WHO_AM_I = 0x%02X -> responding, but not the usual "
-               "MPU-6050 value.\n", address, identity);
+               "MPU-6050 value.\n",
+               address, identity);
         b_found = true;
     }
 
     return (b_found);
-}   /* mpu_identify() */
-
+} /* mpu_identify() */
 
 /*!
  * @brief Wait up to 10 s for a serial monitor to connect.
  */
 static void
-usb_wait (void)
+usb_wait(void)
 {
     uint32_t waited_ms = 0u;
 
@@ -244,6 +237,6 @@ usb_wait (void)
         sleep_ms(USB_POLL_MSEC);
         waited_ms += USB_POLL_MSEC;
     }
-}   /* usb_wait() */
+} /* usb_wait() */
 
 /*** end of file ***/

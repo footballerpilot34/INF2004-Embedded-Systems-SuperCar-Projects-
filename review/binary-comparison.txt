@@ -1,0 +1,8 @@
+Functional-only baseline size: 478744 bytes
+Final refactor binary size: 478744 bytes
+Differing byte offsets: [217157]
+0x35045: baseline 0x30; refactor 0x34
+Only difference: SDK embedded build date Nov 20 -> Nov 24 2026.
+All remaining machine-code/data bytes match the functional-only baseline.
+Comparison uses supercar.bin; ELF debug line metadata differs after formatting.
+Final UF2 SHA256: bc768702a2c1aa1f6f705bf304476ed05e784b37648e0cbe381fe98c888c1ab1

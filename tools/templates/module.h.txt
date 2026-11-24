@@ -1,0 +1,14 @@
+/** @file module.h
+ * @brief Describe the public purpose and units of this module.
+ */
+#ifndef MODULE_H
+#define MODULE_H
+
+#include <stdint.h>
+
+/** @brief Describe the operation, preconditions, units and error result. */
+void module_init (void);
+
+#endif /* MODULE_H */
+
+/*** end of file ***/

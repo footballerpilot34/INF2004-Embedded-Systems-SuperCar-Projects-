@@ -28,21 +28,18 @@
 #include "ultrasonic.h"
 #include "vehicle.h"
 
-
-#define TENTHS              10
-#define NO_RANGE_PLOT       (-1)
-#define STATE_TEXT_EVERY    20u     // Resend the state name every 1 s.
-
+#define TENTHS 10
+#define NO_RANGE_PLOT (-1)
+#define STATE_TEXT_EVERY 20u // Resend the state name every 1 s.
 
 static void value_print(char const * p_name, int32_t value);
 static void tenths_print(char const * p_name, int32_t value_x10);
-
 
 /*!
  * @brief Send one set of Teleplot points. Call every TELEMETRY_EVERY_TICKS.
  */
 void
-telemetry_task (void)
+telemetry_task(void)
 {
     static uint32_t        report_count = 0u;
     static vehicle_state_t last_state   = VEHICLE_READY;
@@ -65,20 +62,22 @@ telemetry_task (void)
     else
     {
         // NOTE: The range is at most about 5000 mm, so it fits int32.
-        tenths_print("range_cm", (int32_t) range_mm);
+        tenths_print("range_cm", (int32_t)range_mm);
     }
 
     value_print("motor_L", motor_left_speed());
     value_print("motor_R", motor_right_speed());
-    value_print("state", (int32_t) state);
+    value_print("state", (int32_t)state);
     value_print("servo_deg", servo_angle());
     obstacle_profile_t const * profile = obstacle_profile();
-    bool bounded = profile->finished && !profile->timed_out &&
-                   profile->left_bounded && profile->right_bounded;
+    bool bounded = (((profile->finished) && (!profile->timed_out)) &&
+                    (profile->edges_confirmed)) &&
+                   (!profile->cancelled);
     value_print("obstacle_width_mm", bounded ? (int32_t)profile->width_mm : -1);
-    value_print("obstacle_left_mm", bounded ? profile->left_mm : 0);
-    value_print("obstacle_right_mm", bounded ? profile->right_mm : 0);
-    value_print("obstacle_edges_confirmed", bounded && profile->edges_confirmed);
+    value_print("obstacle_left_mm", bounded ? profile->left_mm : INT32_MIN);
+    value_print("obstacle_right_mm", bounded ? profile->right_mm : INT32_MIN);
+    value_print("obstacle_edges_confirmed",
+                bounded && (profile->edges_confirmed));
 
     // Text only needs sending when it changes, plus a refresh each second
     // in case Teleplot was opened late.
@@ -89,8 +88,7 @@ telemetry_task (void)
     }
 
     report_count++;
-}   /* telemetry_task() */
-
+} /* telemetry_task() */
 
 /*!
  * @brief Send a Teleplot text field, such as ">barcode:HELLO|t".
@@ -99,11 +97,10 @@ telemetry_task (void)
  * @param[in] p_text The text to show.
  */
 void
-telemetry_text (char const * p_name, char const * p_text)
+telemetry_text(char const * p_name, char const * p_text)
 {
     printf(">%s:%s|t\n", p_name, p_text);
-}   /* telemetry_text() */
-
+} /* telemetry_text() */
 
 /*!
  * @brief Send one whole-number Teleplot point.
@@ -112,11 +109,10 @@ telemetry_text (char const * p_name, char const * p_text)
  * @param[in] value  The value.
  */
 static void
-value_print (char const * p_name, int32_t value)
+value_print(char const * p_name, int32_t value)
 {
     printf(">%s:%" PRId32 "\n", p_name, value);
-}   /* value_print() */
-
+} /* value_print() */
 
 /*!
  * @brief Send one Teleplot point with one decimal place.
@@ -125,13 +121,13 @@ value_print (char const * p_name, int32_t value)
  * @param[in] value_x10 The value in tenths (mm for cm, tenths for deg).
  */
 static void
-tenths_print (char const * p_name, int32_t value_x10)
+tenths_print(char const * p_name, int32_t value_x10)
 {
     int32_t magnitude = ((value_x10 < 0) ? -value_x10 : value_x10);
 
     printf(">%s:%s%" PRId32 ".%" PRId32 "\n", p_name,
            ((value_x10 < 0) ? "-" : ""), magnitude / TENTHS,
            magnitude % TENTHS);
-}   /* tenths_print() */
+} /* tenths_print() */
 
 /*** end of file ***/

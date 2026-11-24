@@ -3,6 +3,7 @@
 Internal phase setup isolates clearance/return decisions; it does not simulate
 wheel slip, prove a trajectory, or replace physical validation.
 """
+import re
 from pathlib import Path
 import importlib.util
 import subprocess
@@ -54,8 +55,8 @@ static void publish(char const *topic, char const *payload, unsigned qos, unsign
 }
 '''
 source = (ROOT / 'src/mqtt_comm.c').read_text()
-start = source.index('static void\npublish_events (void)')
-end = source.index('}   /* publish_events() */', start) + len('}   /* publish_events() */')
+start = re.search(r'static void\s+publish_events\s*\(void\)\s*\{' , source).start()
+end = source.index('/* publish_events() */', start) + len('/* publish_events() */')
 code += source[start:end]
 code += r'''
 static void start_pass(void) {
@@ -92,13 +93,17 @@ static void fixed_checks(void) {
     assert(planned_begin());
     assert(g_target_x==-210 && g_geometry.departure<=BYPASS_DEPARTURE_MAX_DEG);
     assert(fabsf(g_fixed_clear_z-((OBSTACLE_STOP_MM+BYPASS_AXLE_TO_FRONT_MM-SENSOR_TO_BUMPER_MM)*cosf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD)-BYPASS_AXLE_TO_FRONT_MM+150+180+20+BYPASS_PASS_EXTRA_MM-BYPASS_PASS_TRIM_MM))<0.01f);
-    if(SENSOR_TO_BUMPER_MM==60) assert(g_geometry.departure==77 && g_geometry.reverse_mm==0);
+    if(SENSOR_TO_BUMPER_MM==60) {
+        assert(g_geometry.reverse_mm==0);
+        if(OBSTACLE_STOP_MM==150) assert(g_geometry.departure==77);
+        assert(g_geometry.return_deg==65);
+    }
     assert(g_geometry.return_deg>=BYPASS_RETURN_MIN_DEG && g_geometry.return_deg<=70);
     profile.corrected_width_mm=140;
     assert(bypass_begin(&profile,0,true)); assert(g_geometry.left==-75 && g_target_x==-210);
     bypass_cancel();
     profile.corrected_width_mm=160;
-    assert(bypass_begin(&profile,0,true)); assert(g_geometry.left==-80 && g_target_x==-215);
+    assert(bypass_begin(&profile,0,true)); assert(g_geometry.left==-75 && g_target_x==-210);
     bypass_cancel(); profile.corrected_width_mm=150;
     // Fixed controlled-test geometry does not retune itself from scan width/edges.
     profile.left_status=OBSTACLE_EDGE_NO_ECHO;
@@ -373,18 +378,20 @@ int main(void) {
 
     // Preserve old event fields; expose calibration as null/150/250.
     profile.front_mm=200; profile.width_mm=333;
+    profile.finished=true; profile.timed_out=false; profile.cancelled=false;
+    profile.centre_seen=true; profile.edges_confirmed=true;
     profile.calibrated_width_valid=false; publish_events();
     assert(strstr(sent,"\"width\":333") && strstr(sent,"\"front\":200"));
-    assert(strstr(sent,"\"calibrated_width\":null"));
+    assert(strstr(sent,"\"width\":"));
     unsigned previous=events; publish_events(); assert(events==previous);
     for (uint32_t w=150; w<=250; w+=100) {
         gb_scan_done=false; profile.calibrated_width_valid=true;
         profile.calibrated_width_mm=w; publish_events();
-        assert(strstr(sent,w==150 ? "\"calibrated_width\":150" : "\"calibrated_width\":250"));
+        assert(!strstr(sent,"calibrated_width"));
         assert(strstr(sent,"\"width\":333"));
     }
     profile.timed_out=true; gb_scan_done=false; publish_events();
-    assert(strstr(sent,"\"calibrated_width\":null"));
+    assert(strstr(sent,"\"width\":null"));
     return 0;
 }
 '''

@@ -1,3 +1,17 @@
+> **Latest measurement update:** continuous scan geometry replaces width bins
+> and scanner fallbacks. Missing centre/edge/width data stays UNKNOWN/null.
+> Nominal dimensions remain exclusively in bypass planning. See
+> [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) for schema changes and limits.
+
+> **Submission update (24 November 2026):** detection triggers at 200 mm.
+> Full real-echo scanning and detailed edge/raw/calibrated-width logs are restored.
+> Bypass uses the stationary measured range, with the existing +65 degree return,
+> 140 mm post-contact advance, 160 mm lateral cap and bounded IR recovery.
+> Normal success returns to FOLLOW_LINE; manual `v` ends STOPPED.
+> See [BARR_C_REVIEW.md](BARR_C_REVIEW.md) for the repository-wide standards
+> refactor, unresolved deviations and verification artifacts. Full compliance
+> and physical validation of the changed trigger are not claimed.
+
 # SuperCar connection (current firmware)
 
 Build the current firmware with `cmake --build build --target supercar -j4`.

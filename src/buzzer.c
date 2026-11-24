@@ -21,36 +21,31 @@
 #include "buzzer.h"
 #include "config.h"
 
+#define BUZZER_HZ 2000u
+#define HZ_PER_MHZ 1000000u // 1 PWM tick per microsecond.
+#define USEC_PER_MSEC 1000u
+#define PERCENT_100 100u
+#define BUZZER_TOP (HZ_PER_MHZ / BUZZER_HZ) // PWM ticks per cycle.
 
-#define BUZZER_HZ       2000u
-#define HZ_PER_MHZ      1000000u    // 1 PWM tick per microsecond.
-#define USEC_PER_MSEC   1000u
-#define PERCENT_100     100u
-#define BUZZER_TOP      (HZ_PER_MHZ / BUZZER_HZ)    // PWM ticks per cycle.
-
-
-static uint64_t g_off_usec = 0u;    // When the beep ends; 0 = silent.
-
+static uint64_t g_off_usec = 0u; // When the beep ends; 0 = silent.
 
 /*!
  * @brief Set up the buzzer pin for a 2 kHz tone, silent to start.
  */
 void
-buzzer_init (void)
+buzzer_init(void)
 {
     uint32_t slice = pwm_gpio_to_slice_num(PIN_BUZZER);
 
     gpio_set_function(PIN_BUZZER, GPIO_FUNC_PWM);
 
     // NOTE: clk_sys is 125 or 150 MHz, so the divider fits in 8 bits.
-    pwm_set_clkdiv_int_frac(slice,
-                            (uint8_t) (clock_get_hz(clk_sys) / HZ_PER_MHZ),
-                            0u);
+    pwm_set_clkdiv_int_frac(
+        slice, (uint8_t)((clock_get_hz(clk_sys)) / HZ_PER_MHZ), 0u);
     pwm_set_wrap(slice, (HZ_PER_MHZ / BUZZER_HZ) - 1u);
     pwm_set_gpio_level(PIN_BUZZER, 0u);
     pwm_set_enabled(slice, true);
-}   /* buzzer_init() */
-
+} /* buzzer_init() */
 
 /*!
  * @brief Start a beep; buzzer_task() ends it.
@@ -58,12 +53,11 @@ buzzer_init (void)
  * @param[in] duration_msec How long to beep.
  */
 void
-buzzer_beep (uint32_t duration_msec)
+buzzer_beep(uint32_t duration_msec)
 {
     pwm_set_gpio_level(PIN_BUZZER, BUZZER_TOP / 2u);
-    g_off_usec = time_us_64() + ((uint64_t) duration_msec * USEC_PER_MSEC);
-}   /* buzzer_beep() */
-
+    g_off_usec = (time_us_64()) + (((uint64_t)duration_msec) * USEC_PER_MSEC);
+} /* buzzer_beep() */
 
 /*!
  * @brief Start a quiet beep (low duty cycle); buzzer_task() ends it.
@@ -71,25 +65,24 @@ buzzer_beep (uint32_t duration_msec)
  * @param[in] duration_msec How long to beep.
  */
 void
-buzzer_beep_soft (uint32_t duration_msec)
+buzzer_beep_soft(uint32_t duration_msec)
 {
     pwm_set_gpio_level(PIN_BUZZER,
                        (BUZZER_TOP * BUZZER_SOFT_DUTY_PERCENT) / PERCENT_100);
-    g_off_usec = time_us_64() + ((uint64_t) duration_msec * USEC_PER_MSEC);
-}   /* buzzer_beep_soft() */
-
+    g_off_usec = (time_us_64()) + (((uint64_t)duration_msec) * USEC_PER_MSEC);
+} /* buzzer_beep_soft() */
 
 /*!
  * @brief End the beep when its time is up. Call every control tick.
  */
 void
-buzzer_task (void)
+buzzer_task(void)
 {
-    if ((0u != g_off_usec) && (time_us_64() >= g_off_usec))
+    if ((0u != g_off_usec) && ((time_us_64()) >= g_off_usec))
     {
         pwm_set_gpio_level(PIN_BUZZER, 0u);
         g_off_usec = 0u;
     }
-}   /* buzzer_task() */
+} /* buzzer_task() */
 
 /*** end of file ***/

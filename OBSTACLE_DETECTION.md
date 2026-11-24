@@ -1,3 +1,88 @@
+# Measurement reporting update
+
+This section supersedes earlier width-classification and reporting notes.
+The scanner has no nominal obstacle dimensions, width acceptance window or
+150/250 mm classification. Continuous width is derived from measured edge
+geometry. Reliable confirmed geometry is published; insufficient edge evidence
+produces UNKNOWN/null. A missing centre echo remains unavailable and does not
+borrow the trigger range or a neighbouring ray. Raw samples retain their actual
+range and quality, including weak returns and no-echo observations.
+
+The full 31-angle, three-attempt sweep and 200 mm threshold remain. Timeout or
+STOP can interrupt a sweep. MQTT and both dashboard APIs publish null for
+unavailable numeric measurements. The retired calibration/corrected-width JSON
+keys are removed; consumers must use width and edge status. Low-level profile
+compatibility slots remain zero and are never published as measurements.
+
+Bypass planning exclusively supplies BYPASS_FIXED_WIDTH_MM (150 mm), the
+unchanged effective planning width with the previously unpopulated calibration
+table. Nominal depth and movement constants remain planning-only. No scan width
+is constrained to this nominal size. The return, post-contact advance, lateral
+cap, final correction, state handoff and bounded IR recovery are unchanged.
+
+Limitations: geometric width is an estimate from angular sampling and the
+ultrasonic beam, not a calibrated precision measurement. No continuous physical
+calibration data exists, so none is fabricated. Unreliable data may now yield
+UNKNOWN more often. Strict BARR-C compliance is still not claimed; existing
+C11 SDK, naming/type and long-function deviations remain in BARR_C_REVIEW.md.
+Numeric Teleplot channels retain explicit invalid sentinels; JSON uses null.
+
+Current verification: review/measurement-tests.txt, measurement-build.txt and
+measurement-barr.json. Previous review patches, reports and binary comparisons
+are snapshots of the earlier submission refactor, not this updated firmware.
+No firmware has been flashed or pushed.
+
+---
+
+# Submission implementation — 24 November 2026
+
+This section supersedes earlier dated implementation notes below.
+
+- The trigger is **200 mm measured from the ultrasonic sensor**. After stopping,
+  the existing planner consumes the actual stationary scan front range; it does
+  not substitute the threshold for a measured distance.
+- The original complete centre-outward sweep remains: every configured angle
+  from -30 through +30 degrees, 2-degree spacing (31 angles), three genuine
+  echoes attempted per angle. The scan waits for servo settling and fresh echo
+  sequences. Missing echoes stay missing; no random or nominal range is injected.
+- Original left/right edge brackets, apparent width, sampling interval and
+  physical-envelope calibration calculations are retained. Detailed terminal
+  output is restored directly from bbedf5d before the standards-only refactor.
+  Unknown/unreliable edges and calibration are explicitly labelled.
+- Calibration rows are currently zero/unpopulated. There is no physical table
+  to apply yet; calibrated width is unknown until actual calibration is supplied.
+  A reliable calibrated 140–160 mm width is retained when available; otherwise
+  the separate nominal 150 mm estimate remains. Planning still uses at least
+  150 mm width and 150 mm depth. Raw points and measured distance are preserved.
+- Completion and cancellation recenter the servo. Motors remain stopped during
+  autonomous scanning; STOP, MQTT, USB, barcode and other controls are retained.
+- Bypass algorithm and limits remain unchanged: 210 mm nominal axle offset,
+  existing 40 mm pass trim, +65 degree return, **140 mm** post-IR advance,
+  **160 mm** lateral cap, final heading target zero, and bounded 240 mm / 8 s
+  recovery. Stable detection from either IR sensor with heading confirmation
+  permits autonomous FOLLOW_LINE. Manual `v` ends STOPPED.
+
+For an exact stationary range of 200 mm and the existing -10 degree initial
+heading model, the unchanged planner selects a 59 degree departure target
+(49 degree left rotation from -10), no reverse, approximately 245.0 mm departure,
+320.8 mm parallel travel and 231.7 mm ideal return. Ideal translation is 797.5 mm;
+the empirical recovery extension above the 45 mm sensor model adds 95 mm,
+giving about **892.5 mm before any additional bounded search**. These are
+planner outputs, not replacement hardcoded movement values. At 150 mm the same
+planner still produces the previous 77 degree departure. Measured range,
+encoder calibration and line contact determine the actual executed movement.
+
+Independent dense footprint checks at 200 mm, including the extension and final
+rotation, give **38.04 mm minimum overall clearance** and **40.90 mm parallel
+side clearance** with the existing uncertainty model. This does not claim a
+40 mm margin at every transient orientation or guarantee real floor clearance.
+No physical test of the 200 mm trigger has been performed in this work.
+
+See [BARR_C_REVIEW.md](BARR_C_REVIEW.md), the separate review patches and test
+reports for the source-wide refactoring and its explicit compliance limits.
+
+---
+
 # Current physical-test adjustment: 140 mm advance and bounded IR search
 
 Departure, parallel travel, +65° return and the original final +65°→0°
