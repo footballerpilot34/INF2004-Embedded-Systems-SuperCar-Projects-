@@ -1,3 +1,82 @@
+# Current physical-test adjustment: 140 mm advance and bounded IR search
+
+Departure, parallel travel, +65° return and the original final +65°→0°
+correction are unchanged. The post-IR-contact advance is now **140 mm**, up
+from 65 mm. That adds `75*sin(65°)=68.0 mm` sideways, close to the reported
+70 mm displacement (`70/sin(65°)=77.2 mm` extra forward distance). The physical
+sensor offset remains 45 mm; 140 mm is the explicitly requested empirical
+compensation, not a fabricated mounting measurement.
+
+The lateral cap is **160 mm**. At the planned heading, 140 mm projects to
+126.9 mm laterally (128.9 mm at 67°), leaving room for contact coast. The cap
+remains a safety bound. The existing footprint validator derives its extended
+return endpoint/final pivot from the advance constant: it now checks the full
+**95 mm extension beyond the ideal axle-centred return** (140−45), not the
+previous 20 mm extension. Independent dense footprint cases include this
+extension for both 150 and 160 mm planning widths. No turn angle was retuned.
+The dry route is unchanged; the ideal normal estimate increases by 75 mm,
+from 816.5 to approximately 891.5 mm before any additional search. Actual
+contact geometry remains a physical tuning uncertainty.
+
+## What the old failure and line-following code show
+
+The logged 4.3° heading was inside the old nudge heading allowance, with both
+IR readings white. The old 60 mm/3 s correction and ±5° target provided only
+about 5 mm lateral travel even in an ideal straight angled probe, insufficient
+for a large remaining offset. The old log does not identify uniquely whether
+distance, elapsed time or a range guard ended that run. Failure logs now also
+include travel, elapsed milliseconds and actual ultrasonic range.
+
+The actual normal follower treats BOTH black as centred, LEFT-only black as
+an instruction to arc left, and RIGHT-only black as an instruction to arc right.
+It can continue across both-white using previous tracking history; both-white
+alone is not fresh evidence of reacquisition. LINE_CAL stops/returns READY if
+it starts on both white and does not preserve a track-heading target, so moving
+the bypass into that mode would not solve this missing-line case.
+
+The bypass now uses a **stable left OR right black reading with heading within
+±5°** for a valid handoff. BOTH black is accepted but is no longer mandatory.
+The existing `line_filter_reset` seeds fresh sensor/filter/side history on
+handoff, and the follower's 300 ms straight launch is skipped specifically for
+BYPASS→FOLLOW_LINE, allowing the normal arc correction immediately. Other
+START, barcode and line-calibration behaviour is unchanged. A fresh both-white
+handoff is still rejected; the car is not released on an invented centre state.
+
+## Bounded recovery
+
+After the unchanged final turn and settling, missing line starts one low-speed
+forward search, bounded by **240 mm / 8 seconds**. Search heading targets are
+**±25°**, with a 2° tracking guard. A single visible sensor sets a gentler
+**±8°** remembered correction side. On detecting either sensor, steering targets
+zero; completion requires stable line readings and heading within ±1° in the
+search phase (which satisfies the overall ±5° requirement). If contact is lost,
+it follows the remembered side within the same time/distance budget.
+
+If neither sensor has ever found black, it may change search side once after
+75% of its distance budget. There are no repeated sweeps, resets of the
+recovery deadline, checkpoints or blind transitions to FOLLOW. An incorrect
+pose/side estimate can still produce a bounded failure; search is not a
+physical guarantee for every off-track location.
+
+A full axle turning-circle envelope must already be behind the obstacle
+before search is permitted. Heading remains forward-going and live footprint
+checks remain active. Search has a conservative 150 mm forward close-echo
+stop (the existing 120 mm bypass guard remains for other phases). Invalid
+range, heading violation, STOP, timeout or distance exhaustion fails stopped.
+After valid recovery, normal operation transitions automatically to FOLLOW_LINE
+and immediately uses its established IR steering. Continuous manual v remains
+STOPPED at completion and never enters this line-search phase.
+
+The 150 mm detection trigger, all servo scan angles, raw distance, raw width,
+calibrated/corrected-width fallback and planning-depth rules are unchanged.
+Regression tests cover extended advance/cap, footprint sweep, one-sensor
+success, immediate follower steering, both-white rejection, search-side change,
+heading/range/time/distance failures, STOP and continuous v. Firmware is rebuilt,
+not automatically flashed or pushed; actual centring remains unverified.
+All older 65 mm/±5°/both-sensors-required notes below are superseded here.
+
+---
+
 # Pre-flash verification: bounded final line correction
 
 The 40 mm parallel trim is applied to `clear_y`, which also positions the

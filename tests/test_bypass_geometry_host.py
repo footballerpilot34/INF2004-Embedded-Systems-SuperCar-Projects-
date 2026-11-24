@@ -86,9 +86,9 @@ def dense_check(plan, front, left, right):
         final = end+d/math.tan(math.radians(b))
         poses = [(0,0,initial),(rx,ry,initial),(rx,ry,-a),(-d,y,-a),(-d,y,0),
                  (-d,end,0),(-d,end,b),(0,final,b),(0,final,0)]
-        # Also check the empirical +20 mm recovery extension and its pivot.
+        # Also check the empirical +95 mm recovery extension and its pivot.
         # The duplicate turn at x=0 conservatively covers dry and normal routes.
-        extra=20
+        extra=95
         ex=extra*math.sin(math.radians(b)); ey=final+extra*math.cos(math.radians(b))
         poses += [(0,final,b),(ex,ey,b),(ex,ey,0)]
         for stage,(p,q) in enumerate(zip(poses,poses[1:])):

@@ -156,6 +156,7 @@ static bool     gb_turn_settling;
 static uint32_t g_turn_quiet_msec;
 static float    g_line_contact_x;      // Bound sideways movement after finding black.
 static bool     gb_nudge_used;
+static bool     gb_nudge_seen_black, gb_nudge_reversed;
 static float    g_nudge_heading;
 static float    g_line_advance_hdg;
 static uint32_t g_pose_next   = 0u;     // Next pose log (ms).
@@ -303,8 +304,7 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     }
     bool confirm_line = b_line;
     if (gb_fixed_test && (g_phase == PHASE_ALIGN || g_phase == PHASE_FINISH || g_phase==PHASE_LINE_NUDGE)) {
-        confirm_line = line.b_left_black && line.b_right_black &&
-                       fabsf(g_heading) <= BYPASS_ALIGN_TOL_DEG;
+        confirm_line = b_line && fabsf(g_heading) <= BYPASS_ALIGN_TOL_DEG;
     }
     if (confirm_line) { if (g_line_ticks < BYPASS_LINE_CONFIRM_TICKS) { ++g_line_ticks; } }
     else { g_line_ticks = 0u; }
@@ -472,8 +472,8 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
     }
 
     if (result==BYPASS_DONE && gb_use_line &&
-        (fabsf(g_heading)>BYPASS_ALIGN_TOL_DEG || !line.b_left_black || !line.b_right_black)) {
-        log_obstacle("BYPASS: final heading and BOTH IR sensors not confirmed; stopping.");
+        (fabsf(g_heading)>BYPASS_ALIGN_TOL_DEG || !(line.b_left_black || line.b_right_black))) {
+        log_obstacle("BYPASS: final heading and IR line detection not confirmed; stopping.");
         result=BYPASS_FAILED;
     }
     if (BYPASS_RUNNING != result)
@@ -482,6 +482,8 @@ bypass_step (uint32_t now_msec, uint32_t range_mm)
             log_obstacle("BYPASS failure phase=%s x=%ld y=%ld heading=%ld/10 deg",
                 bypass_phase_name(),(long)lroundf(g_x),(long)lroundf(g_z),(long)lroundf(g_heading*10));
             log_obstacle("BYPASS IR left=%u right=%u confirmations=%lu",line.b_left_black,line.b_right_black,(unsigned long)g_line_ticks);
+            log_obstacle("BYPASS guard data: mm=%ld elapsed=%lu range=%lu",
+                (long)lroundf(g_phase_mm),(unsigned long)(now_msec-g_phase_msec),(unsigned long)range_mm);
         }
         motor_set(0, 0);
         servo_set_angle(SERVO_CENTER_DEG);
@@ -607,7 +609,8 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
     }
     // No-echo permits travel only under the declared empty-corridor test
     // assumption. Any actual close echo stops; zero is an invalid range.
-    if (range_mm == 0u || front_within(range_mm, BYPASS_FRONT_STOP_MM)) {
+    if (range_mm == 0u || front_within(range_mm, g_phase==PHASE_LINE_NUDGE ?
+                     BYPASS_NUDGE_FRONT_STOP_MM : BYPASS_FRONT_STOP_MM)) {
         return BYPASS_FAILED;
     }
     if (g_phase == PHASE_PLAN) {
@@ -725,10 +728,10 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
         if (fixed_turn_step(now_msec)) {
             if (fabsf(g_heading) > BYPASS_ALIGN_TOL_DEG) { return BYPASS_FAILED; }
             if (g_line_ticks >= BYPASS_LINE_CONFIRM_TICKS) { return BYPASS_DONE; }
-            if(g_line_ticks>0) return BYPASS_RUNNING; // Confirm an aligned pair braked.
+            if(g_line_ticks>0) return BYPASS_RUNNING; // Confirm the aligned line reading while braked.
             if(gb_nudge_used) return BYPASS_FAILED;
             // A complete turning circle must already be behind the obstacle.
-            // Forward motion within +/-7 degrees then only increases that gap.
+            // Forward motion within the bounded search heading only increases that gap.
             float rear_clear=g_z-BYPASS_AXLE_TO_FRONT_MM-bypass_geometry_radius();
             if(rear_clear < g_geometry.front+g_geometry.depth+
                            OBSTACLE_BYPASS_MARGIN_MM+BYPASS_POSITION_UNCERTAINTY_MM) {
@@ -741,20 +744,29 @@ fixed_step(uint32_t now_msec, uint32_t range_mm)
             else if(contact.b_right_black) direction=1.0f;
             g_nudge_heading=direction*BYPASS_NUDGE_HEADING_DEG;
             gb_nudge_used=true;
-            log_obstacle("BYPASS: aligned but IR pair missing; bounded line correction.");
+            gb_nudge_seen_black=contact.b_left_black || contact.b_right_black;
+            gb_nudge_reversed=false;
+            log_obstacle("BYPASS: aligned but no line confirmed; bounded line search.");
             phase_enter(PHASE_LINE_NUDGE,now_msec);
         }
     } else if (g_phase == PHASE_LINE_NUDGE) {
         line_state_t contact=line_sensor_read();
         if(fabsf(g_heading)>BYPASS_NUDGE_HEADING_DEG+BYPASS_DRIVE_HEADING_TOL_DEG) return BYPASS_FAILED;
-        if(contact.b_left_black && contact.b_right_black) {
+        if(contact.b_left_black || contact.b_right_black) {
             if(fabsf(g_heading)<=BYPASS_NUDGE_DONE_DEG &&
                g_line_ticks>=BYPASS_LINE_CONFIRM_TICKS) return BYPASS_DONE;
+            gb_nudge_seen_black=true;
+            if(contact.b_left_black && !contact.b_right_black) g_nudge_heading=-BYPASS_NUDGE_TRACK_DEG;
+            else if(contact.b_right_black && !contact.b_left_black) g_nudge_heading=BYPASS_NUDGE_TRACK_DEG;
             steer_at_speed(0,BYPASS_NUDGE_SPEED);
         } else {
             if(g_phase_mm>=BYPASS_NUDGE_MAX_MM) return BYPASS_FAILED;
-            if(contact.b_left_black) g_nudge_heading=-BYPASS_NUDGE_HEADING_DEG;
-            else if(contact.b_right_black) g_nudge_heading=BYPASS_NUDGE_HEADING_DEG;
+            if(!gb_nudge_seen_black && !gb_nudge_reversed &&
+                      g_phase_mm>=BYPASS_NUDGE_MAX_MM*0.75f) {
+                // One bounded change of search side, never a repeating sweep.
+                g_nudge_heading=-g_nudge_heading;
+                gb_nudge_reversed=true;
+            }
             steer_at_speed(g_nudge_heading,BYPASS_NUDGE_SPEED);
         }
     } else if (g_phase == PHASE_FINISH) {

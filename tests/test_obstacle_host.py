@@ -71,8 +71,8 @@ int32_t imu_max_tilt_x10(void) { return tilt; }
 int32_t imu_total_tilt_x10(void) { return tilt; }
 int32_t imu_pitch_x10(void) { return tilt; }
 int32_t imu_roll_x10(void) { return 0; }
-static bool both_line=true;
-line_state_t line_sensor_read(void) { return (line_state_t){true, both_line}; }
+static bool both_line=true, left_line=true;
+line_state_t line_sensor_read(void) { return (line_state_t){left_line, both_line}; }
 line_junction_t line_junction_detect(bool black, bool enabled, uint32_t time,
                                      uint32_t * mark) {
     (void)black; (void)enabled; (void)time; (void)mark;
@@ -388,8 +388,8 @@ int main(void) {
     range_mm=OBSTACLE_CLEAR_MM+1;
     vehicle_task();
     assert(vehicle_state()==VEHICLE_FOLLOW_LINE && motor_left>0 && motor_right>0);
-    // A missing second IR sensor cannot be released to FOLLOW, even if the
-    // mocked bypass result says done. Re-enter via the normal scan path.
+    // A single black sensor is a valid normal-follower input. Seed its
+    // history and steer immediately instead of the straight-launch delay.
     vehicle_stop(); vehicle_start(); range_mm=OBSTACLE_STOP_MM;
     mock_bypass_result=BYPASS_RUNNING; vehicle_task();
     uint32_t handoff_start=now;
@@ -401,8 +401,20 @@ int main(void) {
     }
     assert(vehicle_state()==VEHICLE_BYPASS);
     both_line=false; mock_bypass_result=BYPASS_DONE; vehicle_task();
+    assert(vehicle_state()==VEHICLE_FOLLOW_LINE);
+    range_mm=OBSTACLE_CLEAR_MM+1; vehicle_task();
+    assert(motor_left>0 && motor_right>0 && motor_left<motor_right);
+    vehicle_stop(); both_line=true;
+    vehicle_start(); range_mm=OBSTACLE_STOP_MM; mock_bypass_result=BYPASS_RUNNING; vehicle_task();
+    handoff_start=now;
+    while(vehicle_state()==VEHICLE_OBSTACLE_SCAN) {
+        now+=10; if(servo_is_settled() && now%60==0) sample(); vehicle_task();
+        assert(now-handoff_start<=OBSTACLE_SCAN_TIMEOUT_MSEC+10);
+    }
+    assert(vehicle_state()==VEHICLE_BYPASS);
+    both_line=false; left_line=false; mock_bypass_result=BYPASS_DONE; vehicle_task();
     assert(vehicle_state()==VEHICLE_STOPPED && motor_left==0 && motor_right==0);
-    both_line=true;
+    both_line=left_line=true;
     vehicle_stop();
     return 0;
 }

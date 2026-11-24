@@ -348,7 +348,7 @@
 #define BYPASS_REVERSE_PLAN_STEP_MM 2u
 #define BYPASS_MIN_SIDE_GAP_MM      40u
 #define BYPASS_PASS_TRIM_MM          40u    // 50 mm request capped by full-footprint check.
-#define BYPASS_REACQUIRE_ADVANCE_MM  65u    // Empirical post-contact advance; mounting stays 45 mm.
+#define BYPASS_REACQUIRE_ADVANCE_MM  140u    // Empirical post-contact advance; mounting stays 45 mm.
 #define BYPASS_PASS_EXTRA_MM         0u     // Whole-car 20 mm reserve and swept check already apply.
 #define BYPASS_COMPACT_OFFSET_MM     210u
 #define BYPASS_COMPACT_DEPARTURE_DEG 77u
@@ -376,14 +376,16 @@
 #define BYPASS_LINE_TIMEOUT_MSEC    10000u
 #define BYPASS_TURN_SETTLE_MSEC     120u
 #define BYPASS_RETURN_EXTRA_MM      60u
-#define BYPASS_NUDGE_MAX_MM         60u
-#define BYPASS_NUDGE_MAX_MSEC       3000u
-#define BYPASS_NUDGE_HEADING_DEG    5.0f
+#define BYPASS_NUDGE_MAX_MM         240u
+#define BYPASS_NUDGE_MAX_MSEC       8000u
+#define BYPASS_NUDGE_HEADING_DEG    25.0f
+#define BYPASS_NUDGE_TRACK_DEG      8.0f
+#define BYPASS_NUDGE_FRONT_STOP_MM  150u
 #define BYPASS_NUDGE_SPEED          9
 #define BYPASS_NUDGE_DONE_DEG       1.0f
-#define BYPASS_LINE_CROSS_MAX_MM    70u    // Allows the empirical 65 mm advance plus contact coast.
+#define BYPASS_LINE_CROSS_MAX_MM    160u    // Allows 140 mm advance plus contact coast.
 #define BYPASS_TURN_SLOW_DEG        15      // Pace the final turn using existing pulses.
-#define BYPASS_ALIGN_TOL_DEG        5       // Both sensors AND heading required.
+#define BYPASS_ALIGN_TOL_DEG        5       // Stable normal-follower IR reading AND heading required.
 
 // Wheel encoders, measured 2026-11-17 rolling 300 mm along a straight
 // edge: LEFT 3992, RIGHT 4113 edges.

@@ -235,3 +235,9 @@ Final line recovery now permits one low-speed, forward-only correction after
 alignment: at most 60 mm / 3 s with ±5° steering, behind the obstacle's complete
 turning envelope. Both IR readings and heading confirmation remain required;
 normal success enters FOLLOW_LINE, while failure and dry v end STOPPED.
+
+Latest recovery tuning: post-contact advance 140 mm with a 160 mm lateral
+cap; working route angles are unchanged. Missing-line recovery searches up to
+240 mm / 8 s with ±25° heading targets, restores zero, and accepts the normal
+follower's stable one-or-both-black pattern. Normal FOLLOW immediately resumes
+IR steering; manual v still ends STOPPED. See OBSTACLE_DETECTION.md.

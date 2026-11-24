@@ -211,6 +211,7 @@ typedef enum
     TURN_ALIGN      // Pivot until both line sensors are on it.
 } turn_phase_t;
 
+static bool              gb_follow_from_bypass;
 static bool              gb_launch      = true;  // Straight start allowed.
 static barcode_command_t g_turn_cmd     = BARCODE_CMD_NONE;
 static vehicle_state_t   g_turn_after   = VEHICLE_FOLLOW_LINE;
@@ -676,15 +677,21 @@ vehicle_task (void)
 
         if (BYPASS_DONE == result)
         {
-            // Recheck the live pair at the handoff, not just cached recovery ticks.
+            // Recheck a live follower-valid reading, not just cached recovery ticks.
             line_state_t recovered=line_sensor_read();
             if (!gb_bypass_dry_run &&
-                !(recovered.b_left_black && recovered.b_right_black)) {
+                !(recovered.b_left_black || recovered.b_right_black)) {
                 log_obstacle("BYPASS: line lost at FOLLOW handoff; stopping.");
                 state_enter(VEHICLE_STOPPED,now_msec);
                 break;
             }
-            if(!gb_bypass_dry_run) gb_feat_line=true;
+            if(!gb_bypass_dry_run) {
+                gb_feat_line=true;
+                line_filter_reset(recovered,now_msec);
+                g_line_last=recovered.b_left_black && recovered.b_right_black ? LINE_LAST_BOTH :
+                            recovered.b_left_black ? LINE_LAST_LEFT : LINE_LAST_RIGHT;
+                if(g_line_last!=LINE_LAST_BOTH) gb_last_left=recovered.b_left_black;
+            }
             state_enter(gb_bypass_dry_run ? VEHICLE_STOPPED : VEHICLE_FOLLOW_LINE,now_msec);
         }
         else if (BYPASS_FAILED == result)
@@ -1581,6 +1588,7 @@ state_enter (vehicle_state_t state, uint32_t now_msec)
 
     if (state != VEHICLE_BYPASS) { gb_bypass_dry_run = false; }
     // After a barcode turn the car is already lined up: no straight start.
+    gb_follow_from_bypass=(g_state==VEHICLE_BYPASS && state==VEHICLE_FOLLOW_LINE);
     gb_launch      = (VEHICLE_TURN != g_state);
     g_state        = state;
     g_entered_msec = now_msec;
@@ -1828,7 +1836,7 @@ line_steer (int32_t speed, uint32_t now_msec)
     int32_t      hard_out = (speed * TURN_HARD_OUTER_PERCENT) / PERCENT;
     int32_t      hard_in  = (speed * TURN_HARD_INNER_PERCENT) / PERCENT;
     steer_t      want     = STEER_STRAIGHT;
-    bool         b_launch = ((VEHICLE_FOLLOW_LINE == g_state) &&
+    bool         b_launch = (!gb_follow_from_bypass && (VEHICLE_FOLLOW_LINE == g_state) &&
                              ((now_msec - g_entered_msec) <
                               LINE_START_STRAIGHT_MSEC));
     int32_t      left     = speed;

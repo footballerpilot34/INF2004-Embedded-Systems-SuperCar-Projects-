@@ -144,7 +144,7 @@ static void fixed_checks(void) {
                 // stay inside the reserved position allowance, not exactly fixed.
                 assert(g_z+BYPASS_POSITION_UNCERTAINTY_MM>=g_fixed_clear_z);
             }
-            if (g_phase==PHASE_OUT || g_phase==PHASE_PASS || g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE) assert(ml>=0 && mr>=0);
+            if (g_phase==PHASE_OUT || g_phase==PHASE_PASS || g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE || g_phase==PHASE_LINE_NUDGE) assert(ml>=0 && mr>=0);
             assert(fabsf(g_heading)<90);
             phases|=1u<<g_phase;
             result=bypass_step(t,ULTRASONIC_NO_RANGE);
@@ -183,8 +183,9 @@ static void fixed_checks(void) {
     phase_enter(PHASE_ALIGN,0);
     assert(bypass_step(10,1000)==BYPASS_RUNNING && g_line_ticks==0);
     black=false; left_only=true; g_heading=0; phase_enter(PHASE_ALIGN,0);
-    assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0 && g_line_ticks==0);
-    assert(bypass_step(BYPASS_LINE_TIMEOUT_MSEC+1,1000)==BYPASS_FAILED); left_only=false;
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0 && g_line_ticks==1);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING);
+    assert(bypass_step(140,1000)==BYPASS_DONE); left_only=false;
     assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=4; black=true;
     phase_enter(PHASE_ALIGN,0);
     assert(bypass_step(10,1000)==BYPASS_RUNNING && ml<0 && mr>0);
@@ -192,21 +193,26 @@ static void fixed_checks(void) {
     assert(bypass_step(30,1000)==BYPASS_RUNNING);
     assert(bypass_step(20+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_DONE);
     // A small bounded correction is attempted only after the unchanged final
-    // pivot has settled. One sensor steers toward the line; BOTH are required.
+    // pivot has settled. A stable single sensor matches normal FOLLOW semantics.
     assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0;
-    black=false; left_only=true; phase_enter(PHASE_ALIGN,0);
+    black=false; left_only=false; phase_enter(PHASE_ALIGN,0);
     assert(bypass_step(10,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
     assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
     assert(gb_nudge_used && fabsf(g_target_hdg)<0.01f);
     assert(bypass_step(140,1000)==BYPASS_RUNNING && ml>0 && mr>0 && ml<mr);
+    left_only=true; g_heading=10;
+    assert(bypass_step(150,1000)==BYPASS_RUNNING && ml>0 && mr>0);
+    assert(g_nudge_heading==-BYPASS_NUDGE_TRACK_DEG);
     left_only=false; right_only=true;
-    assert(bypass_step(150,1000)==BYPASS_RUNNING && ml>0 && mr>0 && ml>mr);
-    right_only=false; black=true; g_heading=0;
-    assert(bypass_step(160,1000)==BYPASS_RUNNING);
+    assert(bypass_step(160,1000)==BYPASS_RUNNING && ml>0 && mr>0);
+    assert(g_nudge_heading==BYPASS_NUDGE_TRACK_DEG);
+    g_heading=0;
     assert(bypass_step(170,1000)==BYPASS_RUNNING);
-    assert(bypass_step(180,1000)==BYPASS_DONE && ml==0 && mr==0);
+    assert(bypass_step(180,1000)==BYPASS_RUNNING);
+    assert(bypass_step(190,1000)==BYPASS_DONE && ml==0 && mr==0);
+    right_only=false;
     // Absence of line is bounded by distance AND time, including sensor waits.
-    for(unsigned limit=0;limit<3;++limit) {
+    for(unsigned limit=0;limit<4;++limit) {
         assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0; black=false;
         phase_enter(PHASE_ALIGN,0);
         assert(bypass_step(10,1000)==BYPASS_RUNNING);
@@ -214,9 +220,23 @@ static void fixed_checks(void) {
         if(limit==0) g_phase_mm=BYPASS_NUDGE_MAX_MM;
         if(limit==1) ready=false;
         if(limit==2) g_heading=BYPASS_NUDGE_HEADING_DEG+BYPASS_DRIVE_HEADING_TOL_DEG+1;
-        assert(bypass_step(limit==1 ? 131+BYPASS_NUDGE_MAX_MSEC : 140,1000)==BYPASS_FAILED);
+        assert(bypass_step(limit==1 ? 131+BYPASS_NUDGE_MAX_MSEC : 140,
+                           limit==3 ? BYPASS_NUDGE_FRONT_STOP_MM : 1000)==BYPASS_FAILED);
         assert(ml==0 && mr==0); ready=true;
     }
+    // Both-white search changes side only once, late in its bounded travel.
+    assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0; black=false;
+    phase_enter(PHASE_ALIGN,0);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
+    float first_search=g_nudge_heading;
+    g_phase_mm=BYPASS_NUDGE_MAX_MM*0.75f-1;
+    assert(bypass_step(140,1000)==BYPASS_RUNNING && !gb_nudge_reversed);
+    g_phase_mm=BYPASS_NUDGE_MAX_MM*0.75f;
+    assert(bypass_step(150,1000)==BYPASS_RUNNING && gb_nudge_reversed);
+    assert(g_nudge_heading==-first_search && ml>0 && mr>0);
+    assert(bypass_step(160,1000)==BYPASS_RUNNING && g_nudge_heading==-first_search);
+    bypass_cancel();
     // A correction is not allowed while a full turning envelope remains beside the obstacle.
     assert(planned_begin()); black=false; g_x=g_target_x; g_z=g_fixed_clear_z; g_heading=0;
     phase_enter(PHASE_ALIGN,0);
