@@ -19,7 +19,7 @@ code = r'''
 #include "bypass.c"
 static int32_t ml, mr;
 static uint32_t seq, left_edges, right_edges;
-static bool ready = true, settled = true, black, left_only;
+static bool ready = true, settled = true, black, left_only, right_only;
 static obstacle_point_t points[31];
 static obstacle_profile_t profile;
 uint32_t encoder_count(uint32_t pin) { return pin == PIN_ENC_LEFT_A ? left_edges : right_edges; }
@@ -32,7 +32,7 @@ bool servo_is_settled(void) { return settled; }
 bool ultrasonic_measurement_ready(void) { return ready; }
 uint32_t ultrasonic_sample_sequence(void) { return seq; }
 void ultrasonic_invalidate(void) {}
-line_state_t line_sensor_read(void) { return (line_state_t){black || left_only, black}; }
+line_state_t line_sensor_read(void) { return (line_state_t){black || left_only, black || right_only}; }
 obstacle_point_t const *obstacle_scan_points(uint32_t *n) { *n=31; return points; }
 obstacle_profile_t const *obstacle_profile(void) { return &profile; }
 char const *obstacle_edge_status_name(obstacle_edge_status_t s) { (void)s; return "echo-bracketed"; }
@@ -91,9 +91,15 @@ static void fixed_checks(void) {
     }
     assert(planned_begin());
     assert(g_target_x==-210 && g_geometry.departure<=BYPASS_DEPARTURE_MAX_DEG);
-    assert(fabsf(g_fixed_clear_z-((OBSTACLE_STOP_MM+BYPASS_AXLE_TO_FRONT_MM-SENSOR_TO_BUMPER_MM)*cosf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD)-BYPASS_AXLE_TO_FRONT_MM+150+180+20+BYPASS_PASS_EXTRA_MM))<0.01f);
+    assert(fabsf(g_fixed_clear_z-((OBSTACLE_STOP_MM+BYPASS_AXLE_TO_FRONT_MM-SENSOR_TO_BUMPER_MM)*cosf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD)-BYPASS_AXLE_TO_FRONT_MM+150+180+20+BYPASS_PASS_EXTRA_MM-BYPASS_PASS_TRIM_MM))<0.01f);
     if(SENSOR_TO_BUMPER_MM==60) assert(g_geometry.departure==77 && g_geometry.reverse_mm==0);
     assert(g_geometry.return_deg>=BYPASS_RETURN_MIN_DEG && g_geometry.return_deg<=70);
+    profile.corrected_width_mm=140;
+    assert(bypass_begin(&profile,0,true)); assert(g_geometry.left==-75 && g_target_x==-210);
+    bypass_cancel();
+    profile.corrected_width_mm=160;
+    assert(bypass_begin(&profile,0,true)); assert(g_geometry.left==-80 && g_target_x==-215);
+    bypass_cancel(); profile.corrected_width_mm=150;
     // Fixed controlled-test geometry does not retune itself from scan width/edges.
     profile.left_status=OBSTACLE_EDGE_NO_ECHO;
     assert(bypass_begin(&profile,0,true)); assert(g_target_x==-210);
@@ -110,7 +116,7 @@ static void fixed_checks(void) {
 
     // Full ideal encoder routes. Sensor contact is tied to the measured forward
     // sensor position; final success still needs BOTH sensors and forward heading.
-    for (int trial=0;trial<3;++trial) {
+    for (int trial=0;trial<4;++trial) {
         int dry=trial==1;
         profile.front_mm=trial==2 ? 140 : OBSTACLE_STOP_MM;
         black=left_only=false; left_edges=right_edges=0;
@@ -121,7 +127,11 @@ static void fixed_checks(void) {
             lm+=fabsf((float)ml)*0.06f; rm+=fabsf((float)mr)*0.06f;
             left_edges=(uint32_t)lroundf(lm*ENC_LEFT_EDGES_PER_M/1000.0f);
             right_edges=(uint32_t)lroundf(rm*ENC_RIGHT_EDGES_PER_M/1000.0f);
-            float sensor_x=g_x+BYPASS_LINE_SENSOR_FORWARD_MM*sinf(g_heading/DEG_PER_RAD);
+            // Positive cases model the reported effective contact/turn offset.
+            // Trial 3 retains the 45 mm ideal mount and must fail safely if
+            // empirical over-advance leaves the pair off-line.
+            float contact=trial==3 ? BYPASS_LINE_SENSOR_FORWARD_MM : BYPASS_REACQUIRE_ADVANCE_MM;
+            float sensor_x=g_x+contact*sinf(g_heading/DEG_PER_RAD);
             black=!dry && (g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE || g_phase==PHASE_ALIGN) && fabsf(sensor_x)<=9;
             if (g_phase==PHASE_PASS) {
                 assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG);
@@ -138,6 +148,10 @@ static void fixed_checks(void) {
             assert(fabsf(g_heading)<90);
             phases|=1u<<g_phase;
             result=bypass_step(t,ULTRASONIC_NO_RANGE);
+        }
+        if(trial==3) {
+            assert(phases&(1u<<PHASE_LINE_NUDGE));
+            assert(result==BYPASS_FAILED && ml==0 && mr==0);continue;
         }
         if (result!=BYPASS_DONE) fprintf(stderr,"route failed result=%d x=%f y=%f h=%f phases=%x\n",result,g_x,g_z,g_heading,phases);
         assert(result==BYPASS_DONE && ml==0 && mr==0);
@@ -177,6 +191,37 @@ static void fixed_checks(void) {
     g_heading=0; assert(bypass_step(20,1000)==BYPASS_RUNNING && ml==0 && mr==0);
     assert(bypass_step(30,1000)==BYPASS_RUNNING);
     assert(bypass_step(20+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_DONE);
+    // A small bounded correction is attempted only after the unchanged final
+    // pivot has settled. One sensor steers toward the line; BOTH are required.
+    assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0;
+    black=false; left_only=true; phase_enter(PHASE_ALIGN,0);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
+    assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
+    assert(gb_nudge_used && fabsf(g_target_hdg)<0.01f);
+    assert(bypass_step(140,1000)==BYPASS_RUNNING && ml>0 && mr>0 && ml<mr);
+    left_only=false; right_only=true;
+    assert(bypass_step(150,1000)==BYPASS_RUNNING && ml>0 && mr>0 && ml>mr);
+    right_only=false; black=true; g_heading=0;
+    assert(bypass_step(160,1000)==BYPASS_RUNNING);
+    assert(bypass_step(170,1000)==BYPASS_RUNNING);
+    assert(bypass_step(180,1000)==BYPASS_DONE && ml==0 && mr==0);
+    // Absence of line is bounded by distance AND time, including sensor waits.
+    for(unsigned limit=0;limit<3;++limit) {
+        assert(planned_begin()); g_x=0; g_z=g_fixed_clear_z+200; g_heading=0; black=false;
+        phase_enter(PHASE_ALIGN,0);
+        assert(bypass_step(10,1000)==BYPASS_RUNNING);
+        assert(bypass_step(130,1000)==BYPASS_RUNNING && g_phase==PHASE_LINE_NUDGE);
+        if(limit==0) g_phase_mm=BYPASS_NUDGE_MAX_MM;
+        if(limit==1) ready=false;
+        if(limit==2) g_heading=BYPASS_NUDGE_HEADING_DEG+BYPASS_DRIVE_HEADING_TOL_DEG+1;
+        assert(bypass_step(limit==1 ? 131+BYPASS_NUDGE_MAX_MSEC : 140,1000)==BYPASS_FAILED);
+        assert(ml==0 && mr==0); ready=true;
+    }
+    // A correction is not allowed while a full turning envelope remains beside the obstacle.
+    assert(planned_begin()); black=false; g_x=g_target_x; g_z=g_fixed_clear_z; g_heading=0;
+    phase_enter(PHASE_ALIGN,0);
+    assert(bypass_step(10,1000)==BYPASS_RUNNING);
+    assert(bypass_step(130,1000)==BYPASS_FAILED);
     // Residual turn motion, even during a sensor wait, resets quiet time.
     assert(planned_begin()); g_heading=g_target_hdg;
     assert(bypass_step(10,1000)==BYPASS_RUNNING && g_phase==PHASE_PIVOT);
@@ -220,15 +265,20 @@ static void fixed_checks(void) {
     phase_enter(PHASE_RETURN,0);
     for (uint32_t t=10;t<=30;t+=10) assert(bypass_step(t,1000)==BYPASS_RUNNING);
     assert(g_phase==PHASE_ADVANCE);
-    g_phase_mm=BYPASS_LINE_SENSOR_FORWARD_MM;
-    assert(bypass_step(40,1000)==BYPASS_RUNNING && g_phase==PHASE_BRAKE);
-    assert(bypass_step(40+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
+    assert(BYPASS_REACQUIRE_ADVANCE_MM*sinf(g_heading/DEG_PER_RAD)<BYPASS_LINE_CROSS_MAX_MM);
+    g_phase_mm=BYPASS_REACQUIRE_ADVANCE_MM-0.1f;
+    g_x=g_line_contact_x+g_phase_mm*sinf(g_heading/DEG_PER_RAD);
+    assert(bypass_step(40,1000)==BYPASS_RUNNING && g_phase==PHASE_ADVANCE && ml>0 && mr>0);
+    g_phase_mm=BYPASS_REACQUIRE_ADVANCE_MM;
+    assert(bypass_step(50,1000)==BYPASS_RUNNING && g_phase==PHASE_BRAKE);
+    assert(bypass_step(50+BYPASS_TURN_SETTLE_MSEC,1000)==BYPASS_RUNNING && g_phase==PHASE_ALIGN);
+    assert(g_target_hdg==0);
     assert(planned_begin()); assert(bypass_step(10,BYPASS_FRONT_STOP_MM)==BYPASS_FAILED);
     assert(planned_begin()); ready=false;
     assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==0 && mr==0);
     assert(bypass_step(BYPASS_STEP_MAX_MSEC+1,1000)==BYPASS_FAILED); ready=true;
     // The planner is cancellable too; no pre-motion blocking search.
-    phase_t interrupted[]={PHASE_PLAN,PHASE_BRAKE,PHASE_PIVOT,PHASE_OUT,PHASE_PASS,PHASE_RETURN,PHASE_ADVANCE,PHASE_ALIGN};
+    phase_t interrupted[]={PHASE_PLAN,PHASE_BRAKE,PHASE_PIVOT,PHASE_OUT,PHASE_PASS,PHASE_RETURN,PHASE_ADVANCE,PHASE_ALIGN,PHASE_LINE_NUDGE};
     for (unsigned i=0;i<sizeof(interrupted)/sizeof(interrupted[0]);++i) {
         assert(planned_begin()); phase_enter(interrupted[i],0); ml=mr=12;
         bypass_cancel(); assert(g_phase==PHASE_IDLE && ml==0 && mr==0);

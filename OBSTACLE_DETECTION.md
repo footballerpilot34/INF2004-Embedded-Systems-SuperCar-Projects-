@@ -1,3 +1,122 @@
+# Pre-flash verification: bounded final line correction
+
+The 40 mm parallel trim is applied to `clear_y`, which also positions the
+return pivot, return corridor and final alignment sweep. It is not just a
+shortened distance counter. Independent footprint tests cover both 150 and
+160 mm planning widths and the empirical recovery extension.
+
+Sequence remains: first IR contact → brake/confirm → **65 mm advance** →
+encoder-quiet brake → existing final LEFT correction to **0°** → confirmation.
+The main return heading remains **+65°**; its final target/turn calibration have
+not been retuned. The advance finishes before final rotation starts.
+At +65°, the nominal lateral movement is `65*sin(65°)=58.9 mm`, or about
+59.8 mm at +67° measured heading. The **70 mm lateral cap therefore does not
+truncate the planned 65 mm advance**, while retaining a guard against excess
+movement since first contact/coast. This does not claim unmeasured braking
+coast can never consume the remaining margin.
+
+If the original final turn is aligned/settled but BOTH IR readings are missing,
+normal bypass now gets **one bounded forward correction** before failure:
+
+- At most **60 mm encoder travel or 3000 ms**, including sensor waits.
+- Lower drive command 9, both wheels forward; target steering within **±5°**.
+- A single black sensor selects correction direction. With both white, the
+  estimate/known return side selects direction; it does not execute an open-ended
+  left/right sweep. An incorrect side estimate may still cause a safe failure.
+- Both black steers back toward heading zero. Success requires consecutive
+  BOTH-IR readings and heading within **±1°** in this correction phase, which
+  satisfies the existing overall ±5° requirement.
+- Measured heading beyond the ±5° target plus 2° tracking allowance, close echo,
+  invalid range, distance/time limit or any existing safety guard fails stopped.
+
+The correction is allowed only if a full axle-centred turning circle plus
+position/collision allowances is already behind the obstacle rear plane.
+Since both wheels drive forward with small heading error, forward movement
+increases this rear clearance. Live full-footprint checks remain active too.
+This is a local recovery adjustment; departure, overtaking offset, main return
+angle and original final pivot are unchanged. A large line offset is not
+silently treated as successful recovery. There is no repeat/restart loop.
+
+Normal success still undergoes a live BOTH-IR recheck at vehicle handoff and
+transitions automatically to **FOLLOW_LINE**, with forward motor output on the
+next control tick. Failure remains **STOPPED**. Manual continuous **v** remains
+a dry rehearsal and ends STOPPED; it does not use this line-recovery phase.
+
+Focused tests verify the first-contact/advance/pivot order, continued motion at
+64.9 mm without triggering the lateral cap, the unchanged zero target, bounded
+correction success, one-sensor rejection, timeout during a sensor wait, distance/
+heading/clearance failure, STOP cancellation and normal FOLLOW/forward handoff.
+Firmware is rebuilt but has not been flashed. Physical performance remains
+unverified; the 65 mm empirical tuning may still require adjustment on the car.
+
+---
+
+# Current update: measured-width fallback and recovery tuning
+
+The 150 mm ultrasonic trigger, all existing servo angles, genuine median range
+samples, edge search and calibration lookup are retained. No range or raw width
+is overwritten. A separate corrected-width product is computed:
+
+- Reliable calibrated width in **140–160 mm inclusive**, with both edges and
+  a usable centre reading: retain that calibrated value, fallback=false.
+- Invalid calibration, out-of-band calibrated width, unusable/missing edges,
+  cancelled/timed-out data or invalid width: **150 mm**, fallback=true.
+
+The existing calibration is a measured class lookup (currently capable of 150
+or 250 mm), not a newly invented continuous width calibration. Unknown data
+remain unknown in the raw/calibrated outputs. A fallback estimate is not proof
+of verified edges or corridor clearance. Normal bypass still requires a
+completed nonfailed sweep and genuine stable forward obstacle reading.
+The vehicle controller automatically assesses/starts bypass after the sweep;
+manual stationary scans remain stationary. All existing scan angles remain.
+
+Dashboard scan JSON, graph text, MQTT obstacle event and serial log expose
+`corrected_width` / `width_fallback` separately from raw `width` and
+`calibrated_width`. Genuine measured `front` range is retained. Planning uses
+**max(150, corrected_width)** and fixed depth **150 mm**. Widths up to 160 mm
+increase offset only as required by the existing side-clearance check (210 mm
+at planning width 150; 215 mm at 160). The measured value can be 140 mm without
+allowing a narrower-than-150 mm planning envelope.
+
+The requested 50 mm shorter parallel leg was checked against the complete
+footprint. **40 mm shorter passes; 45–50 mm fails** at the existing 65° return.
+The implemented trim is therefore **40 mm**, rather than weakening the safety
+check or changing the return angle. For nominal 150 mm width/range, the straight
+leg becomes about **349.2 mm**, down from 389.2 mm. This earlier return is
+validated while the rear may still be alongside the obstacle; the full swept
+footprint replaces the old conservative whole-car-past station as the deciding
+constraint. All live collision/heading/STOP/timeout protections remain.
+
+`BYPASS_REACQUIRE_ADVANCE_MM=65` is a separate empirical post-contact advance;
+`BYPASS_LINE_SENSOR_FORWARD_MM=45` remains the physical mounting dimension.
+The lateral post-contact cap is increased from 50 to **70 mm**, so it does not
+truncate the requested 65 mm movement. The extra diagonal endpoint and final
+pivot are included in footprint validation. Both dry and extended endpoints
+are tested. The early return changes the forward station; lateral distance is
+unchanged, so the pre-contact return is still controlled by real IR detection.
+
+This 65 mm setting is a requested physical tuning change, not a claim that a
+45 mm ideal sensor model mathematically needs 65 mm. Tests include a synthetic
+reported-effective-offset recovery case and an uncompensated ideal-mount case
+that safely refuses success when the extra advance leaves the sensors off-line.
+Physical line centring remains unverified. No test invents a successful reading
+on the car. BOTH IR sensors and heading within ±5° are still mandatory before
+normal FOLLOW; v remains a continuous dry rehearsal ending STOPPED.
+
+`BYPASS recovery failed` is not bypassed. Failures now additionally log the
+actual phase, estimated x/y, heading in tenths of a degree, both IR readings and
+confirmation count. A failed sensor/heading confirmation still stops rather
+than driving off-line. These logs distinguish alignment failure from collision,
+heading or distance guards. No arbitrary post-failure restart has been added.
+
+For comparison, the dry geometric axle path is now about **796.5 mm**. With an
+ideal 45 mm contact projection and the 65 mm empirical advance, the normal
+estimate is about **816.5 mm**; actual tape contact/pivot translation determines
+the real length. The reference calculations below precede this trim/tuning and
+are superseded by this section. Firmware is built, not flashed or pushed.
+
+---
+
 # Forward-first bypass from a 150 mm ultrasonic reading
 
 The active scenario is a **180 ×140 mm car**, a **150 ×150 mm obstacle centred

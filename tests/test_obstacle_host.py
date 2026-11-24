@@ -135,6 +135,30 @@ static void run_scan(void) {
 }
 
 
+static void estimate_checks(void) {
+    obstacle_profile_t p={.centre_seen=true,.left_bounded=true,.right_bounded=true,
+        .edges_confirmed=true,.calibrated_width_valid=true,.front_mm=150,.width_mm=333};
+    for(unsigned w=139;w<=161;++w) {
+        p.calibrated_width_mm=w;
+        obstacle_width_estimate_update(&p);
+        assert(p.corrected_width_mm==(w>=140 && w<=160 ? w : 150));
+        assert(p.width_fallback==!(w>=140 && w<=160));
+        assert(p.width_mm==333 && p.front_mm==150);
+    }
+    p.calibrated_width_mm=150; p.left_bounded=false;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback && p.corrected_width_mm==150);
+    p.left_bounded=true; p.timed_out=true;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.timed_out=false; p.right_bounded=false;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.right_bounded=true; p.cancelled=true;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.cancelled=false; p.calibrated_width_valid=false;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+    p.calibrated_width_valid=true; p.width_mm=0;
+    obstacle_width_estimate_update(&p); assert(p.width_fallback);
+}
+
 static void width_calibration_checks(void) {
     // SYNTHETIC table/scan inputs exercise decisions, not physical accuracy.
     for (uint32_t d = 150; d <= 250; d += 50) {
@@ -154,6 +178,8 @@ static void width_calibration_checks(void) {
                 assert(p.calibrated_width_mm == (edge == 10 ? 150u : 250u));
             } else { assert(!p.calibrated_width_valid); }
             assert(p.width_mm > 0); // Raw geometry remains separate.
+            assert(p.corrected_width_mm==150);
+            assert(p.width_fallback==!(p.calibrated_width_valid && p.calibrated_width_mm==150));
             points[15].kind = OBSTACLE_RETURN_WEAK_RANGE;
             obstacle_profile_build(points, 31, d, &p);
             assert(!p.calibrated_width_valid);
@@ -246,6 +272,7 @@ static void geometry_checks(void) {
 }
 
 int main(void) {
+    estimate_checks();
     width_calibration_checks();
     geometry_checks();
     scan_depth = 250; width = 80; offset = 0;

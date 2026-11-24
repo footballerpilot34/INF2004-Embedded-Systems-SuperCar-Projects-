@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     if (argc!=4 && argc!=5) return 2;
     bypass_geometry_t p;
     bypass_geometry_init(&p,strtof(argv[1],0),strtof(argv[2],0),strtof(argv[3],0));
-    p.offset=argc==5 ? strtof(argv[4],0) : BYPASS_COMPACT_OFFSET_MM;
+    if(argc==5) p.offset=strtof(argv[4],0);
     p.return_deg=BYPASS_COMPACT_RETURN_DEG;
     p.return_mm=p.offset/sinf(p.return_deg*BG_RAD);
     bool ok=false;
@@ -86,6 +86,11 @@ def dense_check(plan, front, left, right):
         final = end+d/math.tan(math.radians(b))
         poses = [(0,0,initial),(rx,ry,initial),(rx,ry,-a),(-d,y,-a),(-d,y,0),
                  (-d,end,0),(-d,end,b),(0,final,b),(0,final,0)]
+        # Also check the empirical +20 mm recovery extension and its pivot.
+        # The duplicate turn at x=0 conservatively covers dry and normal routes.
+        extra=20
+        ex=extra*math.sin(math.radians(b)); ey=final+extra*math.cos(math.radians(b))
+        poses += [(0,final,b),(ex,ey,b),(ex,ey,0)]
         for stage,(p,q) in enumerate(zip(poses,poses[1:])):
             n = math.ceil(max(math.hypot(q[0]-p[0],q[1]-p[1])/2,abs(q[2]-p[2]),1))
             for i in range(n+1):
@@ -115,13 +120,17 @@ with tempfile.TemporaryDirectory() as directory:
     assert nominal['reverse']==0
     assert abs(nominal['path']-(nominal['reverse']+nominal['departure']+nominal['clear_y']-nominal['departure_y']+nominal['return']))<0.02
     assert nominal['offset']-75-70==65
-    assert abs(nominal['clear_y']-(front+150+180+20))<0.01
+    assert abs(nominal['clear_y']-(front+150+180+20-40))<0.01
     assert plan(20,-75,75) is None
     fallback=plan(140*math.cos(math.radians(10))-60,-75,75)
     assert fallback and fallback['reverse']>0
     assert plan(144*math.cos(math.radians(10))-60,-75,75)['reverse']==0
     assert plan(front,-75,75,200) is None
     assert plan(front,-75,75,209) is None
+    wider=plan(front,-80,80)
+    assert wider and wider['offset']==215
+    wide_min,wide_side=dense_check(wider,front,-80,80)
+    assert wide_min>=20 and wide_side>=40
     minimum,side=dense_check(nominal,front,-75,75)
     print(f'Forward-first geometry: {nominal}; dense minimum={minimum:.2f} mm; parallel minimum={side:.2f} mm')
     a,b=map(math.radians,(nominal['a'],nominal['b']))

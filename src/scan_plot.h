@@ -52,6 +52,8 @@ static char const g_scan_script[] =
     " function edge(a,s){return a===null?'not observed':a.toFixed(1)+' deg ('+s+')'}\n"
     " document.getElementById('usresult').textContent=\n"
     "  'Left: '+edge(d.left,d.ls)+'; Right: '+edge(d.right,d.rs)+\n"
+    "  '; Corrected estimate: '+(d.corrected_width==null?'unknown':d.corrected_width+' mm')+\n"
+    "  (d.width_fallback?' (150 mm fallback)':' (reliable calibrated reading)')+\n"
     "  '; Raw geometric width: '+(d.width===null?'unavailable':d.width+' mm')+\n"
     "  '; Calibrated obstacle width: '+(d.calibrated_width==null?\n"
     "   (d.calibration_enabled?'unknown':'disabled'):d.calibrated_width+' mm')+\n"

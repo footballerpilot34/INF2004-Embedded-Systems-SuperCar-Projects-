@@ -223,3 +223,15 @@ The main control loop is organised around a nominal **10 ms** task period, with 
 - [MQTT.md](MQTT.md) — MQTT configuration, telemetry and commands.
 - [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) — obstacle bypass design, configuration and validation.
 - [ULTRASONIC_SCAN.md](ULTRASONIC_SCAN.md) — servo scan measurements and interpretation.
+
+Current width/recovery tuning: genuine full-angle scans retain raw/calibrated
+width and measured range; separate corrected width uses a labelled 150 mm
+fallback when needed. Planning width is at least 150 mm, depth 150 mm. The
+parallel leg is shortened by a footprint-validated 40 mm, and post-contact
+advance is 65 mm. Both IR sensors/heading remain required before normal FOLLOW.
+See [OBSTACLE_DETECTION.md](OBSTACLE_DETECTION.md) for safety limits and logs.
+
+Final line recovery now permits one low-speed, forward-only correction after
+alignment: at most 60 mm / 3 s with ±5° steering, behind the obstacle's complete
+turning envelope. Both IR readings and heading confirmation remain required;
+normal success enters FOLLOW_LINE, while failure and dry v end STOPPED.

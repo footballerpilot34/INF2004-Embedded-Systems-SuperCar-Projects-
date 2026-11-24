@@ -92,10 +92,12 @@ bypass_geometry_init(bypass_geometry_t *p, float front, float left, float right)
 {
     *p = (bypass_geometry_t){.left=left, .right=right, .front=front,
                              .depth=BYPASS_ASSUMED_DEPTH_MM};
-    p->offset = BYPASS_COMPACT_OFFSET_MM;
+    float error=(BYPASS_DRIVE_HEADING_TOL_DEG+BYPASS_ALIGN_TOL_DEG)*BG_RAD;
+    float side=CAR_WIDTH_MM/2.0f*cosf(error)+(CAR_LENGTH_MM-BYPASS_AXLE_TO_FRONT_MM)*sinf(error);
+    p->offset=fmaxf(BYPASS_COMPACT_OFFSET_MM,ceilf(-left+side+BYPASS_POSITION_UNCERTAINTY_MM+BYPASS_MIN_SIDE_GAP_MM));
     /* At zero heading: rear bumper is clear after front gap + depth + length.
      * Preserve a positive whole-car clearance rather than trim a magic distance. */
-    p->clear_y = front + p->depth + CAR_LENGTH_MM + OBSTACLE_BYPASS_MARGIN_MM + BYPASS_PASS_EXTRA_MM;
+    p->clear_y = front + p->depth + CAR_LENGTH_MM + OBSTACLE_BYPASS_MARGIN_MM + BYPASS_PASS_EXTRA_MM - BYPASS_PASS_TRIM_MM;
     // Fixed compact return; the complete route is validated before movement.
     p->return_deg=BYPASS_COMPACT_RETURN_DEG;
     p->return_mm=p->offset/sinf(p->return_deg*BG_RAD);
@@ -144,6 +146,16 @@ bypass_geometry_candidate(bypass_geometry_t *p, float a)
     for(unsigned i=0;i<8;++i) {
         if(!bypass_geometry_corridor(p,poses[i][0],poses[i][1],poses[i][2],poses[i][3],
                                     poses[i+1][0],poses[i+1][1],poses[i+1][2],poses[i+1][3])) return false;
+    }
+    // Normal recovery may deliberately advance farther than the mounting
+    // offset. Validate that extra diagonal and final pivot as well as dry x=0.
+    float extra=fmaxf(0.0f,(float)BYPASS_REACQUIRE_ADVANCE_MM-BYPASS_LINE_SENSOR_FORWARD_MM);
+    if(extra>0) {
+        float ex=extra*sinf(b*BG_RAD);
+        float lo=final_low+extra*cosf((b+BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
+        float hi=final_high+extra*cosf((b-BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
+        if(!bypass_geometry_corridor(p,0,final_low,final_high,b,ex,lo,hi,b) ||
+           !bypass_geometry_corridor(p,ex,lo,hi,b,ex,lo,hi,0)) return false;
     }
     p->translation_mm = p->reverse_mm+p->departure_mm+end-p->departure_y+p->return_mm;
     p->wheel_mm = p->translation_mm + WHEEL_TRACK_MM/2.0f*BG_RAD/100.0f *

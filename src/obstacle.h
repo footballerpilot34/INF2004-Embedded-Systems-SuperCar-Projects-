@@ -69,6 +69,8 @@ typedef struct {
     uint32_t width_mm;             // Only meaningful with BOTH bounded flags.
     uint32_t calibrated_width_mm;  // 150 or 250 mm from measured reference scans.
     bool calibrated_width_valid;   // False means unknown; raw geometry is retained.
+    uint32_t corrected_width_mm;  // Separate estimate; never overwrites raw/calibrated width.
+    bool width_fallback;
     uint32_t width_min_mm;         // Angular sampling interval, not accuracy.
     uint32_t width_max_mm;
     uint32_t left_ray_mm;          // Endpoint ray ranges; NOT corridor clearance.
@@ -77,6 +79,7 @@ typedef struct {
     obstacle_bypass_candidate_t bypass;
 } obstacle_profile_t;
 
+void obstacle_width_estimate_update(obstacle_profile_t * profile);
 void obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec);
 void obstacle_scan_task(uint32_t now_msec);
 void obstacle_scan_cancel(void);

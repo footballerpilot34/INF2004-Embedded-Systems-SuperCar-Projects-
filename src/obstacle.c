@@ -30,7 +30,16 @@ static uint32_t g_queue_count, g_queue_pos;
 static uint32_t g_values[OBSTACLE_SCAN_SAMPLES], g_samples, g_valid;
 static uint32_t g_sequence, g_started;
 static bool g_active;
-static obstacle_profile_t g_profile;
+static obstacle_profile_t g_profile={.corrected_width_mm=150u,.width_fallback=true};
+
+void obstacle_width_estimate_update(obstacle_profile_t *p)
+{
+    bool measured=p->width_mm>0 && p->centre_seen && p->left_bounded && p->right_bounded &&
+        p->edges_confirmed && !p->timed_out && !p->cancelled &&
+        p->calibrated_width_valid && p->calibrated_width_mm>=140 && p->calibrated_width_mm<=160;
+    p->corrected_width_mm=measured ? p->calibrated_width_mm : 150u;
+    p->width_fallback=!measured;
+}
 
 static float forward_depth(obstacle_point_t const * point)
 {
@@ -197,6 +206,7 @@ obstacle_profile_build(obstacle_point_t const * points, uint32_t count,
                        uint32_t front, obstacle_profile_t * p)
 {
     memset(p, 0, sizeof(*p));
+    obstacle_width_estimate_update(p);
     p->front_mm = front;
     p->point_count = count;
     p->left_ray_mm = p->right_ray_mm = ULTRASONIC_NO_RANGE;
@@ -272,6 +282,7 @@ obstacle_profile_build(obstacle_point_t const * points, uint32_t count,
         }
         calibrated_width(p, points, count);
     }
+    obstacle_width_estimate_update(p);
 }
 
 char const * obstacle_edge_status_name(obstacle_edge_status_t status)
@@ -312,6 +323,7 @@ void
 obstacle_scan_start(uint32_t forward_mm, uint32_t now_msec)
 {
     memset(&g_profile, 0, sizeof(g_profile));
+    obstacle_width_estimate_update(&g_profile);
     g_profile.front_mm = forward_mm;
     g_count = g_queue_count = g_queue_pos = 0u;
     g_started = now_msec;
@@ -421,15 +433,20 @@ static void finish(bool timeout)
         g_profile.bypass.available = false;
         log_obstacle("SCAN timed out; profile is incomplete.");
     }
+    obstacle_width_estimate_update(&g_profile);
+    log_obstacle("SCAN raw=%lu calibrated=%lu corrected=%lu mm fallback=%u front=%lu mm",
+        (unsigned long)g_profile.width_mm,(unsigned long)g_profile.calibrated_width_mm,
+        (unsigned long)g_profile.corrected_width_mm,g_profile.width_fallback,
+        (unsigned long)g_profile.front_mm);
     obstacle_bypass_candidate_t const * path = &g_profile.bypass;
     if (path->available) {
         log_obstacle("SCAN bypass candidate: left x=%ld, right x=%ld, preferred x=%ld mm.",
             (long)path->left_x_mm, (long)path->right_x_mm, (long)path->preferred_x_mm);
         log_obstacle("SCAN alongside y=%lu mm; return needs measured rear y + %lu mm.",
             (unsigned long)path->alongside_y_mm, (unsigned long)path->turn_clearance_mm);
-        log_obstacle("SCAN bypass corridor unverified. Staying braked.");
+        log_obstacle("SCAN corridor unverified; vehicle controller decides motion.");
     } else {
-        log_obstacle("SCAN no bypass candidate. Staying braked.");
+        log_obstacle("SCAN no verified corridor; corrected width available to vehicle controller.");
     }
 }
 
@@ -489,6 +506,7 @@ void obstacle_scan_cancel(void)
 {
     if (g_active) { g_profile.cancelled = true; }
     g_active = false;
+    obstacle_width_estimate_update(&g_profile);
     g_profile.bypass.available = false;
     servo_set_angle(SERVO_CENTER_DEG);
 }
