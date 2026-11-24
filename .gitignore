@@ -3,3 +3,26 @@ build
 
 # MQTT logs from mosquitto_sub (local test records, not code)
 mqtt_log*.txt
+
+# Hotspot names and passwords: copy config/wifi_secrets.example.h.
+config/wifi_secrets.h
+
+# Build output (from the course template). The firmware is built from source;
+# build/ above already holds everything CMake makes.
+Debug
+Release
+*.elf
+*.uf2
+*.map
+*.o
+*.d
+
+# Videos are shared as unlisted YouTube links (videos/README.md), never committed
+*.mp4
+*.mov
+*.webm
+*.avi
+*.mkv
+
+# macOS
+.DS_Store

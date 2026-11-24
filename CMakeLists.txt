@@ -19,106 +19,45 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 
 include(pico_sdk_import.cmake)
 
-project(robocar C CXX ASM)
+project(supercar C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 pico_sdk_init()
-
-add_executable(robocar
-    robocar.c
-    dhcpserver/dhcpserver.c
-)
-
-target_include_directories(robocar PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}             # lwipopts.h
-    ${CMAKE_CURRENT_LIST_DIR}/dhcpserver
-)
-
-target_link_libraries(robocar
-    pico_stdlib
-    hardware_pwm
-    pico_cyw43_arch_lwip_poll             # Wi-Fi chip + network stack
-)
-
-pico_enable_stdio_usb(robocar 1)          # printf() over USB cable (handy for debugging)
-pico_enable_stdio_uart(robocar 0)
-
-pico_add_extra_outputs(robocar)           # makes robocar.uf2
-
-# Bench test: line IR sensors + IMU gyroscope connection check.
-add_executable(sensor_test
-    tests/sensor_test.c
-)
-
-target_link_libraries(sensor_test
-    pico_stdlib
-    hardware_i2c
-)
-
-pico_enable_stdio_usb(sensor_test 1)
-pico_enable_stdio_uart(sensor_test 0)
-
-pico_add_extra_outputs(sensor_test)       # makes sensor_test.uf2
-
-# Bench test: gyroscope I2C bus check, scan and WHO_AM_I read.
-add_executable(i2cscanner
-    tests/i2cscanner.c
-)
-
-target_link_libraries(i2cscanner
-    pico_stdlib
-    hardware_i2c
-)
-
-pico_enable_stdio_usb(i2cscanner 1)
-pico_enable_stdio_uart(i2cscanner 0)
-
-pico_add_extra_outputs(i2cscanner)        # makes i2cscanner.uf2
-
-# Bench test: MPU-6050 gyroscope X/Y/Z rates, angles and acceleration.
-add_executable(gyro_test
-    tests/gyro_test.c
-)
-
-target_link_libraries(gyro_test
-    pico_stdlib
-    hardware_i2c
-)
-
-pico_enable_stdio_usb(gyro_test 1)
-pico_enable_stdio_uart(gyro_test 0)
-
-pico_add_extra_outputs(gyro_test)         # makes gyro_test.uf2
 
 # Final firmware: line following, Code 39 barcode, hump vs wall,
 # Teleplot telemetry and a wireless web UI.
 add_executable(supercar
-    src/supercar_main.c
-    src/barcode.c
-    src/bypass.c
-    src/encoder.c
-    src/buzzer.c
-    src/gpio_isr.c
-    src/hump.c
-    src/imu.c
-    src/line_diag.c
-    src/line_sensor.c
-    src/log.c
-    src/motor.c
-    src/mqtt_comm.c
-    src/power.c
-    src/servo.c
-    src/obstacle.c
-    src/telemetry.c
-    src/ultrasonic.c
-    src/vehicle.c
-    src/web.c
-    dhcpserver/dhcpserver.c
+    app_program/app_main.c
+    app_program/line_barcode/barcode.c
+    app_program/obstacle/bypass.c
+    app_program/motion/encoder.c
+    app_program/buzzer.c
+    app_program/gpio_isr.c
+    app_program/imu_hump/hump.c
+    app_program/imu_hump/imu.c
+    app_program/line_barcode/line_diag.c
+    app_program/line_barcode/line_sensor.c
+    app_program/comms/log.c
+    app_program/motion/motor.c
+    app_program/comms/mqtt_comm.c
+    app_program/power.c
+    app_program/obstacle/servo.c
+    app_program/obstacle/obstacle.c
+    app_program/comms/telemetry.c
+    app_program/obstacle/ultrasonic.c
+    app_program/vehicle.c
+    app_program/comms/web.c
+    lib/libwifi/dhcpserver/dhcpserver.c
 )
 
 target_include_directories(supercar PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/src
-    ${CMAKE_CURRENT_LIST_DIR}             # lwipopts.h
-    ${CMAKE_CURRENT_LIST_DIR}/dhcpserver
+    ${CMAKE_CURRENT_LIST_DIR}/config      # config.h, lwipopts.h, wifi_secrets.h
+    ${CMAKE_CURRENT_LIST_DIR}/app_program
+    ${CMAKE_CURRENT_LIST_DIR}/app_program/line_barcode
+    ${CMAKE_CURRENT_LIST_DIR}/app_program/motion
+    ${CMAKE_CURRENT_LIST_DIR}/app_program/obstacle
+    ${CMAKE_CURRENT_LIST_DIR}/app_program/comms
+    ${CMAKE_CURRENT_LIST_DIR}/app_program/imu_hump
+    ${CMAKE_CURRENT_LIST_DIR}/lib/libwifi/dhcpserver
 )
 
 target_link_libraries(supercar

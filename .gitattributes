@@ -1,2 +1,8 @@
 # Patch context lines intentionally contain diff whitespace.
-review/*.patch -whitespace
+testing/review/*.patch -whitespace
+
+# C sources stay LF on every checkout: the BARR-C style check in the build
+# (tools/check_barr.py, rule 3.6.a) rejects CR line endings, so a Windows
+# checkout with core.autocrlf=true would otherwise fail to build.
+*.c text eol=lf
+*.h text eol=lf

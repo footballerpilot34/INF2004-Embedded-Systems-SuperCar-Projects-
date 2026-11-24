@@ -10,10 +10,12 @@ entries = json.loads((ROOT / 'build/compile_commands.json').read_text())
 failed = 0
 count = 0
 with tempfile.TemporaryDirectory(prefix='supercar-analysis-') as temporary:
-    with (ROOT / 'review/final-static-analysis.txt').open('w') as report:
+    with (ROOT / 'testing/review/final-static-analysis.txt').open('w') as report:
         for entry in entries:
             path = Path(entry['file'])
-            if path.parent not in [ROOT, ROOT / 'src', ROOT / 'tests']:
+            project = ('app_program', 'config')
+            if not any(part in project for part in
+                       path.relative_to(ROOT).parts[:1]):
                 continue
             if path.suffix != '.c':
                 continue

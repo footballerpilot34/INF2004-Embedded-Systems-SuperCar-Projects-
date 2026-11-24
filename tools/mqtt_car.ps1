@@ -17,7 +17,7 @@
 #  4. keeps this window for typing commands: start, stop, ft1111, set A
 #     left, letters, ...
 #
-# The car also keeps trying the broker in src/config.h (MQTT_BROKER_HOST)
+# The car also keeps trying the broker in config/config.h (MQTT_BROKER_HOST)
 # by itself, every 5 s, whenever it is on the hotspot.
 
 param(
