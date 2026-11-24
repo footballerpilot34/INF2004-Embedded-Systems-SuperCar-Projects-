@@ -66,14 +66,22 @@ static void start_pass(void) {
 // Advance the incremental planner while time is held at zero in isolated tests.
 static bool planned_begin(void) {
     if (!bypass_begin(&profile,0,true)) return false;
-    for (unsigned i=0;i<150 && g_phase==PHASE_PLAN;++i) {
+    for (unsigned i=0;i<256 && g_phase==PHASE_PLAN;++i) {
         if (bypass_step(0,300)==BYPASS_FAILED) return false;
+    }
+    if(g_phase==PHASE_BACKUP) {
+        // Isolated state tests begin after ideal reverse motion; full-route
+        // integration below exercises the actual reverse/settling controller.
+        g_x=-g_geometry.reverse_mm*sinf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD);
+        g_z=-g_geometry.reverse_mm*cosf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD);
+        start_pivot(-g_geometry.departure,PHASE_OUT,0);
+        phase_enter(PHASE_PIVOT,0);
     }
     return g_phase==PHASE_PIVOT;
 }
 static void fixed_checks(void) {
     for (int i=0;i<31;i++) points[i]=(obstacle_point_t){-30+2*i,300,OBSTACLE_RETURN_RANGE};
-    profile=(obstacle_profile_t){.finished=true,.centre_seen=true,.front_mm=300,
+    profile=(obstacle_profile_t){.finished=true,.centre_seen=true,.front_mm=OBSTACLE_STOP_MM,
         .left_bounded=true,.right_bounded=true,
         .left_status=OBSTACLE_EDGE_CONFIRMED,.right_status=OBSTACLE_EDGE_CONFIRMED,
         .left_mm=-100,.right_mm=100,
@@ -82,17 +90,18 @@ static void fixed_checks(void) {
         assert(!bypass_begin(&profile,0,true)); return;
     }
     assert(planned_begin());
-    assert(g_target_x==-219 && g_geometry.departure<58);
-    assert(g_fixed_clear_z==300-SENSOR_TO_BUMPER_MM+100+170+20);
+    assert(g_target_x==-210 && g_geometry.departure<=BYPASS_DEPARTURE_MAX_DEG);
+    assert(fabsf(g_fixed_clear_z-((OBSTACLE_STOP_MM+BYPASS_AXLE_TO_FRONT_MM-SENSOR_TO_BUMPER_MM)*cosf(BYPASS_INITIAL_HEADING_DEG/DEG_PER_RAD)-BYPASS_AXLE_TO_FRONT_MM+150+180+20+BYPASS_PASS_EXTRA_MM))<0.01f);
+    if(SENSOR_TO_BUMPER_MM==60) assert(g_geometry.departure==77 && g_geometry.reverse_mm==0);
     assert(g_geometry.return_deg>=BYPASS_RETURN_MIN_DEG && g_geometry.return_deg<=70);
     // Fixed controlled-test geometry does not retune itself from scan width/edges.
     profile.left_status=OBSTACLE_EDGE_NO_ECHO;
-    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-219);
+    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-210);
     bypass_cancel(); profile.left_status=OBSTACLE_EDGE_CONFIRMED;
     profile.left_mm=-150; profile.right_mm=50;
-    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-219);
+    assert(bypass_begin(&profile,0,true)); assert(g_target_x==-210);
     bypass_cancel(); profile.left_mm=-100; profile.right_mm=100;
-    profile.front_mm=SENSOR_TO_BUMPER_MM+20; assert(!planned_begin()); profile.front_mm=300;
+    profile.front_mm=SENSOR_TO_BUMPER_MM+20; assert(!planned_begin()); profile.front_mm=OBSTACLE_STOP_MM;
     points[15].kind=OBSTACLE_RETURN_NO_ECHO;
     assert(!bypass_begin(&profile,0,true)); points[15].kind=OBSTACLE_RETURN_RANGE;
     points[0].range_mm=80; assert(!bypass_begin(&profile,0,true)); points[0].range_mm=300;
@@ -101,10 +110,12 @@ static void fixed_checks(void) {
 
     // Full ideal encoder routes. Sensor contact is tied to the measured forward
     // sensor position; final success still needs BOTH sensors and forward heading.
-    for (int dry=0;dry<2;++dry) {
+    for (int trial=0;trial<3;++trial) {
+        int dry=trial==1;
+        profile.front_mm=trial==2 ? 140 : OBSTACLE_STOP_MM;
         black=left_only=false; left_edges=right_edges=0;
         assert(dry ? bypass_test_begin(0) : bypass_begin(&profile,0,true));
-        unsigned phases=0; float lm=0,rm=0;
+        unsigned phases=0; float lm=0,rm=0; bool checked_return=false;
         bypass_result_t result=BYPASS_RUNNING;
         for (uint32_t t=10;t<60000 && result==BYPASS_RUNNING;t+=10) {
             lm+=fabsf((float)ml)*0.06f; rm+=fabsf((float)mr)*0.06f;
@@ -116,7 +127,13 @@ static void fixed_checks(void) {
                 assert(fabsf(g_heading)<=BYPASS_ALIGN_TOL_DEG);
                 assert(fabsf(g_x-g_target_x)<=BYPASS_LATERAL_TOL_MM);
             }
-            if (g_phase==PHASE_PIVOT && g_after==PHASE_RETURN) assert(g_z>=g_fixed_clear_z);
+            if ((g_phase==PHASE_BRAKE || g_phase==PHASE_PIVOT) && g_after==PHASE_RETURN &&
+                (phases&(1u<<PHASE_PASS))) {
+                if(!checked_return) {assert(g_z>=g_fixed_clear_z);checked_return=true;}
+                // Unequal-wheel pivot motion is explicitly integrated; it must
+                // stay inside the reserved position allowance, not exactly fixed.
+                assert(g_z+BYPASS_POSITION_UNCERTAINTY_MM>=g_fixed_clear_z);
+            }
             if (g_phase==PHASE_OUT || g_phase==PHASE_PASS || g_phase==PHASE_RETURN || g_phase==PHASE_ADVANCE) assert(ml>=0 && mr>=0);
             assert(fabsf(g_heading)<90);
             phases|=1u<<g_phase;
@@ -128,8 +145,19 @@ static void fixed_checks(void) {
         assert(phases&(1u<<PHASE_PLAN)); assert(phases&(1u<<PHASE_PASS));
         assert(phases&(1u<<PHASE_RETURN));
         assert(phases&(1u<<(dry ? PHASE_FINISH : PHASE_ALIGN)));
+        assert(checked_return);
+        if(SENSOR_TO_BUMPER_MM==60) {
+            if(trial<2) assert(!(phases&(1u<<PHASE_BACKUP)));
+            else assert(phases&(1u<<PHASE_BACKUP));
+        }
     }
+    profile.front_mm=OBSTACLE_STOP_MM;
+    black=true;
+    assert(bypass_test_begin(0) && !bypass_test_uses_line());
+    bypass_cancel();
     black=false;
+    assert(bypass_test_begin(0) && !bypass_test_uses_line());
+    bypass_cancel();
     // Parallel motor targets are exactly zero heading; drift is bounded.
     assert(planned_begin()); g_x=g_target_x; g_z=g_geometry.departure_y; g_heading=0;
     phase_enter(PHASE_PASS,0); assert(bypass_step(10,1000)==BYPASS_RUNNING && ml==mr);
@@ -209,9 +237,9 @@ static void fixed_checks(void) {
 
 int main(void) {
     if (BYPASS_FIXED_WIDTH_TEST) { fixed_checks(); return 0; }
-    assert(CAR_LENGTH_MM==170 && CAR_WIDTH_MM==140);
-    assert(SIDE_CLEARANCE_MM==141); // ceil(hypot(85,70)) + 30.
-    assert(BYPASS_ASSUMED_DEPTH_MM==100);
+    assert(CAR_LENGTH_MM==180 && CAR_WIDTH_MM==140);
+    assert(SIDE_CLEARANCE_MM==145); // ceil(hypot(85,70)) + 30.
+    assert(BYPASS_ASSUMED_DEPTH_MM==150);
     for (int i=0;i<31;i++) points[i]=(obstacle_point_t){-30+2*i,2000,OBSTACLE_RETURN_RANGE};
     profile=(obstacle_profile_t){.finished=true,.centre_seen=true,
         .left_bounded=true,.right_bounded=true,.front_mm=200,
@@ -226,9 +254,9 @@ int main(void) {
     // Artificial long-range setup exercises geometry decisions only. Real
     // scanner stops at 250 mm; this is not a newly supported operating mode.
     profile.front_mm=1000;
-    assert(side_shift(&profile,true)==266); // Unknown: 125 + corner radius/margin.
+    assert(side_shift(&profile,true)==270); // Unknown: 125 + corner radius/margin.
     profile.calibrated_width_valid=true; profile.calibrated_width_mm=150;
-    assert(side_shift(&profile,true)==216); // 75 + same clearance.
+    assert(side_shift(&profile,true)==220); // 75 + same clearance.
     points[0].kind=OBSTACLE_RETURN_NO_ECHO;
     assert(side_shift(&profile,true)==NO_SIDE);
     points[0].kind=OBSTACLE_RETURN_RANGE;
@@ -240,7 +268,7 @@ int main(void) {
     assert(!start_backup(PHASE_OUT,80,0)); // Unseen rear path is never used.
 
     start_pass();
-    assert(g_pass_min_mm==100+100+170+30);
+    assert(g_pass_min_mm==100+150+180+30);
     seq++; pass_step(100,200); assert(gb_side_seen);
     pass_step(200,1000); assert(g_side_clear==0); // Same ping, not another vote.
     for (int i=0;i<5;i++) { seq++; pass_step(300+100*i,ULTRASONIC_NO_RANGE); }

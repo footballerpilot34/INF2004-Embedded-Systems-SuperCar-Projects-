@@ -295,16 +295,16 @@
 // hump/wall PROBE instead (creep closer, climb if the nose tips up). With
 // true the car stops in front of a hump too.
 #define OBSTACLE_STOP_AT_ONCE       true
-// Fixed-width controlled test: begin at 30 cm from the sensor (24 cm bumper gap).
+// Close start measured from the sensor: 150 mm range, 60 mm setback, 90 mm axial bumper gap.
 #define OBSTACLE_SLOW_MM            350u
-#define OBSTACLE_STOP_MM            300u
+#define OBSTACLE_STOP_MM            150u
 #define OBSTACLE_HARD_STOP_MM       80u     // Wall: stop for certain.
 #define OBSTACLE_CLEAR_MM           350u    // Clear again (hysteresis).
 #define OBSTACLE_PROBE_MSEC         4000u   // Longest creep while probing.
 #define OBSTACLE_CLEAR_MSEC         200u    // Clear this long to resume.
 
 // Confirmed test setup; scan settings require tuning on the real sensor.
-#define CAR_LENGTH_MM              170u
+#define CAR_LENGTH_MM              180u
 #define CAR_WIDTH_MM               140u
 #define OBSTACLE_EXPECTED_WIDTH_MM  250u
 // Positive = sensor behind front bumper; -1 = not measured, bypass blocked.
@@ -342,8 +342,14 @@
 // Distances and heading come from the wheel encoders. STOP ends it at
 // once; any step that cannot finish brakes the car.
 // ------------------------------------------------------------------------
-#define BYPASS_COMPACT_OFFSET_MM     219u
-#define BYPASS_COMPACT_DEPARTURE_DEG 43u
+// Track-relative initial yaw is an operator-supplied scenario assumption.
+#define BYPASS_INITIAL_HEADING_DEG  (-10.0f)
+#define BYPASS_REVERSE_PLAN_MAX_MM  220u
+#define BYPASS_REVERSE_PLAN_STEP_MM 2u
+#define BYPASS_MIN_SIDE_GAP_MM      40u
+#define BYPASS_PASS_EXTRA_MM         0u     // Whole-car 20 mm reserve and swept check already apply.
+#define BYPASS_COMPACT_OFFSET_MM     210u
+#define BYPASS_COMPACT_DEPARTURE_DEG 77u
 #define BYPASS_COMPACT_RETURN_DEG    65u
 #define BYPASS_ENABLED              true    // false: stay BLOCKED (old way).
 // Controlled experiment ONLY: the operator verifies an empty left bypass
@@ -351,15 +357,15 @@
 #ifndef BYPASS_FIXED_WIDTH_TEST
 #define BYPASS_FIXED_WIDTH_TEST     true
 #endif
-#define BYPASS_FIXED_WIDTH_MM       200u    // Planning ONLY, never telemetry.
+#define BYPASS_FIXED_WIDTH_MM       150u    // Planning ONLY, never telemetry.
 // Measured chassis/sensor geometry; axle is NOT assumed at chassis centre.
 #define BYPASS_AXLE_TO_FRONT_MM      60u
 #define BYPASS_LINE_SENSOR_FORWARD_MM 45u
 #define BYPASS_POSITION_UNCERTAINTY_MM 10u // Calibration allowance, not measured accuracy.
 #define BYPASS_DEPARTURE_MIN_DEG     20u
-#define BYPASS_DEPARTURE_MAX_DEG     75u
+#define BYPASS_DEPARTURE_MAX_DEG     85u
 #define BYPASS_RETURN_MIN_DEG        35u
-#define BYPASS_RETURN_MAX_DEG        70u   // At least 20 degrees away from perpendicular.
+#define BYPASS_RETURN_MAX_DEG        65u   // Keep return at least 25 degrees from perpendicular.
 #define BYPASS_GEOMETRY_STEP_MM      5u
 #define BYPASS_GEOMETRY_STEP_DEG     2u
 #define BYPASS_MAX_PLAN_OFFSET_MM   500u
@@ -442,7 +448,7 @@
                                             // 150; the turning clearance
                                             // already gives about 120),
 #define BYPASS_MAX_SHIFT_MM         300u    // and at most (was 400).
-#define BYPASS_ASSUMED_DEPTH_MM     100u    // Controlled rectangular test obstacle.
+#define BYPASS_ASSUMED_DEPTH_MM     150u    // Controlled rectangular test obstacle.
 #define BYPASS_PASS_MAX_MM          700u    // Give up passing after this
                                             // (was 800).
 #define BYPASS_SIDE_CLEAR_COUNT     3u      // Far side echoes in a row =

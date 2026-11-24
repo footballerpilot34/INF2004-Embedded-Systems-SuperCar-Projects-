@@ -283,7 +283,7 @@ vehicle_init (void)
 }   /* vehicle_init() */
 
 
-// Shared serial/MQTT movement rehearsal. It ends STOPPED, never in straight driving.
+// Shared rehearsal: recover/follow when started on line; empty floor ends stopped.
 void
 vehicle_bypass_test(void)
 {
@@ -665,7 +665,7 @@ vehicle_task (void)
         if (!obstacle_scan_active())
         {
             state_enter((bypass_begin(obstacle_profile(), now_msec,
-                                      gb_feat_line) ?
+                                      true) ?
                          VEHICLE_BYPASS : VEHICLE_BLOCKED), now_msec);
         }
     break;
@@ -676,11 +676,20 @@ vehicle_task (void)
 
         if (BYPASS_DONE == result)
         {
-            state_enter((gb_bypass_dry_run ? VEHICLE_STOPPED :
-                         gb_feat_line ? VEHICLE_FOLLOW_LINE : VEHICLE_BARCODE_TEST), now_msec);
+            // Recheck the live pair at the handoff, not just cached recovery ticks.
+            line_state_t recovered=line_sensor_read();
+            if (!gb_bypass_dry_run &&
+                !(recovered.b_left_black && recovered.b_right_black)) {
+                log_obstacle("BYPASS: line lost at FOLLOW handoff; stopping.");
+                state_enter(VEHICLE_STOPPED,now_msec);
+                break;
+            }
+            if(!gb_bypass_dry_run) gb_feat_line=true;
+            state_enter(gb_bypass_dry_run ? VEHICLE_STOPPED : VEHICLE_FOLLOW_LINE,now_msec);
         }
         else if (BYPASS_FAILED == result)
         {
+            log_obstacle("BYPASS recovery failed: STOPPED; line/heading or safety not confirmed.");
             state_enter(VEHICLE_STOPPED, now_msec);
         }
         else

@@ -10,7 +10,7 @@
 typedef struct {
     float left, right, front, depth; /* Obstacle, front relative to start bumper. */
     float offset, departure, return_deg, departure_mm, departure_y;
-    float clear_y, return_mm, translation_mm, wheel_mm;
+    float clear_y, return_mm, translation_mm, wheel_mm, reverse_mm;
 } bypass_geometry_t;
 
 /* Largest separating projection gap is a LOWER bound on Euclidean clearance.
@@ -95,7 +95,7 @@ bypass_geometry_init(bypass_geometry_t *p, float front, float left, float right)
     p->offset = BYPASS_COMPACT_OFFSET_MM;
     /* At zero heading: rear bumper is clear after front gap + depth + length.
      * Preserve a positive whole-car clearance rather than trim a magic distance. */
-    p->clear_y = front + p->depth + CAR_LENGTH_MM + OBSTACLE_BYPASS_MARGIN_MM;
+    p->clear_y = front + p->depth + CAR_LENGTH_MM + OBSTACLE_BYPASS_MARGIN_MM + BYPASS_PASS_EXTRA_MM;
     // Fixed compact return; the complete route is validated before movement.
     p->return_deg=BYPASS_COMPACT_RETURN_DEG;
     p->return_mm=p->offset/sinf(p->return_deg*BG_RAD);
@@ -119,29 +119,36 @@ bypass_geometry_return_safe(bypass_geometry_t const *p, float b)
 static inline bool
 bypass_geometry_candidate(bypass_geometry_t *p, float a)
 {
+    float error=(BYPASS_DRIVE_HEADING_TOL_DEG+BYPASS_ALIGN_TOL_DEG)*BG_RAD;
+    float worst_side=CAR_WIDTH_MM/2.0f*cosf(error)+
+        (CAR_LENGTH_MM-BYPASS_AXLE_TO_FRONT_MM)*sinf(error);
+    if(p->offset+p->left-worst_side-BYPASS_POSITION_UNCERTAINTY_MM < BYPASS_MIN_SIDE_GAP_MM) return false;
     p->departure = a;
     p->departure_mm = p->offset/sinf(a*BG_RAD);
     p->departure_y = p->offset/tanf(a*BG_RAD);
     float d=p->offset, end=p->clear_y, b=p->return_deg;
-    float low=d/tanf((a+BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
-    float high=d/tanf((a-BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
-    if (high >= end || end-low > BYPASS_PASS_MAX_MM) { return false; }
+    float initial=BYPASS_INITIAL_HEADING_DEG;
+    float x=-p->reverse_mm*sinf(initial*BG_RAD);
+    float y=-p->reverse_mm*cosf(initial*BG_RAD);
+    float dx=d+x;
+    p->departure_mm=dx/sinf(a*BG_RAD);
+    p->departure_y=y+dx/tanf(a*BG_RAD);
+    float low=y+dx/tanf((a+BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
+    float high=y+dx/tanf((a-BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
+    if (high>=end || end-low>BYPASS_PASS_MAX_MM) return false;
     float final_low=end+d/tanf((b+BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
     float final_high=end+d/tanf((b-BYPASS_DRIVE_HEADING_TOL_DEG)*BG_RAD);
-    // Each row: x, low_y, high_y, heading. A common y interval also
-    // covers the departure's uncertain arrival station during its next pivot.
-    float poses[8][4]={{0,0,0,0},{0,0,0,-a},{-d,low,high,-a},{-d,low,high,0},
-                       {-d,end,end,0},{-d,end,end,b},
-                       {0,final_low,final_high,b},{0,final_low,final_high,0}};
-    for (unsigned i=0;i<7;++i) {
-        if (!bypass_geometry_corridor(p,poses[i][0],poses[i][1],poses[i][2],poses[i][3],
-                                      poses[i+1][0],poses[i+1][1],poses[i+1][2],poses[i+1][3])) {
-            return false;
-        }
+    float poses[9][4]={{0,0,0,initial},{x,y,y,initial},{x,y,y,-a},
+                      {-d,low,high,-a},{-d,low,high,0},{-d,end,end,0},
+                      {-d,end,end,b},{0,final_low,final_high,b},{0,final_low,final_high,0}};
+    for(unsigned i=0;i<8;++i) {
+        if(!bypass_geometry_corridor(p,poses[i][0],poses[i][1],poses[i][2],poses[i][3],
+                                    poses[i+1][0],poses[i+1][1],poses[i+1][2],poses[i+1][3])) return false;
     }
-    p->translation_mm = p->clear_y + d*tanf(a*BG_RAD/2.0f) + p->return_mm;
-    p->wheel_mm = p->translation_mm + WHEEL_TRACK_MM/2.0f *
-        (BYPASS_PIVOT_LEFT_X100+BYPASS_PIVOT_RIGHT_X100)/100.0f*(a+b)*BG_RAD;
+    p->translation_mm = p->reverse_mm+p->departure_mm+end-p->departure_y+p->return_mm;
+    p->wheel_mm = p->translation_mm + WHEEL_TRACK_MM/2.0f*BG_RAD/100.0f *
+        (BYPASS_PIVOT_LEFT_X100*(a+b+BYPASS_INITIAL_HEADING_DEG) +
+         BYPASS_PIVOT_RIGHT_X100*(a+b));
     return true;
 }
 #endif

@@ -31,6 +31,8 @@ static bool mock_bypass_begin_ok;
 bool bypass_begin(obstacle_profile_t const *p, uint32_t t, bool l) { (void)p; (void)t; (void)l; return mock_bypass_begin_ok; }
 static unsigned mock_bypass_starts;
 bool bypass_test_begin(uint32_t t) { (void)t; ++mock_bypass_starts; return true; }
+static bool mock_rehearsal_line;
+bool bypass_test_uses_line(void) { return mock_rehearsal_line; }
 void bypass_cancel(void) {}
 static bypass_result_t mock_bypass_result = BYPASS_FAILED;
 bypass_result_t bypass_step(uint32_t t, uint32_t r) { (void)t; (void)r; return mock_bypass_result; }
@@ -69,7 +71,8 @@ int32_t imu_max_tilt_x10(void) { return tilt; }
 int32_t imu_total_tilt_x10(void) { return tilt; }
 int32_t imu_pitch_x10(void) { return tilt; }
 int32_t imu_roll_x10(void) { return 0; }
-line_state_t line_sensor_read(void) { return (line_state_t){true, true}; }
+static bool both_line=true;
+line_state_t line_sensor_read(void) { return (line_state_t){true, both_line}; }
 line_junction_t line_junction_detect(bool black, bool enabled, uint32_t time,
                                      uint32_t * mark) {
     (void)black; (void)enabled; (void)time; (void)mark;
@@ -305,7 +308,7 @@ int main(void) {
     vehicle_task(); now += OBSTACLE_CLEAR_MSEC + 1; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE);
     assert(reader_enabled);
-    for (uint32_t d = 150; d <= 250; d += 50) {
+    for (uint32_t d = 100; d <= OBSTACLE_STOP_MM; d += 30) {
         vehicle_stop(); vehicle_start(); range_mm = d; vehicle_task();
         assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN);
         assert(motor_left == 0 && motor_right == 0);
@@ -330,8 +333,17 @@ int main(void) {
     assert(vehicle_state() == VEHICLE_BYPASS && mock_bypass_starts == starts_before_repeat);
     mock_bypass_result = BYPASS_DONE; vehicle_task();
     assert(vehicle_state() == VEHICLE_STOPPED); // Dry run must not start driving straight.
+    mock_rehearsal_line=true;
+    vehicle_bypass_test();
+    assert(vehicle_state()==VEHICLE_BYPASS);
+    mock_bypass_result=BYPASS_DONE; vehicle_task();
+    assert(vehicle_state()==VEHICLE_STOPPED); // v always ends stopped, even over a line.
+    vehicle_stop();
+    vehicle_bypass_test(); mock_bypass_result=BYPASS_FAILED; vehicle_task();
+    assert(vehicle_state()==VEHICLE_STOPPED);
+    mock_rehearsal_line=false;
     mock_bypass_begin_ok = true; mock_bypass_result = BYPASS_RUNNING;
-    mode = BACKGROUND; width = 80; scan_depth = 300; range_mm = 300;
+    mode = BACKGROUND; width = 80; scan_depth = OBSTACLE_STOP_MM; range_mm = OBSTACLE_STOP_MM;
     vehicle_start(); vehicle_task();
     assert(vehicle_state() == VEHICLE_OBSTACLE_SCAN);
     uint32_t integration_start = now;
@@ -346,6 +358,24 @@ int main(void) {
     assert(vehicle_state() == VEHICLE_BYPASS); // No nested detection during return.
     mock_bypass_result = BYPASS_DONE; vehicle_task();
     assert(vehicle_state() == VEHICLE_FOLLOW_LINE && reader_enabled);
+    range_mm=OBSTACLE_CLEAR_MM+1;
+    vehicle_task();
+    assert(vehicle_state()==VEHICLE_FOLLOW_LINE && motor_left>0 && motor_right>0);
+    // A missing second IR sensor cannot be released to FOLLOW, even if the
+    // mocked bypass result says done. Re-enter via the normal scan path.
+    vehicle_stop(); vehicle_start(); range_mm=OBSTACLE_STOP_MM;
+    mock_bypass_result=BYPASS_RUNNING; vehicle_task();
+    uint32_t handoff_start=now;
+    while(vehicle_state()==VEHICLE_OBSTACLE_SCAN) {
+        now+=10;
+        if(servo_is_settled() && now%60==0) sample();
+        vehicle_task();
+        assert(now-handoff_start<=OBSTACLE_SCAN_TIMEOUT_MSEC+10);
+    }
+    assert(vehicle_state()==VEHICLE_BYPASS);
+    both_line=false; mock_bypass_result=BYPASS_DONE; vehicle_task();
+    assert(vehicle_state()==VEHICLE_STOPPED && motor_left==0 && motor_right==0);
+    both_line=true;
     vehicle_stop();
     return 0;
 }
