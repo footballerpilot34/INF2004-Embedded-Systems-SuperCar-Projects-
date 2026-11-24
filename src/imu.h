@@ -30,6 +30,8 @@ int32_t imu_pitch_x10(void);
 int32_t imu_roll_x10(void);
 int32_t imu_max_tilt_x10(void);
 int32_t imu_total_tilt_x10(void);
+int32_t imu_accel_mg(void);
+int32_t imu_lift_speed_mm_s(void);
 
 #endif /* IMU_H */
 

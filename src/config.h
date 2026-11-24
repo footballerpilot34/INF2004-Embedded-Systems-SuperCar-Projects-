@@ -539,6 +539,16 @@
 // lifted, less than rolling off a hump) and tilt (none in a level lift)
 // are not used.
 #define PICKUP_FLOORLESS_MSEC       800u    // All three black this long.
+// A pick-up ends in STOPPED (no separate state since 2026-11-24).
+// 2026-11-24: on the track the barcode sensor sat on black for over
+// 0.8 s three times while centred on the line (false pick-ups), so an
+// IMU check is being measured: a brisk lift pushes the car upwards long
+// enough to build up an upward speed (acceleration above 1 g added up
+// over PICKUP_IMU_WINDOW_MSEC); a bump pushes up and down again. Every
+// kick whose upward or downward speed passes PICKUP_IMU_LOG_MM_S is
+// logged ("IMU kick: ..."), with telemetry "am" (mg) and "vz" (mm/s).
+#define PICKUP_IMU_WINDOW_MSEC      400u
+#define PICKUP_IMU_LOG_MM_S         80
 
 #define HUMP_IGNORE_RANGE_MSEC      500u    // Ignore ultrasonic after a
                                             // hump (it may see the floor).

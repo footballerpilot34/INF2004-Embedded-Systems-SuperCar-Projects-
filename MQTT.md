@@ -104,7 +104,7 @@ The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
 | Field | Meaning |
 |---|---|
 | `t` | ms since boot. |
-| `st` | Car state: `READY`, `LINE_CAL`, `FOLLOW_LINE`, `FEATURE_TEST`, `TURN`, `OBSTACLE_SCAN`, `BYPASS`, `HUMP`, `BLOCKED`, `STOPPED`, `PICKED_UP` (lifted off the floor while driving: the end of the demo), and so on. |
+| `st` | Car state: `READY`, `LINE_CAL`, `FOLLOW_LINE`, `FEATURE_TEST`, `TURN`, `OBSTACLE_SCAN`, `BYPASS`, `HUMP`, `BLOCKED`, `STOPPED` (also after being picked up while driving: the end of the demo), and so on. |
 | `bp` | Bypass step while in `BYPASS` (`out`, `pass`, `return`, …), otherwise empty. |
 | `ml`, `mr` | Left and right motor power in %. |
 | `el`, `er` | Left and right encoder edges since boot (about 13.3 and 13.7 per mm). |
@@ -113,6 +113,8 @@ The prefix is `MQTT_TOPIC_PREFIX` = `inf2004/aai14/supercar`.
 | `pt`, `rl` | Pitch and roll in tenths of a degree. |
 | `sv` | Servo angle in degrees. 90 is straight ahead. |
 | `hh` | Height the car is on now, in mm (one decimal): how far the raised end is above the floor. About 0 on the flat. |
+| `am` | Total acceleration from the IMU, in milli-g: about 1000 at rest, whichever way the car is tilted. |
+| `vz` | Upward speed from the IMU, in mm/s (down is negative): acceleration above 1 g added up over the last 0.4 s. A brisk lift builds it up; a bump goes up and back to about 0. Each kick is also logged as `IMU kick (...)`. |
 | `pend` | Turn waiting for the next crossroad, or empty. |
 
 **barcode**: `{"msg":"A","cmd":"TURN LEFT","t":51230}`. `cmd` is one of

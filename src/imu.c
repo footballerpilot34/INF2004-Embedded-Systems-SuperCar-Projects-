@@ -3,8 +3,9 @@
  * @brief Raw LSM303DLHC accelerometer and magnetometer readings.
  *
  * The LSM303DLHC contains an accelerometer and a magnetometer, but no
- * gyroscope. This module reports only the six physical axis values; it
- * does not estimate orientation or motion events.
+ * gyroscope. This module reports the six physical axis values, the
+ * filtered pitch and roll, and, for pick-up detection, the total
+ * acceleration and the car's upward speed (imu_lift_speed_mm_s()).
  */
 
 #include <stdbool.h>
@@ -62,6 +63,23 @@
 // The filter runs in hundredths so it settles to within 0.1 deg.
 #define PITCH_FILTER_DIVISOR             8
 #define RAD_TO_TENTH_DEG                 572.958f
+// Lift: the total acceleration minus 1 g (the baseline, below), added up
+// over the last LIFT_WINDOW_SAMPLES readings, is the car's upward speed.
+// mg x ms -> mm/s: 1 mg for 1 ms adds 9.81e-3 mm/s.
+#define USEC_PER_MSEC_IMU                1000u
+#define LIFT_WINDOW_USEC                 (PICKUP_IMU_WINDOW_MSEC * \
+                                          USEC_PER_MSEC_IMU)
+#define LIFT_WINDOW_SAMPLES              (LIFT_WINDOW_USEC / \
+                                          SAMPLE_PERIOD_USEC)
+#define MG_MS_TO_MM_S_NUM                981
+#define MG_MS_TO_MM_S_DEN                100000
+#define LIFT_MAX_DT_MSEC                 60u     // A late reading counts
+                                                 // as at most this long.
+// The 1 g baseline follows the sensor slowly (x100, ~5 s), but only while
+// the reading is quiet, so a lift or a bump never moves it.
+#define GRAVITY_TRACK_DIV                256
+#define GRAVITY_QUIET_MG                 40
+#define GRAVITY_DEFAULT_MG               1000
 
 
 static bool         gb_sensor_ok       = false;
@@ -75,6 +93,12 @@ static int32_t      g_pitch_x10         = 0;
 static int32_t      g_roll_x10          = 0;
 static int32_t      g_pitch_x100        = 0;    // Filter state.
 static int32_t      g_roll_x100         = 0;
+static int32_t      g_accel_mg          = 0;    // Total, last reading.
+static int32_t      g_gravity_x100      = (GRAVITY_DEFAULT_MG * 100);
+static bool         gb_gravity_set      = false;
+static int32_t      g_lift[LIFT_WINDOW_SAMPLES];  // (total - 1 g) x ms.
+static uint32_t     g_lift_idx          = 0u;
+static int32_t      g_lift_sum          = 0;
 
 
 static bool    reg_write(uint8_t address, uint8_t reg, uint8_t value);
@@ -85,6 +109,8 @@ static int32_t signed_be(uint8_t msb, uint8_t lsb);
 static int32_t accel_mg(uint8_t msb, uint8_t lsb);
 static int32_t raw_pitch_x10(imu_axes_t const * p_axes);
 static int32_t raw_roll_x10(imu_axes_t const * p_axes);
+static int32_t accel_total_mg(imu_axes_t const * p_axes);
+static void    lift_update(uint32_t dt_msec);
 
 
 /*!
@@ -173,8 +199,15 @@ imu_task (void)
 
         if ((now_usec - g_last_sample_usec) >= SAMPLE_PERIOD_USEC)
         {
+            uint32_t dt_msec = (uint32_t) ((now_usec - g_last_sample_usec) /
+                                           USEC_PER_MSEC_IMU);
+
             g_last_sample_usec = now_usec;
             gb_reading_valid = sample_read(&g_axes);
+            if (gb_reading_valid)
+            {
+                lift_update(dt_msec);
+            }
             if (gb_reading_valid && gb_calibrated)
             {
                 int32_t pitch = raw_pitch_x10(&g_axes) - g_pitch_zero_x10;
@@ -250,6 +283,8 @@ imu_calibrate (void)
         g_pitch_x100 = 0;
         g_roll_x100 = 0;
         gb_calibrated = true;
+        g_gravity_x100 = accel_total_mg(&g_axes) * 100;
+        gb_gravity_set = true;
     }
     gb_reading_valid = b_ok;
     g_last_sample_usec = time_us_64();
@@ -333,6 +368,89 @@ imu_total_tilt_x10 (void)
 
     return ((int32_t) (sqrtf((pitch * pitch) + (roll * roll)) + 0.5f));
 }   /* imu_total_tilt_x10() */
+
+
+/*!
+ * @brief Return the total acceleration of the last reading (about 1000
+ *        at rest, whichever way the car is tilted).
+ *
+ * @return Milli-g; 0 if the sensor is not reading.
+ */
+int32_t
+imu_accel_mg (void)
+{
+    return (gb_reading_valid ? g_accel_mg : 0);
+}   /* imu_accel_mg() */
+
+
+/*!
+ * @brief Return the car's upward speed: the acceleration above 1 g added
+ *        up over the last PICKUP_IMU_WINDOW_MSEC. A lift builds it up; a
+ *        bump pushes up and back down again, so it stays near 0.
+ *
+ * @return Millimetres a second, up positive (down negative).
+ */
+int32_t
+imu_lift_speed_mm_s (void)
+{
+    return ((g_lift_sum * MG_MS_TO_MM_S_NUM) / MG_MS_TO_MM_S_DEN);
+}   /* imu_lift_speed_mm_s() */
+
+
+/*!
+ * @brief Update the total acceleration, the 1 g baseline and the lift
+ *        window with the reading just taken.
+ *
+ * @param[in] dt_msec Time since the previous reading.
+ */
+static void
+lift_update (uint32_t dt_msec)
+{
+    int32_t gravity = 0;
+    int32_t excess  = 0;
+    int32_t dt      = (int32_t) ((dt_msec > LIFT_MAX_DT_MSEC) ?
+                                 LIFT_MAX_DT_MSEC : dt_msec);
+
+    g_accel_mg = accel_total_mg(&g_axes);
+    if (!gb_gravity_set)
+    {
+        g_gravity_x100 = g_accel_mg * 100;  // First reading: start here.
+        gb_gravity_set = true;
+    }
+
+    gravity = g_gravity_x100 / 100;
+    excess  = g_accel_mg - gravity;
+
+    if ((excess < GRAVITY_QUIET_MG) && (excess > -GRAVITY_QUIET_MG))
+    {
+        g_gravity_x100 += ((g_accel_mg * 100) - g_gravity_x100) /
+                          GRAVITY_TRACK_DIV;
+    }
+
+    // Slide the window: drop the oldest reading, add this one.
+    g_lift_sum             -= g_lift[g_lift_idx];
+    g_lift[g_lift_idx]      = excess * dt;
+    g_lift_sum             += g_lift[g_lift_idx];
+    g_lift_idx              = ((g_lift_idx + 1u) % LIFT_WINDOW_SAMPLES);
+}   /* lift_update() */
+
+
+/*!
+ * @brief Calculate the total acceleration of one reading.
+ *
+ * @param[in] p_axes The reading.
+ *
+ * @return Milli-g.
+ */
+static int32_t
+accel_total_mg (imu_axes_t const * p_axes)
+{
+    float x = (float) p_axes->ax_mg;
+    float y = (float) p_axes->ay_mg;
+    float z = (float) p_axes->az_mg;
+
+    return ((int32_t) (sqrtf((x * x) + (y * y) + (z * z)) + 0.5f));
+}   /* accel_total_mg() */
 
 
 /*!
