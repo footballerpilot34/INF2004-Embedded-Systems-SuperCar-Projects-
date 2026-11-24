@@ -311,6 +311,10 @@
 #ifndef SENSOR_TO_BUMPER_MM
 #define SENSOR_TO_BUMPER_MM         60      // User measured 6 cm behind bumper.
 #endif
+// Enable detailed ultrasonic scan logs without changing scan behaviour.
+#ifndef OBSTACLE_SCAN_DEBUG_LOG
+#define OBSTACLE_SCAN_DEBUG_LOG false
+#endif
 #define OBSTACLE_SCAN_COARSE_DEG    10
 #define OBSTACLE_SCAN_FINE_DEG      2
 #define OBSTACLE_SCAN_SAMPLES       3u
